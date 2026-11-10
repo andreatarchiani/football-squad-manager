@@ -3,7 +3,7 @@
 A private, dark-themed Angular Progressive Web App for managing football squads.
 
 ## Project status
-**Phase 0 — foundation and architecture.** The repository is being prepared before application implementation.
+**Phase 1 — Angular application shell.** The initial PWA scaffold and dark dashboard shell are committed on the foundation branch. Firebase and feature modules are next.
 
 ## Product goals
 - Manage workspaces, teams, players, shirt numbers, roles, squads, formations and matches.
