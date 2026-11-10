@@ -9,7 +9,7 @@
     <div class="nav-label">GESTIONE</div>
     <nav>
       @for (item of navigation; track item; let index = $index) {
-        <a class="nav-item" [class.active]="index === 0" [attr.aria-current]="index === 0 ? 'page' : null" href="/">
+        <button class="nav-item" [class.active]="index === 0" [disabled]="index !== 0" [attr.aria-current]="index === 0 ? 'page' : null" type="button">
           <span class="nav-icon">{{ ['▦', '⚑', '♟', '◇', '◷'][index] }}</span><span>{{ item }}</span>
         </a>
       }
