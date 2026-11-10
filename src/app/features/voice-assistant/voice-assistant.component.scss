@@ -8,17 +8,18 @@
 .voice-close { width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 8px; color: #c8d3d8; background: #202938; font-size: 20px; cursor: pointer; }
 .voice-help { margin: 14px 0; color: var(--text-muted); font-size: 11px; line-height: 1.6; }
 .voice-record { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 43px; border: 1px solid #9bdab2; border-radius: 9px; color: #102018; background: #9bdab2; font-size: 11px; font-weight: 800; cursor: pointer; }
-.voice-record:disabled,.voice-confirm:disabled { opacity: .6; cursor: wait; }
+.voice-record:disabled,.voice-confirm:disabled,.voice-cancel:disabled { opacity: .6; cursor: wait; }
 .voice-status { display: flex; align-items: center; gap: 8px; margin: 13px 0 0; color: #b9e9c9; font-size: 11px; }
 .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #77d99c; box-shadow: 0 0 0 5px #77d99c22; }
 .transcript,.voice-review { margin-top: 15px; padding: 13px; border: 1px solid var(--border); border-radius: 10px; background: #101720; }
 .field-label { color: #9bdab2; font-size: 9px; font-weight: 800; letter-spacing: .12em; }
 .transcript p { margin: 7px 0 0; color: #dce4e8; font-size: 12px; line-height: 1.6; }
-.voice-review h3 { margin: 8px 0 12px; font-size: 13px; }
-.voice-review dl { display: grid; gap: 9px; margin: 0; }
-.voice-review dl div { display: flex; justify-content: space-between; gap: 15px; font-size: 11px; }
-.voice-review dt { color: var(--text-muted); }.voice-review dd { margin: 0; color: #e5ece8; text-align: right; }
-.voice-review .voice-help { margin-bottom: 0; font-size: 10px; }
+.voice-review h3 { margin: 8px 0 0; font-size: 13px; }
+.voice-edit-fields { display: grid; gap: 11px; margin-top: 13px; }
+.voice-edit-fields label { display: grid; gap: 5px; color: var(--text-muted); font-size: 10px; font-weight: 700; }
+.voice-edit-fields input { box-sizing: border-box; width: 100%; min-height: 37px; padding: 0 10px; border: 1px solid #3b4a50; border-radius: 7px; outline: none; color: #e5ece8; background: #182229; font: inherit; font-size: 12px; }
+.voice-edit-fields input:focus { border-color: #9bdab2; box-shadow: 0 0 0 2px #9bdab222; }
+.voice-edit-fields input:disabled { opacity: .6; }
 .voice-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 .voice-cancel,.voice-confirm { min-height: 35px; padding: 0 12px; border-radius: 8px; font-size: 10px; font-weight: 700; cursor: pointer; }
 .voice-cancel { border: 1px solid var(--border); color: #dce4e8; background: #202938; }
