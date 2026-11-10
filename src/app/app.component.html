@@ -89,6 +89,15 @@
       }
       <footer class="page-footer">FOOTBALL SQUAD MANAGER <span>•</span> Gestione squadra, senza complicazioni.</footer>
     </main>
+
+    <nav class="mobile-bottom-nav" aria-label="Navigazione principale">
+      <button type="button" class="mobile-nav-item" [class.active]="activePage() === 'overview'" [attr.aria-current]="activePage() === 'overview' ? 'page' : null" (click)="navigate(0)">
+        <span class="mobile-nav-icon">▦</span><span>Panoramica</span>
+      </button>
+      <button type="button" class="mobile-nav-item" [class.active]="activePage() === 'teams'" [attr.aria-current]="activePage() === 'teams' ? 'page' : null" (click)="navigate(1)">
+        <span class="mobile-nav-icon">⚑</span><span>Squadre</span>
+      </button>
+    </nav>
   </div>
 }
 
