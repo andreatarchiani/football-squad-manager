@@ -47,6 +47,14 @@ try {
   });
   await assertSucceeds(bootstrap.commit());
   await assertSucceeds(getDoc(doc(ownerDb, 'workspaces', 'workspace-1')));
+  await assertSucceeds(setDoc(doc(ownerDb, 'workspaces', 'workspace-1', 'teams', 'team-1'), {
+    name: 'Prima squadra', category: 'Senior', clubName: 'Club test', isArchived: false,
+    createdAt: timestamp(), updatedAt: timestamp()
+  }));
+  await assertSucceeds(setDoc(doc(ownerDb, 'workspaces', 'workspace-1', 'teams', 'team-1', 'seasons', 'season-1'), {
+    label: '2026/2027', startsOn: '2026-07-01', endsOn: '2027-06-30', status: 'active',
+    createdAt: timestamp(), updatedAt: timestamp()
+  }));
 
   // Users without an active membership cannot read workspace data.
   const outsiderDb = testEnv.authenticatedContext('outsider').firestore();
@@ -79,6 +87,9 @@ try {
   await assertSucceeds(getDoc(doc(viewerDb, 'workspaces', 'workspace-viewer')));
   await assertFails(setDoc(doc(viewerDb, 'workspaces', 'workspace-viewer', 'teams', 'blocked-team'), {
     name: 'Should not be writable'
+  }));
+  await assertFails(setDoc(doc(viewerDb, 'workspaces', 'workspace-viewer', 'teams', 'team-1', 'seasons', 'season-1'), {
+    label: '2026/2027', status: 'active'
   }));
 
   // A member cannot create another owner's membership or grant themselves ownership.

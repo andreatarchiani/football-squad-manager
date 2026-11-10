@@ -1,0 +1,77 @@
+<section class="teams-page">
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">IL TUO CLUB</div>
+      <h2>Squadre</h2>
+      <p>Gestisci le squadre del tuo club e le relative stagioni sportive.</p>
+    </div>
+    <button class="primary-button" type="button" (click)="openCreate()">＋ Nuova squadra</button>
+  </div>
+
+  @if (error()) {
+    <div class="feedback error" role="alert">{{ error() }}</div>
+  }
+  @if (notice()) {
+    <div class="feedback success" role="status">{{ notice() }}</div>
+  }
+
+  @if (formOpen()) {
+    <form class="team-form" (ngSubmit)="save()">
+      <div class="form-heading">
+        <div><span class="eyebrow">DATI PRINCIPALI</span><h3>{{ editingId() ? 'Modifica squadra' : 'Crea una squadra' }}</h3></div>
+        <button class="text-button" type="button" (click)="cancelEdit()">Annulla</button>
+      </div>
+      <div class="form-grid">
+        <label class="wide">Nome squadra *
+          <input name="name" [(ngModel)]="form.name" required maxlength="80" placeholder="Es. Prima squadra">
+        </label>
+        <label>Società / Club
+          <input name="clubName" [(ngModel)]="form.clubName" maxlength="80" placeholder="Es. ASD Football Club">
+        </label>
+        <label>Categoria
+          <input name="category" [(ngModel)]="form.category" maxlength="50" placeholder="Es. Juniores, Allievi, Prima categoria">
+        </label>
+        <label>Stagione sportiva *
+          <input name="seasonLabel" [(ngModel)]="form.seasonLabel" required maxlength="9" placeholder="2026/2027">
+        </label>
+      </div>
+      <p class="form-hint">La stagione viene creata insieme alla squadra e impostata come attiva.</p>
+      <div class="form-actions">
+        <button class="primary-button" type="submit" [disabled]="saving()">{{ saving() ? 'Salvataggio…' : (editingId() ? 'Salva modifiche' : 'Crea squadra') }}</button>
+      </div>
+    </form>
+  }
+
+  <div class="list-toolbar">
+    <div><strong>{{ teams().length }}</strong> squadre registrate</div>
+    <label class="archive-toggle"><input type="checkbox" [checked]="showArchived()" (change)="showArchived.set($any($event.target).checked)"> Mostra archiviate</label>
+  </div>
+
+  @if (loading()) {
+    <div class="empty-state">Caricamento squadre…</div>
+  } @else if (visibleTeams.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">⚑</div>
+      <h3>{{ showArchived() ? 'Nessuna squadra da mostrare' : 'Ancora nessuna squadra' }}</h3>
+      <p>Crea la prima squadra per iniziare a organizzare la rosa e le stagioni.</p>
+      <button class="primary-button" type="button" (click)="openCreate()">Crea la prima squadra</button>
+    </div>
+  } @else {
+    <div class="team-list">
+      @for (team of visibleTeams; track team.id) {
+        <article class="team-card" [class.archived]="team.isArchived">
+          <div class="team-emblem">⚽</div>
+          <div class="team-details">
+            <h3>{{ team.name }} @if (team.isArchived) { <span class="archived-label">ARCHIVIATA</span> }</h3>
+            <p>{{ team.clubName || 'Società non indicata' }}<span>•</span>{{ team.category || 'Categoria non indicata' }}</p>
+            <div class="season-chip">STAGIONE {{ team.seasonLabel || 'Non definita' }}</div>
+          </div>
+          <div class="team-actions">
+            <button class="secondary-button" type="button" (click)="openEdit(team)">Modifica</button>
+            <button class="text-button" type="button" (click)="toggleArchive(team)">{{ team.isArchived ? 'Ripristina' : 'Archivia' }}</button>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
