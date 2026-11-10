@@ -17,12 +17,15 @@ This roadmap is intentionally incremental. Each phase should be reviewed before 
 - [ ] Add lint, unit-test and production-build scripts
 
 ## Phase 2 — Firebase foundation
-- [ ] Configure Firebase project for Spark only
-- [ ] Add email/password and Google authentication
+- [ ] Configure a real Firebase project on Spark (requires project owner setup)
+- [x] Add email/password and Google authentication UI and SDK integration
+- [x] Add password reset and sign-out
+- [x] Create a personal workspace and owner membership on first sign-in
 - [ ] Add workspace context and route guards
-- [ ] Define Firestore schema and indexes
-- [ ] Implement deny-by-default Security Rules
+- [x] Define the initial Firestore profile/workspace structure
+- [x] Implement baseline deny-by-default Security Rules
 - [ ] Add emulator-based Rules tests
+- [ ] Verify authentication and workspace creation against a real Firebase project
 
 ## Phase 3 — core squad management
 - [ ] Teams and seasons
