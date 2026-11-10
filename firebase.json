@@ -3,6 +3,7 @@
     "rules": "firestore.rules"
   },
   "hosting": {
+    "site": "football-squad-manager-5673e",
     "public": "dist/football-squad-manager/browser",
     "ignore": [
       "firebase.json",
