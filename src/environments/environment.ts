@@ -1,15 +1,15 @@
 import type { FirebaseOptions } from 'firebase/app';
 
-// Paste the Firebase web app configuration from Firebase Console here.
-// These values identify the Firebase project; they are not server credentials.
+// Firebase web app configuration. These values identify the Firebase project;
+// they are public client configuration, not server credentials.
 export const environment = {
   firebase: {
-    apiKey: '',
-    authDomain: '',
-    projectId: '',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: ''
+    apiKey: 'AIzaSyAbPI3Wx6ITIK3mxJs9krOx12oPEkJD1Do',
+    authDomain: 'football-squad-manager-6fdaa.firebaseapp.com',
+    projectId: 'football-squad-manager-6fdaa',
+    storageBucket: 'football-squad-manager-6fdaa.firebasestorage.app',
+    messagingSenderId: '1062518492921',
+    appId: '1:1062518492921:web:273928214d0a0ac865dc28'
   } satisfies FirebaseOptions
 };
 
