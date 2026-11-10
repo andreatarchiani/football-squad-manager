@@ -6,11 +6,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { FirebaseAuthService } from './core/firebase-auth.service';
 import { AuthPageComponent } from './features/auth/auth-page.component';
 import { TeamsPageComponent } from './features/teams/teams-page.component';
+import { VoiceAssistantComponent } from './features/voice-assistant/voice-assistant.component';
 
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent],
+  imports: [MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, VoiceAssistantComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

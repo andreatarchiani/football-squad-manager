@@ -44,6 +44,7 @@
         <div><div class="eyebrow">AREA PERSONALE</div><h1>{{ activePage() === 'teams' ? 'Squadre' : 'Panoramica' }}</h1></div>
         <div class="topbar-actions">
           <span class="today-label">{{ auth.user()?.displayName || auth.user()?.email }}</span>
+          <fsm-voice-assistant />
           <button mat-icon-button aria-label="Esci dall'account" class="profile-button" (click)="signOut()">↪</button>
         </div>
       </header>
