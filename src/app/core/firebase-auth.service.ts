@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { FIREBASE_AUTH, FIRESTORE_DB } from './firebase.tokens';
+import type { Auth } from 'firebase/auth';
 import {
   GoogleAuthProvider,
   User,
