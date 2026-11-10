@@ -6,13 +6,13 @@ This roadmap is intentionally incremental. Each phase should be reviewed before 
 - [x] Verify private GitHub repository access and main branch
 - [x] Create an isolated foundation branch
 - [x] Record product constraints and architecture
-- [ ] Review and approve the architecture
+- [x] Record the initial architecture baseline
 
 ## Phase 1 — Angular application shell
-- [ ] Generate Angular 22 application with strict TypeScript settings
-- [ ] Add Angular Material and global dark theme
-- [ ] Add responsive navigation and empty-state dashboard
-- [ ] Add PWA manifest, icons and service worker
+- [x] Add Angular 22 application scaffold with strict TypeScript settings
+- [x] Add Angular Material dependency and initial dark theme
+- [x] Add responsive navigation shell and empty-state dashboard
+- [x] Add PWA manifest, SVG icon and service worker configuration
 - [ ] Add application update notification
 - [ ] Add lint, unit-test and production-build scripts
 
