@@ -2,11 +2,11 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, chore/project-foundation]
+    branches: [main]
 permissions:
   contents: read
 jobs:
-  build:
+  build-and-rules:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -15,7 +15,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Set up Java for Firestore Emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
       - name: Install dependencies
         run: npm install
       - name: Build production application
         run: npm run build
+      - name: Test Firestore Security Rules
+        run: npm run test:rules

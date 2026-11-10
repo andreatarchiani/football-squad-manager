@@ -1,0 +1,69 @@
+<main class="auth-page">
+  <section class="auth-card" aria-labelledby="auth-title">
+    <a class="brand" href="/" aria-label="Football Squad Manager">
+      <span class="brand-mark">⚽</span>
+      <span><strong>FOOTBALL</strong><small>SQUAD MANAGER</small></span>
+    </a>
+
+    <div class="intro">
+      <span class="eyebrow">IL TUO CLUB, IN UN UNICO POSTO</span>
+      <h1 id="auth-title">
+        @if (mode === 'register') { Crea il tuo account }
+        @else if (mode === 'reset') { Recupera l’accesso }
+        @else { Bentornato. }
+      </h1>
+      <p>
+        @if (mode === 'register') { Inizia a organizzare squadre, rose e partite. }
+        @else if (mode === 'reset') { Ti invieremo le istruzioni per reimpostare la password. }
+        @else { Accedi per gestire il tuo spazio squadra. }
+      </p>
+    </div>
+
+    <form (ngSubmit)="submit()" #authForm="ngForm">
+      @if (mode === 'register') {
+        <label for="displayName">Nome</label>
+        <input id="displayName" name="displayName" [(ngModel)]="displayName" autocomplete="name" placeholder="Come ti chiami" required>
+      }
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" [(ngModel)]="email" autocomplete="email" placeholder="nome@esempio.it" required>
+
+      @if (mode !== 'reset') {
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" [(ngModel)]="password" [autocomplete]="mode === 'register' ? 'new-password' : 'current-password'" placeholder="Almeno 6 caratteri" minlength="6" required>
+      }
+
+      @if (mode === 'login') {
+        <button class="text-action forgot" type="button" (click)="setMode('reset')">Password dimenticata?</button>
+      }
+
+      <button class="primary-button" type="submit" [disabled]="busy || !authForm.form.valid">
+        @if (busy) { Attendi… }
+        @else if (mode === 'register') { Crea account }
+        @else if (mode === 'reset') { Invia istruzioni }
+        @else { Accedi }
+      </button>
+    </form>
+
+    @if (mode !== 'reset') {
+      <div class="separator"><span>oppure</span></div>
+      <button class="google-button" type="button" (click)="googleSignIn()" [disabled]="busy">
+        <span class="google-mark">G</span> Continua con Google
+      </button>
+    }
+
+    @if (message) { <p class="feedback success" role="status">{{ message }}</p> }
+    @if (error) { <p class="feedback error" role="alert">{{ error }}</p> }
+
+    <div class="switch-mode">
+      @if (mode === 'register') {
+        Hai già un account? <button class="text-action" type="button" (click)="setMode('login')">Accedi</button>
+      } @else if (mode === 'reset') {
+        <button class="text-action" type="button" (click)="setMode('login')">Torna all’accesso</button>
+      } @else {
+        Non hai un account? <button class="text-action" type="button" (click)="setMode('register')">Registrati</button>
+      }
+    </div>
+    <p class="privacy-note">I tuoi dati sono archiviati nel tuo progetto Firebase. L’accesso è protetto da autenticazione e regole Firestore.</p>
+  </section>
+</main>
