@@ -22,6 +22,7 @@ export class TeamsPageComponent {
   protected readonly error = signal('');
   protected readonly notice = signal('');
   protected readonly editingId = signal<string | null>(null);
+  protected readonly formOpen = signal(false);
   protected form: TeamInput = this.emptyForm();
 
   constructor() {
@@ -34,6 +35,7 @@ export class TeamsPageComponent {
 
   protected openCreate(): void {
     this.editingId.set(null);
+    this.formOpen.set(true);
     this.form = this.emptyForm();
     this.error.set('');
     this.notice.set('');
@@ -41,6 +43,7 @@ export class TeamsPageComponent {
 
   protected openEdit(team: TeamRecord): void {
     this.editingId.set(team.id);
+    this.formOpen.set(true);
     this.form = {
       name: team.name,
       category: team.category,
@@ -53,6 +56,7 @@ export class TeamsPageComponent {
 
   protected cancelEdit(): void {
     this.editingId.set(null);
+    this.formOpen.set(false);
     this.form = this.emptyForm();
     this.error.set('');
   }
@@ -77,6 +81,7 @@ export class TeamsPageComponent {
         this.notice.set('Squadra creata correttamente.');
       }
       this.editingId.set(null);
+      this.formOpen.set(false);
       this.form = this.emptyForm();
       await this.loadTeams();
     } catch (error) {
