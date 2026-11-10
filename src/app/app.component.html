@@ -31,7 +31,7 @@
       <div class="nav-label">GESTIONE</div>
       <nav>
         @for (item of navigation; track item; let index = $index) {
-          <button class="nav-item" [class.active]="index === 0" [disabled]="index !== 0" [attr.aria-current]="index === 0 ? 'page' : null" type="button">
+          <button class="nav-item" [class.active]="(index === 0 && activePage() === 'overview') || (index === 1 && activePage() === 'teams')" [disabled]="index > 1" [attr.aria-current]="(index === 0 && activePage() === 'overview') || (index === 1 && activePage() === 'teams') ? 'page' : null" (click)="navigate(index)" type="button">
             <span class="nav-icon">{{ ['▦', '⚑', '♟', '◇', '◷'][index] }}</span><span>{{ item }}</span>
           </button>
         }
@@ -41,7 +41,7 @@
 
     <main class="main-content">
       <header class="topbar">
-        <div><div class="eyebrow">AREA PERSONALE</div><h1>Panoramica</h1></div>
+        <div><div class="eyebrow">AREA PERSONALE</div><h1>{{ activePage() === 'teams' ? 'Squadre' : 'Panoramica' }}</h1></div>
         <div class="topbar-actions">
           <span class="today-label">{{ auth.user()?.displayName || auth.user()?.email }}</span>
           <button mat-icon-button aria-label="Esci dall'account" class="profile-button" (click)="signOut()">↪</button>
@@ -52,6 +52,7 @@
         <section class="workspace-error" role="alert">{{ auth.workspaceError() }}</section>
       }
 
+      @if (activePage() === 'overview') {
       <section class="welcome-panel">
         <div class="welcome-copy"><div class="eyebrow accent">STAGIONE 2026 / 2027</div><h2>La tua squadra,<br><span>sempre sotto controllo.</span></h2><p>Organizza la rosa, prepara le formazioni e tieni traccia di ogni partita.</p><span class="primary-action setup-complete">Account configurato <span aria-hidden="true">✓</span></span></div>
         <div class="pitch-art" aria-hidden="true"><div class="pitch-line halfway"></div><div class="pitch-circle"></div><div class="pitch-box left"></div><div class="pitch-box right"></div><div class="pitch-dot"></div></div>
@@ -69,6 +70,9 @@
         <section class="next-steps"><div class="next-icon">✦</div><div><h3>Il tuo spazio personale è stato creato</h3><p>Account e workspace sono pronti. Nel prossimo passaggio attiveremo la gestione di squadre e giocatori.</p></div><span class="coming-soon">FASE 2</span></section>
       } @else {
         <section class="next-steps" role="status"><div class="next-icon">!</div><div><h3>Workspace non disponibile</h3><p>L’account è autenticato, ma lo spazio personale non è stato inizializzato. Controlla la configurazione Firebase e le Security Rules, quindi esci e riprova.</p></div><span class="coming-soon">ATTENZIONE</span></section>
+      }
+      } @else if (activePage() === 'teams') {
+        <fsm-teams-page />
       }
       <footer class="page-footer">FOOTBALL SQUAD MANAGER <span>•</span> Gestione squadra, senza complicazioni.</footer>
     </main>
