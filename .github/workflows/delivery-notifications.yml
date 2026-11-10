@@ -1,0 +1,132 @@
+name: Delivery notifications
+
+on:
+  workflow_run:
+    workflows: ["CI", "Deploy Firebase"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  report:
+    name: Merge verified PRs and report delivery
+    runs-on: ubuntu-latest
+    steps:
+      - name: Process completed workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const run = context.payload.workflow_run;
+            const notificationIssue = 11;
+            const mention = '@andreatarchiani';
+
+            async function notify(message) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: notificationIssue,
+                body: `${mention} ${message}`
+              });
+            }
+
+            if (run.name === 'CI') {
+              const pullRequests = run.pull_requests || [];
+
+              if (run.conclusion !== 'success') {
+                if (pullRequests.length === 0) {
+                  core.info('CI failed for a non-PR run; no delivery notification is needed.');
+                  return;
+                }
+
+                for (const association of pullRequests) {
+                  await notify(
+                    `**CI non superata** per la PR #${association.number}. Il merge automatico è stato bloccato. [Apri i controlli](${run.html_url}).`
+                  );
+                }
+                return;
+              }
+
+              for (const association of pullRequests) {
+                const pullNumber = association.number;
+                let response = await github.rest.pulls.get({
+                  owner,
+                  repo,
+                  pull_number: pullNumber
+                });
+                let pull = response.data;
+
+                if (pull.state !== 'open' || pull.base.ref !== 'main') {
+                  core.info(`PR #${pullNumber} is no longer open against main; skipping.`);
+                  continue;
+                }
+
+                if (
+                  pull.user.login !== owner ||
+                  !pull.head.repo ||
+                  pull.head.repo.full_name.toLowerCase() !== `${owner}/${repo}`.toLowerCase()
+                ) {
+                  await notify(
+                    `La CI della PR #${pullNumber} è superata, ma non ho eseguito il merge automatico perché la PR non proviene dal proprietario del repository. [Apri la PR](${pull.html_url}).`
+                  );
+                  continue;
+                }
+
+                for (let attempt = 0; pull.mergeable === null && attempt < 5; attempt++) {
+                  await new Promise(resolve => setTimeout(resolve, 3000));
+                  response = await github.rest.pulls.get({
+                    owner,
+                    repo,
+                    pull_number: pullNumber
+                  });
+                  pull = response.data;
+                }
+
+                if (pull.mergeable !== true) {
+                  await notify(
+                    `La CI della PR #${pullNumber} è superata, ma GitHub non la segnala come mergeable. Nessun merge automatico eseguito. [Apri la PR](${pull.html_url}).`
+                  );
+                  continue;
+                }
+
+                try {
+                  const merge = await github.rest.pulls.merge({
+                    owner,
+                    repo,
+                    pull_number: pullNumber,
+                    merge_method: 'squash',
+                    sha: pull.head.sha
+                  });
+
+                  if (!merge.data.merged) {
+                    throw new Error(merge.data.message || 'GitHub did not confirm the merge.');
+                  }
+
+                  core.info(`PR #${pullNumber} merged as ${merge.data.sha}.`);
+                } catch (error) {
+                  await notify(
+                    `La CI della PR #${pullNumber} è superata, ma il merge automatico è fallito: ${error.message}. [Apri la PR](${pull.html_url}).`
+                  );
+                  core.setFailed(error.message);
+                  return;
+                }
+              }
+            }
+
+            if (run.name === 'Deploy Firebase') {
+              if (run.conclusion === 'success') {
+                await notify(
+                  `**Firebase: deploy completato correttamente.** La nuova versione è disponibile su https://football-squad-manager-5673e.web.app. [Dettagli del deploy](${run.html_url}). Commit: \`${run.head_sha}\`.`
+                );
+              } else {
+                await notify(
+                  `**Deploy Firebase fallito** (stato: ${run.conclusion}). La versione precedente resta quella pubblicata; controlla [i log del deploy](${run.html_url}). Commit: \`${run.head_sha}\`.`
+                );
+                core.setFailed(`Firebase deployment concluded with ${run.conclusion}.`);
+              }
+            }
