@@ -15,8 +15,8 @@ This document defines the first implementation contract for Firestore. All appli
 
 ```text
 userProfiles/{uid}
-  workspaces/{workspaceId}
-    members/{uid}
+workspaces/{workspaceId}
+  members/{uid}
   teams/{teamId}
     seasons/{seasonId}
       squadMembers/{playerId}
