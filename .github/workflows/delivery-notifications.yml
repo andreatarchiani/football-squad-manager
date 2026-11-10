@@ -6,7 +6,7 @@ on:
     types: [completed]
 
 permissions:
-  actions: read
+  actions: write
   contents: write
   issues: write
   pull-requests: write
@@ -108,9 +108,19 @@ jobs:
                   }
 
                   core.info(`PR #${pullNumber} merged as ${merge.data.sha}.`);
+
+                  // Merges made with GITHUB_TOKEN do not emit a push workflow event.
+                  // Dispatch the existing production deployment workflow explicitly.
+                  await github.rest.actions.createWorkflowDispatch({
+                    owner,
+                    repo,
+                    workflow_id: 'deploy-firebase.yml',
+                    ref: 'main'
+                  });
+                  core.info('Firebase deployment workflow dispatched after the merge.');
                 } catch (error) {
                   await notify(
-                    `La CI della PR #${pullNumber} è superata, ma il merge automatico è fallito: ${error.message}. [Apri la PR](${pull.html_url}).`
+                    `La CI della PR #${pullNumber} è superata, ma il merge o l'avvio del deploy automatico è fallito: ${error.message}. [Apri la PR](${pull.html_url}).`
                   );
                   core.setFailed(error.message);
                   return;
