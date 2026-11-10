@@ -14,8 +14,9 @@ This document defines the first implementation contract for Firestore. All appli
 ## Collections
 
 ```text
-workspaces/{workspaceId}
-  members/{uid}
+userProfiles/{uid}
+  workspaces/{workspaceId}
+    members/{uid}
   teams/{teamId}
     seasons/{seasonId}
       squadMembers/{playerId}
@@ -27,7 +28,13 @@ workspaces/{workspaceId}
   activity/{activityId}
 ```
 
-### Workspace
+### User profile
+
+`userProfiles/{uid}` is readable and writable only by its authenticated owner. It stores `defaultWorkspaceId`, optional `displayName` and `email`, plus timestamps. It is a small account-level pointer; all football domain data remains scoped to a workspace.
+
+The first successful sign-in creates the workspace document, owner membership and user profile in one Firestore batch. The Security Rules validate the related writes with `getAfter()` so a user cannot create an owner membership without creating the matching workspace in the same atomic operation.
+
+## Workspace
 
 `workspaces/{workspaceId}`
 
