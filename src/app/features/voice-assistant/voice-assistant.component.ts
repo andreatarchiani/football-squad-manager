@@ -54,6 +54,12 @@ export class VoiceAssistantComponent {
     );
   }
 
+  protected updateDraft(field: keyof TeamInput, value: string): void {
+    const current = this.draft();
+    if (!current) return;
+    this.draft.set({ ...current, [field]: value });
+  }
+
   protected close(): void {
     this.recognition.stop();
     this.listening.set(false);

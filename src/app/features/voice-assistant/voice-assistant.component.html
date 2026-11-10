@@ -28,18 +28,26 @@
       }
       @if (draft(); as team) {
         <div class="voice-review">
-          <span class="field-label">CONFERMA OPERAZIONE</span>
-          <h3>Creare questa squadra?</h3>
-          <dl>
-            <div><dt>Nome</dt><dd>{{ team.name }}</dd></div>
-            <div><dt>Società / Club</dt><dd>{{ team.clubName || 'Non indicata' }}</dd></div>
-            <div><dt>Categoria</dt><dd>{{ team.category || 'Non indicata' }}</dd></div>
-            <div><dt>Stagione</dt><dd>{{ team.seasonLabel }}</dd></div>
-          </dl>
-          <p class="voice-help">La stagione predefinita viene impostata automaticamente se non la pronunci.</p>
+          <span class="field-label">REVISIONE OPERAZIONE</span>
+          <h3>Controlla i dati della squadra</h3>
+          <p class="voice-help">Puoi correggere qualsiasi campo prima di confermare la creazione.</p>
+          <div class="voice-edit-fields">
+            <label>Nome squadra
+              <input type="text" [value]="team.name" (input)="updateDraft('name', $any($event.target).value)" [disabled]="saving()" required autocomplete="off">
+            </label>
+            <label>Società / Club
+              <input type="text" [value]="team.clubName" (input)="updateDraft('clubName', $any($event.target).value)" [disabled]="saving()" autocomplete="off" placeholder="Non indicata">
+            </label>
+            <label>Categoria
+              <input type="text" [value]="team.category" (input)="updateDraft('category', $any($event.target).value)" [disabled]="saving()" autocomplete="off" placeholder="Non indicata">
+            </label>
+            <label>Stagione
+              <input type="text" [value]="team.seasonLabel" (input)="updateDraft('seasonLabel', $any($event.target).value)" [disabled]="saving()" autocomplete="off" placeholder="2026/2027">
+            </label>
+          </div>
           <div class="voice-actions">
-            <button type="button" class="voice-cancel" (click)="close()">Annulla</button>
-            <button type="button" class="voice-confirm" [disabled]="saving()" (click)="confirm()">{{ saving() ? 'Salvataggio…' : 'Conferma e crea' }}</button>
+            <button type="button" class="voice-cancel" (click)="close()" [disabled]="saving()">Annulla</button>
+            <button type="button" class="voice-confirm" [disabled]="saving() || !team.name.trim()" (click)="confirm()">{{ saving() ? 'Salvataggio…' : 'Conferma e crea' }}</button>
           </div>
         </div>
       }
