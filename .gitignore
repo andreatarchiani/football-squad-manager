@@ -5,6 +5,7 @@ out-tsc/
 *.log
 .angular/
 /.firebase/
+.firebaserc
 firebase-debug.log
 firestore-debug.log
 .env
