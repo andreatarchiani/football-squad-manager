@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { FIREBASE_AUTH, FIRESTORE_DB } from './firebase.tokens';
 import {
-  Auth,
   GoogleAuthProvider,
   User,
   createUserWithEmailAndPassword,
@@ -12,7 +12,6 @@ import {
   updateProfile
 } from 'firebase/auth';
 import {
-  Firestore,
   collection,
   doc,
   getDoc,
@@ -22,8 +21,8 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseAuthService {
-  private readonly auth = inject(Auth, { optional: true });
-  private readonly firestore = inject(Firestore, { optional: true });
+  private readonly auth = inject(FIREBASE_AUTH, { optional: true });
+  private readonly firestore = inject(FIRESTORE_DB, { optional: true });
 
   readonly configured = this.auth !== null && this.firestore !== null;
   readonly user = signal<User | null>(null);
