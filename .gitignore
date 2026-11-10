@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+out-tsc/
+*.log
+.angular/
+/.firebase/
+firebase-debug.log
+firestore-debug.log
+.env
+.env.*
+!.env.example
+service-account*.json
+*-firebase-adminsdk-*.json
+*.pem
+.DS_Store
+Thumbs.db
