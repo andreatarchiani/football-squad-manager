@@ -1,0 +1,20 @@
+{
+  "name": "Football Squad Manager",
+  "short_name": "Squad Manager",
+  "description": "Gestisci squadre, giocatori, rose, formazioni e partite.",
+  "lang": "it",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d1119",
+  "theme_color": "#10131b",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
