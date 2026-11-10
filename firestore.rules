@@ -29,6 +29,10 @@ service cloud.firestore {
       return activeMember(workspaceId) && memberRole(workspaceId) == 'owner';
     }
 
+    function canManageMembers(workspaceId) {
+      return activeMember(workspaceId) && memberRole(workspaceId) in ['owner', 'admin'];
+    }
+
     match /userProfiles/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
       allow create: if signedIn()
@@ -69,14 +73,14 @@ service cloud.firestore {
           ])
           && request.resource.data.role == 'owner'
           && request.resource.data.status == 'active';
-        allow update: if isOwner(workspaceId)
+        allow update: if canManageMembers(workspaceId)
           && memberId != get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.ownerId
           && request.resource.data.role in ['admin', 'editor', 'viewer']
           && request.resource.data.status in ['active', 'invited', 'disabled']
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'role', 'status', 'displayName', 'updatedAt'
           ]);
-        allow delete: if isOwner(workspaceId)
+        allow delete: if canManageMembers(workspaceId)
           && memberId != get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.ownerId;
       }
 
