@@ -89,7 +89,8 @@ export class TeamService {
   async update(workspaceId: string, team: TeamRecord, input: TeamInput): Promise<void> {
     const db = this.requireFirestore();
     const teamRef = doc(db, 'workspaces', workspaceId, 'teams', team.id);
-    await updateDoc(teamRef, {
+    const batch = writeBatch(db);
+    batch.update(teamRef, {
       name: input.name.trim(),
       category: input.category.trim(),
       clubName: input.clubName.trim(),
@@ -97,12 +98,13 @@ export class TeamService {
     });
 
     if (team.seasonId) {
-      await updateDoc(doc(teamRef, 'seasons', team.seasonId), {
+      batch.update(doc(teamRef, 'seasons', team.seasonId), {
         label: input.seasonLabel.trim(),
         ...this.seasonDates(input.seasonLabel),
         updatedAt: serverTimestamp()
       });
     }
+    await batch.commit();
   }
 
   async setArchived(workspaceId: string, team: TeamRecord, archived: boolean): Promise<void> {
