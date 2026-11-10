@@ -15,7 +15,7 @@
     <div class="feedback success" role="status">{{ notice() }}</div>
   }
 
-  @if (editingId() !== null || (!editingId() && form.name !== '')) {
+  @if (formOpen()) {
     <form class="team-form" (ngSubmit)="save()">
       <div class="form-heading">
         <div><span class="eyebrow">DATI PRINCIPALI</span><h3>{{ editingId() ? 'Modifica squadra' : 'Crea una squadra' }}</h3></div>
