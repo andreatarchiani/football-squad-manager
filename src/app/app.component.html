@@ -65,7 +65,11 @@
         <article class="stat-card"><div class="stat-top"><span class="stat-icon orange">◇</span><span class="stat-trend">TATTICA</span></div><div class="stat-value">—</div><div class="stat-label">Formazioni</div><p>Moduli e schemi salvati</p></article>
       </section>
 
-      <section class="next-steps"><div class="next-icon">✦</div><div><h3>Il tuo spazio personale è stato creato</h3><p>Account e workspace sono pronti. Nel prossimo passaggio attiveremo la gestione di squadre e giocatori.</p></div><span class="coming-soon">FASE 2</span></section>
+      @if (auth.workspaceId()) {
+        <section class="next-steps"><div class="next-icon">✦</div><div><h3>Il tuo spazio personale è stato creato</h3><p>Account e workspace sono pronti. Nel prossimo passaggio attiveremo la gestione di squadre e giocatori.</p></div><span class="coming-soon">FASE 2</span></section>
+      } @else {
+        <section class="next-steps" role="status"><div class="next-icon">!</div><div><h3>Workspace non disponibile</h3><p>L’account è autenticato, ma lo spazio personale non è stato inizializzato. Controlla la configurazione Firebase e le Security Rules, quindi esci e riprova.</p></div><span class="coming-soon">ATTENZIONE</span></section>
+      }
       <footer class="page-footer">FOOTBALL SQUAD MANAGER <span>•</span> Gestione squadra, senza complicazioni.</footer>
     </main>
   </div>
