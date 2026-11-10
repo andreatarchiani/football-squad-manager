@@ -24,7 +24,7 @@ This roadmap is intentionally incremental. Each phase should be reviewed before 
 - [ ] Add workspace context and route guards
 - [x] Define the initial Firestore profile/workspace structure
 - [x] Implement baseline deny-by-default Security Rules
-- [ ] Add emulator-based Rules tests
+- [x] Add emulator-based Security Rules tests for bootstrap, membership isolation, role restrictions, and append-only activity
 - [ ] Verify authentication and workspace creation against a real Firebase project
 
 ## Phase 3 — core squad management
