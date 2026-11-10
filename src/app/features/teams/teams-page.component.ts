@@ -63,7 +63,7 @@ export class TeamsPageComponent {
 
   protected async save(): Promise<void> {
     const workspaceId = this.auth.workspaceId();
-    const seasonMatch = /^(\\d{4})\\/(\\d{4})$/.exec(this.form.seasonLabel.trim());
+    const seasonMatch = /^([0-9]{4})\/([0-9]{4})$/.exec(this.form.seasonLabel.trim());
     if (!workspaceId || !this.form.name.trim() || !seasonMatch
       || Number(seasonMatch[2]) !== Number(seasonMatch[1]) + 1) {
       this.error.set('Inserisci il nome della squadra e una stagione valida nel formato 2026/2027.');
