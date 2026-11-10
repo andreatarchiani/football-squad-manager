@@ -34,7 +34,8 @@ A private, dark-themed Angular Progressive Web App for managing football squads.
 
 ## Documentation
 - [Architecture and technical decisions](docs/architecture.md)
+- [Firestore data model](docs/data-model.md)
 - [Implementation roadmap](docs/roadmap.md)
 
 ## Development status
-No application build, automated tests or deployment have been run yet. Those checks will be reported only after they are actually executed.
+The Angular scaffold and PWA shell are present on `chore/project-foundation`. No local application build, automated tests or deployment have been run or verified yet. CI status must be checked in GitHub Actions before considering the scaffold validated.
