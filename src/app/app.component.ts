@@ -4,6 +4,8 @@ import { interval } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { FirebaseAuthService } from './core/firebase-auth.service';
+import { NotificationService } from './core/notifications/notification.service';
+import { NotificationHostComponent } from './core/notifications/notification-host.component';
 import { AuthPageComponent } from './features/auth/auth-page.component';
 import { TeamsPageComponent } from './features/teams/teams-page.component';
 import { VoiceAssistantComponent } from './features/voice-assistant/voice-assistant.component';
@@ -11,7 +13,7 @@ import { VoiceAssistantComponent } from './features/voice-assistant/voice-assist
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, VoiceAssistantComponent],
+  imports: [MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, VoiceAssistantComponent, NotificationHostComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -22,6 +24,7 @@ export class AppComponent {
   protected readonly updateAvailable = signal(false);
   protected readonly updating = signal(false);
   private readonly swUpdate = inject(SwUpdate);
+  private readonly notifications = inject(NotificationService);
 
   constructor() {
     if (this.swUpdate.isEnabled) {
@@ -57,9 +60,35 @@ export class AppComponent {
     if (index === 0) this.activePage.set('overview');
     if (index === 1) this.activePage.set('teams');
   }
+
   protected readonly auth = inject(FirebaseAuthService);
 
   protected async signOut(): Promise<void> {
-    await this.auth.signOut();
+    const confirmed = await this.notifications.confirm({
+      title: 'Vuoi davvero fare il logout?',
+      message: 'Dovrai accedere nuovamente per continuare a gestire la tua squadra.',
+      confirmText: 'Logout',
+      cancelText: 'Annulla',
+      tone: 'danger'
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await this.auth.signOut();
+      this.notifications.notify({
+        title: 'Logout effettuato',
+        message: 'Hai disconnesso il tuo account.',
+        type: 'success'
+      });
+    } catch (error) {
+      console.error('Unable to sign out.', error);
+      this.notifications.notify({
+        title: 'Logout non riuscito',
+        message: 'Non è stato possibile uscire. Riprova.',
+        type: 'error',
+        durationMs: 6000
+      });
+    }
   }
 }

@@ -1,0 +1,32 @@
+<div class="notification-host" aria-live="polite" aria-relevant="additions">
+  @for (item of service.notifications(); track item.id) {
+    <article class="toast" [class.toast-success]="item.type === 'success'" [class.toast-error]="item.type === 'error'" [class.toast-warning]="item.type === 'warning'" [attr.role]="item.type === 'error' ? 'alert' : 'status'">
+      <span class="toast-icon" aria-hidden="true">{{ iconFor(item.type) }}</span>
+      <div class="toast-copy">
+        <strong>{{ item.title }}</strong>
+        @if (item.message) { <p>{{ item.message }}</p> }
+      </div>
+      <button class="toast-close" type="button" aria-label="Chiudi notifica" (click)="dismiss(item.id)">×</button>
+    </article>
+  }
+</div>
+
+@if (service.confirmation(); as confirmation) {
+  <div class="confirmation-backdrop" (click)="resolve(false)">
+    <section class="confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmation-title" aria-describedby="confirmation-message" (click)="$event.stopPropagation()">
+      <div class="confirmation-symbol" [class.danger-symbol]="confirmation.tone === 'danger'" aria-hidden="true">
+        @if (confirmation.tone === 'danger') {
+          <svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg>
+        } @else {
+          <span>?</span>
+        }
+      </div>
+      <h2 id="confirmation-title">{{ confirmation.title }}</h2>
+      <p id="confirmation-message">{{ confirmation.message }}</p>
+      <div class="confirmation-actions">
+        <button class="confirmation-cancel" type="button" (click)="resolve(false)">{{ confirmation.cancelText }}</button>
+        <button class="confirmation-confirm" [class.confirm-danger]="confirmation.tone === 'danger'" type="button" (click)="resolve(true)">{{ confirmation.confirmText }}</button>
+      </div>
+    </section>
+  </div>
+}

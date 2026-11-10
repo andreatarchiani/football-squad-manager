@@ -1,0 +1,113 @@
+:host { position: relative; z-index: 1000; }
+
+.notification-host {
+  position: fixed;
+  z-index: 1002;
+  top: 20px;
+  right: 20px;
+  display: grid;
+  gap: 10px;
+  width: min(390px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 14px 13px;
+  border: 1px solid #344153;
+  border-radius: 12px;
+  color: #edf1f4;
+  background: #192230;
+  box-shadow: 0 16px 42px #0007;
+  animation: toast-enter .2s ease-out;
+  pointer-events: auto;
+}
+
+.toast-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 25px;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  color: #a9c8f0;
+  background: #263c59;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.toast-success .toast-icon { color: #a9e7c2; background: #234333; }
+.toast-error .toast-icon { color: #ffb8bf; background: #4a2930; }
+.toast-warning .toast-icon { color: #f2d29b; background: #4a3b25; }
+.toast-copy { min-width: 0; flex: 1; padding-top: 2px; }
+.toast-copy strong { display: block; font-size: 12px; line-height: 1.4; }
+.toast-copy p { margin: 4px 0 0; color: #a6b0bd; font-size: 11px; line-height: 1.5; }
+.toast-close { width: 25px; height: 25px; padding: 0; border: 0; border-radius: 6px; color: #8995a5; background: transparent; font-size: 19px; cursor: pointer; }
+.toast-close:hover { color: #edf1f4; background: #ffffff12; }
+
+.confirmation-backdrop {
+  position: fixed;
+  z-index: 1001;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #070b12bd;
+  backdrop-filter: blur(5px);
+  animation: backdrop-enter .16s ease-out;
+}
+
+.confirmation-dialog {
+  width: min(100%, 420px);
+  padding: 27px;
+  border: 1px solid #344153;
+  border-radius: 17px;
+  color: #edf1f4;
+  background: #171f2b;
+  box-shadow: 0 26px 90px #0009;
+  animation: dialog-enter .2s ease-out;
+}
+
+.confirmation-symbol {
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  margin-bottom: 18px;
+  border: 1px solid #3c5949;
+  border-radius: 12px;
+  color: #a9e7c2;
+  background: #20372c;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.confirmation-symbol svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.confirmation-symbol.danger-symbol { border-color: #75404a; color: #ff9da8; background: #3b2228; }
+.confirmation-dialog h2 { margin: 0; font-size: 19px; letter-spacing: -.035em; }
+.confirmation-dialog > p { margin: 9px 0 24px; color: #a6b0bd; font-size: 12px; line-height: 1.65; }
+.confirmation-actions { display: flex; justify-content: flex-end; gap: 9px; }
+.confirmation-actions button { min-height: 39px; padding: 0 16px; border: 1px solid #354153; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: background .16s ease, border-color .16s ease, transform .16s ease; }
+.confirmation-cancel { color: #c4ccd6; background: #202a38; }
+.confirmation-cancel:hover { border-color: #59677a; background: #293647; }
+.confirmation-confirm { border-color: #477b5b !important; color: #102018; background: #9bdab2; }
+.confirmation-confirm:hover { background: #b2e8c4; transform: translateY(-1px); }
+.confirmation-confirm.confirm-danger { border-color: #a74450 !important; color: #fff; background: #c74755; }
+.confirmation-confirm.confirm-danger:hover { border-color: #d96570 !important; background: #dc5965; }
+.confirmation-actions button:focus-visible,.toast-close:focus-visible { outline: 2px solid #9bdab2; outline-offset: 3px; }
+
+@keyframes toast-enter { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dialog-enter { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+@media (max-width: 520px) {
+  .notification-host { top: 12px; right: 12px; width: calc(100vw - 24px); }
+  .confirmation-dialog { padding: 23px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast,.confirmation-backdrop,.confirmation-dialog { animation: none; }
+  .confirmation-actions button { transition: none; }
+}
