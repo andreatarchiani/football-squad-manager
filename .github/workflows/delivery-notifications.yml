@@ -2,7 +2,7 @@ name: Delivery notifications
 
 on:
   workflow_run:
-    workflows: ["CI", "Deploy Firebase"]
+    workflows: ["CI"]
     types: [completed]
 
 permissions:
@@ -128,15 +128,3 @@ jobs:
               }
             }
 
-            if (run.name === 'Deploy Firebase') {
-              if (run.conclusion === 'success') {
-                await notify(
-                  `**Firebase: deploy completato correttamente.** La nuova versione è disponibile su https://football-squad-manager-5673e.web.app. [Dettagli del deploy](${run.html_url}). Commit: \`${run.head_sha}\`.`
-                );
-              } else {
-                await notify(
-                  `**Deploy Firebase fallito** (stato: ${run.conclusion}). La versione precedente resta quella pubblicata; controlla [i log del deploy](${run.html_url}). Commit: \`${run.head_sha}\`.`
-                );
-                core.setFailed(`Firebase deployment concluded with ${run.conclusion}.`);
-              }
-            }

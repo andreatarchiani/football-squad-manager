@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: firebase-production-deploy
@@ -47,3 +48,31 @@ jobs:
 
       - name: Deploy Hosting and Firestore Security Rules
         run: npx firebase-tools deploy --only hosting,firestore:rules --project football-squad-manager-6fdaa
+
+      - name: Notify successful deployment
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: 11,
+              body: `@andreatarchiani **Firebase: deploy completato correttamente.** La nuova versione è disponibile su https://football-squad-manager-5673e.web.app. [Dettagli del deploy](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}). Commit: \`${context.sha}\`.`
+            });
+
+      - name: Notify failed deployment
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: 11,
+              body: `@andreatarchiani **Deploy Firebase fallito.** La versione precedente resta quella pubblicata; controlla [i log del deploy](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}). Commit: \`${context.sha}\`.`
+            });
