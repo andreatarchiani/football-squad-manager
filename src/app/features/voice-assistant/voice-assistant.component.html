@@ -1,0 +1,50 @@
+<div class="voice-assistant">
+  <button class="voice-trigger" type="button" (click)="toggleListening()" [class.is-listening]="listening()" [attr.aria-pressed]="listening()" aria-label="Attiva assistente vocale">
+    <span aria-hidden="true">🎙</span><span>{{ listening() ? 'In ascolto…' : 'Assistente vocale' }}</span>
+  </button>
+
+  @if (panelOpen()) {
+    <section class="voice-panel" aria-label="Assistente vocale" aria-live="polite">
+      <div class="voice-panel-heading">
+        <div><span class="eyebrow">FOOTBALL SQUAD MANAGER</span><h2>Assistente vocale</h2></div>
+        <button class="voice-close" type="button" (click)="close()" aria-label="Chiudi assistente">×</button>
+      </div>
+
+      @if (!supported) {
+        <p class="voice-error">Il riconoscimento vocale non è supportato da questo browser. Prova con Google Chrome o Microsoft Edge.</p>
+      } @else {
+        <p class="voice-help">Premi il pulsante e pronuncia un comando in italiano. Per esempio: “Aggiungi una squadra con il nome Arezzo, società Arezzo Calcio, categoria Prima Squadra”.</p>
+        <button class="voice-record" type="button" (click)="toggleListening()" [class.is-listening]="listening()">
+          <span aria-hidden="true">{{ listening() ? '■' : '🎙' }}</span>
+          {{ listening() ? 'Interrompi ascolto' : 'Parla adesso' }}
+        </button>
+      }
+
+      @if (listening()) {
+        <p class="voice-status"><span class="pulse-dot"></span> Ti sto ascoltando…</p>
+      }
+      @if (transcript()) {
+        <div class="transcript"><span class="field-label">HO CAPITO</span><p>“{{ transcript() }}”</p></div>
+      }
+      @if (draft(); as team) {
+        <div class="voice-review">
+          <span class="field-label">CONFERMA OPERAZIONE</span>
+          <h3>Creare questa squadra?</h3>
+          <dl>
+            <div><dt>Nome</dt><dd>{{ team.name }}</dd></div>
+            <div><dt>Società / Club</dt><dd>{{ team.clubName || 'Non indicata' }}</dd></div>
+            <div><dt>Categoria</dt><dd>{{ team.category || 'Non indicata' }}</dd></div>
+            <div><dt>Stagione</dt><dd>{{ team.seasonLabel }}</dd></div>
+          </dl>
+          <p class="voice-help">La stagione predefinita viene impostata automaticamente se non la pronunci.</p>
+          <div class="voice-actions">
+            <button type="button" class="voice-cancel" (click)="close()">Annulla</button>
+            <button type="button" class="voice-confirm" [disabled]="saving()" (click)="confirm()">{{ saving() ? 'Salvataggio…' : 'Conferma e crea' }}</button>
+          </div>
+        </div>
+      }
+      @if (error()) { <p class="voice-error" role="alert">{{ error() }}</p> }
+      @if (message()) { <p class="voice-success" role="status">{{ message() }}</p> }
+    </section>
+  }
+</div>
