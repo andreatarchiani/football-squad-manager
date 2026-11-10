@@ -3,7 +3,7 @@
 A private, dark-themed Angular Progressive Web App for managing football squads.
 
 ## Project status
-**Phase 1 — Angular application shell.** The initial PWA scaffold and dark dashboard shell are committed on the foundation branch. Firebase and feature modules are next.
+**Phase 2 — Firebase foundation in progress.** The Angular PWA shell is merged to `main`; Firebase Authentication, personal workspace bootstrap, and baseline Firestore rules are being implemented on `feat/firebase-auth-workspace`.
 
 ## Product goals
 - Manage workspaces, teams, players, shirt numbers, roles, squads, formations and matches.
@@ -35,7 +35,8 @@ A private, dark-themed Angular Progressive Web App for managing football squads.
 ## Documentation
 - [Architecture and technical decisions](docs/architecture.md)
 - [Firestore data model](docs/data-model.md)
+- [Firebase Spark setup](docs/firebase-setup.md)
 - [Implementation roadmap](docs/roadmap.md)
 
 ## Development status
-The Angular scaffold and PWA shell are present on `chore/project-foundation`. No local application build, automated tests or deployment have been run or verified yet. CI status must be checked in GitHub Actions before considering the scaffold validated.
+The Angular scaffold has passed GitHub Actions CI on `main`. Firebase integration is under review on its own feature branch. A Firebase project has not yet been connected, and no production deployment has been performed.
