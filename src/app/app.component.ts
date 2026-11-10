@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { SwUpdate } from '@angular/service-worker';
+import { interval } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { FirebaseAuthService } from './core/firebase-auth.service';
@@ -16,6 +18,39 @@ import { TeamsPageComponent } from './features/teams/teams-page.component';
 export class AppComponent {
   protected readonly navigation = ['Panoramica', 'Squadre', 'Giocatori', 'Formazioni', 'Partite'];
   protected readonly activePage = signal<'overview' | 'teams'>('overview');
+  protected readonly updateAvailable = signal(false);
+  protected readonly updating = signal(false);
+  private readonly swUpdate = inject(SwUpdate);
+
+  constructor() {
+    if (this.swUpdate.isEnabled) {
+      this.swUpdate.versionUpdates.subscribe((event) => {
+        if (event.type === 'VERSION_READY') this.updateAvailable.set(true);
+      });
+      void this.checkForUpdate();
+      interval(6 * 60 * 60 * 1000).subscribe(() => void this.checkForUpdate());
+    }
+  }
+
+  protected async applyUpdate(): Promise<void> {
+    if (!this.swUpdate.isEnabled || this.updating()) return;
+    this.updating.set(true);
+    try {
+      await this.swUpdate.activateUpdate();
+      window.location.reload();
+    } catch (error) {
+      console.error('Unable to activate application update.', error);
+      this.updating.set(false);
+    }
+  }
+
+  private async checkForUpdate(): Promise<void> {
+    try {
+      await this.swUpdate.checkForUpdate();
+    } catch (error) {
+      console.warn('Application update check failed.', error);
+    }
+  }
 
   protected navigate(index: number): void {
     if (index === 0) this.activePage.set('overview');
