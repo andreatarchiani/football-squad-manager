@@ -1,6 +1,8 @@
 name: Deploy Firebase
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -12,7 +14,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build and deploy to Firebase
+    name: Build, test and deploy to Firebase
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,11 +25,20 @@ jobs:
         with:
           node-version: 22
 
+      - name: Set up Java for Firestore Emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
       - name: Install dependencies
         run: npm install
 
       - name: Build production application
         run: npm run build
+
+      - name: Test Firestore Security Rules
+        run: npm run test:rules
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v3
