@@ -23,6 +23,9 @@ export class TeamsPageComponent {
   protected readonly rosterLoading = signal(false);
   protected readonly formation = signal('4-3-3');
   protected readonly lineup = signal<Record<string, string>>({});
+  protected readonly activeSlotId = signal<string | null>(null);
+  protected readonly shirtPositions = signal<Record<string, { x: number; y: number }>>({});
+  private dragSlotId: string | null = null;
   protected readonly formations = ['4-3-3', '4-4-2', '3-5-2'];
   protected readonly pitchSlots: Record<string, { id: string; label: string; role: string; x: number; y: number }[]> = {
     '4-3-3': [
@@ -79,12 +82,49 @@ export class TeamsPageComponent {
 
   protected changeFormation(value: string): void {
     this.formation.set(value);
-    this.autoArrange();
+    this.activeSlotId.set(null);
+    this.lineup.update(current => Object.fromEntries(
+      Object.entries(current).filter(([id]) => this.pitchSlots[value].some(slot => slot.id === id))
+    ));
   }
 
   protected assignPlayer(slotId: string, playerId: string): void {
-    this.lineup.update(current => ({ ...current, [slotId]: playerId }));
+    this.lineup.update(current => {
+      const next = { ...current };
+      for (const [key, value] of Object.entries(next)) if (value === playerId) delete next[key];
+      if (playerId) next[slotId] = playerId;
+      else delete next[slotId];
+      return next;
+    });
+    this.activeSlotId.set(null);
   }
+
+  protected togglePlayerPicker(slotId: string): void {
+    this.activeSlotId.update(current => current === slotId ? null : slotId);
+  }
+
+  protected positionForSlot(slot: { id: string; x: number; y: number }): { x: number; y: number } {
+    return this.shirtPositions()[slot.id] ?? { x: slot.x, y: slot.y };
+  }
+
+  protected startDrag(event: PointerEvent, slotId: string): void {
+    if (event.button !== 0) return;
+    this.dragSlotId = slotId;
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+  }
+
+  protected moveDrag(event: PointerEvent): void {
+    if (!this.dragSlotId) return;
+    const target = (event.currentTarget as HTMLElement).closest('.football-pitch') as HTMLElement | null;
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const x = Math.max(5, Math.min(95, ((event.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(4, Math.min(96, ((event.clientY - rect.top) / rect.height) * 100));
+    const id = this.dragSlotId;
+    this.shirtPositions.update(current => ({ ...current, [id]: { x, y } }));
+  }
+
+  protected endDrag(): void { this.dragSlotId = null; }
 
   protected optionsForSlot(slot: { id: string; role: string }): PlayerRecord[] {
     const selectedId = this.lineup()[slot.id] || '';
@@ -136,6 +176,8 @@ export class TeamsPageComponent {
     }
     this.expandedRosterId.set(team.id);
     this.lineup.set({});
+    this.shirtPositions.set({});
+    this.activeSlotId.set(null);
     const workspaceId = this.auth.workspaceId();
     if (!workspaceId) return;
     this.rosterLoading.set(true);
