@@ -97,25 +97,13 @@
                 <div class="pitch-box top-box"></div><div class="pitch-box bottom-box"></div>
                 <div class="pitch-goal top-goal"></div><div class="pitch-goal bottom-goal"></div>
                 @for (slot of slots(); track slot.id) {
-                  <div class="pitch-player" [class.picker-above]="positionForSlot(slot).y > 55" [class.picker-near-left]="positionForSlot(slot).x < 35" [class.picker-near-right]="positionForSlot(slot).x > 65" [style.left.%]="positionForSlot(slot).x" [style.top.%]="positionForSlot(slot).y"
+                  <div class="pitch-player" [style.left.%]="positionForSlot(slot).x" [style.top.%]="positionForSlot(slot).y"
                     (pointerdown)="startDrag($event, slot.id)" (pointermove)="moveDrag($event)"
                     (pointerup)="endDrag()" (pointercancel)="endDrag()">
                     <button class="pitch-shirt" type="button" (click)="togglePlayerPicker(slot.id)"
                       [attr.aria-label]="'Assegna giocatore a ' + slot.label"
                       [attr.aria-expanded]="activeSlotId() === slot.id">{{ playerForSlot(slot.id)?.shirtNumber ?? '+' }}</button>
                     <span class="pitch-player-name">{{ playerForSlot(slot.id) ? playerForSlot(slot.id)!.lastName : slot.label }}</span>
-                    @if (activeSlotId() === slot.id) {
-                      <div class="shirt-picker" (pointerdown)="$event.stopPropagation()">
-                        <strong>{{ slot.label }} · {{ slot.role }}</strong>
-                        @for (player of optionsForSlot(slot); track player.id) {
-                          <button type="button" (click)="assignPlayer(slot.id, player.id)">{{ player.shirtNumber ?? '—' }} · {{ player.firstName }} {{ player.lastName }}</button>
-                        }
-                        @if (playerForSlot(slot.id)) {
-                          <button class="remove-player" type="button" (click)="assignPlayer(slot.id, '')">Svuota maglia</button>
-                        }
-                        <button class="close-picker" type="button" (click)="togglePlayerPicker(slot.id)">Chiudi</button>
-                      </div>
-                    }
                   </div>
                 }
               </div>
@@ -134,5 +122,38 @@
         }
       }
     </div>
+  }
+
+  @if (activeSlotId(); as selectedSlotId) {
+    @if (activeSlot(); as selectedSlot) {
+      <div class="player-picker-overlay" (click)="closePlayerPicker()">
+        <section class="player-picker-dialog" role="dialog" aria-modal="true"
+          [attr.aria-label]="'Assegna un giocatore: ' + selectedSlot.role"
+          (click)="$event.stopPropagation()" (keydown.escape)="closePlayerPicker()">
+          <div class="picker-dialog-heading">
+            <div>
+              <span class="eyebrow">FORMAZIONE · {{ selectedSlot.label }}</span>
+              <h3>Scegli {{ selectedSlot.role.toLowerCase() }}</h3>
+              <p>Seleziona un giocatore disponibile per questo ruolo.</p>
+            </div>
+            <button class="picker-dialog-close" type="button" aria-label="Chiudi" (click)="closePlayerPicker()">×</button>
+          </div>
+          <div class="picker-player-list">
+            @for (player of optionsForSlot(selectedSlot); track player.id) {
+              <button class="picker-player-option" type="button" (click)="assignPlayer(selectedSlotId, player.id)">
+                <span class="picker-player-number">{{ player.shirtNumber ?? '—' }}</span>
+                <span class="picker-player-details"><strong>{{ player.firstName }} {{ player.lastName }}</strong><small>{{ player.roles.join(' · ') || player.primaryRole }}</small></span>
+                @if (playerForSlot(selectedSlotId)?.id === player.id) { <span class="picker-selected">IN CAMPO</span> }
+              </button>
+            } @empty {
+              <p class="picker-no-players">Nessun giocatore disponibile per questo ruolo.</p>
+            }
+          </div>
+          @if (playerForSlot(selectedSlotId)) {
+            <button class="picker-clear-player" type="button" (click)="assignPlayer(selectedSlotId, '')">Rimuovi giocatore dalla maglia</button>
+          }
+        </section>
+      </div>
+    }
   }
 </section>
