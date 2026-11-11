@@ -132,7 +132,7 @@
 .pitch-player:active { cursor: grabbing; }
 .pitch-shirt { border: 0; cursor: pointer; font-family: inherit; }
 .pitch-shirt:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-.shirt-picker { position: absolute; z-index: 5; top: 38px; left: 50%; display: grid; gap: 5px; width: 190px; max-width: min(190px, 72vw); padding: 9px; border: 1px solid #9bdab2; border-radius: 9px; background: #101a17; box-shadow: 0 8px 24px #0009; transform: translateX(-50%); }
+.shirt-picker { position: absolute; z-index: 5; top: calc(100% + 7px); left: 50%; display: grid; gap: 5px; width: 190px; max-width: min(190px, 72vw); max-height: min(220px, 34vh); overflow-y: auto; overscroll-behavior: contain; padding: 9px; border: 1px solid #9bdab2; border-radius: 9px; background: #101a17; box-shadow: 0 8px 24px #0009; transform: translateX(-50%); }\n.pitch-player.picker-above .shirt-picker { top: auto; bottom: calc(100% + 7px); }\n.pitch-player.picker-near-left .shirt-picker { left: 0; transform: none; }\n.pitch-player.picker-near-right .shirt-picker { right: 0; left: auto; transform: none; }
 .shirt-picker strong { color: #b8f0c9; font-size: 10px; }
 .shirt-picker button { min-height: 32px; padding: 5px 7px; border: 1px solid #35483e; border-radius: 6px; color: #edf4f0; background: #1b2a23; text-align: left; font-size: 10px; cursor: pointer; }
 .shirt-picker button.remove-player { color: #ffc1c1; }
