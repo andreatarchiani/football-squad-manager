@@ -8,19 +8,20 @@ import { NotificationService } from './core/notifications/notification.service';
 import { NotificationHostComponent } from './core/notifications/notification-host.component';
 import { AuthPageComponent } from './features/auth/auth-page.component';
 import { TeamsPageComponent } from './features/teams/teams-page.component';
+import { PlayersPageComponent } from './features/players/players-page.component';
 import { VoiceAssistantComponent } from './features/voice-assistant/voice-assistant.component';
 
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, VoiceAssistantComponent, NotificationHostComponent],
+  imports: [MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, VoiceAssistantComponent, NotificationHostComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
   protected readonly navigation = ['Panoramica', 'Squadre', 'Giocatori', 'Formazioni', 'Partite'];
-  protected readonly activePage = signal<'overview' | 'teams'>('overview');
+  protected readonly activePage = signal<'overview' | 'teams' | 'players'>('overview');
   protected readonly updateAvailable = signal(false);
   protected readonly updating = signal(false);
   private readonly swUpdate = inject(SwUpdate);
@@ -59,6 +60,7 @@ export class AppComponent {
   protected navigate(index: number): void {
     if (index === 0) this.activePage.set('overview');
     if (index === 1) this.activePage.set('teams');
+    if (index === 2) this.activePage.set('players');
   }
 
   protected readonly auth = inject(FirebaseAuthService);
