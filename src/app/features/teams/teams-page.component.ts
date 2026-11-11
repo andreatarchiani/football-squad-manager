@@ -87,9 +87,20 @@ export class TeamsPageComponent {
   }
 
   protected optionsForSlot(slot: { id: string; role: string }): PlayerRecord[] {
-    const used = new Set(Object.entries(this.lineup()).filter(([key, id]) => key !== slot.id && id).map(([, id]) => id));
-    const players = this.rosterForExpanded().filter(player => !used.has(player.id));
-    return players.sort((a, b) => Number(!this.playerHasRole(a, slot.role)) - Number(!this.playerHasRole(b, slot.role)) || (a.shirtNumber ?? 100) - (b.shirtNumber ?? 100));
+    const selectedId = this.lineup()[slot.id] || '';
+    const usedElsewhere = new Set(
+      Object.entries(this.lineup())
+        .filter(([key, id]) => key !== slot.id && id)
+        .map(([, id]) => id)
+    );
+
+    // Show only players eligible for this role. Keep the current selection
+    // visible in its own dropdown, but never offer a player used in another slot.
+    return this.rosterForExpanded()
+      .filter(player => this.playerHasRole(player, slot.role)
+        && (!usedElsewhere.has(player.id) || player.id === selectedId))
+      .sort((a, b) => (a.shirtNumber ?? 100) - (b.shirtNumber ?? 100)
+        || a.lastName.localeCompare(b.lastName, 'it'));
   }
 
   private playerHasRole(player: PlayerRecord, role: string): boolean {
