@@ -72,13 +72,17 @@ export class PlayerService {
       const p=doc(db,'workspaces',workspaceId,'players',player.id);
       const m=player.teamId&&player.seasonId?doc(db,'workspaces',workspaceId,'teams',player.teamId,'seasons',player.seasonId,'squadMembers',player.id):null;
       const r=m&&player.shirtNumber!==null?doc(db,'workspaces',workspaceId,'teams',player.teamId,'seasons',player.seasonId,'jerseyReservations',String(player.shirtNumber)):null;
-      const old=r?await tx.get(r):null;
+      const reservation=r?await tx.get(r):null;
+      if (!archived && reservation?.exists() && reservation.data()['playerId']!==player.id) {
+        throw new Error('Impossibile ripristinare il numero: è già stato assegnato a un altro giocatore.');
+      }
       tx.update(p,{isArchived:archived,updatedAt:serverTimestamp()});
-      if(m&&archived) tx.delete(m);
-      if(r&&old?.exists()&&old.data()['playerId']===player.id) { if(archived) tx.delete(r); else tx.set(r,{playerId:player.id,updatedAt:serverTimestamp()},{merge:true}); }
-      if(m&&!archived) tx.set(m,{playerId:player.id,shirtNumber:player.shirtNumber,roles:player.roles,status:player.status,updatedAt:serverTimestamp()},{merge:true});
+      if (r && archived && reservation?.exists() && reservation.data()['playerId']===player.id) tx.delete(r);
+      if (r && !archived) tx.set(r,{playerId:player.id,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
+      if (m) tx.set(m,{playerId:player.id,shirtNumber:player.shirtNumber,roles:player.roles,status:player.status,updatedAt:serverTimestamp()},{merge:true});
     });
   }
+
   private role(v:unknown):PlayerRole { return PLAYER_ROLES.includes(v as PlayerRole)?v as PlayerRole:'Centrocampista'; }
   private status(v:unknown):PlayerStatus { return ['active','injured','suspended','left'].includes(String(v))?v as PlayerStatus:'active'; }
   private requireFirestore():Firestore { if(!this.firestore) throw new Error('Firestore non è configurato.'); return this.firestore; }
