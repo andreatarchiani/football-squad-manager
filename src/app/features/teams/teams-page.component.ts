@@ -21,6 +21,29 @@ export class TeamsPageComponent {
   protected readonly players = signal<PlayerRecord[]>([]);
   protected readonly expandedRosterId = signal<string | null>(null);
   protected readonly rosterLoading = signal(false);
+  protected readonly formation = signal('4-3-3');
+  protected readonly lineup = signal<Record<string, string>>({});
+  protected readonly formations = ['4-3-3', '4-4-2', '3-5-2'];
+  protected readonly pitchSlots: Record<string, { id: string; label: string; role: string; x: number; y: number }[]> = {
+    '4-3-3': [
+      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
+      { id: 'ts', label: 'TS', role: 'Difensore', x: 13, y: 72 }, { id: 'dc1', label: 'DC', role: 'Difensore', x: 38, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 62, y: 75 }, { id: 'td', label: 'TD', role: 'Difensore', x: 87, y: 72 },
+      { id: 'mezz1', label: 'CC', role: 'Centrocampista', x: 28, y: 49 }, { id: 'med', label: 'MED', role: 'Centrocampista', x: 50, y: 56 }, { id: 'mezz2', label: 'CC', role: 'Centrocampista', x: 72, y: 49 },
+      { id: 'ala1', label: 'AS', role: 'Attaccante', x: 17, y: 27 }, { id: 'punta', label: 'ATT', role: 'Attaccante', x: 50, y: 19 }, { id: 'ala2', label: 'AD', role: 'Attaccante', x: 83, y: 27 }
+    ],
+    '4-4-2': [
+      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
+      { id: 'ts', label: 'TS', role: 'Difensore', x: 13, y: 72 }, { id: 'dc1', label: 'DC', role: 'Difensore', x: 38, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 62, y: 75 }, { id: 'td', label: 'TD', role: 'Difensore', x: 87, y: 72 },
+      { id: 'est1', label: 'ES', role: 'Centrocampista', x: 13, y: 49 }, { id: 'cc1', label: 'CC', role: 'Centrocampista', x: 38, y: 53 }, { id: 'cc2', label: 'CC', role: 'Centrocampista', x: 62, y: 53 }, { id: 'est2', label: 'ED', role: 'Centrocampista', x: 87, y: 49 },
+      { id: 'att1', label: 'ATT', role: 'Attaccante', x: 37, y: 24 }, { id: 'att2', label: 'ATT', role: 'Attaccante', x: 63, y: 24 }
+    ],
+    '3-5-2': [
+      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
+      { id: 'dc1', label: 'DC', role: 'Difensore', x: 25, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 50, y: 78 }, { id: 'dc3', label: 'DC', role: 'Difensore', x: 75, y: 75 },
+      { id: 'est1', label: 'EST', role: 'Centrocampista', x: 10, y: 49 }, { id: 'cc1', label: 'CC', role: 'Centrocampista', x: 30, y: 53 }, { id: 'reg', label: 'REG', role: 'Centrocampista', x: 50, y: 47 }, { id: 'cc2', label: 'CC', role: 'Centrocampista', x: 70, y: 53 }, { id: 'est2', label: 'EST', role: 'Centrocampista', x: 90, y: 49 },
+      { id: 'att1', label: 'ATT', role: 'Attaccante', x: 36, y: 24 }, { id: 'att2', label: 'ATT', role: 'Attaccante', x: 64, y: 24 }
+    ]
+  };
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly showArchived = signal(false);
@@ -38,6 +61,52 @@ export class TeamsPageComponent {
     return this.teams().filter((team) => this.showArchived() || !team.isArchived);
   }
 
+  protected slots() { return this.pitchSlots[this.formation()]; }
+
+  protected playerForSlot(slotId: string): PlayerRecord | undefined {
+    return this.rosterForExpanded().find(player => player.id === this.lineup()[slotId]);
+  }
+
+  protected rosterForExpanded(): PlayerRecord[] {
+    const team = this.teams().find(item => item.id === this.expandedRosterId());
+    return team ? this.rosterFor(team).filter(player => player.status === 'active') : [];
+  }
+
+  protected benchPlayers(): PlayerRecord[] {
+    const starters = new Set(Object.values(this.lineup()).filter(Boolean));
+    return this.rosterForExpanded().filter(player => !starters.has(player.id));
+  }
+
+  protected changeFormation(value: string): void {
+    this.formation.set(value);
+    this.autoArrange();
+  }
+
+  protected assignPlayer(slotId: string, playerId: string): void {
+    this.lineup.update(current => ({ ...current, [slotId]: playerId }));
+  }
+
+  protected optionsForSlot(slot: { id: string; role: string }): PlayerRecord[] {
+    const used = new Set(Object.entries(this.lineup()).filter(([key, id]) => key !== slot.id && id).map(([, id]) => id));
+    const players = this.rosterForExpanded().filter(player => !used.has(player.id));
+    return players.sort((a, b) => Number(!this.playerHasRole(a, slot.role)) - Number(!this.playerHasRole(b, slot.role)) || (a.shirtNumber ?? 100) - (b.shirtNumber ?? 100));
+  }
+
+  private playerHasRole(player: PlayerRecord, role: string): boolean {
+    return player.primaryRole === role || player.roles.includes(role as PlayerRecord['primaryRole']);
+  }
+
+  private autoArrange(): void {
+    const remaining = [...this.rosterForExpanded()];
+    const next: Record<string, string> = {};
+    for (const slot of this.slots()) {
+      const index = remaining.findIndex(player => this.playerHasRole(player, slot.role));
+      const player = remaining.splice(index >= 0 ? index : 0, 1)[0];
+      if (player) next[slot.id] = player.id;
+    }
+    this.lineup.set(next);
+  }
+
   protected rosterFor(team: TeamRecord): PlayerRecord[] {
     return this.players().filter((player) => !player.isArchived
       && player.teamId === team.id && player.seasonId === team.seasonId)
@@ -51,11 +120,13 @@ export class TeamsPageComponent {
       return;
     }
     this.expandedRosterId.set(team.id);
+    this.lineup.set({});
     const workspaceId = this.auth.workspaceId();
     if (!workspaceId) return;
     this.rosterLoading.set(true);
     try {
       this.players.set(await this.playerService.list(workspaceId, this.teams()));
+      this.autoArrange();
     } catch (error) {
       console.error('Unable to load team roster.', error);
       this.error.set('Non è stato possibile caricare la rosa. Verifica la connessione e i permessi Firestore.');
