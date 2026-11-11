@@ -53,11 +53,11 @@
   .form-actions .primary-button { width: 100%; min-height: 46px; }
   .list-toolbar { align-items: flex-start; }
   .archive-toggle { font-size: 11px; }
-  .team-card { align-items: flex-start; gap: 12px; padding: 14px; }
+  .team-card { align-items: flex-start; flex-wrap: wrap; gap: 12px; padding: 14px; }
   .team-emblem { width: 42px; height: 42px; }
   .team-details h3 { font-size: 14px; }
   .team-details p { gap: 5px; font-size: 11px; }
-  .team-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .team-actions { width: 100%; flex: 1 0 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .team-actions button { min-height: 43px; }
   .empty-state { padding: 35px 17px; }
 }
