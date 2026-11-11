@@ -1,71 +1,53 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#071b43"/>
-      <stop offset=".58" stop-color="#123c80"/>
-      <stop offset="1" stop-color="#07152e"/>
-    </linearGradient>
-    <linearGradient id="pitch" x1="0" y1="0" x2="0" y2="1">
-      <stop stop-color="#35c96b"/>
-      <stop offset="1" stop-color="#087a43"/>
-    </linearGradient>
-    <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#318cff"/>
-      <stop offset="1" stop-color="#0750b9"/>
-    </linearGradient>
-    <linearGradient id="board" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#f7fbff"/>
-      <stop offset="1" stop-color="#c8d9ec"/>
-    </linearGradient>
-    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="9"/>
-    </filter>
-    <clipPath id="clip"><rect width="512" height="512" rx="112"/></clipPath>
-  </defs>
-  <g clip-path="url(#clip)">
-    <rect width="512" height="512" fill="url(#bg)"/>
-    <circle cx="80" cy="104" r="3" fill="#fff" opacity=".75"/>
-    <circle cx="430" cy="90" r="4" fill="#fff" opacity=".8"/>
-    <circle cx="466" cy="156" r="2.5" fill="#fff" opacity=".65"/>
-    <path d="M0 350 Q130 310 256 350 T512 342 V512 H0Z" fill="#0b6a43"/>
-    <path d="M0 382 Q130 350 256 382 T512 374 V512 H0Z" fill="url(#pitch)"/>
-    <path d="M0 435 Q130 405 256 435 T512 425" fill="none" stroke="#a4ff72" stroke-width="5" opacity=".65"/>
-    <g transform="translate(274 70) rotate(8 105 112)">
-      <rect x="7" y="10" width="190" height="230" rx="18" fill="#000" opacity=".3" filter="url(#shadow)"/>
-      <rect width="190" height="230" rx="18" fill="#101c32" stroke="#8fa8c8" stroke-width="5"/>
-      <rect x="12" y="13" width="166" height="204" rx="9" fill="url(#board)"/>
-      <rect x="24" y="27" width="142" height="176" rx="5" fill="url(#pitch)"/>
-      <path d="M95 27V203 M24 115H166 M68 27V50H122V27 M68 203V180H122V203" fill="none" stroke="#eafff1" stroke-width="2.5" opacity=".9"/>
-      <circle cx="95" cy="115" r="19" fill="none" stroke="#eafff1" stroke-width="2.5"/>
-      <g fill="#1674ef" stroke="#fff" stroke-width="3">
-        <circle cx="57" cy="67" r="8"/><circle cx="95" cy="58" r="8"/><circle cx="133" cy="67" r="8"/>
-        <circle cx="43" cy="111" r="8"/><circle cx="147" cy="111" r="8"/>
-        <circle cx="57" cy="158" r="8"/><circle cx="95" cy="170" r="8"/><circle cx="133" cy="158" r="8"/>
-      </g>
-      <path d="M52 86l17 11m-17 0 17-11M124 126l16-12m-16 0 16 12" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>
-    </g>
-    <g transform="translate(0 0)">
-      <path d="M118 512v-91q0-49 46-65l43-15h97l44 15q46 16 46 65v91Z" fill="#06152d" opacity=".55"/>
-      <path d="M154 512v-83q0-34 31-46l52-19h42l52 19q31 12 31 46v83Z" fill="#101d32"/>
-      <path d="M191 512v-84q0-25 23-35l42-17 42 17q23 10 23 35v84Z" fill="url(#shirt)"/>
-      <path d="M218 386l38 20 38-20" fill="none" stroke="#e9f3ff" stroke-width="8" stroke-linecap="round"/>
-      <path d="M224 376q0-38 32-38t32 38v18h-64Z" fill="#f0b98f"/>
-      <path d="M221 376q0-43 35-43 36 0 36 43l-10-13-14-9-19 8-18 0Z" fill="#17243a"/>
-      <path d="M207 512v-59q0-25 25-34l24-9 24 9q25 9 25 34v59Z" fill="#1764cf"/>
-      <path d="M238 414h36v19h-36z" fill="#fff" opacity=".95"/>
-    </g>
-    <g fill="url(#shirt)" stroke="#dcecff" stroke-width="4">
-      <circle cx="78" cy="420" r="24"/><circle cx="145" cy="446" r="21"/>
-      <circle cx="368" cy="444" r="21"/><circle cx="436" cy="417" r="24"/>
-    </g>
-    <g fill="#f2f7ff" opacity=".95">
-      <path d="M68 417h20v6H68zM135 443h20v6h-20zM358 441h20v6h-20zM426 414h20v6h-20z"/>
-    </g>
-    <g transform="translate(256 467)">
-      <circle r="35" fill="#fff" stroke="#cbd8e8" stroke-width="4"/>
-      <path d="M0-13 13-4 8 12H-8L-13-4Z" fill="#142033"/>
-      <path d="m0-13 0-18m13 27 17 5M8 12l7 17m-23-17-7 17m-8-33 17-5" fill="none" stroke="#142033" stroke-width="4" stroke-linecap="round"/>
-    </g>
-    <path d="M0 0h512v8H0z" fill="#2e8cff" opacity=".7"/>
+<defs>
+ <linearGradient id="bg" x2="0.9" y2="1"><stop stop-color="#0879df"/><stop offset=".55" stop-color="#073b83"/><stop offset="1" stop-color="#061a3c"/></linearGradient>
+ <linearGradient id="grass" x2="0" y2="1"><stop stop-color="#42d66d"/><stop offset="1" stop-color="#08743d"/></linearGradient>
+ <linearGradient id="shirt" x2="1" y2="1"><stop stop-color="#172c4c"/><stop offset="1" stop-color="#050e20"/></linearGradient>
+ <linearGradient id="board" x2="1" y2="1"><stop stop-color="#f7fbff"/><stop offset="1" stop-color="#9db5d2"/></linearGradient>
+ <clipPath id="clip"><rect width="512" height="512" rx="104"/></clipPath>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="10"/></filter>
+</defs>
+<g clip-path="url(#clip)">
+ <rect width="512" height="512" fill="url(#bg)"/>
+ <path d="M0 300 Q125 265 255 300T512 286V512H0Z" fill="#0b5c3d"/>
+ <path d="M0 356Q130 320 260 356T512 340V512H0Z" fill="url(#grass)"/>
+ <path d="M0 420Q125 386 255 420T512 404" fill="none" stroke="#a4ff85" stroke-width="5" opacity=".55"/>
+ <!-- stadium lights and team -->
+ <g fill="#fff" opacity=".9"><circle cx="54" cy="70" r="7"/><circle cx="83" cy="58" r="5"/><circle cx="112" cy="70" r="6"/><circle cx="402" cy="60" r="6"/><circle cx="432" cy="50" r="7"/><circle cx="462" cy="66" r="5"/></g>
+ <g opacity=".95">
+  <g fill="#0b1c35"><circle cx="290" cy="194" r="22"/><circle cx="360" cy="180" r="23"/><circle cx="430" cy="197" r="21"/></g>
+  <g fill="#1675e8"><path d="M258 226q32-27 64 0l13 80h-90z"/><path d="M326 214q34-30 68 0l12 92h-92z"/><path d="M399 226q31-25 62 0l12 80h-85z"/></g>
+  <g fill="#f5f8ff"><path d="M274 258h31v10h-31zM342 248h34v10h-34zM413 260h31v10h-31z"/></g>
+ </g>
+ <!-- coach, deliberately large -->
+ <path d="M-32 512v-128q4-67 70-91l76-27h85l78 29q58 23 62 91v126Z" fill="url(#shirt)"/>
+ <path d="M72 512v-122q0-51 43-73l64-30 66 30q42 22 42 73v122Z" fill="#102542"/>
+ <path d="M138 283q-6-27 5-53 17-41 61-42 43 0 60 41 10 26 4 54l-17 38h-97z" fill="#d99a72"/>
+ <path d="M132 258q-9-70 41-91 42-18 77 7 28 21 25 76l-19-28-34-16-35 20-37 2z" fill="#101725"/>
+ <path d="M137 278q12 29 31 40l-15 27-34-31zM263 278q-12 29-31 40l15 27 34-31z" fill="#d99a72"/>
+ <path d="M168 326l42 27 44-27 25 28-69 57-68-57z" fill="#f3f7ff"/>
+ <path d="M0 512v-97q0-57 51-85l53-29 44 54-39 157z" fill="#07152b"/>
+ <!-- tactical clipboard, large and legible -->
+ <g transform="translate(284 274) rotate(-8)">
+  <rect x="7" y="8" width="222" height="254" rx="20" fill="#000" opacity=".35" filter="url(#shadow)"/>
+  <rect width="222" height="254" rx="18" fill="#15243a" stroke="#dbe9fa" stroke-width="7"/>
+  <rect x="13" y="16" width="196" height="226" rx="9" fill="url(#board)"/>
+  <rect x="27" y="33" width="168" height="192" rx="5" fill="url(#grass)"/>
+  <path d="M111 33v192M27 129h168M72 33v24h78V33M72 225v-24h78v24" fill="none" stroke="#f4fff7" stroke-width="3"/>
+  <circle cx="111" cy="129" r="22" fill="none" stroke="#f4fff7" stroke-width="3"/>
+  <g fill="#086be5" stroke="#fff" stroke-width="4">
+   <circle cx="66" cy="78" r="11"/><circle cx="111" cy="68" r="11"/><circle cx="156" cy="78" r="11"/>
+   <circle cx="49" cy="128" r="11"/><circle cx="173" cy="128" r="11"/>
+   <circle cx="66" cy="179" r="11"/><circle cx="111" cy="190" r="11"/><circle cx="156" cy="179" r="11"/>
   </g>
+  <g fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M74 96l23 12-4-18m4 18-18 3M139 149l20-12-3 18"/></g>
+  <rect x="78" y="-8" width="66" height="28" rx="8" fill="#243b59" stroke="#dbe9fa" stroke-width="4"/>
+ </g>
+ <!-- large foreground football -->
+ <g transform="translate(107 437)">
+  <circle r="62" fill="#f7fbff" stroke="#d5e1ef" stroke-width="5"/>
+  <path d="M0-24 23-8 14 19H-14L-23-8Z" fill="#101b2d"/>
+  <g fill="#101b2d"><path d="M0-24l0-35 22 10 1 41zM23-8l32-11 2 27-43 11zM14 19l13 33-27 11-14-44zM-14 19l-33 15-8-26 32-16zM-23-8l-26-24 20-20 29 28z"/></g>
+ </g>
+</g>
 </svg>
