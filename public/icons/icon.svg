@@ -24,6 +24,7 @@
   </defs>
   <g clip-path="url(#clip)">
     <rect width="512" height="512" fill="url(#bg)"/>
+    <g transform="translate(46 46) scale(.82)">
     <circle cx="80" cy="104" r="3" fill="#fff" opacity=".75"/>
     <circle cx="430" cy="90" r="4" fill="#fff" opacity=".8"/>
     <circle cx="466" cy="156" r="2.5" fill="#fff" opacity=".65"/>
@@ -67,5 +68,6 @@
       <path d="m0-13 0-18m13 27 17 5M8 12l7 17m-23-17-7 17m-8-33 17-5" fill="none" stroke="#142033" stroke-width="4" stroke-linecap="round"/>
     </g>
     <path d="M0 0h512v8H0z" fill="#2e8cff" opacity=".7"/>
+    </g>
   </g>
 </svg>
