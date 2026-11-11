@@ -89,7 +89,7 @@
                     @for (module of formations; track module) { <option [value]="module">{{ module }}</option> }
                   </select>
                 </label>
-                <span>{{ rosterForExpanded().length }} giocatori disponibili</span>
+                <span>Tocca una maglia per assegnare · Trascinala per spostarla</span>
               </div>
               <div class="football-pitch" [attr.aria-label]="'Campo con modulo ' + formation()">
                 <div class="pitch-line halfway"></div>
@@ -97,27 +97,27 @@
                 <div class="pitch-box top-box"></div><div class="pitch-box bottom-box"></div>
                 <div class="pitch-goal top-goal"></div><div class="pitch-goal bottom-goal"></div>
                 @for (slot of slots(); track slot.id) {
-                  <div class="pitch-player" [style.left.%]="slot.x" [style.top.%]="slot.y">
-                    <span class="pitch-shirt">{{ playerForSlot(slot.id)?.shirtNumber ?? '—' }}</span>
+                  <div class="pitch-player" [style.left.%]="positionForSlot(slot).x" [style.top.%]="positionForSlot(slot).y"
+                    (pointerdown)="startDrag($event, slot.id)" (pointermove)="moveDrag($event)"
+                    (pointerup)="endDrag()" (pointercancel)="endDrag()">
+                    <button class="pitch-shirt" type="button" (click)="togglePlayerPicker(slot.id)"
+                      [attr.aria-label]="'Assegna giocatore a ' + slot.label"
+                      [attr.aria-expanded]="activeSlotId() === slot.id">{{ playerForSlot(slot.id)?.shirtNumber ?? '+' }}</button>
                     <span class="pitch-player-name">{{ playerForSlot(slot.id) ? playerForSlot(slot.id)!.lastName : slot.label }}</span>
+                    @if (activeSlotId() === slot.id) {
+                      <div class="shirt-picker" (pointerdown)="$event.stopPropagation()">
+                        <strong>{{ slot.label }} · {{ slot.role }}</strong>
+                        @for (player of optionsForSlot(slot); track player.id) {
+                          <button type="button" (click)="assignPlayer(slot.id, player.id)">{{ player.shirtNumber ?? '—' }} · {{ player.firstName }} {{ player.lastName }}</button>
+                        }
+                        @if (playerForSlot(slot.id)) {
+                          <button class="remove-player" type="button" (click)="assignPlayer(slot.id, '')">Svuota maglia</button>
+                        }
+                        <button class="close-picker" type="button" (click)="togglePlayerPicker(slot.id)">Chiudi</button>
+                      </div>
+                    }
                   </div>
                 }
-              </div>
-              <div class="lineup-editor">
-                <div class="editor-heading"><strong>Schieramento</strong><span>Seleziona chi schierare in ogni posizione</span></div>
-                <div class="lineup-grid">
-                  @for (slot of slots(); track slot.id) {
-                    <label class="lineup-slot">
-                      <span>{{ slot.label }} <small>{{ slot.role }}</small></span>
-                      <select [value]="lineup()[slot.id] || ''" (change)="assignPlayer(slot.id, $any($event.target).value)" [attr.aria-label]="'Giocatore ' + slot.label">
-                        <option value="">Da assegnare</option>
-                        @for (player of optionsForSlot(slot); track player.id) {
-                          <option [value]="player.id">{{ player.shirtNumber ?? '—' }} · {{ player.firstName }} {{ player.lastName }}</option>
-                        }
-                      </select>
-                    </label>
-                  }
-                </div>
               </div>
               <div class="bench-section">
                 <div class="editor-heading"><strong>Panchina</strong><span>{{ benchPlayers().length }} giocatori</span></div>
