@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { TeamService, type TeamInput, type TeamRecord } from './team.service';
+import { PlayerService, type PlayerRecord } from '../players/player.service';
 
 @Component({
   selector: 'fsm-teams-page',
@@ -14,8 +15,12 @@ import { TeamService, type TeamInput, type TeamRecord } from './team.service';
 export class TeamsPageComponent {
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamsService = inject(TeamService);
+  private readonly playerService = inject(PlayerService);
 
   protected readonly teams = signal<TeamRecord[]>([]);
+  protected readonly players = signal<PlayerRecord[]>([]);
+  protected readonly expandedRosterId = signal<string | null>(null);
+  protected readonly rosterLoading = signal(false);
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly showArchived = signal(false);
@@ -31,6 +36,32 @@ export class TeamsPageComponent {
 
   protected get visibleTeams(): TeamRecord[] {
     return this.teams().filter((team) => this.showArchived() || !team.isArchived);
+  }
+
+  protected rosterFor(team: TeamRecord): PlayerRecord[] {
+    return this.players().filter((player) => !player.isArchived
+      && player.teamId === team.id && player.seasonId === team.seasonId)
+      .sort((a, b) => (a.shirtNumber ?? 100) - (b.shirtNumber ?? 100)
+        || a.lastName.localeCompare(b.lastName, 'it'));
+  }
+
+  protected async toggleRoster(team: TeamRecord): Promise<void> {
+    if (this.expandedRosterId() === team.id) {
+      this.expandedRosterId.set(null);
+      return;
+    }
+    this.expandedRosterId.set(team.id);
+    const workspaceId = this.auth.workspaceId();
+    if (!workspaceId) return;
+    this.rosterLoading.set(true);
+    try {
+      this.players.set(await this.playerService.list(workspaceId, this.teams()));
+    } catch (error) {
+      console.error('Unable to load team roster.', error);
+      this.error.set('Non è stato possibile caricare la rosa. Verifica la connessione e i permessi Firestore.');
+    } finally {
+      this.rosterLoading.set(false);
+    }
   }
 
   protected openCreate(): void {
@@ -122,6 +153,9 @@ export class TeamsPageComponent {
     this.loading.set(true);
     try {
       this.teams.set(await this.teamsService.list(workspaceId));
+      if (this.expandedRosterId()) {
+        this.players.set(await this.playerService.list(workspaceId, this.teams()));
+      }
     } catch (error) {
       console.error('Unable to load teams.', error);
       this.error.set('Non è stato possibile caricare le squadre. Controlla i permessi Firestore.');
