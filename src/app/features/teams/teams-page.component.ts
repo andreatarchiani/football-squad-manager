@@ -101,8 +101,12 @@ export class TeamsPageComponent {
     const next: Record<string, string> = {};
     for (const slot of this.slots()) {
       const index = remaining.findIndex(player => this.playerHasRole(player, slot.role));
-      const player = remaining.splice(index >= 0 ? index : 0, 1)[0];
-      if (player) next[slot.id] = player.id;
+      // Never fill a position with an unrelated player: keep role-incompatible
+      // players available for their correct position and manual selection.
+      if (index >= 0) {
+        const [player] = remaining.splice(index, 1);
+        next[slot.id] = player.id;
+      }
     }
     this.lineup.set(next);
   }
