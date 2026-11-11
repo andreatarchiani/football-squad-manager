@@ -86,3 +86,43 @@
   .roster-player-role { grid-column: 2; grid-row: 2; }
   .roster-player-status { grid-column: 3; grid-row: 1 / span 2; }
 }
+
+
+.tactical-panel { display: grid; gap: 15px; }
+.tactical-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 12px; color: var(--text-muted); font-size: 11px; }
+.tactical-toolbar label { display: grid; gap: 6px; color: #c6d1d2; font-weight: 700; }
+.tactical-toolbar select,.lineup-slot select { min-height: 40px; max-width: 100%; padding: 0 10px; border: 1px solid #3c4d4b; border-radius: 8px; color: #edf4f0; background: #17231f; font: inherit; }
+.football-pitch { position: relative; width: 100%; max-width: 570px; aspect-ratio: 0.78; justify-self: center; overflow: hidden; border: 2px solid #b8d6bd; border-radius: 9px; background: repeating-linear-gradient(0deg,#24623e 0%,#24623e 12.5%,#2b7048 12.5%,#2b7048 25%); box-shadow: inset 0 0 0 1px #ffffff24; }
+.football-pitch::before { position: absolute; inset: 50% 0 auto; height: 1px; background: #e4f2e6b0; content: ''; }
+.pitch-line { position: absolute; background: #e4f2e6b0; }
+.pitch-line.halfway { top: 50%; left: 0; width: 100%; height: 1px; }
+.pitch-circle { position: absolute; top: 50%; left: 50%; width: 27%; aspect-ratio: 1; border: 1px solid #e4f2e6b0; border-radius: 50%; transform: translate(-50%,-50%); }
+.pitch-box { position: absolute; left: 25%; width: 50%; height: 13%; border: 1px solid #e4f2e6b0; }
+.top-box { top: 0; border-top: 0; }.bottom-box { bottom: 0; border-bottom: 0; }
+.pitch-goal { position: absolute; left: 39%; width: 22%; height: 2.5%; border: 1px solid #e4f2e6b0; }
+.top-goal { top: 0; border-top: 0; }.bottom-goal { bottom: 0; border-bottom: 0; }
+.pitch-player { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 68px; transform: translate(-50%,-50%); text-align: center; z-index: 1; }
+.pitch-shirt { display: grid; place-items: center; width: 31px; height: 34px; clip-path: polygon(22% 0,38% 10%,62% 10%,78% 0,100% 19%,83% 35%,78% 28%,78% 100%,22% 100%,22% 28%,17% 35%,0 19%); color: #102018; background: #b8f0c9; font-size: 11px; font-weight: 900; filter: drop-shadow(0 1px 2px #0008); }
+.pitch-player-name { max-width: 68px; padding: 2px 4px; border-radius: 4px; color: #fff; background: #10291edb; font-size: 9px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+.lineup-editor,.bench-section { display: grid; gap: 10px; }
+.editor-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; color: #e9f0eb; font-size: 12px; }
+.editor-heading span { color: var(--text-muted); font-size: 10px; }
+.lineup-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.lineup-slot { display: grid; gap: 6px; min-width: 0; padding: 9px; border: 1px solid #2c3d37; border-radius: 8px; background: #17231f; }
+.lineup-slot > span { display: flex; align-items: baseline; gap: 7px; color: #b8f0c9; font-size: 10px; font-weight: 800; }
+.lineup-slot small { color: #91a59a; font-size: 9px; font-weight: 500; }
+.lineup-slot select { width: 100%; min-width: 0; font-size: 11px; }
+.bench-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+.bench-player { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 8px; border: 1px solid #2c3740; border-radius: 8px; color: #e5ece8; background: #17212a; font-size: 10px; }
+.bench-player > span:nth-child(2) { min-width: 0; flex: 1; overflow-wrap: anywhere; font-weight: 700; }
+.bench-player small { color: var(--text-muted); font-size: 9px; }
+.bench-number { display: grid; place-items: center; width: 27px; height: 27px; flex: 0 0 auto; border-radius: 7px; color: #b8f0c9; background: #1b3029; font-weight: 900; }
+@media (max-width: 420px) {
+  .tactical-panel { padding: 11px; }
+  .football-pitch { width: 100%; }
+  .pitch-player { width: 52px; }
+  .pitch-shirt { width: 27px; height: 30px; }
+  .pitch-player-name { max-width: 54px; font-size: 8px; }
+  .lineup-grid,.bench-list { grid-template-columns: 1fr; }
+  .editor-heading { align-items: flex-start; flex-direction: column; gap: 3px; }
+}

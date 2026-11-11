@@ -73,9 +73,9 @@
           </div>
         </article>
         @if (expandedRosterId() === team.id) {
-          <section class="roster-panel" [attr.aria-label]="'Rosa ' + team.name">
+          <section class="roster-panel tactical-panel" [attr.aria-label]="'Rosa ' + team.name">
             <div class="roster-heading">
-              <div><span class="eyebrow">STAGIONE {{ team.seasonLabel }}</span><h3>Rosa {{ team.name }}</h3></div>
+              <div><span class="eyebrow">STAGIONE {{ team.seasonLabel }}</span><h3>{{ team.name }} · Formazione</h3></div>
               <span class="roster-count">{{ rosterFor(team).length }} giocatori</span>
             </div>
             @if (rosterLoading()) {
@@ -83,15 +83,51 @@
             } @else if (rosterFor(team).length === 0) {
               <p class="roster-empty">La rosa è vuota. Aggiungi i giocatori dalla sezione Giocatori.</p>
             } @else {
-              <div class="roster-list">
-                @for (player of rosterFor(team); track player.id) {
-                  <div class="roster-player">
-                    <span class="roster-number">{{ player.shirtNumber ?? '—' }}</span>
-                    <span class="roster-player-name">{{ player.firstName }} {{ player.lastName }}</span>
-                    <span class="roster-player-role">{{ player.roles.length ? player.roles.join(' · ') : player.primaryRole }}</span>
-                    <span class="roster-player-status" [class.status-alert]="player.status !== 'active'">{{ player.status === 'active' ? 'In rosa' : player.status === 'injured' ? 'Infortunato' : player.status === 'suspended' ? 'Squalificato' : 'Fuori rosa' }}</span>
+              <div class="tactical-toolbar">
+                <label>Modulo
+                  <select [value]="formation()" (change)="changeFormation($any($event.target).value)">
+                    @for (module of formations; track module) { <option [value]="module">{{ module }}</option> }
+                  </select>
+                </label>
+                <span>{{ rosterForExpanded().length }} giocatori disponibili</span>
+              </div>
+              <div class="football-pitch" [attr.aria-label]="'Campo con modulo ' + formation()">
+                <div class="pitch-line halfway"></div>
+                <div class="pitch-circle"></div>
+                <div class="pitch-box top-box"></div><div class="pitch-box bottom-box"></div>
+                <div class="pitch-goal top-goal"></div><div class="pitch-goal bottom-goal"></div>
+                @for (slot of slots(); track slot.id) {
+                  <div class="pitch-player" [style.left.%]="slot.x" [style.top.%]="slot.y">
+                    <span class="pitch-shirt">{{ playerForSlot(slot.id)?.shirtNumber ?? '—' }}</span>
+                    <span class="pitch-player-name">{{ playerForSlot(slot.id) ? playerForSlot(slot.id)!.lastName : slot.label }}</span>
                   </div>
                 }
+              </div>
+              <div class="lineup-editor">
+                <div class="editor-heading"><strong>Schieramento</strong><span>Seleziona chi schierare in ogni posizione</span></div>
+                <div class="lineup-grid">
+                  @for (slot of slots(); track slot.id) {
+                    <label class="lineup-slot">
+                      <span>{{ slot.label }} <small>{{ slot.role }}</small></span>
+                      <select [value]="lineup()[slot.id] || ''" (change)="assignPlayer(slot.id, $any($event.target).value)" [attr.aria-label]="'Giocatore ' + slot.label">
+                        <option value="">Da assegnare</option>
+                        @for (player of optionsForSlot(slot); track player.id) {
+                          <option [value]="player.id">{{ player.shirtNumber ?? '—' }} · {{ player.firstName }} {{ player.lastName }}</option>
+                        }
+                      </select>
+                    </label>
+                  }
+                </div>
+              </div>
+              <div class="bench-section">
+                <div class="editor-heading"><strong>Panchina</strong><span>{{ benchPlayers().length }} giocatori</span></div>
+                @if (benchPlayers().length) {
+                  <div class="bench-list">
+                    @for (player of benchPlayers(); track player.id) {
+                      <div class="bench-player"><span class="bench-number">{{ player.shirtNumber ?? '—' }}</span><span>{{ player.firstName }} {{ player.lastName }}</span><small>{{ player.roles.join(' · ') || player.primaryRole }}</small></div>
+                    }
+                  </div>
+                } @else { <p class="roster-empty">Tutti i giocatori disponibili sono schierati.</p> }
               </div>
             }
           </section>
