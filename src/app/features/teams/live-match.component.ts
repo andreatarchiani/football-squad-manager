@@ -69,6 +69,9 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   private timer: ReturnType<typeof setInterval> | null = null;
   private exitingMatch = false;
   private persistQueue: Promise<void> = Promise.resolve();
+  private runStartedAtMs: number | null = null;
+  private runBaseSeconds = 0;
+  private lastPersistedElapsed = 0;
 
   readonly formations: Record<string, { id: string; label: string; x: number; y: number }[]> = {
     '4-3-3': [
@@ -94,22 +97,25 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     try {
       const saved = await this.teamService.loadLiveMatch(this.workspaceId(), this.teamId(), this.seasonId());
       if (saved) {
-        this.elapsedSeconds.set(Math.max(0, Math.min(5400, saved.elapsedSeconds)));
-        this.finished.set(saved.finished); this.finishReportOpen.set(saved.finished); this.events.set(saved.events); this.goals.set(saved.goals); this.assists.set(saved.assists);
+        const restoredElapsed = saved.running && !saved.finished ? saved.elapsedSeconds + Math.max(0, Math.floor((Date.now() - saved.savedAtMs) / 1000)) : saved.elapsedSeconds;
+        this.elapsedSeconds.set(Math.max(0, Math.min(5400, restoredElapsed)));
+        const restoredFinished = saved.finished || restoredElapsed >= 5400;
+        this.finished.set(restoredFinished); this.finishReportOpen.set(restoredFinished); this.events.set(saved.events); this.goals.set(saved.goals); this.assists.set(saved.assists);
         this.yellowCards.set(saved.yellowCards); this.redCards.set(saved.redCards); this.lineup.set(saved.lineup);
         this.matchFormation.set(this.formations[saved.formation] ? saved.formation : f); this.matchPositions.set(saved.positions);
         this.changesUsed.set(Math.max(0, Math.min(this.maxChanges, saved.changesUsed)));
-        if (saved.running && !saved.finished) this.start();
+        if (saved.running && !this.finished()) this.start();
       }
     } catch (error) { console.error('Unable to restore live match.', error); this.voiceMessage.set('Partita caricata, ma non è stato possibile recuperare gli ultimi dati salvati.'); }
   }
-  ngOnDestroy(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.voice.stop(); if(this.animationTimer) clearTimeout(this.animationTimer); if(!this.exitingMatch) void this.persistMatchState(); }
+  ngOnDestroy(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.settleRunningClock(); this.voice.stop(); if(this.animationTimer) clearTimeout(this.animationTimer); if(!this.exitingMatch) void this.persistMatchState(); }
   private async persistMatchState(): Promise<void> {
     if(this.exitingMatch) return;
     const snapshot = {
-      elapsedSeconds:this.elapsedSeconds(), running:this.running(), finished:this.finished(), events:this.events(), goals:this.goals(), assists:this.assists(),
+      elapsedSeconds:this.currentElapsedSeconds(), savedAtMs:Date.now(), running:this.running(), finished:this.finished(), events:this.events(), goals:this.goals(), assists:this.assists(),
       yellowCards:this.yellowCards(), redCards:this.redCards(), lineup:this.lineup(), formation:this.matchFormation(), positions:this.matchPositions(), changesUsed:this.changesUsed()
     };
+    this.lastPersistedElapsed = snapshot.elapsedSeconds;
     this.persistQueue = this.persistQueue.then(async () => {
       if(this.exitingMatch) return;
       try { await this.teamService.saveLiveMatch(this.workspaceId(), this.teamId(), this.seasonId(), snapshot); }
@@ -165,14 +171,26 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected playerInSlot(slotId: string): PlayerRecord | undefined { return this.player(this.lineup()[slotId]); }
   protected onField(): PlayerRecord[] { return Object.values(this.lineup()).filter(Boolean).map(id => this.player(id)).filter((p): p is PlayerRecord => !!p); }
   protected bench(): PlayerRecord[] { const ids=new Set(Object.values(this.lineup())); return this.players().filter(p=>!ids.has(p.id)&&!this.redCards().includes(p.id)); }
-  protected get minute(): number { return Math.min(90, Math.floor(this.elapsedSeconds()/60)); }
-  protected get clock(): string { const m=Math.floor(this.elapsedSeconds()/60),s=this.elapsedSeconds()%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
+  protected get minute(): number { return Math.min(90, Math.floor(this.currentElapsedSeconds()/60)); }
+  protected get clock(): string { const elapsed=this.currentElapsedSeconds(),m=Math.floor(elapsed/60),s=elapsed%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
+  private currentElapsedSeconds(): number { return this.running() && this.runStartedAtMs !== null ? Math.min(5400, this.runBaseSeconds + Math.floor((Date.now() - this.runStartedAtMs) / 1000)) : this.elapsedSeconds(); }
+  private settleRunningClock(): void { const elapsed=this.currentElapsedSeconds(); this.elapsedSeconds.set(elapsed); this.runBaseSeconds=elapsed; this.runStartedAtMs=null; }
   protected get score(): string { return String(Object.values(this.goals()).reduce((a,b)=>a+b,0)); }
-  protected start(): void { if(this.finished()||this.running()) return; this.running.set(true); this.timer=setInterval(()=>{this.elapsedSeconds.update(v=>Math.min(5400,v+1));if(this.elapsedSeconds()>=5400){if(this.timer){clearInterval(this.timer);this.timer=null;}this.running.set(false);this.finished.set(true);this.finishReportOpen.set(true);void this.persistMatchState();} else if (this.elapsedSeconds() % 15 === 0) void this.persistMatchState();},1000); void this.persistMatchState(); }
-  protected pause(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.running.set(false); void this.persistMatchState(); }
+  protected start(): void {
+    if(this.finished()||this.running()) return;
+    this.runBaseSeconds=this.elapsedSeconds(); this.runStartedAtMs=Date.now(); this.running.set(true); this.lastPersistedElapsed=this.runBaseSeconds;
+    this.timer=setInterval(()=>{
+      const elapsed=this.currentElapsedSeconds(); this.elapsedSeconds.set(elapsed);
+      if(elapsed>=5400){if(this.timer){clearInterval(this.timer);this.timer=null;}this.elapsedSeconds.set(5400);this.runBaseSeconds=5400;this.runStartedAtMs=null;this.running.set(false);this.finished.set(true);this.finishReportOpen.set(true);void this.persistMatchState();}
+      else if(elapsed-this.lastPersistedElapsed>=15) void this.persistMatchState();
+    },1000);
+    void this.persistMatchState();
+  }
+  protected pause(): void { this.settleRunningClock(); if(this.timer){clearInterval(this.timer);this.timer=null;} this.running.set(false); void this.persistMatchState(); }
 
   protected finishMatch(): void {
     if (this.finished()) { this.finishReportOpen.set(true); return; }
+    this.settleRunningClock();
     if (this.timer) { clearInterval(this.timer); this.timer = null; }
     this.running.set(false);
     this.finished.set(true);
@@ -306,6 +324,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected chronologicalEvents(): MatchEvent[] { return [...this.events()].sort((a, b) => a.minute - b.minute); }
   protected async close(): Promise<void> {
     if(this.exitingMatch) return;
+    this.settleRunningClock();
     if(this.timer){clearInterval(this.timer);this.timer=null;}
     this.running.set(false);
     this.voice.stop();
@@ -342,10 +361,9 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     if(!this.pending()) return;
     this.voiceMessage.set('Per confermare, pronuncia «Conferma». Per annullare, pronuncia «Annulla».');
     this.voiceListening.set(true);
-    let receivedTranscript = false;
+    let retryAllowed = true;
     this.voice.start(
       raw => {
-        receivedTranscript = true;
         const spoken = raw.trim().toLocaleLowerCase('it-IT').replace(/[.!?]/g, '');
         if(/\bconferma\b/.test(spoken)) {
           this.confirmAction();
@@ -355,10 +373,10 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
           this.parseCommand(raw);
         }
       },
-      message => this.voiceMessage.set(message),
+      message => { this.voiceMessage.set(message); if(/permesso microfono negato|non è supportato/i.test(message)) retryAllowed=false; },
       () => {
         this.voiceListening.set(false);
-        if(this.pending() && receivedTranscript) this.listenForVoiceConfirmation();
+        if(this.pending() && retryAllowed) this.listenForVoiceConfirmation();
       }
     );
   }
@@ -430,6 +448,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
   protected confirmAction(): void {
     const action=this.pending();if(!action)return;
+    this.voice.stop(); this.voiceListening.set(false);
     const minute=this.minute;
     if(action.type==='goal'&&action.playerId){
       const scorer=this.player(action.playerId); this.showMatchAnimation({type:'goal',title:'GOOOL!',detail:scorer?`#${scorer.shirtNumber} ${scorer.lastName}`:'Rete della squadra'});
@@ -458,7 +477,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     }
     this.pending.set(null);this.voiceDraft.set('');this.voiceMessage.set(''); void this.persistMatchState();
   }
-  protected cancelAction(): void { this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set(''); }
+  protected cancelAction(): void { this.voice.stop(); this.voiceListening.set(false); this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set(''); }
   protected chooseOutgoing(player:PlayerRecord): void { if(this.playerHasRedCard(player)){this.voiceMessage.set('Un giocatore espulso non può essere sostituito. La squadra continua in inferiorità numerica.');return;} this.selectedOutgoingId.set(player.id);this.voiceMessage.set(`Selezionato ${player.lastName}. Ora scegli chi entra dalla panchina.`); }
   protected chooseIncoming(player:PlayerRecord): void {
     const outgoing=this.selectedOutgoingId();if(!outgoing)return;
