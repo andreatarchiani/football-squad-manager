@@ -9,3 +9,13 @@
 .home-pitch-player-name{max-width:66px;padding:2px 4px;border-radius:4px;background:#102018d9;color:#fff;font-size:8px;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .home-preview-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px}.home-preview-heading>div{display:grid;gap:4px}.home-preview-heading strong{font-size:12px}.home-preview-heading span{color:var(--text-muted);font-size:9px}.preview-placeholder{display:grid;place-items:center;min-height:150px;margin-top:14px;border:1px dashed var(--border);border-radius:12px;color:var(--text-muted);font-size:11px}
 @media(max-width:650px){.home-football-pitch{width:min(100%,390px)}.home-preview-heading{align-items:flex-start}.home-preview-heading .customize-action{white-space:nowrap}}
+
+
+.profile-name-button{display:flex;align-items:center;gap:9px;margin:5px 0 3px;padding:0;border:0;color:var(--text-primary);background:transparent;font:inherit;font-size:21px;font-weight:800;letter-spacing:-.03em;text-align:left;cursor:pointer}
+.profile-name-button span{color:#91d8aa;font-size:15px;opacity:.8}
+.profile-name-button:hover span{opacity:1}
+.profile-name-editor{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:7px 0}
+.profile-name-editor input{min-width:0;width:min(220px,100%);padding:9px 10px;border:1px solid #6eaa80;border-radius:8px;color:var(--text-primary);background:#111a20;font:inherit;font-size:14px}
+.profile-name-save,.profile-name-cancel{padding:8px 10px;border:1px solid var(--border);border-radius:8px;color:var(--text-primary);background:#17221f;font-size:10px;font-weight:700;cursor:pointer}
+.profile-name-save{border-color:#9bdab2;color:#102018;background:#9bdab2}
+.profile-name-save:disabled,.profile-name-cancel:disabled{opacity:.5;cursor:not-allowed}
