@@ -18,7 +18,7 @@
     <section class="match-launch-panel">
       <div class="launch-heading"><div><span class="eyebrow">MATCH CENTER</span><h2>Pronto a scendere in campo?</h2><p>Seleziona la squadra e visualizza subito la formazione che hai preparato.</p></div><div class="launch-ball">⚽</div></div>
       <label class="default-team-field">Seleziona squadra
-        <select [value]="selectedTeamId()" (change)="selectTeam($any($event.target).value)">
+        <select [value]="selectedTeam?.id ?? ''" (change)="selectTeam($any($event.target).value)">
           <option value="">Scegli una squadra</option>
           @for (team of selectableTeams; track team.id) { <option [value]="team.id">{{ team.name }} · {{ team.category || 'Squadra' }}</option> }
         </select>
