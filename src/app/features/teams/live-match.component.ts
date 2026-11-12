@@ -7,6 +7,7 @@ import { PlayerService } from '../players/player.service';
 type MatchEventType = 'goal' | 'yellow-card' | 'red-card' | 'substitution' | 'formation';
 interface MatchEvent { type: MatchEventType; minute: number; description: string; playerId?: string; outgoingId?: string; incomingId?: string; }
 interface PendingAction { type: MatchEventType; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string; description: string; }
+interface MatchAnimation { type: 'goal' | 'yellow-card' | 'red-card' | 'substitution'; title: string; detail: string; outgoingNumber?: number | null; incomingNumber?: number | null; playerNumber?: number | null; }
 
 @Component({
   selector: 'fsm-live-match',
@@ -46,6 +47,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly voiceListening = signal(false);
   protected readonly voiceMessage = signal('');
   protected readonly voiceHelpOpen = signal(false);
+  protected readonly matchAnimation = signal<MatchAnimation | null>(null);
+  private animationTimer: ReturnType<typeof setTimeout> | null = null;
   protected readonly changesUsed = signal(0);
   protected readonly maxChanges = 5;
   private timer: ReturnType<typeof setInterval> | null = null;
@@ -66,7 +69,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   };
 
   ngOnInit(): void { this.lineup.set({...this.initialLineup()}); const f = this.formations[this.formation()] ? this.formation() : '4-3-3'; this.matchFormation.set(f); const p: Record<string, {x:number;y:number}> = {}; for (const slot of this.formations[f]) { const id=this.initialLineup()[slot.id]; if(id) p[id]=this.initialPositions()[id] ?? {x:slot.x,y:slot.y}; } this.matchPositions.set(p); }
-  ngOnDestroy(): void { this.pause(); this.voice.stop(); }
+  ngOnDestroy(): void { this.pause(); this.voice.stop(); if(this.animationTimer) clearTimeout(this.animationTimer); }
+  private showMatchAnimation(animation: MatchAnimation): void { if(this.animationTimer) clearTimeout(this.animationTimer); this.matchAnimation.set(animation); this.animationTimer=setTimeout(()=>{this.matchAnimation.set(null);this.animationTimer=null;},2600); }
 
   protected slots() {
     const formationSlots = this.formations[this.matchFormation()] ?? this.formations['4-3-3'];
@@ -163,6 +167,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     const action=this.pending();if(!action)return;
     const minute=this.minute;
     if(action.type==='goal'&&action.playerId){
+      const scorer=this.player(action.playerId); this.showMatchAnimation({type:'goal',title:'GOOOL!',detail:scorer?`#${scorer.shirtNumber} ${scorer.lastName}`:'Rete della squadra'});
       this.goals.update(g=>({...g,[action.playerId!]: (g[action.playerId!]??0)+1}));
       if(action.assistPlayerId)this.assists.update(v=>({...v,[action.assistPlayerId!]: (v[action.assistPlayerId!]??0)+1}));
       this.events.update(e=>[{type:'goal',minute,description:action.description,playerId:action.playerId},...e]);
@@ -171,18 +176,19 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       if(workspaceId&&action.assistPlayerId)void this.playerService.recordAssist(workspaceId,action.assistPlayerId).catch(error=>{console.error('Unable to save player assist.',error);this.voiceMessage.set('Gol registrato, ma non è stato possibile aggiornare il totale degli assist.');});
     }
     if(action.type==='yellow-card'&&action.playerId){
-      const count=(this.yellowCards()[action.playerId]??0)+1;
+      const booked=this.player(action.playerId); const count=(this.yellowCards()[action.playerId]??0)+1;
       this.yellowCards.update(cards=>({...cards,[action.playerId!]:count}));
+      this.showMatchAnimation({type:count>=2?'red-card':'yellow-card',title:count>=2?'SECONDO GIALLO · ROSSO':'AMMONIZIONE',detail:booked?`#${booked.shirtNumber} ${booked.lastName}`:'Cartellino'});
       if(count>=2){
         this.redCards.update(ids=>ids.includes(action.playerId!)?ids:[...ids,action.playerId!]);
         this.lineup.update(l=>Object.fromEntries(Object.entries(l).filter(([,id])=>id!==action.playerId)));
         this.events.update(e=>[{type:'red-card',minute,description:action.description,playerId:action.playerId},{type:'yellow-card',minute,description:`Seconda ammonizione per #${this.player(action.playerId)?.shirtNumber} ${this.player(action.playerId)?.lastName}`,playerId:action.playerId},...e]);
       } else this.events.update(e=>[{type:'yellow-card',minute,description:action.description,playerId:action.playerId},...e]);
     }
-    if(action.type==='red-card'&&action.playerId){this.redCards.update(ids=>[...ids,action.playerId!]);this.lineup.update(l=>Object.fromEntries(Object.entries(l).filter(([,id])=>id!==action.playerId)));this.events.update(e=>[{type:'red-card',minute,description:action.description,playerId:action.playerId},...e]);}
+    if(action.type==='red-card'&&action.playerId){const sentOff=this.player(action.playerId);this.showMatchAnimation({type:'red-card',title:'ESPULSO!',detail:sentOff?`#${sentOff.shirtNumber} ${sentOff.lastName}`:'Cartellino rosso'});this.redCards.update(ids=>[...ids,action.playerId!]);this.lineup.update(l=>Object.fromEntries(Object.entries(l).filter(([,id])=>id!==action.playerId)));this.events.update(e=>[{type:'red-card',minute,description:action.description,playerId:action.playerId},...e]);}
     if(action.type==='substitution'&&action.outgoingId&&action.incomingId){
       const slot=Object.entries(this.lineup()).find(([,id])=>id===action.outgoingId)?.[0];
-      if(slot&&this.changesUsed()<this.maxChanges){const pos=this.matchPositions()[action.outgoingId];this.lineup.update(l=>({...l,[slot]:action.incomingId!}));if(pos)this.matchPositions.update(p=>({...p,[action.incomingId!]:pos}));this.changesUsed.update(v=>v+1);this.events.update(e=>[{type:'substitution',minute,description:action.description,outgoingId:action.outgoingId,incomingId:action.incomingId},...e]);}
+      if(slot&&this.changesUsed()<this.maxChanges){const outgoing=this.player(action.outgoingId), incoming=this.player(action.incomingId);this.showMatchAnimation({type:'substitution',title:'SOSTITUZIONE',detail:`${outgoing?.lastName ?? 'Esce'}  →  ${incoming?.lastName ?? 'Entra'}`,outgoingNumber:outgoing?.shirtNumber,incomingNumber:incoming?.shirtNumber});const pos=this.matchPositions()[action.outgoingId];this.lineup.update(l=>({...l,[slot]:action.incomingId!}));if(pos)this.matchPositions.update(p=>({...p,[action.incomingId!]:pos}));this.changesUsed.update(v=>v+1);this.events.update(e=>[{type:'substitution',minute,description:action.description,outgoingId:action.outgoingId,incomingId:action.incomingId},...e]);}
       else {this.voiceMessage.set(this.changesUsed()>=this.maxChanges?'Hai esaurito i cambi disponibili.':'Il giocatore da sostituire non è in campo.');this.pending.set(null);return;}
     }
     this.pending.set(null);this.voiceMessage.set('Evento registrato.');
