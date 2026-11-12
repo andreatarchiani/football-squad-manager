@@ -46,3 +46,5 @@
 @media(prefers-reduced-motion:reduce){.match-moment-backdrop,.match-moment-card,.goal-animation,.animated-card,.animated-shirt,.substitution-arrow{animation:none!important}}
 
 .booked-card{display:inline-flex;align-items:center;gap:3px;margin-top:3px;padding:2px 5px;border-radius:5px;background:#d69e16;color:#211704;font-size:8px;font-weight:950;letter-spacing:.04em;box-shadow:0 2px 8px #0007}
+
+.confirm-edit-label{display:block;margin:14px 0 6px;text-align:left;color:#a9beb0;font-size:11px;font-weight:800}.confirm-edit-input{display:block;width:100%;box-sizing:border-box;resize:vertical;min-height:58px;padding:10px 12px;border:1px solid #ffffff30;border-radius:10px;background:#07120c;color:#f4fff6;font:inherit;font-size:13px;line-height:1.45}.confirm-correct{width:100%;margin:8px 0 12px;padding:10px;border:1px solid #8dff9b66;border-radius:9px;background:#173d29;color:#baf4c9;font-weight:800}
