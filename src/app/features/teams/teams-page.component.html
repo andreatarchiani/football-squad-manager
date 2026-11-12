@@ -93,7 +93,9 @@
                 <span class="layout-save-status" aria-live="polite">{{ layoutSaving() ? 'Salvataggio posizioni…' : 'Posizioni salvate automaticamente' }}</span>
                 <button class="primary-button start-live-match-button" type="button" (click)="startMatch()">▶ Avvia partita</button>
               </div>
-              <div class="football-pitch" [attr.aria-label]="'Campo con modulo ' + formation()">
+              <div class="pitch-stage" aria-label="Vista tridimensionale del campo">
+                <div class="pitch-stadium-glow"></div>
+                <div class="football-pitch" [attr.aria-label]="'Campo con modulo ' + formation()">
                 <div class="pitch-line halfway"></div>
                 <div class="pitch-circle"></div>
                 <div class="pitch-box top-box"></div><div class="pitch-box bottom-box"></div>
@@ -108,6 +110,7 @@
                     <span class="pitch-player-name">{{ playerForSlot(slot.id) ? playerForSlot(slot.id)!.lastName : slot.label }}</span>
                   </div>
                 }
+                </div>
               </div>
               <div class="bench-section">
                 <div class="editor-heading"><strong>Panchina</strong><span>{{ benchPlayers().length }} giocatori</span></div>

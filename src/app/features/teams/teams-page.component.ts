@@ -138,8 +138,13 @@ export class TeamsPageComponent {
     const target = (event.currentTarget as HTMLElement).closest('.football-pitch') as HTMLElement | null;
     if (!target) return;
     const rect = target.getBoundingClientRect();
-    const x = Math.max(5, Math.min(95, ((event.clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(4, Math.min(96, ((event.clientY - rect.top) / rect.height) * 100));
+    const matrix = new DOMMatrix(getComputedStyle(target).transform);
+    const local = new DOMPoint(
+      event.clientX - (rect.left + rect.width / 2),
+      event.clientY - (rect.top + rect.height / 2)
+    ).matrixTransform(matrix.inverse());
+    const x = Math.max(5, Math.min(95, ((local.x + target.offsetWidth / 2) / target.offsetWidth) * 100));
+    const y = Math.max(4, Math.min(96, ((local.y + target.offsetHeight / 2) / target.offsetHeight) * 100));
     const playerId = this.lineup()[this.dragSlotId];
     if (!playerId) return;
     this.shirtPositions.update(current => ({ ...current, [playerId]: { x, y } }));
