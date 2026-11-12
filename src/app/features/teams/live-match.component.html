@@ -17,7 +17,7 @@
       <section class="voice-command-guide" aria-label="Comandi vocali disponibili">
         <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong><p>Pronuncia il comando usando il numero di maglia del giocatore.</p></div><button type="button" class="voice-guide-close" (click)="closeVoiceHelp()" aria-label="Nascondi i comandi">✕</button></div>
         <div class="voice-command-list">
-          <article class="voice-command-item"><span class="voice-command-icon">⚽</span><div><strong>Segnalare un gol</strong><p>“Goal numero <b>9</b>” oppure “Goal numero <b>9</b>, assist di numero <b>10</b>”. Il numero del marcatore è sempre obbligatorio; l’assist è facoltativo.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">⚽</span><div><strong>Segnalare un gol</strong><p>“Goal numero <b>9</b>” oppure “Goal numero <b>9</b>, assist di numero <b>10</b>”.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🟨</span><div><strong>Ammonizione</strong><p>“Ammonizione numero <b>5</b>”. Alla seconda ammonizione il giocatore viene espulso automaticamente.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🟥</span><div><strong>Segnalare un'espulsione</strong><p>“Espulsione numero <b>5</b>” oppure “Cartellino rosso numero <b>5</b>”.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🔄</span><div><strong>Effettuare una sostituzione</strong><p>“Cambio numero <b>7</b> con numero <b>18</b>” oppure “Sostituzione numero <b>7</b> con numero <b>18</b>”.</p><small>Prima indica chi esce, poi chi entra.</small></div></article>
@@ -27,6 +27,26 @@
     }
     @if (voiceMessage()) { <p class="voice-status" aria-live="polite">{{ voiceMessage() }}</p> }
   </section>
+  @if (matchAnimation(); as animation) {
+    <div class="match-moment-backdrop" [class]="'match-moment-backdrop moment-' + animation.type" aria-live="assertive">
+      <section class="match-moment-card" [class]="'match-moment-card moment-card-' + animation.type">
+        @if (animation.type === 'substitution') {
+          <div class="substitution-animation">
+            <div class="animated-shirt shirt-out"><span>{{ animation.outgoingNumber ?? '—' }}</span><small>ESCE</small></div>
+            <span class="substitution-arrow">→</span>
+            <div class="animated-shirt shirt-in"><span>{{ animation.incomingNumber ?? '—' }}</span><small>ENTRA</small></div>
+          </div>
+        } @else if (animation.type === 'red-card') {
+          <div class="animated-card red-card-animation">🟥</div>
+        } @else if (animation.type === 'yellow-card') {
+          <div class="animated-card yellow-card-animation">🟨</div>
+        } @else {
+          <div class="goal-animation">⚽</div>
+        }
+        <strong>{{ animation.title }}</strong><span>{{ animation.detail }}</span>
+      </section>
+    </div>
+  }
   <section class="match-layout">
     <div class="match-pitch-wrap pitch-stage">
       <div class="pitch-caption"><span>IL CAMPO</span><strong>{{ matchFormation() }}</strong></div>
