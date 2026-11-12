@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { collection, doc, getDocs, runTransaction, serverTimestamp, type Firestore } from 'firebase/firestore';
+import { collection, doc, getDocs, increment, runTransaction, serverTimestamp, updateDoc, type Firestore } from 'firebase/firestore';
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
 import type { TeamRecord } from '../teams/team.service';
 
@@ -9,7 +9,7 @@ export type PlayerStatus = 'active' | 'injured' | 'suspended' | 'left';
 export interface PlayerRecord {
   id: string; firstName: string; lastName: string; dateOfBirth: string; preferredFoot: string;
   primaryRole: PlayerRole; notes: string; isArchived: boolean; teamId: string; seasonId: string;
-  teamName: string; seasonLabel: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus;
+  teamName: string; seasonLabel: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus; goals?: number;
 }
 export interface PlayerInput {
   firstName: string; lastName: string; dateOfBirth: string; preferredFoot: string; primaryRole: PlayerRole;
@@ -34,7 +34,7 @@ export class PlayerService {
     const teamMap = new Map(teams.map(t => [t.id, t]));
     return snapshots.docs.map(s => {
       const d = s.data(); const a = assignments.get(s.id); const t = a ? teamMap.get(a.teamId) : undefined;
-      return { id:s.id, firstName:String(d['firstName']??''), lastName:String(d['lastName']??''), dateOfBirth:String(d['dateOfBirth']??''), preferredFoot:String(d['preferredFoot']??''), primaryRole:this.role(d['primaryRole']), notes:String(d['notes']??''), isArchived:d['isArchived']===true, teamId:a?.teamId??'', seasonId:a?.seasonId??'', teamName:t?.name??'', seasonLabel:t?.seasonLabel??'', shirtNumber:a?.shirtNumber??null, roles:a?.roles??[], status:a?.status??'active' };
+      return { id:s.id, firstName:String(d['firstName']??''), lastName:String(d['lastName']??''), dateOfBirth:String(d['dateOfBirth']??''), preferredFoot:String(d['preferredFoot']??''), primaryRole:this.role(d['primaryRole']), notes:String(d['notes']??''), isArchived:d['isArchived']===true, teamId:a?.teamId??'', seasonId:a?.seasonId??'', teamName:t?.name??'', seasonLabel:t?.seasonLabel??'', shirtNumber:a?.shirtNumber??null, roles:a?.roles??[], status:a?.status??'active', goals: typeof d['goals']==='number' ? d['goals'] : 0 };
     }).sort((a,b)=>Number(a.isArchived)-Number(b.isArchived)||a.lastName.localeCompare(b.lastName,'it')||a.firstName.localeCompare(b.firstName,'it'));
   }
 
@@ -64,6 +64,10 @@ export class PlayerService {
       tx.set(memberRef,{playerId:playerRef.id,shirtNumber:number,roles:input.roles.length?input.roles:[input.primaryRole],status:input.status,updatedAt:now,...(existing?.teamId===team.id&&existing.seasonId===team.seasonId?{}:{joinedAt:now,createdAt:now})});
       tx.set(playerRef,{firstName:input.firstName.trim(),lastName:input.lastName.trim(),dateOfBirth:input.dateOfBirth,preferredFoot:input.preferredFoot,primaryRole:input.primaryRole,notes:input.notes.trim(),isArchived:false,createdAt:oldPlayer?.data()?.['createdAt']??now,updatedAt:now},{merge:true});
     });
+  }
+
+  async recordGoal(workspaceId: string, playerId: string): Promise<void> {
+    await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { goals: increment(1), updatedAt: serverTimestamp() });
   }
 
   async setArchived(workspaceId:string, player:PlayerRecord, archived:boolean):Promise<void> {

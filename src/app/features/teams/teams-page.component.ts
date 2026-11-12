@@ -3,11 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { TeamService, type TeamInput, type TeamRecord } from './team.service';
 import { PlayerService, type PlayerRecord } from '../players/player.service';
+import { LiveMatchComponent } from './live-match.component';
 
 @Component({
   selector: 'fsm-teams-page',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LiveMatchComponent],
   templateUrl: './teams-page.component.html',
   styleUrl: './teams-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -24,6 +25,7 @@ export class TeamsPageComponent {
   protected readonly formation = signal('4-3-3');
   protected readonly lineup = signal<Record<string, string>>({});
   protected readonly activeSlotId = signal<string | null>(null);
+  protected readonly liveMatch = signal(false);
   protected readonly shirtPositions = signal<Record<string, { x: number; y: number }>>({});
   private dragSlotId: string | null = null;
   protected readonly formations = ['4-3-3', '4-4-2', '3-5-2'];
@@ -65,6 +67,10 @@ export class TeamsPageComponent {
   }
 
   protected slots() { return this.pitchSlots[this.formation()]; }
+
+  protected expandedTeamName(): string { return this.teams().find(team => team.id === this.expandedRosterId())?.name || 'Partita'; }
+  protected startMatch(): void { this.activeSlotId.set(null); this.liveMatch.set(true); }
+  protected closeMatch(): void { this.liveMatch.set(false); }
 
   protected playerForSlot(slotId: string): PlayerRecord | undefined {
     return this.rosterForExpanded().find(player => player.id === this.lineup()[slotId]);

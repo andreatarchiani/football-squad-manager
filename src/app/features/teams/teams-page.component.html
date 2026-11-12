@@ -90,6 +90,7 @@
                   </select>
                 </label>
                 <span>Tocca una maglia per assegnare · Trascinala per spostarla</span>
+                <button class="primary-button start-live-match-button" type="button" (click)="startMatch()">▶ Avvia partita</button>
               </div>
               <div class="football-pitch" [attr.aria-label]="'Campo con modulo ' + formation()">
                 <div class="pitch-line halfway"></div>
@@ -155,5 +156,8 @@
         </section>
       </div>
     }
+  }
+  @if (liveMatch()) {
+    <fsm-live-match [teamName]="expandedTeamName()" [players]="rosterForExpanded()" [initialLineup]="lineup()" [formation]="formation()" (closematch)="closeMatch()" />
   }
 </section>

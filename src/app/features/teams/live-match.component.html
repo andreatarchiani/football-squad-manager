@@ -1,0 +1,66 @@
+<main class="live-match" aria-label="Modalità partita in corso">
+  <header class="match-topbar">
+    <button type="button" class="match-close" (click)="close()" aria-label="Esci dalla partita">‹</button>
+    <div class="match-team"><small>PARTITA IN CORSO</small><strong>{{ teamName() }}</strong></div>
+    <div class="match-score"><span>{{ score }}</span><small>GOL</small></div>
+  </header>
+  <section class="match-clock">
+    <span class="clock-label">TEMPO DI GIOCO</span>
+    <strong>{{ clock }}</strong>
+    <span class="clock-state">{{ finished() ? 'PARTITA TERMINATA' : running() ? 'IN CORSO' : elapsedSeconds() ? 'IN PAUSA' : 'PRONTO AL VIA' }}</span>
+    <div class="clock-controls">
+      @if (!running() && !finished()) { <button type="button" class="start-match" (click)="start()">{{ elapsedSeconds() ? '▶ Riprendi' : '▶ Avvia partita' }}</button> }
+      @if (running()) { <button type="button" class="pause-match" (click)="pause()">Ⅱ Pausa</button> }
+      <button type="button" class="voice-match" [class.listening]="voiceListening()" (click)="startVoice()">{{ voiceListening() ? '● Ti ascolto…' : '🎙 Assistente vocale' }}</button>
+    </div>
+    @if (voiceMessage()) { <p class="voice-status" aria-live="polite">{{ voiceMessage() }}</p> }
+  </section>
+  <section class="match-layout">
+    <div class="match-pitch-wrap">
+      <div class="match-pitch" [attr.aria-label]="'Formazione ' + formation()">
+        <div class="match-halfway"></div><div class="match-center-circle"></div><div class="match-box match-box-top"></div><div class="match-box match-box-bottom"></div>
+        @for (slot of slots(); track slot.id) {
+          @if (playerInSlot(slot.id); as player) {
+            <div class="match-shirt-player" [style.left.%]="slot.x" [style.top.%]="slot.y" [class.sent-off]="playerHasRedCard(player)">
+              <span class="match-shirt">{{ player.shirtNumber ?? '—' }}</span><span class="match-player-label">{{ player.lastName }}</span>
+              @if (goalsFor(player)) { <small class="goal-indicator">⚽ {{ goalsFor(player) }}</small> }
+            </div>
+          }
+        }
+      </div>
+    </div>
+    <aside class="match-side">
+      <div class="side-heading"><strong>Panchina</strong><span>{{ bench().length }} disponibili</span></div>
+      <p class="substitution-help">Per un cambio manuale, seleziona prima un titolare da sostituire e poi un giocatore in panchina.</p>
+      @if (selectedOutgoingId(); as outgoingId) { <div class="selected-outgoing">Esce: {{ player(outgoingId)?.lastName }} · scegli chi entra</div> }
+      <div class="match-bench">
+        @for (player of bench(); track player.id) {
+          <button type="button" class="bench-choice" [disabled]="!selectedOutgoingId() || changesUsed() >= maxChanges" (click)="chooseIncoming(player)">
+            <span class="bench-choice-number">{{ player.shirtNumber ?? '—' }}</span><span><strong>{{ player.firstName }} {{ player.lastName }}</strong><small>{{ player.roles.join(' · ') || player.primaryRole }}</small></span><b>＋</b>
+          </button>
+        } @empty { <p class="bench-empty">Nessun giocatore disponibile in panchina.</p> }
+      </div>
+      <div class="change-counter"><strong>{{ maxChanges - changesUsed() }}</strong><span>cambi rimasti</span></div>
+      <div class="on-field-list"><strong>In campo · tocca per selezionare chi esce</strong>
+        @for (player of onField(); track player.id) {
+          <button type="button" (click)="chooseOutgoing(player)" [class.selected]="selectedOutgoingId() === player.id" [disabled]="changesUsed() >= maxChanges">
+            <span>#{{ player.shirtNumber ?? '—' }}</span>{{ player.firstName }} {{ player.lastName }}
+          </button>
+        }
+      </div>
+    </aside>
+  </section>
+  <section class="match-events">
+    <div class="events-heading"><strong>Eventi della partita</strong><span>{{ events().length }} registrati</span></div>
+    @for (event of events(); track $index) { <div class="match-event"><b>{{ event.minute }}′</b><span>{{ event.description }}</span></div> }
+    @empty { <p class="events-empty">Gli eventi registrati durante la partita compariranno qui.</p> }
+  </section>
+  @if (pending(); as action) {
+    <div class="match-confirm-overlay">
+      <section class="match-confirm" role="dialog" aria-modal="true" aria-labelledby="match-confirm-title">
+        <span class="confirm-eyebrow">CONFERMA EVENTO · {{ minute }}′</span><h2 id="match-confirm-title">Registrare questo evento?</h2><p>{{ action.description }}</p>
+        <div><button type="button" class="confirm-yes" (click)="confirmAction()">Conferma</button><button type="button" class="confirm-no" (click)="cancelAction()">Annulla</button></div>
+      </section>
+    </div>
+  }
+</main>
