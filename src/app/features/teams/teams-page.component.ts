@@ -289,10 +289,13 @@ export class TeamsPageComponent implements OnChanges {
     if (!workspaceId) return;
     this.rosterLoading.set(true);
     try {
-      this.players.set(await this.playerService.list(workspaceId, this.teams()));
       const seasonId = team.seasonId;
       this.layoutSlot.set(1);
-      const saved = seasonId ? await this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId, 1) : null;
+      const [players, saved] = await Promise.all([
+        this.playerService.list(workspaceId, this.teams()),
+        seasonId ? this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId, 1) : Promise.resolve(null)
+      ]);
+      this.players.set(players);
       const validPlayerIds = new Set(this.rosterForExpanded().map(player => player.id));
       const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
       this.formation.set(formation);
