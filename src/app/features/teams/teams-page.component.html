@@ -1,4 +1,5 @@
 <section class="teams-page">
+  @if (!liveMatch()) {
   <div class="page-heading">
     <div>
       <div class="eyebrow">IL TUO CLUB</div>
@@ -175,6 +176,7 @@
         </section>
       </div>
     }
+  }
   }
   @if (liveMatch() && expandedRosterId() && teams().find(item => item.id === expandedRosterId())?.seasonId && auth.workspaceId()) {
     <fsm-live-match [teamName]="expandedTeamName()" [workspaceId]="auth.workspaceId()!" [teamId]="expandedRosterId()!" [seasonId]="teams().find(item => item.id === expandedRosterId())!.seasonId!" [players]="rosterForExpanded()" [initialLineup]="lineup()" [formation]="formation()" [initialPositions]="shirtPositions()" (closematch)="closeMatch()" />
