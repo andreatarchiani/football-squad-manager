@@ -15,7 +15,7 @@ import { LiveMatchComponent } from './live-match.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TeamsPageComponent implements OnChanges {
-  @Input() launchRequest: { teamId: string; layoutSlot: 1 | 2; token: number } | null = null;
+  @Input() launchRequest: { team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; token: number } | null = null;
   @Output() readonly matchClosed = new EventEmitter<void>();
   private handledLaunchToken = 0;
   private readonly initialLoad: Promise<void>;
@@ -36,6 +36,7 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly lineup = signal<Record<string, string>>({});
   protected readonly activeSlotId = signal<string | null>(null);
   protected readonly liveMatch = signal(false);
+  protected readonly autoStartMatch = signal(false);
   protected readonly shirtPositions = signal<Record<string, { x: number; y: number }>>({});
   private dragSlotId: string | null = null;
   protected readonly formations = ['4-3-3', '4-4-2', '3-5-2'];
@@ -86,41 +87,26 @@ export class TeamsPageComponent implements OnChanges {
   protected slots() { return this.pitchSlots[this.formation()]; }
 
   protected expandedTeamName(): string { return this.teams().find(team => team.id === this.expandedRosterId())?.name || 'Partita'; }
-  private async launchFromHome(request: { teamId: string; layoutSlot: 1 | 2; token: number }): Promise<void> {
-    if (!this.teams().length) await this.initialLoad;
-    const team = this.teams().find(item => item.id === request.teamId && !item.isArchived && !!item.seasonId);
-    if (!team) { this.error.set('La squadra selezionata non è disponibile.'); return; }
+  private launchFromHome(request: NonNullable<TeamsPageComponent['launchRequest']>): void {
+    const team = request.team;
+    if (team.isArchived || !team.seasonId) { this.error.set('La squadra selezionata non è disponibile.'); return; }
+    if (!this.teams().some(item => item.id === team.id)) this.teams.update(items => [...items, team]);
+    this.players.set([...request.players]);
     this.expandedRosterId.set(team.id);
     this.layoutSlot.set(request.layoutSlot);
     this.activeSlotId.set(null);
-    this.rosterLoading.set(true);
-    const workspaceId = this.auth.workspaceId();
-    if (!workspaceId || !team.seasonId) { this.rosterLoading.set(false); return; }
-    try {
-      const [players, saved] = await Promise.all([
-        this.playerService.list(workspaceId, this.teams()),
-        this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, request.layoutSlot)
-      ]);
-      this.players.set(players);
-      const validIds = new Set(this.rosterForExpanded().map(player => player.id));
-      const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
-      this.formation.set(formation);
-      if (saved) {
-        const validSlots = new Set(this.pitchSlots[formation].map(slot => slot.id));
-        this.lineup.set(Object.fromEntries(Object.entries(saved.lineup).filter(([slotId, playerId]) => validSlots.has(slotId) && validIds.has(playerId))));
-        this.shirtPositions.set(saved.shirtPositions || {});
-      } else { this.shirtPositions.set({}); this.autoArrange(); await this.persistTacticalLayout(); }
-      await this.teamsService.saveLiveMatch(workspaceId, team.id, team.seasonId, {
-        elapsedSeconds: 0, running: true, finished: false, events: [], goals: {}, assists: {},
-        yellowCards: {}, redCards: [], lineup: { ...this.lineup() }, formation: this.formation(),
-        positions: { ...this.shirtPositions() }, changesUsed: 0
-      });
-      localStorage.setItem('fsm-active-match-team', team.id);
-      this.liveMatch.set(true);
-    } catch (error) { console.error('Unable to launch match from home.', error); this.error.set('Non è stato possibile preparare la partita. Riprova.'); }
-    finally { this.rosterLoading.set(false); }
+    this.rosterLoading.set(false);
+    this.error.set('');
+    this.formation.set(this.formations.includes(request.formation) ? request.formation : '4-3-3');
+    this.lineup.set({ ...request.lineup });
+    this.shirtPositions.set({ ...request.positions });
+    this.autoStartMatch.set(true);
+    localStorage.setItem('fsm-active-match-team', team.id);
+    // Show the match panel immediately; the live-match component starts its clock
+    // before performing any asynchronous persistence.
+    this.liveMatch.set(true);
   }
-  protected closeMatch(): void { this.liveMatch.set(false); localStorage.removeItem('fsm-active-match-team'); this.matchClosed.emit(); }
+  protected closeMatch(): void { this.liveMatch.set(false); this.autoStartMatch.set(false); localStorage.removeItem('fsm-active-match-team'); this.matchClosed.emit(); }
 
   protected playerForSlot(slotId: string): PlayerRecord | undefined {
     return this.rosterForExpanded().find(player => player.id === this.lineup()[slotId]);
