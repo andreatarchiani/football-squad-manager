@@ -33,6 +33,7 @@ export class HomePageComponent {
   protected readonly previewLoading = signal(false);
   private previewPressTimer: ReturnType<typeof setTimeout> | null = null;
   private previewLongPressTriggered = false;
+  private previewSaveQueue: Promise<void> = Promise.resolve();
   protected readonly pitchSlots: Record<string, { id: string; label: string; role: string; x: number; y: number }[]> = {
     '4-3-3': [
       { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
@@ -114,6 +115,7 @@ export class HomePageComponent {
 
   protected async selectTeam(teamId: string): Promise<void> {
     this.teamDropdownOpen.set(false);
+    this.previewActiveSlotId.set(null);
     const validTeamId = this.selectableTeams.some(team => team.id === teamId) ? teamId : this.selectedTeamId();
     if (!validTeamId) return;
     this.selectedTeamId.set(validTeamId);
@@ -197,15 +199,19 @@ export class HomePageComponent {
     const team = this.selectedTeam;
     const workspaceId = this.auth.workspaceId();
     if (!team?.seasonId || !workspaceId) return;
+    const layout = { formation: this.previewFormation(), lineup: { ...this.previewLineup() }, shirtPositions: { ...this.previewPositions() } };
+    const slot = this.layoutSlot();
     this.previewSaving.set(true);
-    try {
-      await this.teamsService.saveTacticalLayout(workspaceId, team.id, team.seasonId, {
-        formation: this.previewFormation(), lineup: { ...this.previewLineup() }, shirtPositions: { ...this.previewPositions() }
-      }, this.layoutSlot());
-    } catch (error) {
-      console.error('Unable to save home lineup.', error);
-      this.error.set('Non è stato possibile salvare la modifica della rosa.');
-    } finally { this.previewSaving.set(false); }
+    const save = this.previewSaveQueue.then(async () => {
+      try { await this.teamsService.saveTacticalLayout(workspaceId, team.id, team.seasonId!, layout, slot); }
+      catch (error) {
+        console.error('Unable to save home lineup.', error);
+        this.error.set('Non è stato possibile salvare la modifica della rosa.');
+      }
+    });
+    this.previewSaveQueue = save;
+    await save;
+    if (this.previewSaveQueue === save) this.previewSaving.set(false);
   }
 
   protected async saveRole(role: string): Promise<void> {
