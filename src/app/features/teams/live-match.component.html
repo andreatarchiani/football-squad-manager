@@ -13,6 +13,17 @@
       @if (running()) { <button type="button" class="pause-match" (click)="pause()">Ⅱ Pausa</button> }
       <button type="button" class="voice-match" [class.listening]="voiceListening()" (click)="startVoice()">{{ voiceListening() ? '● Ti ascolto…' : '🎙 Assistente vocale' }}</button>
     </div>
+    @if (voiceHelpOpen()) {
+      <section class="voice-command-guide" aria-label="Comandi vocali disponibili">
+        <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong><p>Pronuncia il comando usando il numero di maglia del giocatore.</p></div><button type="button" class="voice-guide-close" (click)="closeVoiceHelp()" aria-label="Nascondi i comandi">✕</button></div>
+        <div class="voice-command-list">
+          <article class="voice-command-item"><span class="voice-command-icon">⚽</span><div><strong>Segnalare un gol</strong><p>“Gol numero <b>10</b>” oppure “Ha segnato il numero <b>10</b>”.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🟥</span><div><strong>Segnalare un'espulsione</strong><p>“Espulsione numero <b>5</b>” oppure “Cartellino rosso numero <b>5</b>”.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🔄</span><div><strong>Effettuare una sostituzione</strong><p>“Cambio numero <b>7</b> con numero <b>18</b>” oppure “Sostituzione numero <b>7</b> con numero <b>18</b>”.</p><small>Prima indica chi esce, poi chi entra.</small></div></article>
+        </div>
+        <p class="voice-guide-note">Ogni evento ti verrà mostrato per la conferma prima di essere registrato. Usa sempre il numero di maglia, non il numero di posizione in campo.</p>
+      </section>
+    }
     @if (voiceMessage()) { <p class="voice-status" aria-live="polite">{{ voiceMessage() }}</p> }
   </section>
   <section class="match-layout">
