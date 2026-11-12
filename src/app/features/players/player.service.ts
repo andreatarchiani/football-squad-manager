@@ -9,7 +9,7 @@ export type PlayerStatus = 'active' | 'injured' | 'suspended' | 'left';
 export interface PlayerRecord {
   id: string; firstName: string; lastName: string; dateOfBirth: string; preferredFoot: string;
   primaryRole: PlayerRole; notes: string; isArchived: boolean; teamId: string; seasonId: string;
-  teamName: string; seasonLabel: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus;
+  teamName: string; seasonLabel: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus; goals?: number;
 }
 export interface PlayerInput {
   firstName: string; lastName: string; dateOfBirth: string; preferredFoot: string; primaryRole: PlayerRole;
@@ -66,7 +66,7 @@ export class PlayerService {
     });
   }
 
-  async recordGoal(workspaceId: string, playerId: string): Promise<void> {\n    await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { goals: increment(1), updatedAt: serverTimestamp() });\n  }\n\n  async setArchived(workspaceId:string, player:PlayerRecord, archived:boolean):Promise<void> {
+  async recordGoal(workspaceId: string, playerId: string): Promise<void> {\n    await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { goals: increment(1), updatedAt: serverTimestamp() });\n  }\n\n  async recordGoal(workspaceId: string, playerId: string): Promise<void> {\n    await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { goals: increment(1), updatedAt: serverTimestamp() });\n  }\n\n  async setArchived(workspaceId:string, player:PlayerRecord, archived:boolean):Promise<void> {
     const db=this.requireFirestore();
     await runTransaction(db,async tx=>{
       const p=doc(db,'workspaces',workspaceId,'players',player.id);
