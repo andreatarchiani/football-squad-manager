@@ -81,7 +81,7 @@ export class HomePageComponent {
       const preferred = String(data?.['defaultTeamId'] ?? '');
       const selected = teams.some(team => team.id === preferred && !team.isArchived) ? preferred : (teams.find(team => !team.isArchived)?.id ?? '');
       this.selectedTeamId.set(selected);
-      if (!preferred && selected) await this.selectTeam(selected);
+      if (selected && selected !== preferred) await this.selectTeam(selected);
     } catch (error) {
       console.error('Unable to load home workspace.', error);
       this.error.set('Non è stato possibile caricare i dati del tuo account e delle squadre.');
