@@ -2,8 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   serverTimestamp,
+  setDoc,
   updateDoc,
   writeBatch,
   type Firestore
@@ -19,6 +21,12 @@ export interface TeamRecord {
   seasonId: string | null;
   seasonLabel: string;
   seasonStatus: string;
+}
+
+export interface TacticalLayout {
+  formation: string;
+  lineup: Record<string, string>;
+  shirtPositions: Record<string, { x: number; y: number }>;
 }
 
 export interface TeamInput {
@@ -58,6 +66,25 @@ export class TeamService {
 
     return teams.sort((a, b) => Number(a.isArchived) - Number(b.isArchived)
       || a.name.localeCompare(b.name, 'it'));
+  }
+
+  async loadTacticalLayout(workspaceId: string, teamId: string, seasonId: string): Promise<TacticalLayout | null> {
+    const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId,
+      'seasons', seasonId, 'settings', 'tactical-layout');
+    const snapshot = await getDoc(ref);
+    if (!snapshot.exists()) return null;
+    const data = snapshot.data();
+    return {
+      formation: String(data['formation'] ?? '4-3-3'),
+      lineup: (data['lineup'] ?? {}) as Record<string, string>,
+      shirtPositions: (data['shirtPositions'] ?? {}) as Record<string, { x: number; y: number }>
+    };
+  }
+
+  async saveTacticalLayout(workspaceId: string, teamId: string, seasonId: string, layout: TacticalLayout): Promise<void> {
+    const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId,
+      'seasons', seasonId, 'settings', 'tactical-layout');
+    await setDoc(ref, { ...layout, updatedAt: serverTimestamp() });
   }
 
   async create(workspaceId: string, input: TeamInput): Promise<void> {

@@ -90,6 +90,7 @@
                   </select>
                 </label>
                 <span>Tocca una maglia per assegnare · Trascinala per spostarla</span>
+                <span class="layout-save-status" aria-live="polite">{{ layoutSaving() ? 'Salvataggio posizioni…' : 'Posizioni salvate automaticamente' }}</span>
                 <button class="primary-button start-live-match-button" type="button" (click)="startMatch()">▶ Avvia partita</button>
               </div>
               <div class="football-pitch" [attr.aria-label]="'Campo con modulo ' + formation()">

@@ -101,6 +101,11 @@ service cloud.firestore {
             allow read: if activeMember(workspaceId);
             allow create, update, delete: if canEdit(workspaceId);
           }
+
+          match /settings/{settingId} {
+            allow read: if activeMember(workspaceId);
+            allow create, update, delete: if canEdit(workspaceId);
+          }
         }
       }
 
