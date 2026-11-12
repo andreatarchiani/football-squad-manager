@@ -6,7 +6,7 @@ import { PlayerService } from '../players/player.service';
 import { TeamService } from './team.service';
 
 type MatchEventType = 'goal' | 'yellow-card' | 'red-card' | 'substitution' | 'formation';
-interface MatchEvent { type: MatchEventType; minute: number; description: string; playerId?: string; outgoingId?: string; incomingId?: string; }
+interface MatchEvent { type: MatchEventType; minute: number; description: string; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string; }
 interface PendingAction { type: MatchEventType; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string; description: string; }
 interface MatchAnimation { type: 'goal' | 'yellow-card' | 'red-card' | 'substitution'; title: string; detail: string; outgoingNumber?: number | null; incomingNumber?: number | null; playerNumber?: number | null; }
 
@@ -51,6 +51,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   private dragCurrentPosition: { x: number; y: number } | null = null;
   protected readonly voiceListening = signal(false);
   protected readonly voiceMessage = signal('');
+  protected readonly voiceDraft = signal('');
   protected readonly voiceHelpOpen = signal(false);
   protected readonly matchAnimation = signal<MatchAnimation | null>(null);
   private animationTimer: ReturnType<typeof setTimeout> | null = null;
@@ -162,7 +163,10 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected toggleVoiceHelp(): void { this.voiceHelpOpen.update(open => !open); }
   protected closeVoiceHelp(): void { this.voiceHelpOpen.set(false); }
   private parseCommand(raw: string): void {
+    this.voiceDraft.set(raw);
     const text=raw.toLocaleLowerCase('it-IT');
+    const undoMatch=text.match(/annulla\s+(goal|gol|ammonizione|giallo|espulsione|rosso)\s+(?:del\s+)?(?:numero\s*)?(\d{1,2})/);
+    if(undoMatch){this.undoMatchEvent(undoMatch[1],Number(undoMatch[2]));return;}
     const numbers=[...text.matchAll(/\b(?:numero\s*)?(\d{1,2})\b/g)].map(m=>Number(m[1]));
     const byNumber=(n:number)=>this.players().find(p=>p.shirtNumber===n);
     const assistMatch=text.match(/assist(?:ito)?\s+(?:di\s+)?(?:numero\s*)?(\d{1,2})/);
@@ -192,6 +196,35 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     } else { this.voiceMessage.set('Comando non riconosciuto. Puoi segnalare gol, ammonizioni, espulsioni e cambi.');return; }
     this.voiceMessage.set('Controlla l’evento e conferma per registrarlo.');
   }
+  protected updateVoiceDraft(value: string): void { this.voiceDraft.set(value); }
+  protected reinterpretDraft(): void {
+    const corrected=this.voiceDraft().trim();
+    if(!corrected){this.voiceMessage.set('Scrivi o pronuncia il comando corretto prima di continuare.');return;}
+    this.pending.set(null); this.parseCommand(corrected);
+    if(this.pending()) this.voiceMessage.set('Comando corretto. Controlla i dettagli e conferma.');
+  }
+  private undoMatchEvent(kind: string, shirtNumber: number): void {
+    const player=this.players().find(p=>p.shirtNumber===shirtNumber);
+    if(!player){this.voiceMessage.set('Non trovo il giocatore numero '+shirtNumber+'.');return;}
+    const type=/goal|gol/.test(kind)?'goal':/ammonizione|giallo/.test(kind)?'yellow-card':'red-card';
+    const current=this.events(); const index=current.findIndex(event=>event.type===type&&event.playerId===player.id);
+    if(index<0){this.voiceMessage.set('Non trovo un evento da annullare per il numero '+shirtNumber+'.');return;}
+    const target=current[index]; let next=current.filter((_,i)=>i!==index);
+    if(type==='yellow-card'&&/seconda ammonizione/i.test(target.description)) next=next.filter(event=>!(event.type==='red-card'&&event.playerId===player.id&&event.minute===target.minute));
+    if(type==='red-card'&&/seconda ammonizione/i.test(target.description)) next=next.filter(event=>!(event.type==='yellow-card'&&event.playerId===player.id&&event.minute===target.minute&&/seconda ammonizione/i.test(event.description)));
+    this.events.set(next);
+    const goals:Record<string,number>={}, assists:Record<string,number>={}, yellows:Record<string,number>={}, reds:string[]=[];
+    for(const event of next){
+      if(event.type==='goal'&&event.playerId){goals[event.playerId]=(goals[event.playerId]??0)+1;if(event.assistPlayerId)assists[event.assistPlayerId]=(assists[event.assistPlayerId]??0)+1;}
+      if(event.type==='yellow-card'&&event.playerId)yellows[event.playerId]=(yellows[event.playerId]??0)+1;
+      if(event.type==='red-card'&&event.playerId&&!reds.includes(event.playerId))reds.push(event.playerId);
+    }
+    this.goals.set(goals);this.assists.set(assists);this.yellowCards.set(yellows);this.redCards.set(reds);
+    const workspaceId=this.auth.workspaceId();
+    if(type==='goal'&&workspaceId&&target.playerId)void this.playerService.removeGoal(workspaceId,target.playerId).catch(error=>{console.error('Unable to reverse player goal.',error);this.voiceMessage.set('Gol annullato nella partita, ma non nel totale giocatore.');});
+    if(type==='goal'&&workspaceId&&target.assistPlayerId)void this.playerService.removeAssist(workspaceId,target.assistPlayerId).catch(error=>{console.error('Unable to reverse player assist.',error);this.voiceMessage.set('Gol annullato, ma non è stato possibile aggiornare gli assist.');});
+    this.voiceMessage.set((type==='goal'?'Gol':type==='yellow-card'?'Ammonizione':'Espulsione')+' del numero '+shirtNumber+' annullata.'); void this.persistMatchState();
+  }
   protected confirmAction(): void {
     const action=this.pending();if(!action)return;
     const minute=this.minute;
@@ -199,7 +232,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       const scorer=this.player(action.playerId); this.showMatchAnimation({type:'goal',title:'GOOOL!',detail:scorer?`#${scorer.shirtNumber} ${scorer.lastName}`:'Rete della squadra'});
       this.goals.update(g=>({...g,[action.playerId!]: (g[action.playerId!]??0)+1}));
       if(action.assistPlayerId)this.assists.update(v=>({...v,[action.assistPlayerId!]: (v[action.assistPlayerId!]??0)+1}));
-      this.events.update(e=>[{type:'goal',minute,description:action.description,playerId:action.playerId},...e]);
+      this.events.update(e=>[{type:'goal',minute,description:action.description,playerId:action.playerId,assistPlayerId:action.assistPlayerId},...e]);
       const workspaceId=this.auth.workspaceId();
       if(workspaceId)void this.playerService.recordGoal(workspaceId,action.playerId).catch(error=>{console.error('Unable to save player goal.',error);this.voiceMessage.set('Gol registrato nella partita, ma non è stato possibile aggiornare il totale del giocatore.');});
       if(workspaceId&&action.assistPlayerId)void this.playerService.recordAssist(workspaceId,action.assistPlayerId).catch(error=>{console.error('Unable to save player assist.',error);this.voiceMessage.set('Gol registrato, ma non è stato possibile aggiornare il totale degli assist.');});
