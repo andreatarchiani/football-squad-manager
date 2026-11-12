@@ -58,6 +58,7 @@
           @if (playerInSlot(slot.id); as player) {
             <div class="match-shirt-player pitch-player" [style.left.%]="slot.x" [style.top.%]="slot.y" [class.sent-off]="playerHasRedCard(player)" (pointerdown)="startShirtDrag($event, player.id)">
               <span class="match-shirt pitch-shirt">{{ player.shirtNumber ?? '—' }}</span><span class="match-player-label pitch-player-name">{{ player.lastName }}</span>
+              @if (playerHasRedCard(player)) { <span class="sent-off-card" aria-label="Cartellino rosso">🟥 ROSSO</span> }
               @if (goalsFor(player)) { <small class="goal-indicator">⚽ {{ goalsFor(player) }}</small> }
             </div>
           }
@@ -78,7 +79,7 @@
       <div class="change-counter"><strong>{{ maxChanges - changesUsed() }}</strong><span>cambi rimasti</span></div>
       <div class="on-field-list"><strong>In campo · tocca per selezionare chi esce</strong>
         @for (player of onField(); track player.id) {
-          <button type="button" (click)="chooseOutgoing(player)" [class.selected]="selectedOutgoingId() === player.id" [disabled]="changesUsed() >= maxChanges">
+          <button type="button" (click)="chooseOutgoing(player)" [class.selected]="selectedOutgoingId() === player.id" [disabled]="changesUsed() >= maxChanges || playerHasRedCard(player)">
             <span>#{{ player.shirtNumber ?? '—' }}</span>{{ player.firstName }} {{ player.lastName }}
           </button>
         }
