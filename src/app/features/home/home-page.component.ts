@@ -52,11 +52,42 @@ export class HomePageComponent {
   protected readonly saving = signal(false);
   protected readonly error = signal('');
   protected readonly user = this.auth.user;
+  protected readonly editingProfileName = signal(false);
+  protected readonly profileNameDraft = signal('');
+  protected readonly profileNameSaving = signal(false);
 
   constructor() { effect(() => { if (this.auth.workspaceId()) void this.load(); }); }
 
   protected get selectedTeam(): TeamRecord | undefined {
     return this.teams().find(team => team.id === this.selectedTeamId());
+  }
+
+  protected beginProfileNameEdit(): void {
+    this.profileNameDraft.set(this.user()?.displayName || '');
+    this.editingProfileName.set(true);
+    this.error.set('');
+  }
+
+  protected cancelProfileNameEdit(): void {
+    this.editingProfileName.set(false);
+    this.profileNameDraft.set('');
+  }
+
+  protected async saveProfileName(): Promise<void> {
+    const name = this.profileNameDraft().trim();
+    if (!name) { this.error.set('Inserisci un nome valido.'); return; }
+    this.profileNameSaving.set(true);
+    this.error.set('');
+    try {
+      await this.auth.updateDisplayName(name);
+      const uid = this.user()?.uid;
+      if (uid && this.db) await setDoc(doc(this.db, 'userProfiles', uid), { displayName: name, updatedAt: new Date() }, { merge: true });
+      this.editingProfileName.set(false);
+      this.profileNameDraft.set('');
+    } catch (error) {
+      console.error('Unable to update profile name.', error);
+      this.error.set('Non è stato possibile aggiornare il nome. Riprova.');
+    } finally { this.profileNameSaving.set(false); }
   }
 
   protected async openTeam(teamId: string): Promise<void> {
