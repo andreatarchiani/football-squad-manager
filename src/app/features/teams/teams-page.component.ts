@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { TeamService, type TeamInput, type TeamRecord } from './team.service';
@@ -16,6 +16,7 @@ import { LiveMatchComponent } from './live-match.component';
 })
 export class TeamsPageComponent implements OnChanges {
   @Input() launchRequest: { teamId: string; layoutSlot: 1 | 2; token: number } | null = null;
+  @Output() readonly matchClosed = new EventEmitter<void>();
   private handledLaunchToken = 0;
   protected readonly layoutSlot = signal<1 | 2>(1);
   private readonly auth = inject(FirebaseAuthService);
@@ -95,8 +96,11 @@ export class TeamsPageComponent implements OnChanges {
     const workspaceId = this.auth.workspaceId();
     if (!workspaceId || !team.seasonId) { this.rosterLoading.set(false); return; }
     try {
-      this.players.set(await this.playerService.list(workspaceId, this.teams()));
-      const saved = await this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, request.layoutSlot);
+      const [players, saved] = await Promise.all([
+        this.playerService.list(workspaceId, this.teams()),
+        this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, request.layoutSlot)
+      ]);
+      this.players.set(players);
       const validIds = new Set(this.rosterForExpanded().map(player => player.id));
       const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
       this.formation.set(formation);
@@ -115,7 +119,7 @@ export class TeamsPageComponent implements OnChanges {
     } catch (error) { console.error('Unable to launch match from home.', error); this.error.set('Non è stato possibile preparare la partita. Riprova.'); }
     finally { this.rosterLoading.set(false); }
   }
-  protected closeMatch(): void { this.liveMatch.set(false); localStorage.removeItem('fsm-active-match-team'); }
+  protected closeMatch(): void { this.liveMatch.set(false); localStorage.removeItem('fsm-active-match-team'); this.matchClosed.emit(); }
 
   protected playerForSlot(slotId: string): PlayerRecord | undefined {
     return this.rosterForExpanded().find(player => player.id === this.lineup()[slotId]);
