@@ -66,7 +66,11 @@ export class PlayerService {
     });
   }
 
-  async recordGoal(workspaceId: string, playerId: string): Promise<void> {\n    await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { goals: increment(1), updatedAt: serverTimestamp() });\n  }\n\n  async recordGoal(workspaceId: string, playerId: string): Promise<void> {\n    await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { goals: increment(1), updatedAt: serverTimestamp() });\n  }\n\n  async setArchived(workspaceId:string, player:PlayerRecord, archived:boolean):Promise<void> {
+  async recordGoal(workspaceId: string, playerId: string): Promise<void> {
+    await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { goals: increment(1), updatedAt: serverTimestamp() });
+  }
+
+  async setArchived(workspaceId:string, player:PlayerRecord, archived:boolean):Promise<void> {
     const db=this.requireFirestore();
     await runTransaction(db,async tx=>{
       const p=doc(db,'workspaces',workspaceId,'players',player.id);
