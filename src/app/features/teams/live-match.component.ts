@@ -26,6 +26,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   readonly initialLineup = input.required<Record<string, string>>();
   readonly formation = input.required<string>();
   readonly initialPositions = input.required<Record<string, { x: number; y: number }>>();
+  readonly autoStart = input(false);
   readonly closematch = output<void>();
   private readonly voice = inject(VoiceRecognitionService);
   private readonly auth = inject(FirebaseAuthService);
@@ -94,6 +95,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     const p: Record<string, {x:number;y:number}> = {};
     for (const slot of this.formations[f]) { const id=this.initialLineup()[slot.id]; if(id) p[id]=this.initialPositions()[id] ?? {x:slot.x,y:slot.y}; }
     this.matchPositions.set(p);
+    if (this.autoStart()) { this.start(); return; }
     try {
       const saved = await this.teamService.loadLiveMatch(this.workspaceId(), this.teamId(), this.seasonId());
       if (saved) {
