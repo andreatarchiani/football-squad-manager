@@ -113,7 +113,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.persistQueue = this.persistQueue.then(async () => {
       if(this.exitingMatch) return;
       try { await this.teamService.saveLiveMatch(this.workspaceId(), this.teamId(), this.seasonId(), snapshot); }
-      catch(error) { console.error('Unable to save live match.', error); this.voiceMessage.set('Attenzione: non è stato possibile salvare la partita.'); }
+      catch(error) { console.error('Unable to save live match.', error); }
     });
     await this.persistQueue;
   }
@@ -168,7 +168,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected get minute(): number { return Math.min(90, Math.floor(this.elapsedSeconds()/60)); }
   protected get clock(): string { const m=Math.floor(this.elapsedSeconds()/60),s=this.elapsedSeconds()%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
   protected get score(): string { return String(Object.values(this.goals()).reduce((a,b)=>a+b,0)); }
-  protected start(): void { if(this.finished()||this.running()) return; this.running.set(true); this.timer=setInterval(()=>{this.elapsedSeconds.update(v=>Math.min(5400,v+1));if(this.elapsedSeconds()>=5400){if(this.timer){clearInterval(this.timer);this.timer=null;}this.running.set(false);this.finished.set(true);this.finishReportOpen.set(true);void this.persistMatchState();} else void this.persistMatchState();},1000); void this.persistMatchState(); }
+  protected start(): void { if(this.finished()||this.running()) return; this.running.set(true); this.timer=setInterval(()=>{this.elapsedSeconds.update(v=>Math.min(5400,v+1));if(this.elapsedSeconds()>=5400){if(this.timer){clearInterval(this.timer);this.timer=null;}this.running.set(false);this.finished.set(true);this.finishReportOpen.set(true);void this.persistMatchState();} else if (this.elapsedSeconds() % 15 === 0) void this.persistMatchState();},1000); void this.persistMatchState(); }
   protected pause(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.running.set(false); void this.persistMatchState(); }
 
   protected finishMatch(): void {
@@ -352,7 +352,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
         } else if(/\b(annulla|annullare|cancella)\b/.test(spoken)) {
           this.cancelAction();
         } else {
-          this.voiceMessage.set('Non ho riconosciuto «Conferma» o «Annulla». Ripeti la parola.');
+          this.parseCommand(raw);
         }
       },
       message => this.voiceMessage.set(message),
@@ -382,12 +382,12 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       if(assister&&scorer.id===assister.id){this.voiceMessage.set('Il marcatore e l’autore dell’assist devono essere due giocatori diversi.');return;}
       const description=`Gol di #${scorer.shirtNumber} ${scorer.firstName} ${scorer.lastName}${assister?` · assist di #${assister.shirtNumber} ${assister.lastName}`:''}`;
       this.pending.set({type:'goal',playerId:scorer.id,assistPlayerId:assister?.id,description});
-    } else if(/ammon|cartellino giallo|giallo/.test(text)){
+    } else if(/ammon|cartellino giallo|giallo/.test(text) || (/cartellino/.test(text) && this.pending()?.type === 'yellow-card')){
       const p=numbers.length?byNumber(numbers[0]):undefined;
       if(!p){this.voiceMessage.set('Dimmi il numero di maglia da ammonire, per esempio: ammonizione numero 5.');return;}
       const next=(this.yellowCards()[p.id]??0)+1;
       this.pending.set({type:'yellow-card',playerId:p.id,description:next>=2?`Seconda ammonizione: #${p.shirtNumber} ${p.firstName} ${p.lastName} · espulsione automatica`:`Ammonizione a #${p.shirtNumber} ${p.firstName} ${p.lastName} (prima ammonizione)`});
-    } else if(/espuls|cartellino rosso|rosso/.test(text)){
+    } else if(/espuls|cartellino rosso|rosso/.test(text) || (/cartellino/.test(text) && this.pending()?.type === 'red-card')){
       const p=numbers.length?byNumber(numbers[0]):undefined;
       if(!p){this.voiceMessage.set('Non ho identificato il giocatore da espellere.');return;}
       this.pending.set({type:'red-card',playerId:p.id,description:`Espulsione di #${p.shirtNumber} ${p.firstName} ${p.lastName}`});
