@@ -47,6 +47,9 @@ try {
   });
   await assertSucceeds(bootstrap.commit());
   await assertSucceeds(getDoc(doc(ownerDb, 'workspaces', 'workspace-1')));
+  await assertSucceeds(setDoc(doc(ownerDb, 'userProfiles', 'owner-1'), {
+    accountRole: 'Allenatore', defaultTeamId: 'team-1', updatedAt: timestamp()
+  }, { merge: true }));
   await assertSucceeds(setDoc(doc(ownerDb, 'workspaces', 'workspace-1', 'teams', 'team-1'), {
     name: 'Prima squadra', category: 'Senior', clubName: 'Club test', isArchived: false,
     createdAt: timestamp(), updatedAt: timestamp()

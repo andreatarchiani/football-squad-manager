@@ -10,18 +10,20 @@ import { AuthPageComponent } from './features/auth/auth-page.component';
 import { TeamsPageComponent } from './features/teams/teams-page.component';
 import { PlayersPageComponent } from './features/players/players-page.component';
 import { VoiceAssistantComponent } from './features/voice-assistant/voice-assistant.component';
+import { HomePageComponent } from './features/home/home-page.component';
 
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, VoiceAssistantComponent, NotificationHostComponent],
+  imports: [MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, VoiceAssistantComponent, HomePageComponent, NotificationHostComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
-  protected readonly navigation = ['Panoramica', 'Squadre', 'Giocatori', 'Formazioni', 'Partite'];
+  protected readonly navigation = ['Home', 'Squadre', 'Giocatori', 'Formazioni', 'Partite'];
   protected readonly activePage = signal<'overview' | 'teams' | 'players'>(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team') ? 'teams' : 'overview');
+  protected readonly matchLaunch = signal<{ teamId: string; layoutSlot: 1 | 2; token: number } | null>(null);
   protected readonly updateAvailable = signal(false);
   protected readonly updating = signal(false);
   private readonly swUpdate = inject(SwUpdate);
@@ -55,6 +57,11 @@ export class AppComponent {
     } catch (error) {
       console.warn('Application update check failed.', error);
     }
+  }
+
+  protected launchMatch(request: { teamId: string; layoutSlot: 1 | 2 }): void {
+    this.matchLaunch.set({ ...request, token: Date.now() });
+    this.activePage.set('teams');
   }
 
   protected navigate(index: number): void {
