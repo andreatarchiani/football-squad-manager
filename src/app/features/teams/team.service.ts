@@ -33,7 +33,7 @@ export interface LiveMatchState {
   elapsedSeconds: number;
   running: boolean;
   finished: boolean;
-  events: { type: string; minute: number; description: string; playerId?: string; outgoingId?: string; incomingId?: string }[];
+  events: { type: 'goal' | 'yellow-card' | 'red-card' | 'substitution' | 'formation'; minute: number; description: string; playerId?: string; outgoingId?: string; incomingId?: string }[];
   goals: Record<string, number>;
   assists: Record<string, number>;
   yellowCards: Record<string, number>;
