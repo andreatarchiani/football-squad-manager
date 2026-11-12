@@ -4,9 +4,9 @@ import { VoiceRecognitionService } from '../../core/voice/voice-recognition.serv
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { PlayerService } from '../players/player.service';
 
-type MatchEventType = 'goal' | 'red-card' | 'substitution' | 'formation';
+type MatchEventType = 'goal' | 'yellow-card' | 'red-card' | 'substitution' | 'formation';
 interface MatchEvent { type: MatchEventType; minute: number; description: string; playerId?: string; outgoingId?: string; incomingId?: string; }
-interface PendingAction { type: MatchEventType; playerId?: string; outgoingId?: string; incomingId?: string; description: string; }
+interface PendingAction { type: MatchEventType; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string; description: string; }
 
 @Component({
   selector: 'fsm-live-match',
@@ -33,6 +33,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly pending = signal<PendingAction | null>(null);
   protected readonly events = signal<MatchEvent[]>([]);
   protected readonly goals = signal<Record<string, number>>({});
+  protected readonly assists = signal<Record<string, number>>({});
+  protected readonly yellowCards = signal<Record<string, number>>({});
   protected readonly redCards = signal<string[]>([]);
   protected readonly lineup = signal<Record<string, string>>({});
   protected readonly matchFormation = signal('4-3-3');
@@ -130,26 +132,53 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     const text=raw.toLocaleLowerCase('it-IT');
     const numbers=[...text.matchAll(/\b(?:numero\s*)?(\d{1,2})\b/g)].map(m=>Number(m[1]));
     const byNumber=(n:number)=>this.players().find(p=>p.shirtNumber===n);
-    if(/gol|ha segnato|rete/.test(text)){
+    const assistMatch=text.match(/assist(?:ito)?\s+(?:di\s+)?(?:numero\s*)?(\d{1,2})/);
+    const assistNumber=assistMatch?Number(assistMatch[1]):undefined;
+    if(/goal|gol|ha segnato|rete/.test(text)){
+      const scorerNumber=numbers.find(n=>n!==assistNumber);
+      if(scorerNumber===undefined){this.voiceMessage.set('Per registrare un gol devi indicare il numero di maglia del marcatore.');return;}
+      const scorer=byNumber(scorerNumber), assister=assistNumber===undefined?undefined:byNumber(assistNumber);
+      if(!scorer){this.voiceMessage.set('Non trovo il marcatore con quel numero di maglia.');return;}
+      if(assistNumber!==undefined&&!assister){this.voiceMessage.set('Non trovo l’autore dell’assist con quel numero di maglia.');return;}
+      if(assister&&scorer.id===assister.id){this.voiceMessage.set('Il marcatore e l’autore dell’assist devono essere due giocatori diversi.');return;}
+      const description=`Gol di #${scorer.shirtNumber} ${scorer.firstName} ${scorer.lastName}${assister?` · assist di #${assister.shirtNumber} ${assister.lastName}`:''}`;
+      this.pending.set({type:'goal',playerId:scorer.id,assistPlayerId:assister?.id,description});
+    } else if(/ammon|cartellino giallo|giallo/.test(text)){
       const p=numbers.length?byNumber(numbers[0]):undefined;
-      if(!p){this.voiceMessage.set('Non ho identificato il numero di maglia. Riprova.');return;}
-      this.pending.set({type:'goal',playerId:p.id,description:`Gol di #${p.shirtNumber} ${p.firstName} ${p.lastName}`});
-    } else if(/espuls|rosso|cartellino rosso/.test(text)){
+      if(!p){this.voiceMessage.set('Dimmi il numero di maglia da ammonire, per esempio: ammonizione numero 5.');return;}
+      const next=(this.yellowCards()[p.id]??0)+1;
+      this.pending.set({type:'yellow-card',playerId:p.id,description:next>=2?`Seconda ammonizione: #${p.shirtNumber} ${p.firstName} ${p.lastName} · espulsione automatica`:`Ammonizione a #${p.shirtNumber} ${p.firstName} ${p.lastName} (prima ammonizione)`});
+    } else if(/espuls|cartellino rosso|rosso/.test(text)){
       const p=numbers.length?byNumber(numbers[0]):undefined;
       if(!p){this.voiceMessage.set('Non ho identificato il giocatore da espellere.');return;}
       this.pending.set({type:'red-card',playerId:p.id,description:`Espulsione di #${p.shirtNumber} ${p.firstName} ${p.lastName}`});
     } else if(/cambio|sostituz/.test(text)){
-      const outgoing=numbers.length>0?byNumber(numbers[0]):undefined;
-      const incoming=numbers.length>1?byNumber(numbers[1]):undefined;
+      const outgoing=numbers.length>0?byNumber(numbers[0]):undefined, incoming=numbers.length>1?byNumber(numbers[1]):undefined;
       if(!outgoing||!incoming){this.voiceMessage.set('Dimmi: cambio numero 7 con numero 9.');return;}
       this.pending.set({type:'substitution',outgoingId:outgoing.id,incomingId:incoming.id,description:`Cambio: esce #${outgoing.shirtNumber} ${outgoing.lastName}, entra #${incoming.shirtNumber} ${incoming.lastName}`});
-    } else { this.voiceMessage.set('Comando non riconosciuto. Per ora puoi segnalare gol, espulsioni e cambi.');return; }
+    } else { this.voiceMessage.set('Comando non riconosciuto. Puoi segnalare gol, ammonizioni, espulsioni e cambi.');return; }
     this.voiceMessage.set('Controlla l’evento e conferma per registrarlo.');
   }
   protected confirmAction(): void {
     const action=this.pending();if(!action)return;
     const minute=this.minute;
-    if(action.type==='goal'&&action.playerId){this.goals.update(g=>({...g,[action.playerId!]: (g[action.playerId!]??0)+1}));this.events.update(e=>[{type:'goal',minute,description:action.description,playerId:action.playerId},...e]);const workspaceId=this.auth.workspaceId();if(workspaceId)void this.playerService.recordGoal(workspaceId,action.playerId).catch(error=>{console.error('Unable to save player goal.',error);this.voiceMessage.set('Gol registrato nella partita, ma non è stato possibile aggiornare il totale del giocatore.');});}
+    if(action.type==='goal'&&action.playerId){
+      this.goals.update(g=>({...g,[action.playerId!]: (g[action.playerId!]??0)+1}));
+      if(action.assistPlayerId)this.assists.update(v=>({...v,[action.assistPlayerId!]: (v[action.assistPlayerId!]??0)+1}));
+      this.events.update(e=>[{type:'goal',minute,description:action.description,playerId:action.playerId},...e]);
+      const workspaceId=this.auth.workspaceId();
+      if(workspaceId)void this.playerService.recordGoal(workspaceId,action.playerId).catch(error=>{console.error('Unable to save player goal.',error);this.voiceMessage.set('Gol registrato nella partita, ma non è stato possibile aggiornare il totale del giocatore.');});
+      if(workspaceId&&action.assistPlayerId)void this.playerService.recordAssist(workspaceId,action.assistPlayerId).catch(error=>{console.error('Unable to save player assist.',error);this.voiceMessage.set('Gol registrato, ma non è stato possibile aggiornare il totale degli assist.');});
+    }
+    if(action.type==='yellow-card'&&action.playerId){
+      const count=(this.yellowCards()[action.playerId]??0)+1;
+      this.yellowCards.update(cards=>({...cards,[action.playerId!]:count}));
+      if(count>=2){
+        this.redCards.update(ids=>ids.includes(action.playerId!)?ids:[...ids,action.playerId!]);
+        this.lineup.update(l=>Object.fromEntries(Object.entries(l).filter(([,id])=>id!==action.playerId)));
+        this.events.update(e=>[{type:'red-card',minute,description:action.description,playerId:action.playerId},{type:'yellow-card',minute,description:`Seconda ammonizione per #${this.player(action.playerId)?.shirtNumber} ${this.player(action.playerId)?.lastName}`,playerId:action.playerId},...e]);
+      } else this.events.update(e=>[{type:'yellow-card',minute,description:action.description,playerId:action.playerId},...e]);
+    }
     if(action.type==='red-card'&&action.playerId){this.redCards.update(ids=>[...ids,action.playerId!]);this.lineup.update(l=>Object.fromEntries(Object.entries(l).filter(([,id])=>id!==action.playerId)));this.events.update(e=>[{type:'red-card',minute,description:action.description,playerId:action.playerId},...e]);}
     if(action.type==='substitution'&&action.outgoingId&&action.incomingId){
       const slot=Object.entries(this.lineup()).find(([,id])=>id===action.outgoingId)?.[0];
