@@ -125,7 +125,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     return formationSlots.map(slot => { const playerId = currentLineup[slot.id]; const saved = playerId ? positions[playerId] : undefined; return saved ? { ...slot, x: Math.max(9, Math.min(91, saved.x)), y: Math.max(9, Math.min(91, saved.y)) } : slot; });
   }
   protected formationOptions(): string[] { return Object.keys(this.formations); }
-  protected changeMatchFormation(next: string): void { if (!this.formations[next] || next === this.matchFormation()) return; const previous=this.matchFormation(); const ids=this.slots().map(slot=>this.lineup()[slot.id]).filter((id): id is string => !!id); const lineup: Record<string,string>={}; const positions: Record<string,{x:number;y:number}>={}; this.formations[next].forEach((slot,i)=>{const id=ids[i];if(id){lineup[slot.id]=id;positions[id]={x:slot.x,y:slot.y};}}); this.lineup.set(lineup);this.matchPositions.set(positions);this.matchFormation.set(next);this.selectedOutgoingId.set(null);this.events.update(items=>[{type:'formation',minute:this.minute,description:'Cambio modulo: '+previous+' → '+next},...items]);this.voiceMessage.set('Modulo cambiato in '+next+'. Evento registrato al '+this.minute+'′.'); void this.persistMatchState(); }
+  protected changeMatchFormation(next: string): void { if (!this.formations[next] || next === this.matchFormation()) return; const previous=this.matchFormation(); const ids=this.slots().map(slot=>this.lineup()[slot.id]).filter((id): id is string => !!id); const lineup: Record<string,string>={}; const positions: Record<string,{x:number;y:number}>={}; this.formations[next].forEach((slot,i)=>{const id=ids[i];if(id){lineup[slot.id]=id;positions[id]={x:slot.x,y:slot.y};}}); this.lineup.set(lineup);this.matchPositions.set(positions);this.matchFormation.set(next);this.selectedOutgoingId.set(null);this.events.update(items=>[{type:'formation',minute:this.minute,description:'Cambio modulo: '+previous+' → '+next},...items]);this.voiceMessage.set('Modulo cambiato in '+next+'.'); void this.persistMatchState(); }
   protected startShirtDrag(event: PointerEvent, id: string): void {
     if (event.button !== 0) return;
     event.preventDefault();
@@ -325,10 +325,42 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected startVoice(): void {
     this.voiceHelpOpen.set(true);
     if(this.voiceListening()) { this.voice.stop(); this.voiceListening.set(false); return; }
+    if(this.pending()) { this.listenForVoiceConfirmation(); return; }
     this.voiceDraft.set('');
     this.voiceMessage.set('Pronuncia un comando, ad esempio: goal numero 9.');
     this.voiceListening.set(true);
-    this.voice.start(text=>this.parseCommand(text),message=>this.voiceMessage.set(message),()=>this.voiceListening.set(false));
+    this.voice.start(
+      text => this.parseCommand(text),
+      message => this.voiceMessage.set(message),
+      () => {
+        this.voiceListening.set(false);
+        if(this.pending()) this.listenForVoiceConfirmation();
+      }
+    );
+  }
+  private listenForVoiceConfirmation(): void {
+    if(!this.pending()) return;
+    this.voiceMessage.set('Per confermare, pronuncia «Conferma». Per annullare, pronuncia «Annulla».');
+    this.voiceListening.set(true);
+    let receivedTranscript = false;
+    this.voice.start(
+      raw => {
+        receivedTranscript = true;
+        const spoken = raw.trim().toLocaleLowerCase('it-IT').replace(/[.!?]/g, '');
+        if(/\\bconferma\\b/.test(spoken)) {
+          this.confirmAction();
+        } else if(/\\b(annulla|annullare|cancella)\\b/.test(spoken)) {
+          this.cancelAction();
+        } else {
+          this.voiceMessage.set('Non ho riconosciuto «Conferma» o «Annulla». Ripeti la parola.');
+        }
+      },
+      message => this.voiceMessage.set(message),
+      () => {
+        this.voiceListening.set(false);
+        if(this.pending() && receivedTranscript) this.listenForVoiceConfirmation();
+      }
+    );
   }
   protected toggleVoiceHelp(): void { this.voiceHelpOpen.update(open => !open); }
   protected closeVoiceHelp(): void { this.voiceHelpOpen.set(false); }
@@ -424,9 +456,9 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       if(slot&&this.changesUsed()<this.maxChanges){const outgoing=this.player(action.outgoingId), incoming=this.player(action.incomingId);this.showMatchAnimation({type:'substitution',title:'SOSTITUZIONE',detail:`${outgoing?.lastName ?? 'Esce'}  →  ${incoming?.lastName ?? 'Entra'}`,outgoingNumber:outgoing?.shirtNumber,incomingNumber:incoming?.shirtNumber});const pos=this.matchPositions()[action.outgoingId];this.lineup.update(l=>({...l,[slot]:action.incomingId!}));if(pos)this.matchPositions.update(p=>({...p,[action.incomingId!]:pos}));this.changesUsed.update(v=>v+1);this.events.update(e=>[{type:'substitution',minute,description:action.description,outgoingId:action.outgoingId,incomingId:action.incomingId},...e]);}
       else {this.voiceMessage.set(this.changesUsed()>=this.maxChanges?'Hai esaurito i cambi disponibili.':'Il giocatore da sostituire non è in campo.');this.pending.set(null);return;}
     }
-    this.pending.set(null);this.voiceMessage.set('Evento registrato.'); void this.persistMatchState();
+    this.pending.set(null);this.voiceDraft.set('');this.voiceMessage.set(''); void this.persistMatchState();
   }
-  protected cancelAction(): void { this.pending.set(null); this.voiceMessage.set('Evento annullato.'); }
+  protected cancelAction(): void { this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set(''); }
   protected chooseOutgoing(player:PlayerRecord): void { if(this.playerHasRedCard(player)){this.voiceMessage.set('Un giocatore espulso non può essere sostituito. La squadra continua in inferiorità numerica.');return;} this.selectedOutgoingId.set(player.id);this.voiceMessage.set(`Selezionato ${player.lastName}. Ora scegli chi entra dalla panchina.`); }
   protected chooseIncoming(player:PlayerRecord): void {
     const outgoing=this.selectedOutgoingId();if(!outgoing)return;
