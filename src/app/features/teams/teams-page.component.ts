@@ -69,14 +69,46 @@ export class TeamsPageComponent implements OnChanges {
     void this.loadTeams();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {\n    if (changes['launchRequest'] && this.launchRequest && this.launchRequest.token !== this.handledLaunchToken) {\n      this.handledLaunchToken = this.launchRequest.token;\n      void this.launchFromHome(this.launchRequest);\n    }\n  }\n\n  protected get visibleTeams(): TeamRecord[] {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['launchRequest'] && this.launchRequest && this.launchRequest.token !== this.handledLaunchToken) {
+      this.handledLaunchToken = this.launchRequest.token;
+      void this.launchFromHome(this.launchRequest);
+    }
+  }
+
+  protected get visibleTeams(): TeamRecord[] {
     return this.teams().filter((team) => this.showArchived() || !team.isArchived);
   }
 
   protected slots() { return this.pitchSlots[this.formation()]; }
 
   protected expandedTeamName(): string { return this.teams().find(team => team.id === this.expandedRosterId())?.name || 'Partita'; }
-  private async launchFromHome(request: { teamId: string; layoutSlot: 1 | 2; token: number }): Promise<void> {\n    if (!this.teams().length) await this.loadTeams();\n    const team = this.teams().find(item => item.id === request.teamId && !item.isArchived && !!item.seasonId);\n    if (!team) { this.error.set('La squadra selezionata non è disponibile.'); return; }\n    this.expandedRosterId.set(team.id);\n    this.layoutSlot.set(request.layoutSlot);\n    this.activeSlotId.set(null);\n    this.rosterLoading.set(true);\n    const workspaceId = this.auth.workspaceId();\n    if (!workspaceId || !team.seasonId) { this.rosterLoading.set(false); return; }\n    try {\n      this.players.set(await this.playerService.list(workspaceId, this.teams()));\n      const saved = await this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, request.layoutSlot);\n      const validIds = new Set(this.rosterForExpanded().map(player => player.id));\n      const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';\n      this.formation.set(formation);\n      if (saved) {\n        const validSlots = new Set(this.pitchSlots[formation].map(slot => slot.id));\n        this.lineup.set(Object.fromEntries(Object.entries(saved.lineup).filter(([slotId, playerId]) => validSlots.has(slotId) && validIds.has(playerId))));\n        this.shirtPositions.set(saved.shirtPositions || {});\n      } else { this.shirtPositions.set({}); this.autoArrange(); await this.persistTacticalLayout(); }\n      localStorage.setItem('fsm-active-match-team', team.id);\n      this.liveMatch.set(true);\n    } catch (error) { console.error('Unable to launch match from home.', error); this.error.set('Non è stato possibile preparare la partita. Riprova.'); }\n    finally { this.rosterLoading.set(false); }\n  }
+  private async launchFromHome(request: { teamId: string; layoutSlot: 1 | 2; token: number }): Promise<void> {
+    if (!this.teams().length) await this.loadTeams();
+    const team = this.teams().find(item => item.id === request.teamId && !item.isArchived && !!item.seasonId);
+    if (!team) { this.error.set('La squadra selezionata non è disponibile.'); return; }
+    this.expandedRosterId.set(team.id);
+    this.layoutSlot.set(request.layoutSlot);
+    this.activeSlotId.set(null);
+    this.rosterLoading.set(true);
+    const workspaceId = this.auth.workspaceId();
+    if (!workspaceId || !team.seasonId) { this.rosterLoading.set(false); return; }
+    try {
+      this.players.set(await this.playerService.list(workspaceId, this.teams()));
+      const saved = await this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, request.layoutSlot);
+      const validIds = new Set(this.rosterForExpanded().map(player => player.id));
+      const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
+      this.formation.set(formation);
+      if (saved) {
+        const validSlots = new Set(this.pitchSlots[formation].map(slot => slot.id));
+        this.lineup.set(Object.fromEntries(Object.entries(saved.lineup).filter(([slotId, playerId]) => validSlots.has(slotId) && validIds.has(playerId))));
+        this.shirtPositions.set(saved.shirtPositions || {});
+      } else { this.shirtPositions.set({}); this.autoArrange(); await this.persistTacticalLayout(); }
+      localStorage.setItem('fsm-active-match-team', team.id);
+      this.liveMatch.set(true);
+    } catch (error) { console.error('Unable to launch match from home.', error); this.error.set('Non è stato possibile preparare la partita. Riprova.'); }
+    finally { this.rosterLoading.set(false); }
+  }
   protected closeMatch(): void { this.liveMatch.set(false); localStorage.removeItem('fsm-active-match-team'); }
 
   protected playerForSlot(slotId: string): PlayerRecord | undefined {
@@ -93,7 +125,24 @@ export class TeamsPageComponent implements OnChanges {
     return this.rosterForExpanded().filter(player => !starters.has(player.id));
   }
 
-  protected async selectLayoutSlot(slot: 1 | 2): Promise<void> {\n    const team = this.teams().find(item => item.id === this.expandedRosterId());\n    const workspaceId = this.auth.workspaceId();\n    if (!team?.seasonId || !workspaceId || slot === this.layoutSlot()) return;\n    await this.persistTacticalLayout();\n    this.layoutSlot.set(slot);\n    const saved = await this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, slot);\n    const validIds = new Set(this.rosterForExpanded().map(player => player.id));\n    const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';\n    this.formation.set(formation);\n    if (saved) {\n      const validSlots = new Set(this.pitchSlots[formation].map(item => item.id));\n      this.lineup.set(Object.fromEntries(Object.entries(saved.lineup).filter(([id, playerId]) => validSlots.has(id) && validIds.has(playerId))));\n      this.shirtPositions.set(saved.shirtPositions || {});\n    } else { this.shirtPositions.set({}); this.autoArrange(); await this.persistTacticalLayout(); }\n  }\n\n  protected changeFormation(value: string): void {
+  protected async selectLayoutSlot(slot: 1 | 2): Promise<void> {
+    const team = this.teams().find(item => item.id === this.expandedRosterId());
+    const workspaceId = this.auth.workspaceId();
+    if (!team?.seasonId || !workspaceId || slot === this.layoutSlot()) return;
+    await this.persistTacticalLayout();
+    this.layoutSlot.set(slot);
+    const saved = await this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, slot);
+    const validIds = new Set(this.rosterForExpanded().map(player => player.id));
+    const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
+    this.formation.set(formation);
+    if (saved) {
+      const validSlots = new Set(this.pitchSlots[formation].map(item => item.id));
+      this.lineup.set(Object.fromEntries(Object.entries(saved.lineup).filter(([id, playerId]) => validSlots.has(id) && validIds.has(playerId))));
+      this.shirtPositions.set(saved.shirtPositions || {});
+    } else { this.shirtPositions.set({}); this.autoArrange(); await this.persistTacticalLayout(); }
+  }
+
+  protected changeFormation(value: string): void {
     this.formation.set(value);
     this.activeSlotId.set(null);
     this.lineup.update(current => Object.fromEntries(
@@ -221,7 +270,8 @@ export class TeamsPageComponent implements OnChanges {
     try {
       this.players.set(await this.playerService.list(workspaceId, this.teams()));
       const seasonId = team.seasonId;
-      this.layoutSlot.set(1);\n      const saved = seasonId ? await this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId, 1) : null;
+      this.layoutSlot.set(1);
+      const saved = seasonId ? await this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId, 1) : null;
       const validPlayerIds = new Set(this.rosterForExpanded().map(player => player.id));
       const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
       this.formation.set(formation);
