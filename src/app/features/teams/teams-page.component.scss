@@ -153,3 +153,6 @@
   .player-picker-overlay { align-items: end; padding: 0; }
   .player-picker-dialog { width: 100%; max-height: min(78dvh, 78vh); padding: 20px 17px max(18px, env(safe-area-inset-bottom)); border-radius: 20px 20px 0 0; border-bottom: 0; }
 }
+
+.start-live-match-button{min-height:42px;padding:0 15px;border:0;border-radius:9px;background:#a9edbd;color:#102018;font:inherit;font-size:12px;font-weight:900;white-space:nowrap;cursor:pointer}
+@media(max-width:600px){.tactical-toolbar{align-items:stretch}.start-live-match-button{width:100%}}
