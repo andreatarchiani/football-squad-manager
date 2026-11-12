@@ -207,14 +207,18 @@ export class HomePageComponent {
       const data = profile?.exists() ? profile.data() : {};
       const role = String(data?.['accountRole'] ?? 'Allenatore');
       this.accountRole.set(['Società', 'Allenatore', 'Collaboratore', 'Altro'].includes(role) ? role : 'Allenatore');
-      const hasSavedPreference = typeof data?.['defaultTeamId'] === 'string';
+      const savedPreference = String(data?.['defaultTeamId'] ?? '');
       const localPreference = uid && typeof localStorage !== 'undefined' ? localStorage.getItem(this.selectionStorageKey(uid)) ?? '' : '';
-      const preferred = hasSavedPreference ? String(data['defaultTeamId']) : localPreference;
-      const selected = teams.some(team => team.id === preferred && !team.isArchived) ? preferred : '';
+      const isSelectable = (id: string) => teams.some(team => team.id === id && !team.isArchived);
+      const selected = isSelectable(savedPreference) ? savedPreference : isSelectable(localPreference) ? localPreference : '';
       this.selectedTeamId.set(selected);
       if (uid && typeof localStorage !== 'undefined') {
         if (selected) localStorage.setItem(this.selectionStorageKey(uid), selected);
         else localStorage.removeItem(this.selectionStorageKey(uid));
+      }
+      if (selected && selected !== savedPreference && uid && this.db) {
+        try { await setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: selected, updatedAt: new Date() }, { merge: true }); }
+        catch (error) { console.error('Unable to restore default team preference.', error); }
       }
       await this.loadPreview();
     } catch (error) {
