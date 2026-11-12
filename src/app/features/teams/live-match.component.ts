@@ -34,6 +34,14 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly elapsedSeconds = signal(0);
   protected readonly running = signal(false);
   protected readonly finished = signal(false);
+  protected readonly finishReportOpen = signal(false);
+  protected readonly editingEvent = signal<MatchEvent | null>(null);
+  protected readonly editMinute = signal('0');
+  protected readonly editPlayerId = signal('');
+  protected readonly editAssistPlayerId = signal('');
+  protected readonly editOutgoingId = signal('');
+  protected readonly editIncomingId = signal('');
+  protected readonly editDescription = signal('');
   protected readonly benchOpen = signal(false);
   protected readonly selectedOutgoingId = signal<string | null>(null);
   protected readonly pending = signal<PendingAction | null>(null);
@@ -86,7 +94,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       const saved = await this.teamService.loadLiveMatch(this.workspaceId(), this.teamId(), this.seasonId());
       if (saved) {
         this.elapsedSeconds.set(Math.max(0, Math.min(5400, saved.elapsedSeconds)));
-        this.finished.set(saved.finished); this.events.set(saved.events); this.goals.set(saved.goals); this.assists.set(saved.assists);
+        this.finished.set(saved.finished); this.finishReportOpen.set(saved.finished); this.events.set(saved.events); this.goals.set(saved.goals); this.assists.set(saved.assists);
         this.yellowCards.set(saved.yellowCards); this.redCards.set(saved.redCards); this.lineup.set(saved.lineup);
         this.matchFormation.set(this.formations[saved.formation] ? saved.formation : f); this.matchPositions.set(saved.positions);
         this.changesUsed.set(Math.max(0, Math.min(this.maxChanges, saved.changesUsed)));
@@ -159,8 +167,142 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected get minute(): number { return Math.min(90, Math.floor(this.elapsedSeconds()/60)); }
   protected get clock(): string { const m=Math.floor(this.elapsedSeconds()/60),s=this.elapsedSeconds()%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
   protected get score(): string { return String(Object.values(this.goals()).reduce((a,b)=>a+b,0)); }
-  protected start(): void { if(this.finished()||this.running()) return; this.running.set(true); this.timer=setInterval(()=>{this.elapsedSeconds.update(v=>Math.min(5400,v+1));if(this.elapsedSeconds()>=5400){if(this.timer){clearInterval(this.timer);this.timer=null;}this.running.set(false);this.finished.set(true);void this.persistMatchState();} else void this.persistMatchState();},1000); void this.persistMatchState(); }
+  protected start(): void { if(this.finished()||this.running()) return; this.running.set(true); this.timer=setInterval(()=>{this.elapsedSeconds.update(v=>Math.min(5400,v+1));if(this.elapsedSeconds()>=5400){if(this.timer){clearInterval(this.timer);this.timer=null;}this.running.set(false);this.finished.set(true);this.finishReportOpen.set(true);void this.persistMatchState();} else void this.persistMatchState();},1000); void this.persistMatchState(); }
   protected pause(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.running.set(false); void this.persistMatchState(); }
+
+  protected finishMatch(): void {
+    if (this.finished()) { this.finishReportOpen.set(true); return; }
+    if (this.timer) { clearInterval(this.timer); this.timer = null; }
+    this.running.set(false);
+    this.finished.set(true);
+    this.finishReportOpen.set(true);
+    this.voice.stop();
+    this.voiceListening.set(false);
+    this.voiceMessage.set('');
+    void this.persistMatchState();
+  }
+
+  protected beginEditEvent(event: MatchEvent): void {
+    this.editingEvent.set(event);
+    this.editMinute.set(String(event.minute));
+    this.editPlayerId.set(event.playerId ?? '');
+    this.editAssistPlayerId.set(event.assistPlayerId ?? '');
+    this.editOutgoingId.set(event.outgoingId ?? '');
+    this.editIncomingId.set(event.incomingId ?? '');
+    this.editDescription.set(event.description);
+  }
+
+  protected cancelEditEvent(): void { this.editingEvent.set(null); }
+
+  protected async saveEditedEvent(): Promise<void> {
+    const current = this.editingEvent();
+    if (!current) return;
+    const minute = Math.max(0, Math.min(90, Math.floor(Number(this.editMinute()) || 0)));
+    const updated: MatchEvent = { ...current, minute };
+    if (current.type === 'goal') {
+      const scorer = this.player(this.editPlayerId());
+      const assister = this.player(this.editAssistPlayerId());
+      if (!scorer || (this.editAssistPlayerId() && !assister) || scorer.id === assister?.id) {
+        this.voiceMessage.set('Seleziona un marcatore valido e un assistente diverso.'); return;
+      }
+      updated.playerId = scorer.id;
+      updated.assistPlayerId = assister?.id;
+      updated.description = `Gol di #${scorer.shirtNumber} ${scorer.firstName} ${scorer.lastName}${assister ? ` · assist di #${assister.shirtNumber} ${assister.lastName}` : ''}`;
+    } else if (current.type === 'yellow-card' || current.type === 'red-card') {
+      const booked = this.player(this.editPlayerId());
+      if (!booked) { this.voiceMessage.set('Seleziona il giocatore dell’evento.'); return; }
+      updated.playerId = booked.id;
+      updated.description = current.type === 'yellow-card'
+        ? `Ammonizione a #${booked.shirtNumber} ${booked.firstName} ${booked.lastName}${/seconda ammonizione/i.test(current.description) ? ' (seconda ammonizione)' : ''}`
+        : `Espulsione di #${booked.shirtNumber} ${booked.firstName} ${booked.lastName}`;
+    } else if (current.type === 'substitution') {
+      const outgoing = this.player(this.editOutgoingId()), incoming = this.player(this.editIncomingId());
+      if (!outgoing || !incoming || outgoing.id === incoming.id) { this.voiceMessage.set('Seleziona due giocatori diversi per la sostituzione.'); return; }
+      updated.outgoingId = outgoing.id; updated.incomingId = incoming.id;
+      updated.description = `Cambio: esce #${outgoing.shirtNumber} ${outgoing.lastName}, entra #${incoming.shirtNumber} ${incoming.lastName}`;
+    } else {
+      updated.description = this.editDescription().trim() || 'Cambio modulo';
+    }
+    const previous = this.events();
+    const next = previous.map(event => event === current ? updated : event);
+    this.editingEvent.set(null);
+    await this.applyEventChanges(previous, next);
+    this.voiceMessage.set('Evento modificato.');
+  }
+
+  protected async deleteMatchEvent(event: MatchEvent): Promise<void> {
+    const previous = this.events();
+    let next = previous.filter(item => item !== event);
+    if (event.type === 'yellow-card' && /seconda ammonizione/i.test(event.description)) {
+      next = next.filter(item => !(item.type === 'red-card' && item.playerId === event.playerId && item.minute === event.minute));
+    }
+    if (event.type === 'red-card' && /seconda ammonizione/i.test(event.description)) {
+      next = next.filter(item => !(item.type === 'yellow-card' && item.playerId === event.playerId && item.minute === event.minute && /seconda ammonizione/i.test(item.description)));
+    }
+    await this.applyEventChanges(previous, next);
+    this.voiceMessage.set('Evento eliminato.');
+  }
+
+  private async applyEventChanges(previous: MatchEvent[], next: MatchEvent[]): Promise<void> {
+    const count = (items: MatchEvent[], type: MatchEventType, field: 'playerId' | 'assistPlayerId') => {
+      const result: Record<string, number> = {};
+      for (const item of items) if (item.type === type && item[field]) {
+        const id = item[field]!;
+        result[id] = (result[id] ?? 0) + 1;
+      }
+      return result;
+    };
+    const oldGoals = count(previous, 'goal', 'playerId'), newGoals = count(next, 'goal', 'playerId');
+    const oldAssists = count(previous, 'goal', 'assistPlayerId'), newAssists = count(next, 'goal', 'assistPlayerId');
+    const oldYellows = count(previous, 'yellow-card', 'playerId'), newYellows = count(next, 'yellow-card', 'playerId');
+    const oldReds = [...new Set(previous.filter(e => e.type === 'red-card' && e.playerId).map(e => e.playerId!))];
+    const newReds = [...new Set(next.filter(e => e.type === 'red-card' && e.playerId).map(e => e.playerId!))];
+    const workspaceId = this.auth.workspaceId();
+    if (workspaceId) {
+      const changes: Promise<void>[] = [];
+      for (const id of new Set([...Object.keys(oldGoals), ...Object.keys(newGoals)])) {
+        const delta = (newGoals[id] ?? 0) - (oldGoals[id] ?? 0);
+        for (let i = 0; i < Math.abs(delta); i++) changes.push(delta > 0 ? this.playerService.recordGoal(workspaceId, id) : this.playerService.removeGoal(workspaceId, id));
+      }
+      for (const id of new Set([...Object.keys(oldAssists), ...Object.keys(newAssists)])) {
+        const delta = (newAssists[id] ?? 0) - (oldAssists[id] ?? 0);
+        for (let i = 0; i < Math.abs(delta); i++) changes.push(delta > 0 ? this.playerService.recordAssist(workspaceId, id) : this.playerService.removeAssist(workspaceId, id));
+      }
+      await Promise.all(changes);
+    }
+    this.events.set(next);
+    this.goals.set(newGoals); this.assists.set(newAssists); this.yellowCards.set(newYellows); this.redCards.set(newReds);
+    this.changesUsed.set(Math.min(this.maxChanges, next.filter(e => e.type === 'substitution').length));
+    await this.persistMatchState();
+  }
+
+  protected async shareMatchReport(): Promise<void> {
+    const chronological = [...this.events()].sort((a, b) => a.minute - b.minute);
+    const lines = chronological.length ? chronological.map(event => `${event.minute}′ — ${event.description}`) : ['Nessun evento registrato.'];
+    const report = [`REPORT PARTITA · ${this.teamName()}`, `Gol squadra: ${this.score}`, `Durata: ${this.clock}`, '', 'CRONACA', ...lines].join('\\n');
+    try {
+      if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+        await navigator.share({ title: `Report partita · ${this.teamName()}`, text: report });
+        this.voiceMessage.set('Resoconto condiviso.');
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(report);
+        this.voiceMessage.set('Resoconto copiato: puoi incollarlo nella chat o nell’app che preferisci.');
+      } else {
+        this.voiceMessage.set('La condivisione non è disponibile su questo dispositivo.');
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return;
+      this.voiceMessage.set('Non è stato possibile condividere il resoconto.');
+    }
+  }
+
+  protected updateEditMinute(value: string): void { this.editMinute.set(value); }
+  protected updateEditPlayer(value: string): void { this.editPlayerId.set(value); }
+  protected updateEditAssist(value: string): void { this.editAssistPlayerId.set(value); }
+  protected updateEditOutgoing(value: string): void { this.editOutgoingId.set(value); }
+  protected updateEditIncoming(value: string): void { this.editIncomingId.set(value); }
+  protected updateEditDescription(value: string): void { this.editDescription.set(value); }
+  protected chronologicalEvents(): MatchEvent[] { return [...this.events()].sort((a, b) => a.minute - b.minute); }
   protected async close(): Promise<void> {
     if(this.exitingMatch) return;
     if(this.timer){clearInterval(this.timer);this.timer=null;}

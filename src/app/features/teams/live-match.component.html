@@ -12,6 +12,8 @@
       @if (!running() && !finished()) { <button type="button" class="start-match" (click)="start()">{{ elapsedSeconds() ? '▶ Riprendi' : '▶ Avvia partita' }}</button> }
       @if (running()) { <button type="button" class="pause-match" (click)="pause()">Ⅱ Pausa</button> }
       <button type="button" class="voice-match" [class.listening]="voiceListening()" (click)="startVoice()">{{ voiceListening() ? '● Ti ascolto…' : '🎙 Assistente vocale' }}</button>
+      @if (!finished()) { <button type="button" class="finish-match" (click)="finishMatch()">■ Fine partita</button> }
+      @else { <button type="button" class="finish-match" (click)="finishReportOpen.set(true)">Riepilogo finale</button> }
     </div>
     @if (voiceHelpOpen()) {
       <section class="voice-command-guide" aria-label="Comandi vocali disponibili">
@@ -98,6 +100,55 @@
     @for (event of events(); track $index) { <div class="match-event"><b>{{ event.minute }}′</b><span>{{ event.description }}</span></div> }
     @empty { <p class="events-empty">Gli eventi registrati durante la partita compariranno qui.</p> }
   </section>
+  @if (finishReportOpen()) {
+    <div class="match-report-backdrop">
+      <section class="match-report-panel" role="dialog" aria-modal="true" aria-labelledby="match-report-title">
+        <header class="match-report-header">
+          <div><span>FINE PARTITA</span><h2 id="match-report-title">{{ teamName() }}</h2><p>Resoconto completo · {{ clock }}</p></div>
+          <button type="button" aria-label="Chiudi partita e azzera" (click)="close()">✕</button>
+        </header>
+        <div class="match-report-stats">
+          <article><strong>{{ score }}</strong><span>Gol squadra</span></article>
+          <article><strong>{{ events().length }}</strong><span>Eventi registrati</span></article>
+          <article><strong>{{ clock }}</strong><span>Tempo giocato</span></article>
+        </div>
+        <div class="match-report-events-heading"><strong>Cronaca della partita</strong><span>Puoi modificare o eliminare ogni evento</span></div>
+        <div class="match-report-events">
+          @for (event of chronologicalEvents(); track $index) {
+            <article class="match-report-event">
+              <time>{{ event.minute }}′</time>
+              <p>{{ event.description }}</p>
+              <div><button type="button" (click)="beginEditEvent(event)">Modifica</button><button type="button" class="delete-event" (click)="deleteMatchEvent(event)">Elimina</button></div>
+            </article>
+          } @empty { <p class="events-empty">Nessun evento registrato durante la partita.</p> }
+        </div>
+        <footer class="match-report-actions">
+          <button type="button" class="share-match-report" (click)="shareMatchReport()">↗ Condividi resoconto</button>
+          <button type="button" class="exit-match-report" (click)="close()">Esci e azzera partita</button>
+        </footer>
+      </section>
+    </div>
+  }
+  @if (editingEvent(); as event) {
+    <div class="match-edit-backdrop">
+      <section class="match-edit-panel" role="dialog" aria-modal="true" aria-labelledby="match-edit-title">
+        <h2 id="match-edit-title">Modifica evento</h2>
+        <label>Minuto <input type="number" min="0" max="90" [value]="editMinute()" (input)="updateEditMinute($any($event.target).value)"></label>
+        @if (event.type === 'goal') {
+          <label>Marcatore <select [value]="editPlayerId()" (change)="updateEditPlayer($any($event.target).value)"><option value="">Seleziona giocatore</option>@for (player of players(); track player.id) { <option [value]="player.id">#{{ player.shirtNumber }} · {{ player.firstName }} {{ player.lastName }}</option> }</select></label>
+          <label>Assist (facoltativo) <select [value]="editAssistPlayerId()" (change)="updateEditAssist($any($event.target).value)"><option value="">Nessun assist</option>@for (player of players(); track player.id) { <option [value]="player.id">#{{ player.shirtNumber }} · {{ player.firstName }} {{ player.lastName }}</option> }</select></label>
+        } @else if (event.type === 'yellow-card' || event.type === 'red-card') {
+          <label>Giocatore <select [value]="editPlayerId()" (change)="updateEditPlayer($any($event.target).value)"><option value="">Seleziona giocatore</option>@for (player of players(); track player.id) { <option [value]="player.id">#{{ player.shirtNumber }} · {{ player.firstName }} {{ player.lastName }}</option> }</select></label>
+        } @else if (event.type === 'substitution') {
+          <label>Giocatore che esce <select [value]="editOutgoingId()" (change)="updateEditOutgoing($any($event.target).value)"><option value="">Seleziona giocatore</option>@for (player of players(); track player.id) { <option [value]="player.id">#{{ player.shirtNumber }} · {{ player.firstName }} {{ player.lastName }}</option> }</select></label>
+          <label>Giocatore che entra <select [value]="editIncomingId()" (change)="updateEditIncoming($any($event.target).value)"><option value="">Seleziona giocatore</option>@for (player of players(); track player.id) { <option [value]="player.id">#{{ player.shirtNumber }} · {{ player.firstName }} {{ player.lastName }}</option> }</select></label>
+        } @else {
+          <label>Descrizione <textarea rows="3" [value]="editDescription()" (input)="updateEditDescription($any($event.target).value)"></textarea></label>
+        }
+        <div class="match-edit-actions"><button type="button" (click)="cancelEditEvent()">Annulla</button><button type="button" (click)="saveEditedEvent()">Salva modifiche</button></div>
+      </section>
+    </div>
+  }
   @if (pending(); as action) {
     <div class="match-confirm-overlay">
       <section class="match-confirm" role="dialog" aria-modal="true" aria-labelledby="match-confirm-title">
