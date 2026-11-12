@@ -149,7 +149,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected get minute(): number { return Math.min(90, Math.floor(this.elapsedSeconds()/60)); }
   protected get clock(): string { const m=Math.floor(this.elapsedSeconds()/60),s=this.elapsedSeconds()%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
   protected get score(): string { return String(Object.values(this.goals()).reduce((a,b)=>a+b,0)); }
-  protected start(): void { if(this.finished()||this.running()) return; this.running.set(true); this.timer=setInterval(()=>{this.elapsedSeconds.update(v=>Math.min(5400,v+1));if(this.elapsedSeconds()>=5400){this.pause();this.finished.set(true);} else void this.persistMatchState();},1000); void this.persistMatchState(); }
+  protected start(): void { if(this.finished()||this.running()) return; this.running.set(true); this.timer=setInterval(()=>{this.elapsedSeconds.update(v=>Math.min(5400,v+1));if(this.elapsedSeconds()>=5400){if(this.timer){clearInterval(this.timer);this.timer=null;}this.running.set(false);this.finished.set(true);void this.persistMatchState();} else void this.persistMatchState();},1000); void this.persistMatchState(); }
   protected pause(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.running.set(false); void this.persistMatchState(); }
   protected close(): void { this.pause(); this.voice.stop(); this.voiceListening.set(false); this.closematch.emit(); }
   protected startVoice(): void {
