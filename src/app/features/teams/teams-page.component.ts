@@ -30,6 +30,7 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly layoutSaving = signal(false);
   private layoutSaveQueue: Promise<void> = Promise.resolve();
   protected readonly formation = signal('4-3-3');
+  protected readonly formationDropdownOpen = signal(false);
   protected readonly lineup = signal<Record<string, string>>({});
   protected readonly activeSlotId = signal<string | null>(null);
   protected readonly liveMatch = signal(false);
