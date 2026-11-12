@@ -4,7 +4,7 @@ import { VoiceRecognitionService } from '../../core/voice/voice-recognition.serv
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { PlayerService } from '../players/player.service';
 
-type MatchEventType = 'goal' | 'red-card' | 'substitution';
+type MatchEventType = 'goal' | 'red-card' | 'substitution' | 'formation';
 interface MatchEvent { type: MatchEventType; minute: number; description: string; playerId?: string; outgoingId?: string; incomingId?: string; }
 interface PendingAction { type: MatchEventType; playerId?: string; outgoingId?: string; incomingId?: string; description: string; }
 
@@ -35,6 +35,9 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly goals = signal<Record<string, number>>({});
   protected readonly redCards = signal<string[]>([]);
   protected readonly lineup = signal<Record<string, string>>({});
+  protected readonly matchFormation = signal('4-3-3');
+  protected readonly matchPositions = signal<Record<string, { x: number; y: number }>>({});
+  private draggingPlayerId: string | null = null;
   protected readonly voiceListening = signal(false);
   protected readonly voiceMessage = signal('');
   protected readonly changesUsed = signal(0);
@@ -56,19 +59,19 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     ]
   };
 
-  ngOnInit(): void { this.lineup.set({...this.initialLineup()}); }
+  ngOnInit(): void { this.lineup.set({...this.initialLineup()}); const f = this.formations[this.formation()] ? this.formation() : '4-3-3'; this.matchFormation.set(f); const p: Record<string, {x:number;y:number}> = {}; for (const slot of this.formations[f]) { const id=this.initialLineup()[slot.id]; if(id) p[id]=this.initialPositions()[id] ?? {x:slot.x,y:slot.y}; } this.matchPositions.set(p); }
   ngOnDestroy(): void { this.pause(); this.voice.stop(); }
 
   protected slots() {
-    const formationSlots = this.formations[this.formation()] ?? this.formations['4-3-3'];
-    const savedPositions = this.initialPositions();
-    const currentLineup = this.lineup();
-    return formationSlots.map(slot => {
-      const playerId = currentLineup[slot.id];
-      const saved = playerId ? savedPositions[playerId] : undefined;
-      return saved ? { ...slot, x: Math.max(9, Math.min(91, saved.x)), y: Math.max(9, Math.min(91, saved.y)) } : slot;
-    });
+    const formationSlots = this.formations[this.matchFormation()] ?? this.formations['4-3-3'];
+    const currentLineup = this.lineup(); const positions = this.matchPositions();
+    return formationSlots.map(slot => { const playerId = currentLineup[slot.id]; const saved = playerId ? positions[playerId] : undefined; return saved ? { ...slot, x: Math.max(9, Math.min(91, saved.x)), y: Math.max(9, Math.min(91, saved.y)) } : slot; });
   }
+  protected formationOptions(): string[] { return Object.keys(this.formations); }
+  protected changeMatchFormation(next: string): void { if (!this.formations[next] || next === this.matchFormation()) return; const previous=this.matchFormation(); const ids=this.slots().map(slot=>this.lineup()[slot.id]).filter((id): id is string => !!id && !this.redCards().includes(id)); const lineup: Record<string,string>={}; const positions: Record<string,{x:number;y:number}>={}; this.formations[next].forEach((slot,i)=>{const id=ids[i];if(id){lineup[slot.id]=id;positions[id]={x:slot.x,y:slot.y};}}); this.lineup.set(lineup);this.matchPositions.set(positions);this.matchFormation.set(next);this.selectedOutgoingId.set(null);this.events.update(items=>[{type:'formation',minute:this.minute,description:'Cambio modulo: '+previous+' → '+next},...items]);this.voiceMessage.set('Modulo cambiato in '+next+'. Evento registrato al '+this.minute+'′.'); }
+  protected startShirtDrag(event: PointerEvent, id: string): void { if(event.button!==0)return;event.preventDefault();this.draggingPlayerId=id;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId); }
+  protected moveShirtDrag(event: PointerEvent): void { if(!this.draggingPlayerId)return;const pitch=event.currentTarget as HTMLElement;const rect=pitch.getBoundingClientRect();const x=Math.max(9,Math.min(91,((event.clientX-rect.left)/rect.width)*100));const y=Math.max(9,Math.min(91,((event.clientY-rect.top)/rect.height)*100));const id=this.draggingPlayerId;this.matchPositions.update(current=>({...current,[id]:{x,y}})); }
+  protected endShirtDrag(): void { this.draggingPlayerId=null; }
   protected player(id: string | undefined): PlayerRecord | undefined { return this.players().find(p => p.id === id); }
   protected playerInSlot(slotId: string): PlayerRecord | undefined { return this.player(this.lineup()[slotId]); }
   protected onField(): PlayerRecord[] { return Object.values(this.lineup()).filter(Boolean).map(id => this.player(id)).filter((p): p is PlayerRecord => !!p && !this.redCards().includes(p.id)); }
@@ -112,7 +115,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     if(action.type==='red-card'&&action.playerId){this.redCards.update(ids=>[...ids,action.playerId!]);this.lineup.update(l=>Object.fromEntries(Object.entries(l).filter(([,id])=>id!==action.playerId)));this.events.update(e=>[{type:'red-card',minute,description:action.description,playerId:action.playerId},...e]);}
     if(action.type==='substitution'&&action.outgoingId&&action.incomingId){
       const slot=Object.entries(this.lineup()).find(([,id])=>id===action.outgoingId)?.[0];
-      if(slot&&this.changesUsed()<this.maxChanges){this.lineup.update(l=>({...l,[slot]:action.incomingId!}));this.changesUsed.update(v=>v+1);this.events.update(e=>[{type:'substitution',minute,description:action.description,outgoingId:action.outgoingId,incomingId:action.incomingId},...e]);}
+      if(slot&&this.changesUsed()<this.maxChanges){const pos=this.matchPositions()[action.outgoingId];this.lineup.update(l=>({...l,[slot]:action.incomingId!}));if(pos)this.matchPositions.update(p=>({...p,[action.incomingId!]:pos}));this.changesUsed.update(v=>v+1);this.events.update(e=>[{type:'substitution',minute,description:action.description,outgoingId:action.outgoingId,incomingId:action.incomingId},...e]);}
       else {this.voiceMessage.set(this.changesUsed()>=this.maxChanges?'Hai esaurito i cambi disponibili.':'Il giocatore da sostituire non è in campo.');this.pending.set(null);return;}
     }
     this.pending.set(null);this.voiceMessage.set('Evento registrato.');
