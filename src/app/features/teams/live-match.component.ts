@@ -302,6 +302,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected updateEditOutgoing(value: string): void { this.editOutgoingId.set(value); }
   protected updateEditIncoming(value: string): void { this.editIncomingId.set(value); }
   protected updateEditDescription(value: string): void { this.editDescription.set(value); }
+  protected chronologicalEvents(): MatchEvent[] { return [...this.events()].sort((a, b) => a.minute - b.minute); }
   protected async close(): Promise<void> {
     if(this.exitingMatch) return;
     if(this.timer){clearInterval(this.timer);this.timer=null;}
