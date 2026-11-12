@@ -104,6 +104,11 @@ export class TeamsPageComponent implements OnChanges {
         this.lineup.set(Object.fromEntries(Object.entries(saved.lineup).filter(([slotId, playerId]) => validSlots.has(slotId) && validIds.has(playerId))));
         this.shirtPositions.set(saved.shirtPositions || {});
       } else { this.shirtPositions.set({}); this.autoArrange(); await this.persistTacticalLayout(); }
+      await this.teamsService.saveLiveMatch(workspaceId, team.id, team.seasonId, {
+        elapsedSeconds: 0, running: true, finished: false, events: [], goals: {}, assists: {},
+        yellowCards: {}, redCards: [], lineup: { ...this.lineup() }, formation: this.formation(),
+        positions: { ...this.shirtPositions() }, changesUsed: 0
+      });
       localStorage.setItem('fsm-active-match-team', team.id);
       this.liveMatch.set(true);
     } catch (error) { console.error('Unable to launch match from home.', error); this.error.set('Non è stato possibile preparare la partita. Riprova.'); }
