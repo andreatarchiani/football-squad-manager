@@ -61,6 +61,12 @@
       @for (team of visibleTeams; track team.id) {
         <article class="team-card" [class.archived]="team.isArchived">
           <div class="team-emblem">⚽</div>
+          <div class="record-icon-actions" aria-label="Azioni squadra">
+            <button class="icon-action archive-action" type="button" (click)="toggleArchive(team)" [attr.aria-label]="team.isArchived ? 'Ripristina squadra' : 'Archivia squadra'" [title]="team.isArchived ? 'Ripristina squadra' : 'Archivia squadra'">
+              @if (team.isArchived) { <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v4H3zM5 8v12h14V8M9 12h6M12 10v4"/></svg> } @else { <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v4H3zM5 8v12h14V8M9 12h6"/></svg> }
+            </button>
+            <button class="icon-action delete-action" type="button" (click)="deleteTeam(team)" aria-label="Elimina squadra" title="Elimina squadra"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 14h12l1-14M9 7V4h6v3"/></svg></button>
+          </div>
           <div class="team-details">
             <h3>{{ team.name }} @if (team.isArchived) { <span class="archived-label">ARCHIVIATA</span> }</h3>
             <p>{{ team.clubName || 'Società non indicata' }}<span>•</span>{{ team.category || 'Categoria non indicata' }}</p>
@@ -69,8 +75,6 @@
           <div class="team-actions">
             <button class="secondary-button" type="button" (click)="toggleRoster(team)" [attr.aria-expanded]="expandedRosterId() === team.id">{{ expandedRosterId() === team.id ? 'Chiudi rosa' : 'Rosa' }}</button>
             <button class="secondary-button" type="button" (click)="openEdit(team)">Modifica</button>
-            <button class="text-button" type="button" (click)="toggleArchive(team)">{{ team.isArchived ? 'Ripristina' : 'Archivia' }}</button>
-            <button class="text-button danger-text" type="button" (click)="deleteTeam(team)">Elimina</button>
           </div>
         </article>
         @if (expandedRosterId() === team.id) {
