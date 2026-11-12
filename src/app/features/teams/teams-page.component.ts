@@ -18,7 +18,6 @@ export class TeamsPageComponent implements OnChanges {
   @Input() launchRequest: { team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; token: number } | null = null;
   @Output() readonly matchClosed = new EventEmitter<void>();
   private handledLaunchToken = 0;
-  private readonly initialLoad: Promise<void>;
   protected readonly layoutSlot = signal<1 | 2>(1);
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamsService = inject(TeamService);
@@ -70,7 +69,7 @@ export class TeamsPageComponent implements OnChanges {
   protected form: TeamInput = this.emptyForm();
 
   constructor() {
-    this.initialLoad = this.loadTeams();
+    void this.loadTeams();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
