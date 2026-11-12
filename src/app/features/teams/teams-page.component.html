@@ -162,6 +162,6 @@
     }
   }
   @if (liveMatch()) {
-    <fsm-live-match [teamName]="expandedTeamName()" [players]="rosterForExpanded()" [initialLineup]="lineup()" [formation]="formation()" (closematch)="closeMatch()" />
+    <fsm-live-match [teamName]="expandedTeamName()" [players]="rosterForExpanded()" [initialLineup]="lineup()" [formation]="formation()" [initialPositions]="shirtPositions()" (closematch)="closeMatch()" />
   }
 </section>
