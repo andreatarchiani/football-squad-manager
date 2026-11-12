@@ -32,6 +32,7 @@ export interface TacticalLayout {
 
 export interface LiveMatchState {
   elapsedSeconds: number;
+  savedAtMs: number;
   running: boolean;
   finished: boolean;
   events: { type: 'goal' | 'yellow-card' | 'red-card' | 'substitution' | 'formation'; minute: number; description: string; playerId?: string; outgoingId?: string; incomingId?: string }[];
@@ -109,7 +110,7 @@ export class TeamService {
     if (!snapshot.exists()) return null;
     const data = snapshot.data();
     return {
-      elapsedSeconds: Number(data['elapsedSeconds'] ?? 0), running: data['running'] === true,
+      elapsedSeconds: Number(data['elapsedSeconds'] ?? 0), savedAtMs: Number(data['savedAtMs'] ?? Date.now()), running: data['running'] === true,
       finished: data['finished'] === true, events: (data['events'] ?? []) as LiveMatchState['events'],
       goals: (data['goals'] ?? {}) as Record<string, number>, assists: (data['assists'] ?? {}) as Record<string, number>,
       yellowCards: (data['yellowCards'] ?? {}) as Record<string, number>, redCards: (data['redCards'] ?? []) as string[],
