@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, input, OnDestroy, signal } from '@angular/core';
 import type { PlayerRecord } from '../players/player.service';
 import { VoiceRecognitionService } from '../../core/voice/voice-recognition.service';
+import { FirebaseAuthService } from '../../core/firebase-auth.service';
+import { PlayerService } from '../players/player.service';
 
 type MatchEventType = 'goal' | 'red-card' | 'substitution';
 interface MatchEvent { type: MatchEventType; minute: number; description: string; playerId?: string; outgoingId?: string; incomingId?: string; }
@@ -19,6 +21,8 @@ export class LiveMatchComponent implements OnDestroy {
   readonly initialLineup = input.required<Record<string, string>>();
   readonly formation = input.required<string>();
   private readonly voice = inject(VoiceRecognitionService);
+  private readonly auth = inject(FirebaseAuthService);
+  private readonly playerService = inject(PlayerService);
   protected readonly elapsedSeconds = signal(0);
   protected readonly running = signal(false);
   protected readonly finished = signal(false);
@@ -93,7 +97,7 @@ export class LiveMatchComponent implements OnDestroy {
   protected confirmAction(): void {
     const action=this.pending();if(!action)return;
     const minute=this.minute;
-    if(action.type==='goal'&&action.playerId){this.goals.update(g=>({...g,[action.playerId!]: (g[action.playerId!]??0)+1}));this.events.update(e=>[{type:'goal',minute,description:action.description,playerId:action.playerId},...e]);}
+    if(action.type==='goal'&&action.playerId){this.goals.update(g=>({...g,[action.playerId!]: (g[action.playerId!]??0)+1}));this.events.update(e=>[{type:'goal',minute,description:action.description,playerId:action.playerId},...e]);const workspaceId=this.auth.workspaceId();if(workspaceId)void this.playerService.recordGoal(workspaceId,action.playerId).catch(error=>{console.error('Unable to save player goal.',error);this.voiceMessage.set('Gol registrato nella partita, ma non è stato possibile aggiornare il totale del giocatore.');});}
     if(action.type==='red-card'&&action.playerId){this.redCards.update(ids=>[...ids,action.playerId!]);this.lineup.update(l=>Object.fromEntries(Object.entries(l).filter(([,id])=>id!==action.playerId)));this.events.update(e=>[{type:'red-card',minute,description:action.description,playerId:action.playerId},...e]);}
     if(action.type==='substitution'&&action.outgoingId&&action.incomingId){
       const slot=Object.entries(this.lineup()).find(([,id])=>id===action.outgoingId)?.[0];
