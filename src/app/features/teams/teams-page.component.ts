@@ -22,6 +22,8 @@ export class TeamsPageComponent {
   protected readonly players = signal<PlayerRecord[]>([]);
   protected readonly expandedRosterId = signal<string | null>(null);
   protected readonly rosterLoading = signal(false);
+  protected readonly layoutSaving = signal(false);
+  private layoutSaveQueue: Promise<void> = Promise.resolve();
   protected readonly formation = signal('4-3-3');
   protected readonly lineup = signal<Record<string, string>>({});
   protected readonly activeSlotId = signal<string | null>(null);
@@ -92,6 +94,7 @@ export class TeamsPageComponent {
     this.lineup.update(current => Object.fromEntries(
       Object.entries(current).filter(([id]) => this.pitchSlots[value].some(slot => slot.id === id))
     ));
+    void this.persistTacticalLayout();
   }
 
   protected assignPlayer(slotId: string, playerId: string): void {
@@ -103,6 +106,7 @@ export class TeamsPageComponent {
       return next;
     });
     this.activeSlotId.set(null);
+    void this.persistTacticalLayout();
   }
 
   protected togglePlayerPicker(slotId: string): void {
@@ -118,11 +122,13 @@ export class TeamsPageComponent {
   }
 
   protected positionForSlot(slot: { id: string; x: number; y: number }): { x: number; y: number } {
-    return this.shirtPositions()[slot.id] ?? { x: slot.x, y: slot.y };
+    const playerId = this.lineup()[slot.id];
+    return (playerId && this.shirtPositions()[playerId]) || { x: slot.x, y: slot.y };
   }
 
   protected startDrag(event: PointerEvent, slotId: string): void {
     if (event.button !== 0) return;
+    if (!this.lineup()[slotId]) return;
     this.dragSlotId = slotId;
     (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
   }
@@ -134,11 +140,16 @@ export class TeamsPageComponent {
     const rect = target.getBoundingClientRect();
     const x = Math.max(5, Math.min(95, ((event.clientX - rect.left) / rect.width) * 100));
     const y = Math.max(4, Math.min(96, ((event.clientY - rect.top) / rect.height) * 100));
-    const id = this.dragSlotId;
-    this.shirtPositions.update(current => ({ ...current, [id]: { x, y } }));
+    const playerId = this.lineup()[this.dragSlotId];
+    if (!playerId) return;
+    this.shirtPositions.update(current => ({ ...current, [playerId]: { x, y } }));
   }
 
-  protected endDrag(): void { this.dragSlotId = null; }
+  protected endDrag(): void {
+    if (!this.dragSlotId) return;
+    this.dragSlotId = null;
+    void this.persistTacticalLayout();
+  }
 
   protected optionsForSlot(slot: { id: string; role: string }): PlayerRecord[] {
     const selectedId = this.lineup()[slot.id] || '';
@@ -197,13 +208,49 @@ export class TeamsPageComponent {
     this.rosterLoading.set(true);
     try {
       this.players.set(await this.playerService.list(workspaceId, this.teams()));
-      this.autoArrange();
+      const seasonId = team.seasonId;
+      const saved = seasonId ? await this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId) : null;
+      const validPlayerIds = new Set(this.rosterForExpanded().map(player => player.id));
+      const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
+      this.formation.set(formation);
+      if (saved) {
+        const validSlots = new Set(this.pitchSlots[formation].map(slot => slot.id));
+        this.lineup.set(Object.fromEntries(Object.entries(saved.lineup)
+          .filter(([slotId, playerId]) => validSlots.has(slotId) && validPlayerIds.has(playerId))));
+        this.shirtPositions.set(saved.shirtPositions || {});
+      } else {
+        this.autoArrange();
+        await this.persistTacticalLayout();
+      }
     } catch (error) {
       console.error('Unable to load team roster.', error);
       this.error.set('Non è stato possibile caricare la rosa. Verifica la connessione e i permessi Firestore.');
     } finally {
       this.rosterLoading.set(false);
     }
+  }
+
+  private persistTacticalLayout(): Promise<void> {
+    const team = this.teams().find(item => item.id === this.expandedRosterId());
+    const workspaceId = this.auth.workspaceId();
+    if (!workspaceId || !team?.seasonId) return Promise.resolve();
+    const snapshot = {
+      formation: this.formation(),
+      lineup: { ...this.lineup() },
+      shirtPositions: { ...this.shirtPositions() }
+    };
+    this.layoutSaveQueue = this.layoutSaveQueue.then(async () => {
+      this.layoutSaving.set(true);
+      try {
+        await this.teamsService.saveTacticalLayout(workspaceId, team.id, team.seasonId!, snapshot);
+      } catch (error) {
+        console.error('Unable to save tactical layout.', error);
+        this.error.set('Non è stato possibile salvare la disposizione della rosa. Riprova.');
+      } finally {
+        this.layoutSaving.set(false);
+      }
+    });
+    return this.layoutSaveQueue;
   }
 
   protected openCreate(): void {
