@@ -68,6 +68,7 @@ export class TeamsPageComponent {
 
   protected slots() { return this.pitchSlots[this.formation()]; }
 
+  protected expandedTeamName(): string { return this.teams().find(team => team.id === this.expandedRosterId())?.name || 'Partita'; }
   protected startMatch(): void { this.activeSlotId.set(null); this.liveMatch.set(true); }
   protected closeMatch(): void { this.liveMatch.set(false); }
 
