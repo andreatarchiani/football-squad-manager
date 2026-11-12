@@ -16,3 +16,20 @@ button, input, textarea, select { font: inherit; }
 .pitch-shirt{position:relative;background:linear-gradient(145deg,#e4fff0 0%,#b8f0c9 36%,#67b989 100%);box-shadow:inset 1px 1px 0 #ffffffb8,inset -2px -3px 4px #174d32a8;filter:drop-shadow(0 2px 1px #071b10) drop-shadow(0 5px 3px #020b06a8);text-shadow:0 1px 0 #ffffff80;}
 .pitch-player-name{border:1px solid #d8f5df35;box-shadow:0 3px 7px #020b0680;text-shadow:0 1px 2px #000;}
 @media (max-width:650px){.layout-save-status{width:100%;margin-left:0;}.football-pitch{box-shadow:0 16px 24px #0008,0 5px 0 #102e20,inset 0 0 0 2px #ffffff20,inset 0 0 28px #061b10a8;}}
+
+
+/* True 3D stadium presentation for the tactical roster. */
+.pitch-stage{position:relative;isolation:isolate;display:grid;place-items:center;width:100%;max-width:690px;min-height:610px;justify-self:center;overflow:visible;padding:34px 26px 42px;border:1px solid #34463f;border-radius:24px;background:radial-gradient(ellipse at 50% 48%,#253a32 0%,#17251f 48%,#0b1213 100%);perspective:1250px;perspective-origin:50% 42%;box-shadow:inset 0 1px 0 #ffffff12,0 24px 48px #0006;}
+.pitch-stage::before{content:"";position:absolute;inset:12px;border-radius:18px;pointer-events:none;background:repeating-linear-gradient(90deg,#ffffff08 0 1px,transparent 1px 36px),linear-gradient(180deg,#101a1d 0%,#202d2a 48%,#101719 100%);clip-path:polygon(8% 0,92% 0,100% 100%,0 100%);opacity:.72;transform:translateZ(-80px);}
+.pitch-stage::after{content:"";position:absolute;inset:0;border-radius:24px;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,#d6f2ff15,transparent 46%),radial-gradient(ellipse at 50% 100%,#0009,transparent 50%);}
+.pitch-stadium-glow{position:absolute;inset:4% 8%;pointer-events:none;border-radius:50%;background:radial-gradient(ellipse,#b8f0c91c 0%,#9bdab20a 42%,transparent 72%);filter:blur(22px);transform:translateZ(-30px);}
+.pitch-stage .football-pitch{width:min(100%,510px);max-width:510px;transform:perspective(1200px) rotateX(39deg) scale(1.12);transform-origin:50% 55%;border:5px solid #b9d7c1;border-radius:9px 9px 15px 15px;box-shadow:0 38px 0 -5px #142b20,0 48px 0 -5px #0b1913,0 65px 54px #000c,inset 0 0 0 2px #ffffff38,inset 0 0 46px #03150c;will-change:transform;}
+.pitch-stage .football-pitch::before{background:radial-gradient(ellipse at 50% 46%,transparent 32%,#06190e88 100%),linear-gradient(180deg,#ffffff20 0%,transparent 25%,transparent 72%,#03160b66 100%);}
+.pitch-stage .football-pitch::after{inset:8px;border:2px solid #e7f8e9b0;box-shadow:inset 0 0 0 2px #061b1055,0 0 18px #d9ffe522;transform:translateZ(2px);}
+.pitch-stage .pitch-line,.pitch-stage .pitch-circle,.pitch-stage .pitch-box,.pitch-stage .pitch-goal{transform:translateZ(5px);box-shadow:0 2px 2px #061b1077,0 0 5px #eaffed22;}
+.pitch-stage .pitch-player{transform:translate3d(-50%,-50%,34px);filter:drop-shadow(0 12px 7px #020b06b8);}
+.pitch-stage .pitch-player::before{top:28px;width:40px;height:14px;filter:blur(6px);background:#020804d9;}
+.pitch-stage .pitch-shirt{width:38px;height:42px;background:linear-gradient(135deg,#f4fff7 0%,#c8f6d6 26%,#78c99a 58%,#276943 100%);box-shadow:inset 2px 2px 2px #ffffffd9,inset -4px -5px 7px #174d32c9,0 3px 0 #17472e,0 7px 8px #020b06a8;filter:drop-shadow(0 3px 2px #071b10);}
+.pitch-stage .pitch-player-name{padding:3px 6px;border:1px solid #e5ffeb66;border-radius:5px;background:linear-gradient(180deg,#183d2ceF,#081b13f2);box-shadow:0 5px 9px #000b;font-size:10px;}
+.pitch-stage .pitch-goal{height:3.5%;border-width:2px;box-shadow:0 3px 0 #dceee366,0 6px 9px #020b06a8;}
+@media(max-width:650px){.pitch-stage{min-height:510px;padding:25px 10px 32px;border-radius:17px;perspective:950px;}.pitch-stage .football-pitch{width:94%;transform:perspective(950px) rotateX(36deg) scale(1.08);}.pitch-stage .pitch-player{transform:translate3d(-50%,-50%,28px);}.pitch-stage .pitch-shirt{width:32px;height:36px;}.pitch-stage .pitch-player-name{font-size:8px;}.pitch-stage::before{inset:8px;}}
