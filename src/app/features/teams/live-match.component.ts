@@ -43,6 +43,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   private dragCurrentPosition: { x: number; y: number } | null = null;
   protected readonly voiceListening = signal(false);
   protected readonly voiceMessage = signal('');
+  protected readonly voiceHelpOpen = signal(false);
   protected readonly changesUsed = signal(0);
   protected readonly maxChanges = 5;
   private timer: ReturnType<typeof setInterval> | null = null;
@@ -117,11 +118,14 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected pause(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.running.set(false); }
   protected close(): void { this.pause(); this.voice.stop(); this.voiceListening.set(false); this.closematch.emit(); }
   protected startVoice(): void {
+    this.voiceHelpOpen.set(true);
     if(this.voiceListening()) { this.voice.stop(); this.voiceListening.set(false); return; }
     this.voiceMessage.set('Ti ascolto…');
     this.voiceListening.set(true);
     this.voice.start(text=>this.parseCommand(text),message=>this.voiceMessage.set(message),()=>this.voiceListening.set(false));
   }
+  protected toggleVoiceHelp(): void { this.voiceHelpOpen.update(open => !open); }
+  protected closeVoiceHelp(): void { this.voiceHelpOpen.set(false); }
   private parseCommand(raw: string): void {
     const text=raw.toLocaleLowerCase('it-IT');
     const numbers=[...text.matchAll(/\b(?:numero\s*)?(\d{1,2})\b/g)].map(m=>Number(m[1]));
