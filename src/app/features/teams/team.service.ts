@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import {
   collection,
   doc,
+  deleteDoc,
   getDoc,
   getDocs,
   serverTimestamp,
@@ -115,6 +116,11 @@ export class TeamService {
       lineup: (data['lineup'] ?? {}) as Record<string, string>, formation: String(data['formation'] ?? '4-3-3'),
       positions: (data['positions'] ?? {}) as Record<string, { x: number; y: number }>, changesUsed: Number(data['changesUsed'] ?? 0)
     };
+  }
+
+  async clearLiveMatch(workspaceId: string, teamId: string, seasonId: string): Promise<void> {
+    const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId, 'seasons', seasonId, 'settings', 'live-match');
+    await deleteDoc(ref);
   }
 
   async saveLiveMatch(workspaceId: string, teamId: string, seasonId: string, state: LiveMatchState): Promise<void> {
