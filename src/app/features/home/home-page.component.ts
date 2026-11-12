@@ -21,6 +21,7 @@ export class HomePageComponent {
   @Output() readonly launchMatch = new EventEmitter<{ teamId: string; layoutSlot: 1 | 2 }>();
   protected readonly teams = signal<TeamRecord[]>([]);
   protected readonly selectedTeamId = signal('');
+  protected readonly teamDropdownOpen = signal(false);
   protected readonly accountRole = signal('Allenatore');
   protected readonly layoutSlot = signal<1 | 2>(1);
   protected readonly previewPlayers = signal<PlayerRecord[]>([]);
@@ -105,7 +106,10 @@ export class HomePageComponent {
     this.openTeams.emit();
   }
 
+  protected toggleTeamDropdown(): void { this.teamDropdownOpen.update(open => !open); }
+
   protected async selectTeam(teamId: string): Promise<void> {
+    this.teamDropdownOpen.set(false);
     const validTeamId = this.selectableTeams.some(team => team.id === teamId) ? teamId : this.selectedTeamId();
     if (!validTeamId) return;
     this.selectedTeamId.set(validTeamId);
