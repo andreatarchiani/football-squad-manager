@@ -42,7 +42,8 @@ export class PlayerService {
     const db = this.requireFirestore();
     const team = teams.find(t => t.id===input.teamId && t.seasonId && !t.isArchived);
     if (!team?.seasonId) throw new Error('Seleziona una squadra con una stagione attiva.');
-    const number = input.shirtNumber.trim() ? Number(input.shirtNumber) : null;
+    const shirtNumber = String(input.shirtNumber ?? '').trim();
+    const number = shirtNumber ? Number(shirtNumber) : null;
     if (number !== null && (!Number.isInteger(number)||number<1||number>99)) throw new Error('Il numero di maglia deve essere compreso tra 1 e 99.');
     const playerRef = existing ? doc(db,'workspaces',workspaceId,'players',existing.id) : doc(collection(db,'workspaces',workspaceId,'players'));
     const memberRef = doc(db,'workspaces',workspaceId,'teams',team.id,'seasons',team.seasonId,'squadMembers',playerRef.id);
