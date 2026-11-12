@@ -20,10 +20,10 @@
       <label class="default-team-field">Seleziona squadra
         <select [value]="selectedTeamId()" (change)="selectTeam($any($event.target).value)">
           <option value="">Scegli una squadra</option>
-          @for (team of teams(); track team.id) { @if (!team.isArchived) { <option [value]="team.id">{{ team.name }} · {{ team.category || 'Squadra' }}</option> } }
+          @for (team of selectableTeams; track team.id) { <option [value]="team.id">{{ team.name }} · {{ team.category || 'Squadra' }}</option> }
         </select>
       </label>
-      @if (selectedTeam) {
+      @if (selectableTeams.length > 0 && selectedTeam) {
         <div class="lineup-choice-heading"><strong>Scegli la formazione</strong><span>Due rose personalizzabili</span></div>
         <div class="lineup-choice-grid">
           <button type="button" class="lineup-choice" [class.active]="layoutSlot() === 1" (click)="selectLayoutSlot(1)"><span class="lineup-number">01</span><span><strong>Modulo 1</strong><small>Rosa e disposizione principale</small></span><span class="radio-indicator"></span></button>
