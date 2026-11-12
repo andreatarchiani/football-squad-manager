@@ -25,8 +25,14 @@
         <p class="voice-guide-note">Ogni evento ti verrà mostrato per la conferma prima di essere registrato. Se viene capito male, correggi il comando nella schermata di conferma. Per rimuovere un evento già registrato: “Annulla goal del numero 9”, “Annulla ammonizione del numero 8” oppure “Annulla espulsione del numero 5”.</p>
       </section>
     }
-    @if (voiceMessage()) { <p class="voice-status" aria-live="polite">{{ voiceMessage() }}</p> }
   </section>
+  @if (voiceListening() || voiceMessage() || voiceDraft()) {
+    <aside class="voice-feedback" [class.is-listening]="voiceListening()" role="status" aria-live="polite">
+      <strong>{{ voiceListening() ? '🎙 TI ASCOLTO' : voiceDraft() ? 'COMANDO RICONOSCIUTO' : 'ASSISTENTE VOCALE' }}</strong>
+      @if (voiceDraft()) { <p>«{{ voiceDraft() }}»</p> }
+      @if (voiceMessage()) { <span>{{ voiceMessage() }}</span> }
+    </aside>
+  }
   @if (matchAnimation(); as animation) {
     <div class="match-moment-backdrop" [class]="'match-moment-backdrop moment-' + animation.type" aria-live="assertive">
       <section class="match-moment-card" [class]="'match-moment-card moment-card-' + animation.type">
