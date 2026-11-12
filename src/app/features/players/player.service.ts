@@ -80,6 +80,25 @@ export class PlayerService {
 
   async removeAssist(workspaceId: string, playerId: string): Promise<void> { await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { assists: increment(-1), updatedAt: serverTimestamp() }); }
 
+  async delete(workspaceId: string, player: PlayerRecord): Promise<void> {
+    const db = this.requireFirestore();
+    await runTransaction(db, async tx => {
+      const playerRef = doc(db, 'workspaces', workspaceId, 'players', player.id);
+      const memberRef = player.teamId && player.seasonId
+        ? doc(db, 'workspaces', workspaceId, 'teams', player.teamId, 'seasons', player.seasonId, 'squadMembers', player.id)
+        : null;
+      const reservationRef = memberRef && player.shirtNumber !== null
+        ? doc(db, 'workspaces', workspaceId, 'teams', player.teamId, 'seasons', player.seasonId, 'jerseyReservations', String(player.shirtNumber))
+        : null;
+      if (reservationRef) {
+        const reservation = await tx.get(reservationRef);
+        if (reservation.exists() && reservation.data()['playerId'] === player.id) tx.delete(reservationRef);
+      }
+      if (memberRef) tx.delete(memberRef);
+      tx.delete(playerRef);
+    });
+  }
+
   async setArchived(workspaceId:string, player:PlayerRecord, archived:boolean):Promise<void> {
     const db=this.requireFirestore();
     await runTransaction(db,async tx=>{
