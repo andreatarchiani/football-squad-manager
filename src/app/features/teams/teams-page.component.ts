@@ -18,6 +18,7 @@ export class TeamsPageComponent implements OnChanges {
   @Input() launchRequest: { teamId: string; layoutSlot: 1 | 2; token: number } | null = null;
   @Output() readonly matchClosed = new EventEmitter<void>();
   private handledLaunchToken = 0;
+  private readonly initialLoad: Promise<void>;
   protected readonly layoutSlot = signal<1 | 2>(1);
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamsService = inject(TeamService);
@@ -68,7 +69,7 @@ export class TeamsPageComponent implements OnChanges {
   protected form: TeamInput = this.emptyForm();
 
   constructor() {
-    void this.loadTeams();
+    this.initialLoad = this.loadTeams();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -86,7 +87,7 @@ export class TeamsPageComponent implements OnChanges {
 
   protected expandedTeamName(): string { return this.teams().find(team => team.id === this.expandedRosterId())?.name || 'Partita'; }
   private async launchFromHome(request: { teamId: string; layoutSlot: 1 | 2; token: number }): Promise<void> {
-    if (!this.teams().length) await this.loadTeams();
+    if (!this.teams().length) await this.initialLoad;
     const team = this.teams().find(item => item.id === request.teamId && !item.isArchived && !!item.seasonId);
     if (!team) { this.error.set('La squadra selezionata non è disponibile.'); return; }
     this.expandedRosterId.set(team.id);
