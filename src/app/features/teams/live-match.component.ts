@@ -156,7 +156,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected startVoice(): void {
     this.voiceHelpOpen.set(true);
     if(this.voiceListening()) { this.voice.stop(); this.voiceListening.set(false); return; }
-    this.voiceMessage.set('Ti ascolto…');
+    this.voiceDraft.set('');
+    this.voiceMessage.set('Pronuncia un comando, ad esempio: goal numero 9.');
     this.voiceListening.set(true);
     this.voice.start(text=>this.parseCommand(text),message=>this.voiceMessage.set(message),()=>this.voiceListening.set(false));
   }
