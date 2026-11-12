@@ -167,15 +167,16 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.running.set(false);
     this.voice.stop();
     this.voiceListening.set(false);
+    this.exitingMatch = true;
     try {
       await this.persistQueue;
       await this.teamService.clearLiveMatch(this.workspaceId(), this.teamId(), this.seasonId());
     } catch(error) {
+      this.exitingMatch = false;
       console.error('Unable to reset live match on exit.', error);
       this.voiceMessage.set('Non è stato possibile azzerare la partita. Riprova a uscire.');
       return;
     }
-    this.exitingMatch = true;
     this.closematch.emit();
   }
   protected startVoice(): void {
