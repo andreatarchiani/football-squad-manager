@@ -34,7 +34,7 @@ export class PlayerService {
     const teamMap = new Map(teams.map(t => [t.id, t]));
     return snapshots.docs.map(s => {
       const d = s.data(); const a = assignments.get(s.id); const t = a ? teamMap.get(a.teamId) : undefined;
-      return { id:s.id, firstName:String(d['firstName']??''), lastName:String(d['lastName']??''), dateOfBirth:String(d['dateOfBirth']??''), preferredFoot:String(d['preferredFoot']??''), primaryRole:this.role(d['primaryRole']), notes:String(d['notes']??''), isArchived:d['isArchived']===true, teamId:a?.teamId??'', seasonId:a?.seasonId??'', teamName:t?.name??'', seasonLabel:t?.seasonLabel??'', shirtNumber:a?.shirtNumber??null, roles:a?.roles??[], status:a?.status??'active' };
+      return { id:s.id, firstName:String(d['firstName']??''), lastName:String(d['lastName']??''), dateOfBirth:String(d['dateOfBirth']??''), preferredFoot:String(d['preferredFoot']??''), primaryRole:this.role(d['primaryRole']), notes:String(d['notes']??''), isArchived:d['isArchived']===true, teamId:a?.teamId??'', seasonId:a?.seasonId??'', teamName:t?.name??'', seasonLabel:t?.seasonLabel??'', shirtNumber:a?.shirtNumber??null, roles:a?.roles??[], status:a?.status??'active', goals: typeof d['goals']==='number' ? d['goals'] : 0 };
     }).sort((a,b)=>Number(a.isArchived)-Number(b.isArchived)||a.lastName.localeCompare(b.lastName,'it')||a.firstName.localeCompare(b.firstName,'it'));
   }
 
