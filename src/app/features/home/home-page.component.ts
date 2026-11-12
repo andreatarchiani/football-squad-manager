@@ -3,6 +3,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
 import { TeamService, type TeamRecord } from '../teams/team.service';
+import { PlayerService, type PlayerRecord } from '../players/player.service';
 
 @Component({
   selector: 'fsm-home-page',
@@ -14,6 +15,7 @@ import { TeamService, type TeamRecord } from '../teams/team.service';
 export class HomePageComponent {
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamsService = inject(TeamService);
+  private readonly playerService = inject(PlayerService);
   private readonly db = inject(FIRESTORE_DB, { optional: true });
   @Output() readonly openTeams = new EventEmitter<void>();
   @Output() readonly launchMatch = new EventEmitter<{ teamId: string; layoutSlot: 1 | 2 }>();
@@ -21,6 +23,31 @@ export class HomePageComponent {
   protected readonly selectedTeamId = signal('');
   protected readonly accountRole = signal('Allenatore');
   protected readonly layoutSlot = signal<1 | 2>(1);
+  protected readonly previewPlayers = signal<PlayerRecord[]>([]);
+  protected readonly previewLineup = signal<Record<string, string>>({});
+  protected readonly previewFormation = signal('4-3-3');
+  protected readonly previewPositions = signal<Record<string, { x: number; y: number }>>({});
+  protected readonly previewLoading = signal(false);
+  protected readonly pitchSlots: Record<string, { id: string; label: string; role: string; x: number; y: number }[]> = {
+    '4-3-3': [
+      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
+      { id: 'ts', label: 'TS', role: 'Difensore', x: 13, y: 72 }, { id: 'dc1', label: 'DC', role: 'Difensore', x: 38, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 62, y: 75 }, { id: 'td', label: 'TD', role: 'Difensore', x: 87, y: 72 },
+      { id: 'mezz1', label: 'CC', role: 'Centrocampista', x: 28, y: 49 }, { id: 'med', label: 'MED', role: 'Centrocampista', x: 50, y: 56 }, { id: 'mezz2', label: 'CC', role: 'Centrocampista', x: 72, y: 49 },
+      { id: 'ala1', label: 'AS', role: 'Attaccante', x: 17, y: 27 }, { id: 'punta', label: 'ATT', role: 'Attaccante', x: 50, y: 19 }, { id: 'ala2', label: 'AD', role: 'Attaccante', x: 83, y: 27 }
+    ],
+    '4-4-2': [
+      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
+      { id: 'ts', label: 'TS', role: 'Difensore', x: 13, y: 72 }, { id: 'dc1', label: 'DC', role: 'Difensore', x: 38, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 62, y: 75 }, { id: 'td', label: 'TD', role: 'Difensore', x: 87, y: 72 },
+      { id: 'est1', label: 'ES', role: 'Centrocampista', x: 13, y: 49 }, { id: 'cc1', label: 'CC', role: 'Centrocampista', x: 38, y: 53 }, { id: 'cc2', label: 'CC', role: 'Centrocampista', x: 62, y: 53 }, { id: 'est2', label: 'ED', role: 'Centrocampista', x: 87, y: 49 },
+      { id: 'att1', label: 'ATT', role: 'Attaccante', x: 37, y: 24 }, { id: 'att2', label: 'ATT', role: 'Attaccante', x: 63, y: 24 }
+    ],
+    '3-5-2': [
+      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
+      { id: 'dc1', label: 'DC', role: 'Difensore', x: 25, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 50, y: 78 }, { id: 'dc3', label: 'DC', role: 'Difensore', x: 75, y: 75 },
+      { id: 'est1', label: 'EST', role: 'Centrocampista', x: 10, y: 49 }, { id: 'cc1', label: 'CC', role: 'Centrocampista', x: 30, y: 53 }, { id: 'reg', label: 'REG', role: 'Centrocampista', x: 50, y: 47 }, { id: 'cc2', label: 'CC', role: 'Centrocampista', x: 70, y: 53 }, { id: 'est2', label: 'EST', role: 'Centrocampista', x: 90, y: 49 },
+      { id: 'att1', label: 'ATT', role: 'Attaccante', x: 36, y: 24 }, { id: 'att2', label: 'ATT', role: 'Attaccante', x: 64, y: 24 }
+    ]
+  };
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly error = signal('');
@@ -39,12 +66,29 @@ export class HomePageComponent {
 
   protected async selectTeam(teamId: string): Promise<void> {
     this.selectedTeamId.set(teamId);
+    void this.loadPreview();
     const uid = this.user()?.uid;
     if (!uid || !this.db) return;
     this.saving.set(true);
     try { await setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: teamId, updatedAt: new Date() }, { merge: true }); }
     catch (error) { console.error('Unable to save default team.', error); this.error.set('Non è stato possibile salvare la squadra predefinita.'); }
     finally { this.saving.set(false); }
+  }
+
+  protected async selectLayoutSlot(slot: 1 | 2): Promise<void> {
+    this.layoutSlot.set(slot);
+    await this.loadPreview();
+  }
+
+  protected previewPlayer(slotId: string): PlayerRecord | undefined {
+    const id = this.previewLineup()[slotId];
+    return this.previewPlayers().find(player => player.id === id);
+  }
+
+  protected previewPosition(slot: { id: string; x: number; y: number }): { x: number; y: number } {
+    const player = this.previewPlayer(slot.id);
+    const position = (player && this.previewPositions()[player.id]) || { x: slot.x, y: slot.y };
+    return { x: Math.max(9, Math.min(91, position.x)), y: Math.max(9, Math.min(91, position.y)) };
   }
 
   protected async saveRole(role: string): Promise<void> {
@@ -65,6 +109,29 @@ export class HomePageComponent {
     this.launchMatch.emit({ teamId: team.id, layoutSlot: this.layoutSlot() });
   }
 
+  private async loadPreview(): Promise<void> {
+    const team = this.selectedTeam;
+    const workspaceId = this.auth.workspaceId();
+    if (!team?.seasonId || !workspaceId) { this.previewPlayers.set([]); this.previewLineup.set({}); return; }
+    this.previewLoading.set(true);
+    try {
+      const [players, saved] = await Promise.all([
+        this.playerService.list(workspaceId, this.teams()),
+        this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, this.layoutSlot())
+      ]);
+      this.previewPlayers.set(players.filter(player => !player.isArchived && player.teamId === team.id && player.seasonId === team.seasonId));
+      const formation = saved?.formation && ['4-3-3', '4-4-2', '3-5-2'].includes(saved.formation) ? saved.formation : '4-3-3';
+      this.previewFormation.set(formation);
+      const validSlots = new Set(this.pitchSlots[formation].map(slot => slot.id));
+      const validPlayers = new Set(this.previewPlayers().map(player => player.id));
+      this.previewLineup.set(Object.fromEntries(Object.entries(saved?.lineup ?? {}).filter(([slotId, playerId]) => validSlots.has(slotId) && validPlayers.has(playerId))));
+      this.previewPositions.set(saved?.shirtPositions ?? {});
+    } catch (error) {
+      console.error('Unable to load home tactical preview.', error);
+      this.error.set('Non è stato possibile caricare la formazione selezionata.');
+    } finally { this.previewLoading.set(false); }
+  }
+
   private async load(): Promise<void> {
     const workspaceId = this.auth.workspaceId();
     const uid = this.user()?.uid;
@@ -82,6 +149,7 @@ export class HomePageComponent {
       const selected = teams.some(team => team.id === preferred && !team.isArchived) ? preferred : (teams.find(team => !team.isArchived)?.id ?? '');
       this.selectedTeamId.set(selected);
       if (selected && selected !== preferred) await this.selectTeam(selected);
+      await this.loadPreview();
     } catch (error) {
       console.error('Unable to load home workspace.', error);
       this.error.set('Non è stato possibile caricare i dati del tuo account e delle squadre.');
