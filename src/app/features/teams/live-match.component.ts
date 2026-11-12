@@ -215,14 +215,15 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.events.set(next);
     const goals:Record<string,number>={}, assists:Record<string,number>={}, yellows:Record<string,number>={}, reds:string[]=[];
     for(const event of next){
-      if(event.type==='goal'&&event.playerId){goals[event.playerId]=(goals[event.playerId]??0)+1;const assistId=event.assistPlayerId??this.players().find(p=>p.shirtNumber===Number(event.description.match(/assist di #?(\\d+)/i)?.[1]))?.id;if(assistId)assists[assistId]=(assists[assistId]??0)+1;}
+      if(event.type==='goal'&&event.playerId){goals[event.playerId]=(goals[event.playerId]??0)+1;const assistId=event.assistPlayerId??this.players().find(p=>p.shirtNumber===Number(event.description.match(/assist di #?(\d+)/i)?.[1]))?.id;if(assistId)assists[assistId]=(assists[assistId]??0)+1;}
       if(event.type==='yellow-card'&&event.playerId)yellows[event.playerId]=(yellows[event.playerId]??0)+1;
       if(event.type==='red-card'&&event.playerId&&!reds.includes(event.playerId))reds.push(event.playerId);
     }
     this.goals.set(goals);this.assists.set(assists);this.yellowCards.set(yellows);this.redCards.set(reds);
     const workspaceId=this.auth.workspaceId();
     if(type==='goal'&&workspaceId&&target.playerId)void this.playerService.removeGoal(workspaceId,target.playerId).catch(error=>{console.error('Unable to reverse player goal.',error);this.voiceMessage.set('Gol annullato nella partita, ma non nel totale giocatore.');});
-    const targetAssistId=target.assistPlayerId??this.players().find(p=>p.shirtNumber===Number(target.description.match(/assist di #?(\\d+)/i)?.[1]))?.id;\n    if(type==='goal'&&workspaceId&&targetAssistId)void this.playerService.removeAssist(workspaceId,targetAssistId).catch(error=>{console.error('Unable to reverse player assist.',error);this.voiceMessage.set('Gol annullato, ma non è stato possibile aggiornare gli assist.');});
+    const targetAssistId=target.assistPlayerId??this.players().find(p=>p.shirtNumber===Number(target.description.match(/assist di #?(\d+)/i)?.[1]))?.id;
+    if(type==='goal'&&workspaceId&&targetAssistId)void this.playerService.removeAssist(workspaceId,targetAssistId).catch(error=>{console.error('Unable to reverse player assist.',error);this.voiceMessage.set('Gol annullato, ma non è stato possibile aggiornare gli assist.');});
     this.voiceMessage.set((type==='goal'?'Gol':type==='yellow-card'?'Ammonizione':'Espulsione')+' del numero '+shirtNumber+' annullata.'); void this.persistMatchState();
   }
   protected confirmAction(): void {
