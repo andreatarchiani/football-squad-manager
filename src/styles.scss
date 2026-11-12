@@ -95,3 +95,16 @@ button, input, textarea, select { font: inherit; }
 .match-pitch-wrap.pitch-stage .match-halfway,.match-pitch-wrap.pitch-stage .match-box,.match-pitch-wrap.pitch-stage .match-goal{box-shadow:0 2px 2px #061b1077,0 0 5px #eaffed22;}
 .match-pitch-wrap.pitch-stage .match-center-circle{box-shadow:0 2px 2px #061b1077,0 0 5px #eaffed22;}
 @media(max-width:650px){.match-pitch-wrap.pitch-stage{width:100%;max-width:100%;min-height:0;padding:16px 7px 23px;border-radius:14px;}.match-pitch-wrap.pitch-stage .match-pitch.football-pitch{width:min(100%,390px);transform:perspective(950px) rotateX(22deg) scale(.95);}.match-pitch-wrap.pitch-stage .match-shirt-player.pitch-player{transform:translate3d(-50%,-50%,20px);}.match-pitch-wrap.pitch-stage .match-shirt.pitch-shirt{width:29px;height:34px;font-size:10px;}.match-pitch-wrap.pitch-stage .match-player-label.pitch-player-name{max-width:52px;font-size:8px;}}
+
+ 
+/* One consistent, stationary chevron for every native dropdown in the app. */
+select{
+  -webkit-appearance:none!important;
+  appearance:none!important;
+  padding-right:38px!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='m3.5 5.25 3.5 3.5 3.5-3.5' fill='none' stroke='%239bdab2' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;
+  background-position:right 13px center!important;
+  background-size:14px 14px!important;
+}
+select::-ms-expand{display:none}
