@@ -55,11 +55,18 @@ export class HomePageComponent {
   protected readonly editingProfileName = signal(false);
   protected readonly profileNameDraft = signal('');
   protected readonly profileNameSaving = signal(false);
+  private previewRequest = 0;
 
   constructor() { effect(() => { if (this.auth.workspaceId()) void this.load(); }); }
 
+  protected get selectableTeams(): TeamRecord[] {
+    return this.teams().filter(team => !team.isArchived);
+  }
+
   protected get selectedTeam(): TeamRecord | undefined {
-    return this.teams().find(team => team.id === this.selectedTeamId());
+    const selectedId = this.selectedTeamId();
+    if (!selectedId || this.selectableTeams.length === 0) return undefined;
+    return this.selectableTeams.find(team => team.id === selectedId);
   }
 
   protected beginProfileNameEdit(): void {
@@ -96,12 +103,19 @@ export class HomePageComponent {
   }
 
   protected async selectTeam(teamId: string): Promise<void> {
-    this.selectedTeamId.set(teamId);
+    const validTeamId = this.selectableTeams.some(team => team.id === teamId) ? teamId : '';
+    this.selectedTeamId.set(validTeamId);
+    if (!validTeamId) {
+      this.previewPlayers.set([]);
+      this.previewLineup.set({});
+      this.previewPositions.set({});
+      this.previewLoading.set(false);
+    }
     void this.loadPreview();
     const uid = this.user()?.uid;
     if (!uid || !this.db) return;
     this.saving.set(true);
-    try { await setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: teamId, updatedAt: new Date() }, { merge: true }); }
+    try { await setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: validTeamId, updatedAt: new Date() }, { merge: true }); }
     catch (error) { console.error('Unable to save default team.', error); this.error.set('Non è stato possibile salvare la squadra predefinita.'); }
     finally { this.saving.set(false); }
   }
@@ -141,15 +155,23 @@ export class HomePageComponent {
   }
 
   private async loadPreview(): Promise<void> {
+    const request = ++this.previewRequest;
     const team = this.selectedTeam;
     const workspaceId = this.auth.workspaceId();
-    if (!team?.seasonId || !workspaceId) { this.previewPlayers.set([]); this.previewLineup.set({}); return; }
+    if (!team?.seasonId || !workspaceId) {
+      this.previewPlayers.set([]);
+      this.previewLineup.set({});
+      this.previewPositions.set({});
+      this.previewLoading.set(false);
+      return;
+    }
     this.previewLoading.set(true);
     try {
       const [players, saved] = await Promise.all([
         this.playerService.list(workspaceId, this.teams()),
         this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, this.layoutSlot())
       ]);
+      if (request !== this.previewRequest || this.selectedTeamId() !== team.id) return;
       this.previewPlayers.set(players.filter(player => !player.isArchived && player.teamId === team.id && player.seasonId === team.seasonId));
       const formation = saved?.formation && ['4-3-3', '4-4-2', '3-5-2'].includes(saved.formation) ? saved.formation : '4-3-3';
       this.previewFormation.set(formation);
@@ -160,7 +182,7 @@ export class HomePageComponent {
     } catch (error) {
       console.error('Unable to load home tactical preview.', error);
       this.error.set('Non è stato possibile caricare la formazione selezionata.');
-    } finally { this.previewLoading.set(false); }
+    } finally { if (request === this.previewRequest) this.previewLoading.set(false); }
   }
 
   private async load(): Promise<void> {
