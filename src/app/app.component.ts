@@ -32,10 +32,23 @@ export class AppComponent {
   constructor() {
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe((event) => {
-        if (event.type === 'VERSION_READY') this.updateAvailable.set(true);
+        if (event.type === 'VERSION_READY') void this.activateReadyVersion();
       });
       void this.checkForUpdate();
-      interval(6 * 60 * 60 * 1000).subscribe(() => void this.checkForUpdate());
+      interval(5 * 60 * 1000).subscribe(() => void this.checkForUpdate());
+    }
+  }
+
+  private async activateReadyVersion(): Promise<void> {
+    if (!this.swUpdate.isEnabled || this.updating()) return;
+    this.updating.set(true);
+    try {
+      await this.swUpdate.activateUpdate();
+      window.location.reload();
+    } catch (error) {
+      console.error('Unable to activate application update.', error);
+      this.updating.set(false);
+      this.updateAvailable.set(true);
     }
   }
 
