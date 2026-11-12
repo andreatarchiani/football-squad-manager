@@ -161,7 +161,7 @@
       </div>
     }
   }
-  @if (liveMatch()) {
-    <fsm-live-match [teamName]="expandedTeamName()" [players]="rosterForExpanded()" [initialLineup]="lineup()" [formation]="formation()" [initialPositions]="shirtPositions()" (closematch)="closeMatch()" />
+  @if (liveMatch() && expandedRosterId() && teams().find(item => item.id === expandedRosterId())?.seasonId && auth.workspaceId()) {
+    <fsm-live-match [teamName]="expandedTeamName()" [workspaceId]="auth.workspaceId()!" [teamId]="expandedRosterId()!" [seasonId]="teams().find(item => item.id === expandedRosterId())!.seasonId!" [players]="rosterForExpanded()" [initialLineup]="lineup()" [formation]="formation()" [initialPositions]="shirtPositions()" (closematch)="closeMatch()" />
   }
 </section>

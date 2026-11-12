@@ -1,4 +1,6 @@
-:host{display:block}
+ :host{display:block}
+.sent-off-card{display:inline-flex;align-items:center;gap:3px;margin-top:3px;padding:2px 5px;border-radius:5px;background:#b91c1c;color:#fff;font-size:8px;font-weight:950;letter-spacing:.04em;box-shadow:0 2px 8px #0007}
+.match-shirt-player.sent-off .match-shirt{filter:saturate(.82);}
 
 
 .voice-command-guide{width:min(100%,620px);margin:12px auto 0;padding:14px;border:1px solid #7ed6a54a;border-radius:14px;background:linear-gradient(145deg,#13251c,#0d1714);box-shadow:0 12px 28px #0004;color:#e8f5ec}
@@ -42,3 +44,5 @@
 @keyframes shirt-enter{0%{transform:translateX(17px) scale(.78);opacity:.45}100%{transform:translateX(0) scale(1);opacity:1}}
 @keyframes arrow-pulse{from{transform:scale(.9);opacity:.55}to{transform:scale(1.12);opacity:1}}
 @media(prefers-reduced-motion:reduce){.match-moment-backdrop,.match-moment-card,.goal-animation,.animated-card,.animated-shirt,.substitution-arrow{animation:none!important}}
+
+.booked-card{display:inline-flex;align-items:center;gap:3px;margin-top:3px;padding:2px 5px;border-radius:5px;background:#d69e16;color:#211704;font-size:8px;font-weight:950;letter-spacing:.04em;box-shadow:0 2px 8px #0007}

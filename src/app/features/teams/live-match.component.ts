@@ -3,6 +3,7 @@ import type { PlayerRecord } from '../players/player.service';
 import { VoiceRecognitionService } from '../../core/voice/voice-recognition.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { PlayerService } from '../players/player.service';
+import { TeamService } from './team.service';
 
 type MatchEventType = 'goal' | 'yellow-card' | 'red-card' | 'substitution' | 'formation';
 interface MatchEvent { type: MatchEventType; minute: number; description: string; playerId?: string; outgoingId?: string; incomingId?: string; }
@@ -18,6 +19,9 @@ interface MatchAnimation { type: 'goal' | 'yellow-card' | 'red-card' | 'substitu
 })
 export class LiveMatchComponent implements OnDestroy, OnInit {
   readonly teamName = input.required<string>();
+  readonly workspaceId = input.required<string>();
+  readonly teamId = input.required<string>();
+  readonly seasonId = input.required<string>();
   readonly players = input.required<PlayerRecord[]>();
   readonly initialLineup = input.required<Record<string, string>>();
   readonly formation = input.required<string>();
@@ -26,6 +30,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   private readonly voice = inject(VoiceRecognitionService);
   private readonly auth = inject(FirebaseAuthService);
   private readonly playerService = inject(PlayerService);
+  private readonly teamService = inject(TeamService);
   protected readonly elapsedSeconds = signal(0);
   protected readonly running = signal(false);
   protected readonly finished = signal(false);
@@ -68,8 +73,31 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     ]
   };
 
-  ngOnInit(): void { this.lineup.set({...this.initialLineup()}); const f = this.formations[this.formation()] ? this.formation() : '4-3-3'; this.matchFormation.set(f); const p: Record<string, {x:number;y:number}> = {}; for (const slot of this.formations[f]) { const id=this.initialLineup()[slot.id]; if(id) p[id]=this.initialPositions()[id] ?? {x:slot.x,y:slot.y}; } this.matchPositions.set(p); }
-  ngOnDestroy(): void { this.pause(); this.voice.stop(); if(this.animationTimer) clearTimeout(this.animationTimer); }
+  async ngOnInit(): Promise<void> {
+    this.lineup.set({...this.initialLineup()});
+    const f = this.formations[this.formation()] ? this.formation() : '4-3-3'; this.matchFormation.set(f);
+    const p: Record<string, {x:number;y:number}> = {};
+    for (const slot of this.formations[f]) { const id=this.initialLineup()[slot.id]; if(id) p[id]=this.initialPositions()[id] ?? {x:slot.x,y:slot.y}; }
+    this.matchPositions.set(p);
+    try {
+      const saved = await this.teamService.loadLiveMatch(this.workspaceId(), this.teamId(), this.seasonId());
+      if (saved) {
+        this.elapsedSeconds.set(Math.max(0, Math.min(5400, saved.elapsedSeconds)));
+        this.finished.set(saved.finished); this.events.set(saved.events); this.goals.set(saved.goals); this.assists.set(saved.assists);
+        this.yellowCards.set(saved.yellowCards); this.redCards.set(saved.redCards); this.lineup.set(saved.lineup);
+        this.matchFormation.set(this.formations[saved.formation] ? saved.formation : f); this.matchPositions.set(saved.positions);
+        this.changesUsed.set(Math.max(0, Math.min(this.maxChanges, saved.changesUsed)));
+        if (saved.running && !saved.finished) this.start();
+      }
+    } catch (error) { console.error('Unable to restore live match.', error); this.voiceMessage.set('Partita caricata, ma non è stato possibile recuperare gli ultimi dati salvati.'); }
+  }
+  ngOnDestroy(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.voice.stop(); if(this.animationTimer) clearTimeout(this.animationTimer); void this.persistMatchState(); }
+  private async persistMatchState(): Promise<void> {
+    try { await this.teamService.saveLiveMatch(this.workspaceId(), this.teamId(), this.seasonId(), {
+      elapsedSeconds:this.elapsedSeconds(), running:this.running(), finished:this.finished(), events:this.events(), goals:this.goals(), assists:this.assists(),
+      yellowCards:this.yellowCards(), redCards:this.redCards(), lineup:this.lineup(), formation:this.matchFormation(), positions:this.matchPositions(), changesUsed:this.changesUsed()
+    }); } catch(error) { console.error('Unable to save live match.', error); this.voiceMessage.set('Attenzione: non è stato possibile salvare la partita.'); }
+  }
   private showMatchAnimation(animation: MatchAnimation): void { if(this.animationTimer) clearTimeout(this.animationTimer); this.matchAnimation.set(animation); this.animationTimer=setTimeout(()=>{this.matchAnimation.set(null);this.animationTimer=null;},2600); }
 
   protected slots() {
@@ -78,7 +106,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     return formationSlots.map(slot => { const playerId = currentLineup[slot.id]; const saved = playerId ? positions[playerId] : undefined; return saved ? { ...slot, x: Math.max(9, Math.min(91, saved.x)), y: Math.max(9, Math.min(91, saved.y)) } : slot; });
   }
   protected formationOptions(): string[] { return Object.keys(this.formations); }
-  protected changeMatchFormation(next: string): void { if (!this.formations[next] || next === this.matchFormation()) return; const previous=this.matchFormation(); const ids=this.slots().map(slot=>this.lineup()[slot.id]).filter((id): id is string => !!id && !this.redCards().includes(id)); const lineup: Record<string,string>={}; const positions: Record<string,{x:number;y:number}>={}; this.formations[next].forEach((slot,i)=>{const id=ids[i];if(id){lineup[slot.id]=id;positions[id]={x:slot.x,y:slot.y};}}); this.lineup.set(lineup);this.matchPositions.set(positions);this.matchFormation.set(next);this.selectedOutgoingId.set(null);this.events.update(items=>[{type:'formation',minute:this.minute,description:'Cambio modulo: '+previous+' → '+next},...items]);this.voiceMessage.set('Modulo cambiato in '+next+'. Evento registrato al '+this.minute+'′.'); }
+  protected changeMatchFormation(next: string): void { if (!this.formations[next] || next === this.matchFormation()) return; const previous=this.matchFormation(); const ids=this.slots().map(slot=>this.lineup()[slot.id]).filter((id): id is string => !!id); const lineup: Record<string,string>={}; const positions: Record<string,{x:number;y:number}>={}; this.formations[next].forEach((slot,i)=>{const id=ids[i];if(id){lineup[slot.id]=id;positions[id]={x:slot.x,y:slot.y};}}); this.lineup.set(lineup);this.matchPositions.set(positions);this.matchFormation.set(next);this.selectedOutgoingId.set(null);this.events.update(items=>[{type:'formation',minute:this.minute,description:'Cambio modulo: '+previous+' → '+next},...items]);this.voiceMessage.set('Modulo cambiato in '+next+'. Evento registrato al '+this.minute+'′.'); void this.persistMatchState(); }
   protected startShirtDrag(event: PointerEvent, id: string): void {
     if (event.button !== 0) return;
     event.preventDefault();
@@ -112,16 +140,17 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.draggingElement = null;
     this.dragStartPosition = null;
     this.dragCurrentPosition = null;
+    void this.persistMatchState();
   }
   protected player(id: string | undefined): PlayerRecord | undefined { return this.players().find(p => p.id === id); }
   protected playerInSlot(slotId: string): PlayerRecord | undefined { return this.player(this.lineup()[slotId]); }
-  protected onField(): PlayerRecord[] { return Object.values(this.lineup()).filter(Boolean).map(id => this.player(id)).filter((p): p is PlayerRecord => !!p && !this.redCards().includes(p.id)); }
+  protected onField(): PlayerRecord[] { return Object.values(this.lineup()).filter(Boolean).map(id => this.player(id)).filter((p): p is PlayerRecord => !!p); }
   protected bench(): PlayerRecord[] { const ids=new Set(Object.values(this.lineup())); return this.players().filter(p=>!ids.has(p.id)&&!this.redCards().includes(p.id)); }
   protected get minute(): number { return Math.min(90, Math.floor(this.elapsedSeconds()/60)); }
   protected get clock(): string { const m=Math.floor(this.elapsedSeconds()/60),s=this.elapsedSeconds()%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
   protected get score(): string { return String(Object.values(this.goals()).reduce((a,b)=>a+b,0)); }
-  protected start(): void { if(this.finished()||this.running()) return; this.running.set(true); this.timer=setInterval(()=>{this.elapsedSeconds.update(v=>Math.min(5400,v+1));if(this.elapsedSeconds()>=5400){this.pause();this.finished.set(true);}},1000); }
-  protected pause(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.running.set(false); }
+  protected start(): void { if(this.finished()||this.running()) return; this.running.set(true); this.timer=setInterval(()=>{this.elapsedSeconds.update(v=>Math.min(5400,v+1));if(this.elapsedSeconds()>=5400){if(this.timer){clearInterval(this.timer);this.timer=null;}this.running.set(false);this.finished.set(true);void this.persistMatchState();} else void this.persistMatchState();},1000); void this.persistMatchState(); }
+  protected pause(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.running.set(false); void this.persistMatchState(); }
   protected close(): void { this.pause(); this.voice.stop(); this.voiceListening.set(false); this.closematch.emit(); }
   protected startVoice(): void {
     this.voiceHelpOpen.set(true);
@@ -181,25 +210,26 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       this.showMatchAnimation({type:count>=2?'red-card':'yellow-card',title:count>=2?'SECONDO GIALLO · ROSSO':'AMMONIZIONE',detail:booked?`#${booked.shirtNumber} ${booked.lastName}`:'Cartellino'});
       if(count>=2){
         this.redCards.update(ids=>ids.includes(action.playerId!)?ids:[...ids,action.playerId!]);
-        this.lineup.update(l=>Object.fromEntries(Object.entries(l).filter(([,id])=>id!==action.playerId)));
         this.events.update(e=>[{type:'red-card',minute,description:action.description,playerId:action.playerId},{type:'yellow-card',minute,description:`Seconda ammonizione per #${this.player(action.playerId)?.shirtNumber} ${this.player(action.playerId)?.lastName}`,playerId:action.playerId},...e]);
       } else this.events.update(e=>[{type:'yellow-card',minute,description:action.description,playerId:action.playerId},...e]);
     }
-    if(action.type==='red-card'&&action.playerId){const sentOff=this.player(action.playerId);this.showMatchAnimation({type:'red-card',title:'ESPULSO!',detail:sentOff?`#${sentOff.shirtNumber} ${sentOff.lastName}`:'Cartellino rosso'});this.redCards.update(ids=>[...ids,action.playerId!]);this.lineup.update(l=>Object.fromEntries(Object.entries(l).filter(([,id])=>id!==action.playerId)));this.events.update(e=>[{type:'red-card',minute,description:action.description,playerId:action.playerId},...e]);}
+    if(action.type==='red-card'&&action.playerId){const sentOff=this.player(action.playerId);this.showMatchAnimation({type:'red-card',title:'ESPULSO!',detail:sentOff?`#${sentOff.shirtNumber} ${sentOff.lastName}`:'Cartellino rosso'});this.redCards.update(ids=>ids.includes(action.playerId!)?ids:[...ids,action.playerId!]);this.events.update(e=>[{type:'red-card',minute,description:action.description,playerId:action.playerId},...e]);}
     if(action.type==='substitution'&&action.outgoingId&&action.incomingId){
+      if(this.redCards().includes(action.outgoingId)){this.voiceMessage.set('Un giocatore espulso non può essere sostituito. La squadra continua in inferiorità numerica.');this.pending.set(null);return;}
       const slot=Object.entries(this.lineup()).find(([,id])=>id===action.outgoingId)?.[0];
       if(slot&&this.changesUsed()<this.maxChanges){const outgoing=this.player(action.outgoingId), incoming=this.player(action.incomingId);this.showMatchAnimation({type:'substitution',title:'SOSTITUZIONE',detail:`${outgoing?.lastName ?? 'Esce'}  →  ${incoming?.lastName ?? 'Entra'}`,outgoingNumber:outgoing?.shirtNumber,incomingNumber:incoming?.shirtNumber});const pos=this.matchPositions()[action.outgoingId];this.lineup.update(l=>({...l,[slot]:action.incomingId!}));if(pos)this.matchPositions.update(p=>({...p,[action.incomingId!]:pos}));this.changesUsed.update(v=>v+1);this.events.update(e=>[{type:'substitution',minute,description:action.description,outgoingId:action.outgoingId,incomingId:action.incomingId},...e]);}
       else {this.voiceMessage.set(this.changesUsed()>=this.maxChanges?'Hai esaurito i cambi disponibili.':'Il giocatore da sostituire non è in campo.');this.pending.set(null);return;}
     }
-    this.pending.set(null);this.voiceMessage.set('Evento registrato.');
+    this.pending.set(null);this.voiceMessage.set('Evento registrato.'); void this.persistMatchState();
   }
   protected cancelAction(): void { this.pending.set(null); this.voiceMessage.set('Evento annullato.'); }
-  protected chooseOutgoing(player:PlayerRecord): void { this.selectedOutgoingId.set(player.id);this.voiceMessage.set(`Selezionato ${player.lastName}. Ora scegli chi entra dalla panchina.`); }
+  protected chooseOutgoing(player:PlayerRecord): void { if(this.playerHasRedCard(player)){this.voiceMessage.set('Un giocatore espulso non può essere sostituito. La squadra continua in inferiorità numerica.');return;} this.selectedOutgoingId.set(player.id);this.voiceMessage.set(`Selezionato ${player.lastName}. Ora scegli chi entra dalla panchina.`); }
   protected chooseIncoming(player:PlayerRecord): void {
     const outgoing=this.selectedOutgoingId();if(!outgoing)return;
     const action:PendingAction={type:'substitution',outgoingId:outgoing,incomingId:player.id,description:`Cambio: esce #${this.player(outgoing)?.shirtNumber} ${this.player(outgoing)?.lastName}, entra #${player.shirtNumber} ${player.lastName}`};
     this.pending.set(action);this.selectedOutgoingId.set(null);this.voiceMessage.set('Conferma il cambio.');
   }
   protected goalsFor(player:PlayerRecord):number{return this.goals()[player.id]??0;}
+  protected yellowCardsFor(player:PlayerRecord):number{return this.yellowCards()[player.id]??0;}
   protected playerHasRedCard(player:PlayerRecord):boolean{return this.redCards().includes(player.id);}
 }

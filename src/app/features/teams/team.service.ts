@@ -29,6 +29,21 @@ export interface TacticalLayout {
   shirtPositions: Record<string, { x: number; y: number }>;
 }
 
+export interface LiveMatchState {
+  elapsedSeconds: number;
+  running: boolean;
+  finished: boolean;
+  events: { type: 'goal' | 'yellow-card' | 'red-card' | 'substitution' | 'formation'; minute: number; description: string; playerId?: string; outgoingId?: string; incomingId?: string }[];
+  goals: Record<string, number>;
+  assists: Record<string, number>;
+  yellowCards: Record<string, number>;
+  redCards: string[];
+  lineup: Record<string, string>;
+  formation: string;
+  positions: Record<string, { x: number; y: number }>;
+  changesUsed: number;
+}
+
 export interface TeamInput {
   name: string;
   category: string;
@@ -85,6 +100,26 @@ export class TeamService {
     const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId,
       'seasons', seasonId, 'settings', 'tactical-layout');
     await setDoc(ref, { ...layout, updatedAt: serverTimestamp() });
+  }
+
+  async loadLiveMatch(workspaceId: string, teamId: string, seasonId: string): Promise<LiveMatchState | null> {
+    const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId, 'seasons', seasonId, 'settings', 'live-match');
+    const snapshot = await getDoc(ref);
+    if (!snapshot.exists()) return null;
+    const data = snapshot.data();
+    return {
+      elapsedSeconds: Number(data['elapsedSeconds'] ?? 0), running: data['running'] === true,
+      finished: data['finished'] === true, events: (data['events'] ?? []) as LiveMatchState['events'],
+      goals: (data['goals'] ?? {}) as Record<string, number>, assists: (data['assists'] ?? {}) as Record<string, number>,
+      yellowCards: (data['yellowCards'] ?? {}) as Record<string, number>, redCards: (data['redCards'] ?? []) as string[],
+      lineup: (data['lineup'] ?? {}) as Record<string, string>, formation: String(data['formation'] ?? '4-3-3'),
+      positions: (data['positions'] ?? {}) as Record<string, { x: number; y: number }>, changesUsed: Number(data['changesUsed'] ?? 0)
+    };
+  }
+
+  async saveLiveMatch(workspaceId: string, teamId: string, seasonId: string, state: LiveMatchState): Promise<void> {
+    const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId, 'seasons', seasonId, 'settings', 'live-match');
+    await setDoc(ref, { ...state, updatedAt: serverTimestamp() });
   }
 
   async create(workspaceId: string, input: TeamInput): Promise<void> {
