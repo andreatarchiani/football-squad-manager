@@ -109,6 +109,7 @@ export class HomePageComponent {
   protected toggleTeamDropdown(): void { this.teamDropdownOpen.update(open => !open); }
 
   protected async selectTeam(teamId: string): Promise<void> {
+    this.teamDropdownOpen.set(false);
     const validTeamId = this.selectableTeams.some(team => team.id === teamId) ? teamId : this.selectedTeamId();
     if (!validTeamId) return;
     this.selectedTeamId.set(validTeamId);
