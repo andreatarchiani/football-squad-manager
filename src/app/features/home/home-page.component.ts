@@ -292,10 +292,10 @@ export class HomePageComponent {
         else localStorage.removeItem(this.selectionStorageKey(uid));
       }
       if (selected && selected !== savedPreference && uid && this.db) {
-        try { await setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: selected, updatedAt: new Date() }, { merge: true }); }
-        catch (error) { console.error('Unable to save automatically selected team.', error); }
+        void setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: selected, updatedAt: new Date() }, { merge: true })
+          .catch(error => console.error('Unable to save automatically selected team.', error));
       }
-      await this.loadPreview();
+      void this.loadPreview();
     } catch (error) {
       console.error('Unable to load home workspace.', error);
       this.error.set('Non è stato possibile caricare i dati del tuo account e delle squadre.');
