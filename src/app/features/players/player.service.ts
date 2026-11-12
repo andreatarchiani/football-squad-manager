@@ -72,6 +72,10 @@ export class PlayerService {
     await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { goals: increment(1), updatedAt: serverTimestamp() });
   }
 
+  async recordAssist(workspaceId: string, playerId: string): Promise<void> {
+    await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { assists: increment(1), updatedAt: serverTimestamp() });
+  }
+
   async setArchived(workspaceId:string, player:PlayerRecord, archived:boolean):Promise<void> {
     const db=this.requireFirestore();
     await runTransaction(db,async tx=>{
