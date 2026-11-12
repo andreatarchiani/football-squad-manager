@@ -46,8 +46,10 @@ service cloud.firestore {
         && request.auth.uid == uid
         && request.resource.data.defaultWorkspaceId == resource.data.defaultWorkspaceId
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'displayName', 'email', 'updatedAt'
-        ]);
+          'displayName', 'email', 'accountRole', 'defaultTeamId', 'updatedAt'
+        ])
+        && (!request.resource.data.keys().hasAny(['accountRole']) || request.resource.data.accountRole in ['Società', 'Allenatore', 'Collaboratore', 'Altro'])
+        && (!request.resource.data.keys().hasAny(['defaultTeamId']) || request.resource.data.defaultTeamId is string);
       allow delete: if false;
     }
 
