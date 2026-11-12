@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, OnDestroy, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnDestroy, OnInit, output, signal } from '@angular/core';
 import type { PlayerRecord } from '../players/player.service';
 import { VoiceRecognitionService } from '../../core/voice/voice-recognition.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
@@ -15,7 +15,7 @@ interface PendingAction { type: MatchEventType; playerId?: string; outgoingId?: 
   styleUrl: './live-match.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LiveMatchComponent implements OnDestroy {
+export class LiveMatchComponent implements OnDestroy, OnInit {
   readonly teamName = input.required<string>();
   readonly players = input.required<PlayerRecord[]>();
   readonly initialLineup = input.required<Record<string, string>>();
@@ -55,7 +55,7 @@ export class LiveMatchComponent implements OnDestroy {
     ]
   };
 
-  constructor() { this.lineup.set({...this.initialLineup()}); }
+  ngOnInit(): void { this.lineup.set({...this.initialLineup()}); }
   ngOnDestroy(): void { this.pause(); this.voice.stop(); }
 
   protected slots() { return this.formations[this.formation()] ?? this.formations['4-3-3']; }
