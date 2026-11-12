@@ -121,3 +121,5 @@
 .formation-picker-option.is-selected { color: #a9e4bb; background: rgba(119,190,143,.16); }
 .formation-picker-check { color: #a9e4bb; font-weight: 900; }
 @keyframes formation-menu-in { from { opacity: 0; transform: translateY(-5px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.voice-confirm-instruction{margin:12px 0 16px;padding:11px 13px;border:1px solid #8dff9b45;border-radius:10px;background:#173d292e;color:#c8dfcf;font-size:12px;line-height:1.55;text-align:left}.voice-confirm-instruction strong{color:#a5efba;font-weight:900}

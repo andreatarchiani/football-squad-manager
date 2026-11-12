@@ -152,7 +152,7 @@
   @if (pending(); as action) {
     <div class="match-confirm-overlay">
       <section class="match-confirm" role="dialog" aria-modal="true" aria-labelledby="match-confirm-title">
-        <span class="confirm-eyebrow">CONFERMA EVENTO · {{ minute }}′</span><h2 id="match-confirm-title">Registrare questo evento?</h2><p>{{ action.description }}</p>
+        <span class="confirm-eyebrow">CONFERMA EVENTO · {{ minute }}′</span><h2 id="match-confirm-title">Registrare questo evento?</h2><p>{{ action.description }}</p><p class="voice-confirm-instruction">Per confermare senza toccare lo schermo, pronuncia <strong>«Conferma»</strong>. Per annullare, pronuncia <strong>«Annulla»</strong>.</p>
         <label class="confirm-edit-label" for="voice-correction">Correggi il comando se è stato capito male</label>
         <textarea id="voice-correction" class="confirm-edit-input" rows="2" [value]="voiceDraft()" (input)="updateVoiceDraft($any($event.target).value)" placeholder="Es. Goal numero 8, assist di numero 10"></textarea>
         <button type="button" class="confirm-correct" (click)="reinterpretDraft()">Correggi comando</button>
