@@ -56,6 +56,9 @@ export class HomePageComponent {
   protected readonly profileNameDraft = signal('');
   protected readonly profileNameSaving = signal(false);
   private previewRequest = 0;
+  private loadRequest = 0;
+
+  private selectionStorageKey(uid: string): string { return `fsm-default-team-${uid}`; }
 
   constructor() { effect(() => { if (this.auth.workspaceId()) void this.load(); }); }
 
@@ -105,6 +108,11 @@ export class HomePageComponent {
   protected async selectTeam(teamId: string): Promise<void> {
     const validTeamId = this.selectableTeams.some(team => team.id === teamId) ? teamId : '';
     this.selectedTeamId.set(validTeamId);
+    const uid = this.user()?.uid;
+    if (uid && typeof localStorage !== 'undefined') {
+      if (validTeamId) localStorage.setItem(this.selectionStorageKey(uid), validTeamId);
+      else localStorage.removeItem(this.selectionStorageKey(uid));
+    }
     if (!validTeamId) {
       this.previewPlayers.set([]);
       this.previewLineup.set({});
@@ -112,7 +120,6 @@ export class HomePageComponent {
       this.previewLoading.set(false);
     }
     void this.loadPreview();
-    const uid = this.user()?.uid;
     if (!uid || !this.db) return;
     this.saving.set(true);
     try { await setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: validTeamId, updatedAt: new Date() }, { merge: true }); }
@@ -186,6 +193,7 @@ export class HomePageComponent {
   }
 
   private async load(): Promise<void> {
+    const request = ++this.loadRequest;
     const workspaceId = this.auth.workspaceId();
     const uid = this.user()?.uid;
     if (!workspaceId) return;
@@ -194,17 +202,24 @@ export class HomePageComponent {
         this.teamsService.list(workspaceId),
         uid && this.db ? getDoc(doc(this.db, 'userProfiles', uid)) : Promise.resolve(null)
       ]);
+      if (request !== this.loadRequest || workspaceId !== this.auth.workspaceId() || uid !== this.user()?.uid) return;
       this.teams.set(teams);
       const data = profile?.exists() ? profile.data() : {};
       const role = String(data?.['accountRole'] ?? 'Allenatore');
       this.accountRole.set(['Società', 'Allenatore', 'Collaboratore', 'Altro'].includes(role) ? role : 'Allenatore');
-      const preferred = String(data?.['defaultTeamId'] ?? '');
+      const hasSavedPreference = typeof data?.['defaultTeamId'] === 'string';
+      const localPreference = uid && typeof localStorage !== 'undefined' ? localStorage.getItem(this.selectionStorageKey(uid)) ?? '' : '';
+      const preferred = hasSavedPreference ? String(data['defaultTeamId']) : localPreference;
       const selected = teams.some(team => team.id === preferred && !team.isArchived) ? preferred : '';
       this.selectedTeamId.set(selected);
+      if (uid && typeof localStorage !== 'undefined') {
+        if (selected) localStorage.setItem(this.selectionStorageKey(uid), selected);
+        else localStorage.removeItem(this.selectionStorageKey(uid));
+      }
       await this.loadPreview();
     } catch (error) {
       console.error('Unable to load home workspace.', error);
       this.error.set('Non è stato possibile caricare i dati del tuo account e delle squadre.');
-    } finally { this.loading.set(false); }
+    } finally { if (request === this.loadRequest) this.loading.set(false); }
   }
 }
