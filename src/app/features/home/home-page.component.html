@@ -14,7 +14,7 @@
     <div class="home-section-heading"><div><span class="eyebrow">IL TUO SPAZIO</span><h2>Le tue squadre</h2></div><button type="button" class="outline-action" (click)="openTeams.emit()">Gestisci squadre <span>↗</span></button></div>
     <div class="team-reference-grid">
       @for (team of teams(); track team.id) {
-        <button type="button" class="team-reference" [class.selected]="selectedTeamId() === team.id" [disabled]="team.isArchived" (click)="selectTeam(team.id)">
+        <button type="button" class="team-reference" [class.selected]="selectedTeamId() === team.id" [disabled]="team.isArchived" (click)="openTeam(team.id)">
           <span class="team-reference-icon">⚽</span><span class="team-reference-copy"><strong>{{ team.name }}</strong><small>{{ team.clubName || 'Società non indicata' }} · {{ team.category || 'Categoria non indicata' }}</small></span>
           @if (selectedTeamId() === team.id) { <span class="selected-mark">✓</span> }
         </button>
