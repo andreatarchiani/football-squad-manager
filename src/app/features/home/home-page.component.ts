@@ -32,6 +32,11 @@ export class HomePageComponent {
     return this.teams().find(team => team.id === this.selectedTeamId());
   }
 
+  protected async openTeam(teamId: string): Promise<void> {
+    await this.selectTeam(teamId);
+    this.openTeams.emit();
+  }
+
   protected async selectTeam(teamId: string): Promise<void> {
     this.selectedTeamId.set(teamId);
     const uid = this.user()?.uid;
