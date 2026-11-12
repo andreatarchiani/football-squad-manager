@@ -173,8 +173,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected playerInSlot(slotId: string): PlayerRecord | undefined { return this.player(this.lineup()[slotId]); }
   protected onField(): PlayerRecord[] { return Object.values(this.lineup()).filter(Boolean).map(id => this.player(id)).filter((p): p is PlayerRecord => !!p); }
   protected bench(): PlayerRecord[] { const ids=new Set(Object.values(this.lineup())); return this.players().filter(p=>!ids.has(p.id)&&!this.redCards().includes(p.id)); }
-  protected get minute(): number { return Math.min(90, Math.floor(this.currentElapsedSeconds()/60)); }
-  protected get clock(): string { const elapsed=this.currentElapsedSeconds(),m=Math.floor(elapsed/60),s=elapsed%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
+  protected get minute(): number { this.elapsedSeconds(); return Math.min(90, Math.floor(this.currentElapsedSeconds()/60)); }
+  protected get clock(): string { this.elapsedSeconds(); const elapsed=this.currentElapsedSeconds(),m=Math.floor(elapsed/60),s=elapsed%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
   private currentElapsedSeconds(): number { return this.running() && this.runStartedAtMs !== null ? Math.min(5400, this.runBaseSeconds + Math.floor((Date.now() - this.runStartedAtMs) / 1000)) : this.elapsedSeconds(); }
   private settleRunningClock(): void { const elapsed=this.currentElapsedSeconds(); this.elapsedSeconds.set(elapsed); this.runBaseSeconds=elapsed; this.runStartedAtMs=null; }
   protected get score(): string { return String(Object.values(this.goals()).reduce((a,b)=>a+b,0)); }
