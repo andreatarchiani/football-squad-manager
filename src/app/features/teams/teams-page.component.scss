@@ -93,7 +93,6 @@
 .tactical-toolbar label { display: grid; gap: 6px; color: #c6d1d2; font-weight: 700; }
 .tactical-toolbar select,.lineup-slot select { min-height: 40px; max-width: 100%; padding: 0 10px; border: 1px solid #3c4d4b; border-radius: 8px; color: #edf4f0; background: #17231f; font: inherit; }
 .football-pitch { position: relative; width: 100%; max-width: 570px; aspect-ratio: 0.78; justify-self: center; overflow: hidden; border: 2px solid #b8d6bd; border-radius: 9px; background: repeating-linear-gradient(0deg,#24623e 0%,#24623e 12.5%,#2b7048 12.5%,#2b7048 25%); box-shadow: inset 0 0 0 1px #ffffff24; }
-.football-pitch::before { position: absolute; inset: 50% 0 auto; height: 1px; background: #e4f2e6b0; content: ''; }
 .pitch-line { position: absolute; background: #e4f2e6b0; }
 .pitch-line.halfway { top: 50%; left: 0; width: 100%; height: 1px; }
 .pitch-circle { position: absolute; top: 50%; left: 50%; width: 27%; aspect-ratio: 1; border: 1px solid #e4f2e6b0; border-radius: 50%; transform: translate(-50%,-50%); }
