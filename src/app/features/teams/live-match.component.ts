@@ -52,6 +52,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly redCards = signal<string[]>([]);
   protected readonly lineup = signal<Record<string, string>>({});
   protected readonly matchFormation = signal('4-3-3');
+  protected readonly matchFormationDropdownOpen = signal(false);
   protected readonly matchPositions = signal<Record<string, { x: number; y: number }>>({});
   private draggingPlayerId: string | null = null;
   private draggingElement: HTMLElement | null = null;
