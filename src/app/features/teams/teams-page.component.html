@@ -70,6 +70,7 @@
             <button class="secondary-button" type="button" (click)="toggleRoster(team)" [attr.aria-expanded]="expandedRosterId() === team.id">{{ expandedRosterId() === team.id ? 'Chiudi rosa' : 'Rosa' }}</button>
             <button class="secondary-button" type="button" (click)="openEdit(team)">Modifica</button>
             <button class="text-button" type="button" (click)="toggleArchive(team)">{{ team.isArchived ? 'Ripristina' : 'Archivia' }}</button>
+            <button class="text-button danger-text" type="button" (click)="deleteTeam(team)">Elimina</button>
           </div>
         </article>
         @if (expandedRosterId() === team.id) {
