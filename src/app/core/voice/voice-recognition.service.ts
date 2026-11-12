@@ -57,7 +57,7 @@ export class VoiceRecognitionService {
     const recognition = new Recognition();
     this.recognition = recognition;
     recognition.lang = 'it-IT';
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.onresult = (event) => {
       let finalTranscript = '';

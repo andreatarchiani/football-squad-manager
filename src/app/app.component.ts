@@ -11,6 +11,8 @@ import { TeamsPageComponent } from './features/teams/teams-page.component';
 import { PlayersPageComponent } from './features/players/players-page.component';
 import { VoiceAssistantComponent } from './features/voice-assistant/voice-assistant.component';
 import { HomePageComponent } from './features/home/home-page.component';
+import type { TeamRecord } from './features/teams/team.service';
+import type { PlayerRecord } from './features/players/player.service';
 
 @Component({
   selector: 'fsm-root',
@@ -23,7 +25,7 @@ import { HomePageComponent } from './features/home/home-page.component';
 export class AppComponent {
   protected readonly navigation = ['Home', 'Squadre', 'Giocatori', 'Formazioni', 'Partite'];
   protected readonly activePage = signal<'overview' | 'teams' | 'players' | 'match'>(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team') ? 'match' : 'overview');
-  protected readonly matchLaunch = signal<{ teamId: string; layoutSlot: 1 | 2; token: number } | null>(null);
+  protected readonly matchLaunch = signal<{ team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; token: number } | null>(null);
   protected readonly updateAvailable = signal(false);
   protected readonly updating = signal(false);
   private readonly swUpdate = inject(SwUpdate);
@@ -72,7 +74,7 @@ export class AppComponent {
     }
   }
 
-  protected launchMatch(request: { teamId: string; layoutSlot: 1 | 2 }): void {
+  protected launchMatch(request: { team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2 }): void {
     this.matchLaunch.set({ ...request, token: Date.now() });
     this.activePage.set('match');
   }
