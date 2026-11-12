@@ -21,7 +21,7 @@ import { VoiceAssistantComponent } from './features/voice-assistant/voice-assist
 })
 export class AppComponent {
   protected readonly navigation = ['Panoramica', 'Squadre', 'Giocatori', 'Formazioni', 'Partite'];
-  protected readonly activePage = signal<'overview' | 'teams' | 'players'>('overview');
+  protected readonly activePage = signal<'overview' | 'teams' | 'players'>(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team') ? 'teams' : 'overview');
   protected readonly updateAvailable = signal(false);
   protected readonly updating = signal(false);
   private readonly swUpdate = inject(SwUpdate);
