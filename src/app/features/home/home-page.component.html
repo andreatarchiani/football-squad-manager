@@ -71,7 +71,7 @@
             </div>
           }
         }
-        <div class="launch-actions"><button type="button" class="customize-action" (click)="openTeams.emit()">Gestisci rosa</button><button type="button" class="launch-button" (click)="start()" [disabled]="saving()">▶ Avvia partita</button></div>
+        <div class="launch-actions"><button type="button" class="customize-action" (click)="openTeams.emit()">Gestisci rosa</button><button type="button" class="launch-button" (click)="start()" [disabled]="saving() || previewSaving()">▶ Avvia partita</button></div>
       } @else {
         <div class="preview-placeholder">Non hai ancora squadre attive. Crea una squadra nella sezione Squadre per iniziare.</div>
         <button type="button" class="customize-action" (click)="openTeams.emit()">Crea squadra</button>
