@@ -103,6 +103,14 @@ export class TeamsPageComponent {
     this.activeSlotId.update(current => current === slotId ? null : slotId);
   }
 
+  protected activeSlot() {
+    return this.slots().find(slot => slot.id === this.activeSlotId());
+  }
+
+  protected closePlayerPicker(): void {
+    this.activeSlotId.set(null);
+  }
+
   protected positionForSlot(slot: { id: string; x: number; y: number }): { x: number; y: number } {
     return this.shirtPositions()[slot.id] ?? { x: slot.x, y: slot.y };
   }
