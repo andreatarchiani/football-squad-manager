@@ -4,3 +4,15 @@ html, body { min-height: 100%; margin: 0; background: var(--page-bg); }
 body { color: var(--text-primary); font-size: 14px; }
 button, input, textarea, select { font: inherit; }
 ::selection { color: #102018; background: #9bdab2; }
+
+/* Depth treatment for the tactical pitch and player markers. */
+.tactical-toolbar{flex-wrap:wrap;}.layout-save-status{margin-left:auto;color:#9bdab2;font-size:10px;font-weight:700;white-space:nowrap;}
+.football-pitch{isolation:isolate;border:3px solid #c5e4c9;border-radius:13px;background:repeating-linear-gradient(0deg,transparent 0%,transparent 12.2%,#ffffff08 12.2%,#ffffff08 24.8%),linear-gradient(110deg,#174c30 0%,#287447 42%,#1d5b38 100%);box-shadow:0 22px 34px #0008,0 7px 0 #102e20,inset 0 0 0 2px #ffffff20,inset 0 0 34px #061b10a8;}
+.football-pitch::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 48%,transparent 42%,#06190e66 100%),linear-gradient(180deg,#ffffff0d 0%,transparent 22%,transparent 78%,#03160b35 100%);}
+.football-pitch::after{content:"";position:absolute;inset:8px;z-index:0;pointer-events:none;border:1px solid #e7f8e899;box-shadow:inset 0 0 0 1px #061b1033;}
+.pitch-line,.pitch-circle,.pitch-box,.pitch-goal{z-index:1;box-shadow:0 1px 1px #061b1055;}
+.pitch-player{z-index:2;filter:drop-shadow(0 5px 4px #03140c88);}
+.pitch-player::before{content:"";position:absolute;top:24px;left:50%;width:34px;height:11px;border-radius:50%;background:#020b06a8;filter:blur(4px);transform:translateX(-50%);z-index:-1;}
+.pitch-shirt{position:relative;background:linear-gradient(145deg,#e4fff0 0%,#b8f0c9 36%,#67b989 100%);box-shadow:inset 1px 1px 0 #ffffffb8,inset -2px -3px 4px #174d32a8;filter:drop-shadow(0 2px 1px #071b10) drop-shadow(0 5px 3px #020b06a8);text-shadow:0 1px 0 #ffffff80;}
+.pitch-player-name{border:1px solid #d8f5df35;box-shadow:0 3px 7px #020b0680;text-shadow:0 1px 2px #000;}
+@media (max-width:650px){.layout-save-status{width:100%;margin-left:0;}.football-pitch{box-shadow:0 16px 24px #0008,0 5px 0 #102e20,inset 0 0 0 2px #ffffff20,inset 0 0 28px #061b10a8;}}
