@@ -347,9 +347,9 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       raw => {
         receivedTranscript = true;
         const spoken = raw.trim().toLocaleLowerCase('it-IT').replace(/[.!?]/g, '');
-        if(/\\bconferma\\b/.test(spoken)) {
+        if(/\bconferma\b/.test(spoken)) {
           this.confirmAction();
-        } else if(/\\b(annulla|annullare|cancella)\\b/.test(spoken)) {
+        } else if(/\b(annulla|annullare|cancella)\b/.test(spoken)) {
           this.cancelAction();
         } else {
           this.voiceMessage.set('Non ho riconosciuto «Conferma» o «Annulla». Ripeti la parola.');
