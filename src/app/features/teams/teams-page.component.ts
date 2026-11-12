@@ -123,7 +123,9 @@ export class TeamsPageComponent {
 
   protected positionForSlot(slot: { id: string; x: number; y: number }): { x: number; y: number } {
     const playerId = this.lineup()[slot.id];
-    return (playerId && this.shirtPositions()[playerId]) || { x: slot.x, y: slot.y };
+    const position = (playerId && this.shirtPositions()[playerId]) || { x: slot.x, y: slot.y };
+    // Keep the full shirt and name tag inside the pitch, including older saved layouts.
+    return { x: Math.max(9, Math.min(91, position.x)), y: Math.max(9, Math.min(91, position.y)) };
   }
 
   protected startDrag(event: PointerEvent, slotId: string): void {
@@ -143,8 +145,8 @@ export class TeamsPageComponent {
       event.clientX - (rect.left + rect.width / 2),
       event.clientY - (rect.top + rect.height / 2)
     ).matrixTransform(matrix.inverse());
-    const x = Math.max(5, Math.min(95, ((local.x + target.offsetWidth / 2) / target.offsetWidth) * 100));
-    const y = Math.max(4, Math.min(96, ((local.y + target.offsetHeight / 2) / target.offsetHeight) * 100));
+    const x = Math.max(9, Math.min(91, ((local.x + target.offsetWidth / 2) / target.offsetWidth) * 100));
+    const y = Math.max(9, Math.min(91, ((local.y + target.offsetHeight / 2) / target.offsetHeight) * 100));
     const playerId = this.lineup()[this.dragSlotId];
     if (!playerId) return;
     this.shirtPositions.update(current => ({ ...current, [playerId]: { x, y } }));
