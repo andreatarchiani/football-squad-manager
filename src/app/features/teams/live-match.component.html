@@ -16,15 +16,16 @@
     @if (voiceMessage()) { <p class="voice-status" aria-live="polite">{{ voiceMessage() }}</p> }
   </section>
   <section class="match-layout">
-    <div class="match-pitch-wrap">
+    <div class="match-pitch-wrap pitch-stage">
       <div class="pitch-caption"><span>IL CAMPO</span><strong>{{ matchFormation() }}</strong></div>
       <div class="match-tactics-toolbar"><label>Modulo in partita <select [value]="matchFormation()" (change)="changeMatchFormation($any($event.target).value)">@for (module of formationOptions(); track module) { <option [value]="module">{{ module }}</option> }</select></label><span>Trascina le maglie per riposizionarle</span></div>
-      <div class="match-pitch" [attr.aria-label]="'Formazione ' + matchFormation()" (pointermove)="moveShirtDrag($event)" (pointerup)="endShirtDrag()" (pointercancel)="endShirtDrag()">
-        <div class="match-boundary-glow"></div><div class="match-halfway"></div><div class="match-center-circle"></div><div class="match-center-dot"></div><div class="match-box match-box-top"></div><div class="match-box match-box-bottom"></div><div class="match-goal match-goal-top"></div><div class="match-goal match-goal-bottom"></div>
+      <div class="pitch-stadium-glow"></div>
+      <div class="match-pitch football-pitch" [attr.aria-label]="'Formazione ' + matchFormation()" (pointermove)="moveShirtDrag($event)" (pointerup)="endShirtDrag()" (pointercancel)="endShirtDrag()">
+        <div class="match-boundary-glow"></div><div class="match-halfway pitch-line"></div><div class="match-center-circle pitch-circle"></div><div class="match-center-dot"></div><div class="match-box pitch-box match-box-top"></div><div class="match-box pitch-box match-box-bottom"></div><div class="match-goal pitch-goal match-goal-top"></div><div class="match-goal pitch-goal match-goal-bottom"></div>
         @for (slot of slots(); track slot.id) {
           @if (playerInSlot(slot.id); as player) {
-            <div class="match-shirt-player" [style.left.%]="slot.x" [style.top.%]="slot.y" [class.sent-off]="playerHasRedCard(player)" (pointerdown)="startShirtDrag($event, player.id)">
-              <span class="match-shirt">{{ player.shirtNumber ?? '—' }}</span><span class="match-player-label">{{ player.lastName }}</span>
+            <div class="match-shirt-player pitch-player" [style.left.%]="slot.x" [style.top.%]="slot.y" [class.sent-off]="playerHasRedCard(player)" (pointerdown)="startShirtDrag($event, player.id)">
+              <span class="match-shirt pitch-shirt">{{ player.shirtNumber ?? '—' }}</span><span class="match-player-label pitch-player-name">{{ player.lastName }}</span>
               @if (goalsFor(player)) { <small class="goal-indicator">⚽ {{ goalsFor(player) }}</small> }
             </div>
           }
