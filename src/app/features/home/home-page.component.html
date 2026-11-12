@@ -1,7 +1,17 @@
 <section class="home-dashboard">
   <section class="profile-hero">
     <div class="profile-avatar">{{ (user()?.displayName || user()?.email || 'U').slice(0,1).toUpperCase() }}</div>
-    <div class="profile-copy"><span class="eyebrow">IL TUO PROFILO</span><h2>{{ user()?.displayName || 'Benvenuto' }}</h2><p>{{ user()?.email }}</p></div>
+    <div class="profile-copy"><span class="eyebrow">IL TUO PROFILO</span>
+      @if (editingProfileName()) {
+        <div class="profile-name-editor">
+          <input type="text" aria-label="Nome del profilo" maxlength="80" [value]="profileNameDraft()" (input)="profileNameDraft.set($any($event.target).value)" (keydown.enter)="saveProfileName()" (keydown.escape)="cancelProfileNameEdit()" autofocus>
+          <button type="button" class="profile-name-save" (click)="saveProfileName()" [disabled]="profileNameSaving() || !profileNameDraft().trim()">{{ profileNameSaving() ? 'Salvo…' : 'Salva' }}</button>
+          <button type="button" class="profile-name-cancel" (click)="cancelProfileNameEdit()" [disabled]="profileNameSaving()">Annulla</button>
+        </div>
+      } @else {
+        <button type="button" class="profile-name-button" (click)="beginProfileNameEdit()" aria-label="Modifica il nome del profilo">{{ user()?.displayName || 'Benvenuto' }} <span aria-hidden="true">✎</span></button>
+      }
+      <p>{{ user()?.email }}</p></div>
   </section>
   @if (error()) { <p class="home-error" role="alert">{{ error() }}</p> }
   @if (loading()) { <div class="home-loading">Caricamento del tuo spazio squadra…</div> } @else {
