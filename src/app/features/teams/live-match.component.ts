@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, OnDestroy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnDestroy, output, signal } from '@angular/core';
 import type { PlayerRecord } from '../players/player.service';
 import { VoiceRecognitionService } from '../../core/voice/voice-recognition.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
@@ -20,6 +20,7 @@ export class LiveMatchComponent implements OnDestroy {
   readonly players = input.required<PlayerRecord[]>();
   readonly initialLineup = input.required<Record<string, string>>();
   readonly formation = input.required<string>();
+  readonly closematch = output<void>();
   private readonly voice = inject(VoiceRecognitionService);
   private readonly auth = inject(FirebaseAuthService);
   private readonly playerService = inject(PlayerService);
@@ -67,7 +68,7 @@ export class LiveMatchComponent implements OnDestroy {
   protected get score(): string { return String(Object.values(this.goals()).reduce((a,b)=>a+b,0)); }
   protected start(): void { if(this.finished()||this.running()) return; this.running.set(true); this.timer=setInterval(()=>{this.elapsedSeconds.update(v=>Math.min(5400,v+1));if(this.elapsedSeconds()>=5400){this.pause();this.finished.set(true);}},1000); }
   protected pause(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.running.set(false); }
-  protected close(): void { this.pause(); this.voice.stop(); this.voiceListening.set(false); this.dispatchEvent(new CustomEvent('closematch',{bubbles:true})); }
+  protected close(): void { this.pause(); this.voice.stop(); this.voiceListening.set(false); this.closematch.emit(); }
   protected startVoice(): void {
     if(this.voiceListening()) { this.voice.stop(); this.voiceListening.set(false); return; }
     this.voiceMessage.set('Ti ascolto…');
