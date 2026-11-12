@@ -23,7 +23,7 @@
           <button type="button" class="team-picker-trigger" [class.is-open]="teamDropdownOpen()" (click)="toggleTeamDropdown()" [attr.aria-expanded]="teamDropdownOpen()" aria-haspopup="listbox">
             <span class="team-picker-crest" aria-hidden="true">⚽</span>
             <span class="team-picker-current"><strong>{{ selectedTeam.name }}</strong><small>{{ selectedTeam.category || 'Squadra' }} · Squadra attiva</small></span>
-            <span class="team-picker-chevron" aria-hidden="true">⌄</span>
+            <span class="team-picker-chevron" aria-hidden="true"></span>
           </button>
           @if (teamDropdownOpen()) {
             <div class="team-picker-menu" role="listbox" aria-label="Seleziona squadra">
