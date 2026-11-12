@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { collection, doc, getDocs, runTransaction, serverTimestamp, type Firestore } from 'firebase/firestore';
+import { collection, doc, getDocs, increment, runTransaction, serverTimestamp, updateDoc, type Firestore } from 'firebase/firestore';
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
 import type { TeamRecord } from '../teams/team.service';
 
@@ -66,7 +66,7 @@ export class PlayerService {
     });
   }
 
-  async setArchived(workspaceId:string, player:PlayerRecord, archived:boolean):Promise<void> {
+  async recordGoal(workspaceId: string, playerId: string): Promise<void> {\n    await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { goals: increment(1), updatedAt: serverTimestamp() });\n  }\n\n  async setArchived(workspaceId:string, player:PlayerRecord, archived:boolean):Promise<void> {
     const db=this.requireFirestore();
     await runTransaction(db,async tx=>{
       const p=doc(db,'workspaces',workspaceId,'players',player.id);
