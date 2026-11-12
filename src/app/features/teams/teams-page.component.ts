@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { TeamService, type TeamInput, type TeamRecord } from './team.service';
@@ -14,7 +14,10 @@ import { LiveMatchComponent } from './live-match.component';
   styleUrl: './teams-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TeamsPageComponent {
+export class TeamsPageComponent implements OnChanges {
+  @Input() launchRequest: { teamId: string; layoutSlot: 1 | 2; token: number } | null = null;
+  private handledLaunchToken = 0;
+  protected readonly layoutSlot = signal<1 | 2>(1);
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamsService = inject(TeamService);
   private readonly playerService = inject(PlayerService);
@@ -66,14 +69,14 @@ export class TeamsPageComponent {
     void this.loadTeams();
   }
 
-  protected get visibleTeams(): TeamRecord[] {
+  ngOnChanges(changes: SimpleChanges): void {\n    if (changes['launchRequest'] && this.launchRequest && this.launchRequest.token !== this.handledLaunchToken) {\n      this.handledLaunchToken = this.launchRequest.token;\n      void this.launchFromHome(this.launchRequest);\n    }\n  }\n\n  protected get visibleTeams(): TeamRecord[] {
     return this.teams().filter((team) => this.showArchived() || !team.isArchived);
   }
 
   protected slots() { return this.pitchSlots[this.formation()]; }
 
   protected expandedTeamName(): string { return this.teams().find(team => team.id === this.expandedRosterId())?.name || 'Partita'; }
-  protected startMatch(): void { this.activeSlotId.set(null); const team=this.teams().find(item=>item.id===this.expandedRosterId()); if(team) localStorage.setItem('fsm-active-match-team',team.id); this.liveMatch.set(true); }
+  private async launchFromHome(request: { teamId: string; layoutSlot: 1 | 2; token: number }): Promise<void> {\n    if (!this.teams().length) await this.loadTeams();\n    const team = this.teams().find(item => item.id === request.teamId && !item.isArchived && !!item.seasonId);\n    if (!team) { this.error.set('La squadra selezionata non è disponibile.'); return; }\n    this.expandedRosterId.set(team.id);\n    this.layoutSlot.set(request.layoutSlot);\n    this.activeSlotId.set(null);\n    this.rosterLoading.set(true);\n    const workspaceId = this.auth.workspaceId();\n    if (!workspaceId || !team.seasonId) { this.rosterLoading.set(false); return; }\n    try {\n      this.players.set(await this.playerService.list(workspaceId, this.teams()));\n      const saved = await this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, request.layoutSlot);\n      const validIds = new Set(this.rosterForExpanded().map(player => player.id));\n      const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';\n      this.formation.set(formation);\n      if (saved) {\n        const validSlots = new Set(this.pitchSlots[formation].map(slot => slot.id));\n        this.lineup.set(Object.fromEntries(Object.entries(saved.lineup).filter(([slotId, playerId]) => validSlots.has(slotId) && validIds.has(playerId))));\n        this.shirtPositions.set(saved.shirtPositions || {});\n      } else { this.shirtPositions.set({}); this.autoArrange(); await this.persistTacticalLayout(); }\n      localStorage.setItem('fsm-active-match-team', team.id);\n      this.liveMatch.set(true);\n    } catch (error) { console.error('Unable to launch match from home.', error); this.error.set('Non è stato possibile preparare la partita. Riprova.'); }\n    finally { this.rosterLoading.set(false); }\n  }
   protected closeMatch(): void { this.liveMatch.set(false); localStorage.removeItem('fsm-active-match-team'); }
 
   protected playerForSlot(slotId: string): PlayerRecord | undefined {
@@ -90,7 +93,7 @@ export class TeamsPageComponent {
     return this.rosterForExpanded().filter(player => !starters.has(player.id));
   }
 
-  protected changeFormation(value: string): void {
+  protected async selectLayoutSlot(slot: 1 | 2): Promise<void> {\n    const team = this.teams().find(item => item.id === this.expandedRosterId());\n    const workspaceId = this.auth.workspaceId();\n    if (!team?.seasonId || !workspaceId || slot === this.layoutSlot()) return;\n    await this.persistTacticalLayout();\n    this.layoutSlot.set(slot);\n    const saved = await this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, slot);\n    const validIds = new Set(this.rosterForExpanded().map(player => player.id));\n    const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';\n    this.formation.set(formation);\n    if (saved) {\n      const validSlots = new Set(this.pitchSlots[formation].map(item => item.id));\n      this.lineup.set(Object.fromEntries(Object.entries(saved.lineup).filter(([id, playerId]) => validSlots.has(id) && validIds.has(playerId))));\n      this.shirtPositions.set(saved.shirtPositions || {});\n    } else { this.shirtPositions.set({}); this.autoArrange(); await this.persistTacticalLayout(); }\n  }\n\n  protected changeFormation(value: string): void {
     this.formation.set(value);
     this.activeSlotId.set(null);
     this.lineup.update(current => Object.fromEntries(
@@ -218,7 +221,7 @@ export class TeamsPageComponent {
     try {
       this.players.set(await this.playerService.list(workspaceId, this.teams()));
       const seasonId = team.seasonId;
-      const saved = seasonId ? await this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId) : null;
+      this.layoutSlot.set(1);\n      const saved = seasonId ? await this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId, 1) : null;
       const validPlayerIds = new Set(this.rosterForExpanded().map(player => player.id));
       const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
       this.formation.set(formation);
@@ -251,7 +254,7 @@ export class TeamsPageComponent {
     this.layoutSaveQueue = this.layoutSaveQueue.then(async () => {
       this.layoutSaving.set(true);
       try {
-        await this.teamsService.saveTacticalLayout(workspaceId, team.id, team.seasonId!, snapshot);
+        await this.teamsService.saveTacticalLayout(workspaceId, team.id, team.seasonId!, snapshot, this.layoutSlot());
       } catch (error) {
         console.error('Unable to save tactical layout.', error);
         this.error.set('Non è stato possibile salvare la disposizione della rosa. Riprova.');
