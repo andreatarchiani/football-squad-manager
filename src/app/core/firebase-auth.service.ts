@@ -70,7 +70,16 @@ export class FirebaseAuthService {
     }
   }
 
-  async updateDisplayName(displayName: string): Promise<void> {\n    const user = this.user();\n    if (!user) throw new Error('Devi effettuare l’accesso per modificare il nome.');\n    const name = displayName.trim();\n    if (!name) throw new Error('Il nome non può essere vuoto.');\n    await updateProfile(user, { displayName: name });\n    this.user.set(user);\n  }\n\n  async signIn(email: string, password: string): Promise<void> {
+  async updateDisplayName(displayName: string): Promise<void> {
+    const user = this.user();
+    if (!user) throw new Error('Devi effettuare l’accesso per modificare il nome.');
+    const name = displayName.trim();
+    if (!name) throw new Error('Il nome non può essere vuoto.');
+    await updateProfile(user, { displayName: name });
+    this.user.set(user);
+  }
+
+  async signIn(email: string, password: string): Promise<void> {
     await signInWithEmailAndPassword(this.requireAuth(), email.trim(), password);
   }
 
