@@ -177,9 +177,8 @@ export class HomePageComponent {
       const role = String(data?.['accountRole'] ?? 'Allenatore');
       this.accountRole.set(['Società', 'Allenatore', 'Collaboratore', 'Altro'].includes(role) ? role : 'Allenatore');
       const preferred = String(data?.['defaultTeamId'] ?? '');
-      const selected = teams.some(team => team.id === preferred && !team.isArchived) ? preferred : (teams.find(team => !team.isArchived)?.id ?? '');
+      const selected = teams.some(team => team.id === preferred && !team.isArchived) ? preferred : '';
       this.selectedTeamId.set(selected);
-      if (selected && selected !== preferred) await this.selectTeam(selected);
       await this.loadPreview();
     } catch (error) {
       console.error('Unable to load home workspace.', error);
