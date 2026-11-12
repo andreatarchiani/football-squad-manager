@@ -17,6 +17,7 @@
   </section>
   <section class="match-layout">
     <div class="match-pitch-wrap">
+      <div class="pitch-caption"><span>IL CAMPO</span><strong>{{ formation() }}</strong></div>
       <div class="match-pitch" [attr.aria-label]="'Formazione ' + formation()">
         <div class="match-boundary-glow"></div><div class="match-halfway"></div><div class="match-center-circle"></div><div class="match-center-dot"></div><div class="match-box match-box-top"></div><div class="match-box match-box-bottom"></div><div class="match-goal match-goal-top"></div><div class="match-goal match-goal-bottom"></div>
         @for (slot of slots(); track slot.id) {
