@@ -18,11 +18,26 @@
     <section class="match-launch-panel">
       <div class="launch-heading"><div><span class="eyebrow">MATCH CENTER</span><h2>Pronto a scendere in campo?</h2><p>Seleziona la squadra e visualizza subito la formazione che hai preparato.</p></div><div class="launch-ball">⚽</div></div>
       @if (selectableTeams.length > 0 && selectedTeam) {
-        <label class="default-team-field">Squadra selezionata
-          <select [value]="selectedTeam.id" (change)="selectTeam($any($event.target).value)">
-            @for (team of selectableTeams; track team.id) { <option [value]="team.id">{{ team.name }} · {{ team.category || 'Squadra' }}</option> }
-          </select>
-        </label>
+        <div class="team-picker">
+          <span class="team-picker-label">LA TUA SQUADRA</span>
+          <button type="button" class="team-picker-trigger" [class.is-open]="teamDropdownOpen()" (click)="toggleTeamDropdown()" [attr.aria-expanded]="teamDropdownOpen()" aria-haspopup="listbox">
+            <span class="team-picker-crest" aria-hidden="true">⚽</span>
+            <span class="team-picker-current"><strong>{{ selectedTeam.name }}</strong><small>{{ selectedTeam.category || 'Squadra' }} · Squadra attiva</small></span>
+            <span class="team-picker-chevron" aria-hidden="true">⌄</span>
+          </button>
+          @if (teamDropdownOpen()) {
+            <div class="team-picker-menu" role="listbox" aria-label="Seleziona squadra">
+              <div class="team-picker-menu-heading"><span>LE TUE SQUADRE</span><small>{{ selectableTeams.length }} disponibili</small></div>
+              @for (team of selectableTeams; track team.id) {
+                <button type="button" class="team-picker-option" [class.is-selected]="team.id === selectedTeam.id" role="option" [attr.aria-selected]="team.id === selectedTeam.id" (click)="selectTeam(team.id)">
+                  <span class="team-picker-option-crest" aria-hidden="true">⚽</span>
+                  <span class="team-picker-option-copy"><strong>{{ team.name }}</strong><small>{{ team.category || 'Squadra' }}</small></span>
+                  @if (team.id === selectedTeam.id) { <span class="team-picker-check" aria-hidden="true">✓</span> }
+                </button>
+              }
+            </div>
+          }
+        </div>
         <div class="lineup-choice-heading"><strong>Scegli la formazione</strong><span>Due rose personalizzabili</span></div>
         <div class="lineup-choice-grid">
           <button type="button" class="lineup-choice" [class.active]="layoutSlot() === 1" (click)="selectLayoutSlot(1)"><span class="lineup-number">01</span><span><strong>Modulo 1</strong><small>Rosa e disposizione principale</small></span><span class="radio-indicator"></span></button>
