@@ -41,7 +41,7 @@
 
     <main class="main-content">
       <header class="topbar">
-        <div><div class="eyebrow">AREA PERSONALE</div><h1>{{ activePage() === 'teams' ? 'Squadre' : activePage() === 'players' ? 'Giocatori' : 'Home' }}</h1></div>
+        <div><div class="eyebrow">AREA PERSONALE</div><h1>{{ activePage() === 'match' ? 'Partita' : activePage() === 'teams' ? 'Squadre' : activePage() === 'players' ? 'Giocatori' : 'Home' }}</h1></div>
         <div class="topbar-actions">
           <span class="today-label">{{ auth.user()?.displayName || auth.user()?.email }}</span>
           <fsm-voice-assistant />
@@ -69,6 +69,8 @@
         <fsm-home-page (openTeams)="navigate(1)" (launchMatch)="launchMatch($event)" />
       } @else if (activePage() === 'teams') {
         <fsm-teams-page [launchRequest]="matchLaunch()" />
+      } @else if (activePage() === 'match') {
+        <fsm-teams-page [launchRequest]="matchLaunch()" (matchClosed)="returnHomeAfterMatch()" />
       } @else if (activePage() === 'players') {
         <fsm-players-page />
       }
