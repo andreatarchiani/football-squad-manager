@@ -84,9 +84,9 @@ export class TeamService {
       || a.name.localeCompare(b.name, 'it'));
   }
 
-  async loadTacticalLayout(workspaceId: string, teamId: string, seasonId: string): Promise<TacticalLayout | null> {
+  async loadTacticalLayout(workspaceId: string, teamId: string, seasonId: string, layoutSlot: 1 | 2 = 1): Promise<TacticalLayout | null> {
     const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId,
-      'seasons', seasonId, 'settings', 'tactical-layout');
+      'seasons', seasonId, 'settings', layoutSlot === 1 ? 'tactical-layout' : 'tactical-layout-2');
     const snapshot = await getDoc(ref);
     if (!snapshot.exists()) return null;
     const data = snapshot.data();
@@ -97,9 +97,9 @@ export class TeamService {
     };
   }
 
-  async saveTacticalLayout(workspaceId: string, teamId: string, seasonId: string, layout: TacticalLayout): Promise<void> {
+  async saveTacticalLayout(workspaceId: string, teamId: string, seasonId: string, layout: TacticalLayout, layoutSlot: 1 | 2 = 1): Promise<void> {
     const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId,
-      'seasons', seasonId, 'settings', 'tactical-layout');
+      'seasons', seasonId, 'settings', layoutSlot === 1 ? 'tactical-layout' : 'tactical-layout-2');
     await setDoc(ref, { ...layout, updatedAt: serverTimestamp() });
   }
 
