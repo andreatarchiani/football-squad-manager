@@ -175,6 +175,41 @@ export class TeamService {
     await batch.commit();
   }
 
+  async deleteTeam(workspaceId: string, team: TeamRecord): Promise<void> {
+    const db = this.requireFirestore();
+    const teamRef = doc(db, 'workspaces', workspaceId, 'teams', team.id);
+    const seasons = await getDocs(collection(teamRef, 'seasons'));
+    const refs: ReturnType<typeof doc>[] = [];
+    const playerIds = new Set<string>();
+
+    for (const season of seasons.docs) {
+      const seasonRef = doc(teamRef, 'seasons', season.id);
+      const [members, reservations, settings] = await Promise.all([
+        getDocs(collection(seasonRef, 'squadMembers')),
+        getDocs(collection(seasonRef, 'jerseyReservations')),
+        getDocs(collection(seasonRef, 'settings'))
+      ]);
+      members.docs.forEach(member => {
+        playerIds.add(member.id);
+        refs.push(member.ref);
+      });
+      reservations.docs.forEach(item => refs.push(item.ref));
+      settings.docs.forEach(item => refs.push(item.ref));
+      refs.push(seasonRef);
+    }
+
+    // Players belong to one team/season; remove their profile documents as part of
+    // the team deletion so no orphaned players remain in the workspace.
+    playerIds.forEach(playerId => refs.push(doc(db, 'workspaces', workspaceId, 'players', playerId)));
+    refs.push(teamRef);
+
+    for (let offset = 0; offset < refs.length; offset += 450) {
+      const batch = writeBatch(db);
+      refs.slice(offset, offset + 450).forEach(ref => batch.delete(ref));
+      await batch.commit();
+    }
+  }
+
   async setArchived(workspaceId: string, team: TeamRecord, archived: boolean): Promise<void> {
     await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', team.id), {
       isArchived: archived,
