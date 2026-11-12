@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Output, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Output, effect, inject, signal } from '@angular/core';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
@@ -26,7 +26,7 @@ export class HomePageComponent {
   protected readonly error = signal('');
   protected readonly user = this.auth.user;
 
-  constructor() { void this.load(); }
+  constructor() { effect(() => { if (this.auth.workspaceId()) void this.load(); }); }
 
   protected get selectedTeam(): TeamRecord | undefined {
     return this.teams().find(team => team.id === this.selectedTeamId());
@@ -68,7 +68,7 @@ export class HomePageComponent {
   private async load(): Promise<void> {
     const workspaceId = this.auth.workspaceId();
     const uid = this.user()?.uid;
-    if (!workspaceId) { this.loading.set(false); return; }
+    if (!workspaceId) return;
     try {
       const [teams, profile] = await Promise.all([
         this.teamsService.list(workspaceId),
@@ -79,7 +79,9 @@ export class HomePageComponent {
       const role = String(data?.['accountRole'] ?? 'Allenatore');
       this.accountRole.set(['Società', 'Allenatore', 'Collaboratore', 'Altro'].includes(role) ? role : 'Allenatore');
       const preferred = String(data?.['defaultTeamId'] ?? '');
-      this.selectedTeamId.set(teams.some(team => team.id === preferred && !team.isArchived) ? preferred : (teams.find(team => !team.isArchived)?.id ?? ''));
+      const selected = teams.some(team => team.id === preferred && !team.isArchived) ? preferred : (teams.find(team => !team.isArchived)?.id ?? '');
+      this.selectedTeamId.set(selected);
+      if (!preferred && selected) await this.selectTeam(selected);
     } catch (error) {
       console.error('Unable to load home workspace.', error);
       this.error.set('Non è stato possibile caricare i dati del tuo account e delle squadre.');
