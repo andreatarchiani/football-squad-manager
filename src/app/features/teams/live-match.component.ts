@@ -130,9 +130,9 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected closeVoiceHelp(): void { this.voiceHelpOpen.set(false); }
   private parseCommand(raw: string): void {
     const text=raw.toLocaleLowerCase('it-IT');
-    const numbers=[...text.matchAll(/\\b(?:numero\\s*)?(\\d{1,2})\\b/g)].map(m=>Number(m[1]));
+    const numbers=[...text.matchAll(/\b(?:numero\s*)?(\d{1,2})\b/g)].map(m=>Number(m[1]));
     const byNumber=(n:number)=>this.players().find(p=>p.shirtNumber===n);
-    const assistMatch=text.match(/assist(?:ito)?\\s+(?:di\\s+)?(?:numero\\s*)?(\\d{1,2})/);
+    const assistMatch=text.match(/assist(?:ito)?\s+(?:di\s+)?(?:numero\s*)?(\d{1,2})/);
     const assistNumber=assistMatch?Number(assistMatch[1]):undefined;
     if(/goal|gol|ha segnato|rete/.test(text)){
       const scorerNumber=numbers.find(n=>n!==assistNumber);
