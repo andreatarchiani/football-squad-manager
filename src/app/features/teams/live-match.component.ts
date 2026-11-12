@@ -58,6 +58,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly changesUsed = signal(0);
   protected readonly maxChanges = 5;
   private timer: ReturnType<typeof setInterval> | null = null;
+  private exitingMatch = false;
+  private persistQueue: Promise<void> = Promise.resolve();
 
   readonly formations: Record<string, { id: string; label: string; x: number; y: number }[]> = {
     '4-3-3': [
@@ -92,12 +94,19 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       }
     } catch (error) { console.error('Unable to restore live match.', error); this.voiceMessage.set('Partita caricata, ma non è stato possibile recuperare gli ultimi dati salvati.'); }
   }
-  ngOnDestroy(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.voice.stop(); if(this.animationTimer) clearTimeout(this.animationTimer); void this.persistMatchState(); }
+  ngOnDestroy(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.voice.stop(); if(this.animationTimer) clearTimeout(this.animationTimer); if(!this.exitingMatch) void this.persistMatchState(); }
   private async persistMatchState(): Promise<void> {
-    try { await this.teamService.saveLiveMatch(this.workspaceId(), this.teamId(), this.seasonId(), {
+    if(this.exitingMatch) return;
+    const snapshot = {
       elapsedSeconds:this.elapsedSeconds(), running:this.running(), finished:this.finished(), events:this.events(), goals:this.goals(), assists:this.assists(),
       yellowCards:this.yellowCards(), redCards:this.redCards(), lineup:this.lineup(), formation:this.matchFormation(), positions:this.matchPositions(), changesUsed:this.changesUsed()
-    }); } catch(error) { console.error('Unable to save live match.', error); this.voiceMessage.set('Attenzione: non è stato possibile salvare la partita.'); }
+    };
+    this.persistQueue = this.persistQueue.then(async () => {
+      if(this.exitingMatch) return;
+      try { await this.teamService.saveLiveMatch(this.workspaceId(), this.teamId(), this.seasonId(), snapshot); }
+      catch(error) { console.error('Unable to save live match.', error); this.voiceMessage.set('Attenzione: non è stato possibile salvare la partita.'); }
+    });
+    await this.persistQueue;
   }
   private showMatchAnimation(animation: MatchAnimation): void { if(this.animationTimer) clearTimeout(this.animationTimer); this.matchAnimation.set(animation); this.animationTimer=setTimeout(()=>{this.matchAnimation.set(null);this.animationTimer=null;},2600); }
 
@@ -152,11 +161,29 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected get score(): string { return String(Object.values(this.goals()).reduce((a,b)=>a+b,0)); }
   protected start(): void { if(this.finished()||this.running()) return; this.running.set(true); this.timer=setInterval(()=>{this.elapsedSeconds.update(v=>Math.min(5400,v+1));if(this.elapsedSeconds()>=5400){if(this.timer){clearInterval(this.timer);this.timer=null;}this.running.set(false);this.finished.set(true);void this.persistMatchState();} else void this.persistMatchState();},1000); void this.persistMatchState(); }
   protected pause(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.running.set(false); void this.persistMatchState(); }
-  protected close(): void { this.pause(); this.voice.stop(); this.voiceListening.set(false); this.closematch.emit(); }
+  protected async close(): Promise<void> {
+    if(this.exitingMatch) return;
+    if(this.timer){clearInterval(this.timer);this.timer=null;}
+    this.running.set(false);
+    this.voice.stop();
+    this.voiceListening.set(false);
+    this.exitingMatch = true;
+    try {
+      await this.persistQueue;
+      await this.teamService.clearLiveMatch(this.workspaceId(), this.teamId(), this.seasonId());
+    } catch(error) {
+      this.exitingMatch = false;
+      console.error('Unable to reset live match on exit.', error);
+      this.voiceMessage.set('Non è stato possibile azzerare la partita. Riprova a uscire.');
+      return;
+    }
+    this.closematch.emit();
+  }
   protected startVoice(): void {
     this.voiceHelpOpen.set(true);
     if(this.voiceListening()) { this.voice.stop(); this.voiceListening.set(false); return; }
-    this.voiceMessage.set('Ti ascolto…');
+    this.voiceDraft.set('');
+    this.voiceMessage.set('Pronuncia un comando, ad esempio: goal numero 9.');
     this.voiceListening.set(true);
     this.voice.start(text=>this.parseCommand(text),message=>this.voiceMessage.set(message),()=>this.voiceListening.set(false));
   }
