@@ -241,6 +241,17 @@ export class TeamsPageComponent implements OnChanges {
   private autoArrange(): void {
     const remaining = [...this.rosterForExpanded()];
     const next: Record<string, string> = {};
+    // Preserve every still-valid assignment first: adding a player must never
+    // reshuffle shirts already positioned on the pitch.
+    const validSlots = new Set(this.slots().map(slot => slot.id));
+    const validPlayers = new Set(remaining.map(player => player.id));
+    for (const [slotId, playerId] of Object.entries(this.lineup())) {
+      if (validSlots.has(slotId) && validPlayers.has(playerId)) {
+        next[slotId] = playerId;
+        const index = remaining.findIndex(player => player.id === playerId);
+        if (index >= 0) remaining.splice(index, 1);
+      }
+    }
     for (const slot of this.slots()) {
       const index = remaining.findIndex(player => this.playerHasRole(player, slot.role));
       // Never fill a position with an unrelated player: keep role-incompatible
