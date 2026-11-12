@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { TeamService,type TeamRecord } from '../teams/team.service';
-import { PLAYER_ROLES,PlayerService,type PlayerInput,type PlayerRecord,type PlayerRole,type PlayerStatus } from './player.service';
+import { PLAYER_ROLES,PlayerService,type PlayerInput,type PlayerRecord,type PlayerStatus } from './player.service';
 
 @Component({selector:'fsm-players-page',standalone:true,imports:[FormsModule],templateUrl:'./players-page.component.html',styleUrl:'./players-page.component.scss',changeDetection:ChangeDetectionStrategy.OnPush})
 export class PlayersPageComponent {
