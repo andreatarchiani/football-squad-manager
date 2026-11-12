@@ -28,7 +28,12 @@ export class HomePageComponent {
   protected readonly previewLineup = signal<Record<string, string>>({});
   protected readonly previewFormation = signal('4-3-3');
   protected readonly previewPositions = signal<Record<string, { x: number; y: number }>>({});
+  protected readonly previewActiveSlotId = signal<string | null>(null);
+  protected readonly previewSaving = signal(false);
   protected readonly previewLoading = signal(false);
+  private previewPressTimer: ReturnType<typeof setTimeout> | null = null;
+  private previewLongPressTriggered = false;
+  private previewSaveQueue: Promise<void> = Promise.resolve();
   protected readonly pitchSlots: Record<string, { id: string; label: string; role: string; x: number; y: number }[]> = {
     '4-3-3': [
       { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
@@ -110,6 +115,7 @@ export class HomePageComponent {
 
   protected async selectTeam(teamId: string): Promise<void> {
     this.teamDropdownOpen.set(false);
+    this.previewActiveSlotId.set(null);
     const validTeamId = this.selectableTeams.some(team => team.id === teamId) ? teamId : this.selectedTeamId();
     if (!validTeamId) return;
     this.selectedTeamId.set(validTeamId);
@@ -139,6 +145,73 @@ export class HomePageComponent {
     const player = this.previewPlayer(slot.id);
     const position = (player && this.previewPositions()[player.id]) || { x: slot.x, y: slot.y };
     return { x: Math.max(9, Math.min(91, position.x)), y: Math.max(9, Math.min(91, position.y)) };
+  }
+
+  protected startPreviewShirtPress(event: PointerEvent, slotId: string): void {
+    if (event.button !== 0) return;
+    this.previewLongPressTriggered = false;
+    if (this.previewPressTimer) clearTimeout(this.previewPressTimer);
+    this.previewPressTimer = setTimeout(() => {
+      this.previewLongPressTriggered = true;
+      this.previewActiveSlotId.set(slotId);
+      this.previewPressTimer = null;
+    }, 450);
+  }
+
+  protected endPreviewShirtPress(): void {
+    if (this.previewPressTimer) clearTimeout(this.previewPressTimer);
+    this.previewPressTimer = null;
+  }
+
+  protected openPreviewPlayerPicker(slotId: string): void {
+    if (this.previewLongPressTriggered) { this.previewLongPressTriggered = false; return; }
+    this.previewActiveSlotId.set(slotId);
+  }
+
+  protected closePreviewPlayerPicker(): void { this.previewActiveSlotId.set(null); }
+
+  protected activePreviewSlot() {
+    return (this.pitchSlots[this.previewFormation()] ?? []).find(slot => slot.id === this.previewActiveSlotId());
+  }
+
+  protected previewOptionsForSlot(slot: { id: string; role: string }): PlayerRecord[] {
+    const selectedId = this.previewLineup()[slot.id] || '';
+    const usedElsewhere = new Set(Object.entries(this.previewLineup()).filter(([id, playerId]) => id !== slot.id && playerId).map(([, playerId]) => playerId));
+    return this.previewPlayers().filter(player =>
+      (player.primaryRole === slot.role || player.roles.includes(slot.role as PlayerRecord['primaryRole']))
+      && (!usedElsewhere.has(player.id) || player.id === selectedId)
+    ).sort((a, b) => (a.shirtNumber ?? 100) - (b.shirtNumber ?? 100) || a.lastName.localeCompare(b.lastName, 'it'));
+  }
+
+  protected assignPreviewPlayer(slotId: string, playerId: string): void {
+    this.previewLineup.update(current => {
+      const next = { ...current };
+      for (const [id, assignedId] of Object.entries(next)) if (assignedId === playerId) delete next[id];
+      if (playerId) next[slotId] = playerId;
+      else delete next[slotId];
+      return next;
+    });
+    this.previewActiveSlotId.set(null);
+    void this.persistPreviewLineup();
+  }
+
+  private async persistPreviewLineup(): Promise<void> {
+    const team = this.selectedTeam;
+    const workspaceId = this.auth.workspaceId();
+    if (!team?.seasonId || !workspaceId) return;
+    const layout = { formation: this.previewFormation(), lineup: { ...this.previewLineup() }, shirtPositions: { ...this.previewPositions() } };
+    const slot = this.layoutSlot();
+    this.previewSaving.set(true);
+    const save = this.previewSaveQueue.then(async () => {
+      try { await this.teamsService.saveTacticalLayout(workspaceId, team.id, team.seasonId!, layout, slot); }
+      catch (error) {
+        console.error('Unable to save home lineup.', error);
+        this.error.set('Non è stato possibile salvare la modifica della rosa.');
+      }
+    });
+    this.previewSaveQueue = save;
+    await save;
+    if (this.previewSaveQueue === save) this.previewSaving.set(false);
   }
 
   protected async saveRole(role: string): Promise<void> {
@@ -177,7 +250,7 @@ export class HomePageComponent {
         this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, this.layoutSlot())
       ]);
       if (request !== this.previewRequest || this.selectedTeamId() !== team.id) return;
-      this.previewPlayers.set(players.filter(player => !player.isArchived && player.teamId === team.id && player.seasonId === team.seasonId));
+      this.previewPlayers.set(players.filter(player => !player.isArchived && player.status === 'active' && player.teamId === team.id && player.seasonId === team.seasonId));
       const formation = saved?.formation && ['4-3-3', '4-4-2', '3-5-2'].includes(saved.formation) ? saved.formation : '4-3-3';
       this.previewFormation.set(formation);
       const validSlots = new Set(this.pitchSlots[formation].map(slot => slot.id));
@@ -219,10 +292,10 @@ export class HomePageComponent {
         else localStorage.removeItem(this.selectionStorageKey(uid));
       }
       if (selected && selected !== savedPreference && uid && this.db) {
-        try { await setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: selected, updatedAt: new Date() }, { merge: true }); }
-        catch (error) { console.error('Unable to save automatically selected team.', error); }
+        void setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: selected, updatedAt: new Date() }, { merge: true })
+          .catch(error => console.error('Unable to save automatically selected team.', error));
       }
-      await this.loadPreview();
+      void this.loadPreview();
     } catch (error) {
       console.error('Unable to load home workspace.', error);
       this.error.set('Non è stato possibile caricare i dati del tuo account e delle squadre.');

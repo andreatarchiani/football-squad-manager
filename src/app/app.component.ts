@@ -22,7 +22,7 @@ import { HomePageComponent } from './features/home/home-page.component';
 })
 export class AppComponent {
   protected readonly navigation = ['Home', 'Squadre', 'Giocatori', 'Formazioni', 'Partite'];
-  protected readonly activePage = signal<'overview' | 'teams' | 'players'>(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team') ? 'teams' : 'overview');
+  protected readonly activePage = signal<'overview' | 'teams' | 'players' | 'match'>(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team') ? 'match' : 'overview');
   protected readonly matchLaunch = signal<{ teamId: string; layoutSlot: 1 | 2; token: number } | null>(null);
   protected readonly updateAvailable = signal(false);
   protected readonly updating = signal(false);
@@ -74,8 +74,10 @@ export class AppComponent {
 
   protected launchMatch(request: { teamId: string; layoutSlot: 1 | 2 }): void {
     this.matchLaunch.set({ ...request, token: Date.now() });
-    this.activePage.set('teams');
+    this.activePage.set('match');
   }
+
+  protected returnHomeAfterMatch(): void { this.activePage.set('overview'); }
 
   protected navigate(index: number): void {
     if (index === 0) this.activePage.set('overview');
