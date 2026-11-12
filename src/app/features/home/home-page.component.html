@@ -23,26 +23,29 @@
           @for (team of teams(); track team.id) { @if (!team.isArchived) { <option [value]="team.id">{{ team.name }} · {{ team.category || 'Squadra' }}</option> } }
         </select>
       </label>
-      <div class="lineup-choice-heading"><strong>Scegli la formazione</strong><span>Due rose personalizzabili</span></div>
-      <div class="lineup-choice-grid">
-        <button type="button" class="lineup-choice" [class.active]="layoutSlot() === 1" (click)="selectLayoutSlot(1)"><span class="lineup-number">01</span><span><strong>Modulo 1</strong><small>Rosa e disposizione principale</small></span><span class="radio-indicator"></span></button>
-        <button type="button" class="lineup-choice" [class.active]="layoutSlot() === 2" (click)="selectLayoutSlot(2)"><span class="lineup-number">02</span><span><strong>Modulo 2</strong><small>Seconda rosa e disposizione alternativa</small></span><span class="radio-indicator"></span></button>
-      </div>
-      <div class="home-preview-heading"><div><strong>Anteprima formazione</strong><span>{{ previewFormation() }} · {{ layoutSlot() === 1 ? 'Modulo 1' : 'Modulo 2' }}</span></div><button type="button" class="customize-action" (click)="openTeams.emit()" [disabled]="!selectedTeam">Modifica rosa</button></div>
-      @if (previewLoading()) { <div class="preview-placeholder">Caricamento formazione…</div> }
-      @else if (!selectedTeam) { <div class="preview-placeholder">Seleziona una squadra per visualizzare il campo.</div> }
-      @else {
-        <div class="home-pitch-stage"><div class="home-football-pitch">
-          <div class="pitch-line halfway"></div><div class="pitch-circle"></div><div class="pitch-box top-box"></div><div class="pitch-box bottom-box"></div>
-          @for (slot of pitchSlots[previewFormation()]; track slot.id) {
-            <div class="home-pitch-player" [style.left.%]="previewPosition(slot).x" [style.top.%]="previewPosition(slot).y">
-              <span class="home-pitch-shirt">{{ previewPlayer(slot.id)?.shirtNumber ?? '+' }}</span>
-              <span class="home-pitch-player-name">{{ previewPlayer(slot.id)?.lastName || slot.label }}</span>
-            </div>
-          }
-        </div></div>
+      @if (selectedTeam) {
+        <div class="lineup-choice-heading"><strong>Scegli la formazione</strong><span>Due rose personalizzabili</span></div>
+        <div class="lineup-choice-grid">
+          <button type="button" class="lineup-choice" [class.active]="layoutSlot() === 1" (click)="selectLayoutSlot(1)"><span class="lineup-number">01</span><span><strong>Modulo 1</strong><small>Rosa e disposizione principale</small></span><span class="radio-indicator"></span></button>
+          <button type="button" class="lineup-choice" [class.active]="layoutSlot() === 2" (click)="selectLayoutSlot(2)"><span class="lineup-number">02</span><span><strong>Modulo 2</strong><small>Seconda rosa e disposizione alternativa</small></span><span class="radio-indicator"></span></button>
+        </div>
+        <div class="home-preview-heading"><div><strong>Anteprima formazione</strong><span>{{ previewFormation() }} · {{ layoutSlot() === 1 ? 'Modulo 1' : 'Modulo 2' }}</span></div><button type="button" class="customize-action" (click)="openTeams.emit()">Modifica rosa</button></div>
+        @if (previewLoading()) { <div class="preview-placeholder">Caricamento formazione…</div> }
+        @else {
+          <div class="home-pitch-stage"><div class="home-football-pitch">
+            <div class="pitch-line halfway"></div><div class="pitch-circle"></div><div class="pitch-box top-box"></div><div class="pitch-box bottom-box"></div>
+            @for (slot of pitchSlots[previewFormation()]; track slot.id) {
+              <div class="home-pitch-player" [style.left.%]="previewPosition(slot).x" [style.top.%]="previewPosition(slot).y">
+                <span class="home-pitch-shirt">{{ previewPlayer(slot.id)?.shirtNumber ?? '+' }}</span>
+                <span class="home-pitch-player-name">{{ previewPlayer(slot.id)?.lastName || slot.label }}</span>
+              </div>
+            }
+          </div></div>
+        }
+        <div class="launch-actions"><button type="button" class="customize-action" (click)="openTeams.emit()">Gestisci rosa</button><button type="button" class="launch-button" (click)="start()" [disabled]="saving()">▶ Avvia partita</button></div>
+      } @else {
+        <div class="preview-placeholder">Seleziona una squadra per visualizzare i moduli e le relative rose.</div>
       }
-      <div class="launch-actions"><button type="button" class="customize-action" (click)="openTeams.emit()" [disabled]="!selectedTeam">Gestisci rosa</button><button type="button" class="launch-button" (click)="start()" [disabled]="!selectedTeam || saving()">▶ Avvia partita</button></div>
     </section>
   }
 </section>
