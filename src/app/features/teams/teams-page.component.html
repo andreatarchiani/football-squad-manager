@@ -91,8 +91,8 @@
                   </select>
                 </label>
                 <span>Tocca una maglia per assegnare · Trascinala per spostarla</span>
+                <div class="layout-slot-switch" role="group" aria-label="Seleziona rosa personalizzabile"><button type="button" [class.active]="layoutSlot() === 1" (click)="selectLayoutSlot(1)">Modulo 1</button><button type="button" [class.active]="layoutSlot() === 2" (click)="selectLayoutSlot(2)">Modulo 2</button></div>
                 <span class="layout-save-status" aria-live="polite">{{ layoutSaving() ? 'Salvataggio posizioni…' : 'Posizioni salvate automaticamente' }}</span>
-                <button class="primary-button start-live-match-button" type="button" (click)="startMatch()">▶ Avvia partita</button>
               </div>
               <div class="pitch-stage" aria-label="Vista tridimensionale del campo">
                 <div class="pitch-stadium-glow"></div>
