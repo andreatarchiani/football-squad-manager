@@ -20,6 +20,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   readonly players = input.required<PlayerRecord[]>();
   readonly initialLineup = input.required<Record<string, string>>();
   readonly formation = input.required<string>();
+  readonly initialPositions = input.required<Record<string, { x: number; y: number }>>();
   readonly closematch = output<void>();
   private readonly voice = inject(VoiceRecognitionService);
   private readonly auth = inject(FirebaseAuthService);
@@ -58,7 +59,16 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   ngOnInit(): void { this.lineup.set({...this.initialLineup()}); }
   ngOnDestroy(): void { this.pause(); this.voice.stop(); }
 
-  protected slots() { return this.formations[this.formation()] ?? this.formations['4-3-3']; }
+  protected slots() {
+    const formationSlots = this.formations[this.formation()] ?? this.formations['4-3-3'];
+    const savedPositions = this.initialPositions();
+    const currentLineup = this.lineup();
+    return formationSlots.map(slot => {
+      const playerId = currentLineup[slot.id];
+      const saved = playerId ? savedPositions[playerId] : undefined;
+      return saved ? { ...slot, x: Math.max(9, Math.min(91, saved.x)), y: Math.max(9, Math.min(91, saved.y)) } : slot;
+    });
+  }
   protected player(id: string | undefined): PlayerRecord | undefined { return this.players().find(p => p.id === id); }
   protected playerInSlot(slotId: string): PlayerRecord | undefined { return this.player(this.lineup()[slotId]); }
   protected onField(): PlayerRecord[] { return Object.values(this.lineup()).filter(Boolean).map(id => this.player(id)).filter((p): p is PlayerRecord => !!p && !this.redCards().includes(p.id)); }
