@@ -71,8 +71,8 @@ export class TeamsPageComponent {
   protected slots() { return this.pitchSlots[this.formation()]; }
 
   protected expandedTeamName(): string { return this.teams().find(team => team.id === this.expandedRosterId())?.name || 'Partita'; }
-  protected startMatch(): void { this.activeSlotId.set(null); this.liveMatch.set(true); }
-  protected closeMatch(): void { this.liveMatch.set(false); }
+  protected startMatch(): void { this.activeSlotId.set(null); const team=this.teams().find(item=>item.id===this.expandedRosterId()); if(team) localStorage.setItem('fsm-active-match-team',team.id); this.liveMatch.set(true); }
+  protected closeMatch(): void { this.liveMatch.set(false); localStorage.removeItem('fsm-active-match-team'); }
 
   protected playerForSlot(slotId: string): PlayerRecord | undefined {
     return this.rosterForExpanded().find(player => player.id === this.lineup()[slotId]);
@@ -349,7 +349,13 @@ export class TeamsPageComponent {
     this.loading.set(true);
     try {
       this.teams.set(await this.teamsService.list(workspaceId));
-      if (this.expandedRosterId()) {
+      const resumeTeamId = localStorage.getItem('fsm-active-match-team');
+      if (resumeTeamId && !this.expandedRosterId()) {
+        const resumeTeam = this.teams().find(item => item.id === resumeTeamId && !!item.seasonId);
+        if (resumeTeam) { this.liveMatch.set(true); await this.toggleRoster(resumeTeam); }
+        else localStorage.removeItem('fsm-active-match-team');
+      }
+      if (this.expandedRosterId() && !this.liveMatch()) {
         this.players.set(await this.playerService.list(workspaceId, this.teams()));
       }
     } catch (error) {
