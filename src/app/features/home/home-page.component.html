@@ -43,18 +43,33 @@
           <button type="button" class="lineup-choice" [class.active]="layoutSlot() === 1" (click)="selectLayoutSlot(1)"><span class="lineup-number">01</span><span><strong>Modulo 1</strong><small>Rosa e disposizione principale</small></span><span class="radio-indicator"></span></button>
           <button type="button" class="lineup-choice" [class.active]="layoutSlot() === 2" (click)="selectLayoutSlot(2)"><span class="lineup-number">02</span><span><strong>Modulo 2</strong><small>Seconda rosa e disposizione alternativa</small></span><span class="radio-indicator"></span></button>
         </div>
-        <div class="home-preview-heading"><div><strong>Anteprima formazione</strong><span>{{ previewFormation() }} · {{ layoutSlot() === 1 ? 'Modulo 1' : 'Modulo 2' }}</span></div><button type="button" class="customize-action" (click)="openTeams.emit()">Modifica rosa</button></div>
+        <div class="home-preview-heading"><div><strong>Anteprima formazione</strong><span>{{ previewFormation() }} · {{ layoutSlot() === 1 ? 'Modulo 1' : 'Modulo 2' }} · Tieni premuta una maglietta per cambiare giocatore</span></div><button type="button" class="customize-action" (click)="openTeams.emit()">Modifica rosa</button></div>
         @if (previewLoading()) { <div class="preview-placeholder">Caricamento formazione…</div> }
         @else {
           <div class="home-pitch-stage"><div class="home-football-pitch">
             <div class="pitch-line halfway"></div><div class="pitch-circle"></div><div class="pitch-box top-box"></div><div class="pitch-box bottom-box"></div>
             @for (slot of pitchSlots[previewFormation()]; track slot.id) {
               <div class="home-pitch-player" [style.left.%]="previewPosition(slot).x" [style.top.%]="previewPosition(slot).y">
-                <span class="home-pitch-shirt">{{ previewPlayer(slot.id)?.shirtNumber ?? '+' }}</span>
+                <button type="button" class="home-pitch-shirt" [attr.aria-label]="'Cambia giocatore per ' + slot.label" (pointerdown)="startPreviewShirtPress($event, slot.id)" (pointerup)="endPreviewShirtPress()" (pointerleave)="endPreviewShirtPress()" (pointercancel)="endPreviewShirtPress()" (click)="openPreviewPlayerPicker(slot.id)">{{ previewPlayer(slot.id)?.shirtNumber ?? '+' }}</button>
                 <span class="home-pitch-player-name">{{ previewPlayer(slot.id)?.lastName || slot.label }}</span>
               </div>
             }
           </div></div>
+        }
+        @if (previewActiveSlotId(); as selectedSlotId) {
+          @if (activePreviewSlot(); as selectedSlot) {
+            <div class="home-player-picker-overlay" (click)="closePreviewPlayerPicker()">
+              <section class="home-player-picker-dialog" role="dialog" aria-modal="true" [attr.aria-label]="'Assegna un giocatore: ' + selectedSlot.label" (click)="$event.stopPropagation()" (keydown.escape)="closePreviewPlayerPicker()">
+                <div class="home-picker-heading"><div><span class="eyebrow">FORMAZIONE · {{ selectedSlot.label }}</span><h3>Scegli {{ selectedSlot.role.toLowerCase() }}</h3><p>La modifica viene salvata automaticamente nella rosa selezionata.</p></div><button type="button" aria-label="Chiudi" (click)="closePreviewPlayerPicker()">×</button></div>
+                <div class="home-picker-list">
+                  @for (player of previewOptionsForSlot(selectedSlot); track player.id) {
+                    <button type="button" class="home-picker-option" (click)="assignPreviewPlayer(selectedSlotId, player.id)"><span class="home-picker-number">{{ player.shirtNumber ?? '—' }}</span><span><strong>{{ player.firstName }} {{ player.lastName }}</strong><small>{{ player.roles.join(' · ') || player.primaryRole }}</small></span>@if (previewPlayer(selectedSlotId)?.id === player.id) { <span class="home-picker-selected">IN CAMPO</span> }</button>
+                  } @empty { <p class="home-picker-empty">Nessun giocatore disponibile per questo ruolo.</p> }
+                </div>
+                @if (previewPlayer(selectedSlotId)) { <button type="button" class="home-picker-remove" (click)="assignPreviewPlayer(selectedSlotId, '')">Rimuovi giocatore dalla maglia</button> }
+              </section>
+            </div>
+          }
         }
         <div class="launch-actions"><button type="button" class="customize-action" (click)="openTeams.emit()">Gestisci rosa</button><button type="button" class="launch-button" (click)="start()" [disabled]="saving()">▶ Avvia partita</button></div>
       } @else {
