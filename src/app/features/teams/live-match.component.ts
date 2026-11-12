@@ -38,6 +38,9 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly matchFormation = signal('4-3-3');
   protected readonly matchPositions = signal<Record<string, { x: number; y: number }>>({});
   private draggingPlayerId: string | null = null;
+  private draggingElement: HTMLElement | null = null;
+  private dragStartPosition: { x: number; y: number } | null = null;
+  private dragCurrentPosition: { x: number; y: number } | null = null;
   protected readonly voiceListening = signal(false);
   protected readonly voiceMessage = signal('');
   protected readonly changesUsed = signal(0);
@@ -69,9 +72,40 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
   protected formationOptions(): string[] { return Object.keys(this.formations); }
   protected changeMatchFormation(next: string): void { if (!this.formations[next] || next === this.matchFormation()) return; const previous=this.matchFormation(); const ids=this.slots().map(slot=>this.lineup()[slot.id]).filter((id): id is string => !!id && !this.redCards().includes(id)); const lineup: Record<string,string>={}; const positions: Record<string,{x:number;y:number}>={}; this.formations[next].forEach((slot,i)=>{const id=ids[i];if(id){lineup[slot.id]=id;positions[id]={x:slot.x,y:slot.y};}}); this.lineup.set(lineup);this.matchPositions.set(positions);this.matchFormation.set(next);this.selectedOutgoingId.set(null);this.events.update(items=>[{type:'formation',minute:this.minute,description:'Cambio modulo: '+previous+' → '+next},...items]);this.voiceMessage.set('Modulo cambiato in '+next+'. Evento registrato al '+this.minute+'′.'); }
-  protected startShirtDrag(event: PointerEvent, id: string): void { if(event.button!==0)return;event.preventDefault();this.draggingPlayerId=id;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId); }
-  protected moveShirtDrag(event: PointerEvent): void { if(!this.draggingPlayerId)return;const pitch=event.currentTarget as HTMLElement;const rect=pitch.getBoundingClientRect();const x=Math.max(9,Math.min(91,((event.clientX-rect.left)/rect.width)*100));const y=Math.max(9,Math.min(91,((event.clientY-rect.top)/rect.height)*100));const id=this.draggingPlayerId;this.matchPositions.update(current=>({...current,[id]:{x,y}})); }
-  protected endShirtDrag(): void { this.draggingPlayerId=null; }
+  protected startShirtDrag(event: PointerEvent, id: string): void {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    const element = event.currentTarget as HTMLElement;
+    this.draggingPlayerId = id;
+    this.draggingElement = element;
+    const saved = this.matchPositions()[id] ?? { x: Number.parseFloat(element.style.left) || 50, y: Number.parseFloat(element.style.top) || 50 };
+    this.dragStartPosition = { ...saved };
+    this.dragCurrentPosition = { ...saved };
+    element.setPointerCapture(event.pointerId);
+  }
+  protected moveShirtDrag(event: PointerEvent): void {
+    if (!this.draggingPlayerId || !this.draggingElement || !this.dragStartPosition) return;
+    const pitch = event.currentTarget as HTMLElement;
+    const rect = pitch.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const x = Math.max(9, Math.min(91, ((event.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(9, Math.min(91, ((event.clientY - rect.top) / rect.height) * 100));
+    this.dragCurrentPosition = { x, y };
+    const dx = (x - this.dragStartPosition.x) * rect.width / 100;
+    const dy = (y - this.dragStartPosition.y) * rect.height / 100;
+    // Move only the dragged DOM node during pointer movement; avoid triggering Angular change detection.
+    this.draggingElement.style.transform = `translate3d(calc(-50% + ${dx}px), calc(-50% + ${dy}px), 0)`;
+  }
+  protected endShirtDrag(): void {
+    const id = this.draggingPlayerId;
+    const position = this.dragCurrentPosition;
+    if (id && position) this.matchPositions.update(current => ({ ...current, [id]: position }));
+    if (this.draggingElement) this.draggingElement.style.transform = '';
+    this.draggingPlayerId = null;
+    this.draggingElement = null;
+    this.dragStartPosition = null;
+    this.dragCurrentPosition = null;
+  }
   protected player(id: string | undefined): PlayerRecord | undefined { return this.players().find(p => p.id === id); }
   protected playerInSlot(slotId: string): PlayerRecord | undefined { return this.player(this.lineup()[slotId]); }
   protected onField(): PlayerRecord[] { return Object.values(this.lineup()).filter(Boolean).map(id => this.player(id)).filter((p): p is PlayerRecord => !!p && !this.redCards().includes(p.id)); }
