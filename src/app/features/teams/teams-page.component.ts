@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { TeamService, type TeamInput, type TeamRecord } from './team.service';
 import { PlayerService, type PlayerRecord } from '../players/player.service';
+import { NotificationService } from '../../core/notifications/notification.service';
 import { LiveMatchComponent } from './live-match.component';
 
 @Component({
@@ -17,6 +18,7 @@ export class TeamsPageComponent {
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamsService = inject(TeamService);
   private readonly playerService = inject(PlayerService);
+  private readonly notifications = inject(NotificationService);
 
   protected readonly teams = signal<TeamRecord[]>([]);
   protected readonly players = signal<PlayerRecord[]>([]);
@@ -319,6 +321,32 @@ export class TeamsPageComponent {
     } finally {
       this.saving.set(false);
     }
+  }
+
+
+  protected async deleteTeam(team: TeamRecord): Promise<void> {
+    const confirmed = await this.notifications.confirm({
+      title: 'Eliminare definitivamente la squadra?',
+      message: `Verranno eliminati "${team.name}", i giocatori associati, la rosa, le formazioni e i dati della partita salvati per questa squadra. L'operazione non è reversibile.`,
+      confirmText: 'Elimina squadra', cancelText: 'Annulla', tone: 'danger'
+    });
+    if (!confirmed) return;
+    const workspaceId = this.auth.workspaceId();
+    if (!workspaceId) return;
+    this.saving.set(true); this.error.set(''); this.notice.set('');
+    try {
+      await this.teamsService.deleteTeam(workspaceId, team);
+      if (this.expandedRosterId() === team.id) {
+        this.expandedRosterId.set(null); this.liveMatch.set(false);
+        this.lineup.set({}); this.shirtPositions.set({});
+        localStorage.removeItem('fsm-active-match-team');
+      }
+      this.notice.set('Squadra e giocatori associati eliminati definitivamente.');
+      await this.loadTeams();
+    } catch (error) {
+      console.error('Unable to delete team.', error);
+      this.error.set('Non è stato possibile eliminare la squadra. Riprova.');
+    } finally { this.saving.set(false); }
   }
 
   protected async toggleArchive(team: TeamRecord): Promise<void> {
