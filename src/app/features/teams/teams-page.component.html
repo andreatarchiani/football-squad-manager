@@ -85,11 +85,21 @@
               <p class="roster-empty">La rosa è vuota. Aggiungi i giocatori dalla sezione Giocatori.</p>
             } @else {
               <div class="tactical-toolbar">
-                <label>Modulo
-                  <select [value]="formation()" (change)="changeFormation($any($event.target).value)">
-                    @for (module of formations; track module) { <option [value]="module">{{ module }}</option> }
-                  </select>
-                </label>
+                <div class="formation-picker">
+                  <span class="formation-picker-label">Modulo</span>
+                  <button type="button" class="formation-picker-trigger" [class.is-open]="formationDropdownOpen()" (click)="formationDropdownOpen.update(open => !open)" [attr.aria-expanded]="formationDropdownOpen()" aria-haspopup="listbox">
+                    <strong>{{ formation() }}</strong><span class="formation-picker-chevron" aria-hidden="true"></span>
+                  </button>
+                  @if (formationDropdownOpen()) {
+                    <div class="formation-picker-menu" role="listbox" aria-label="Seleziona modulo">
+                      @for (module of formations; track module) {
+                        <button type="button" class="formation-picker-option" role="option" [class.is-selected]="formation() === module" [attr.aria-selected]="formation() === module" (click)="changeFormation(module); formationDropdownOpen.set(false)">
+                          <span>{{ module }}</span>@if (formation() === module) { <span class="formation-picker-check">✓</span> }
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
                 <span>Tocca una maglia per assegnare · Trascinala per spostarla</span>
                 <div class="layout-slot-switch" role="group" aria-label="Seleziona rosa personalizzabile"><button type="button" [class.active]="layoutSlot() === 1" (click)="selectLayoutSlot(1)">Modulo 1</button><button type="button" [class.active]="layoutSlot() === 2" (click)="selectLayoutSlot(2)">Modulo 2</button></div>
                 <span class="layout-save-status" aria-live="polite">{{ layoutSaving() ? 'Salvataggio posizioni…' : 'Posizioni salvate automaticamente' }}</span>
