@@ -1,5 +1,5 @@
 <section class="players-page">
- <div class="page-heading"><div><div class="eyebrow">ROSA E TESSERATI</div><h2>Giocatori</h2><p>Gestisci l'anagrafica e assegna ogni giocatore alla sua squadra.</p></div><div class="heading-actions">@if(canShowOlmoponteSeedButton && !loading()){<button class="secondary-button" type="button" (click)="createOlmoponteTestPlayers()" [disabled]="seeding()">{{seeding()?'Creazione…':'Crea 11 giocatori di prova'}}</button>}<button class="primary-button" type="button" (click)="openCreate()" [disabled]="activeTeams.length===0">＋ Nuovo giocatore</button></div></div>
+ <div class="page-heading"><div><div class="eyebrow">ROSA E TESSERATI</div><h2>Giocatori</h2><p>Gestisci l'anagrafica e assegna ogni giocatore alla sua squadra.</p></div><div class="heading-actions"><button class="primary-button" type="button" (click)="openCreate()" [disabled]="activeTeams.length===0">＋ Nuovo giocatore</button></div></div>
  @if(error()){<div class="feedback error" role="alert">{{error()}}</div>} @if(notice()){<div class="feedback success" role="status">{{notice()}}</div>}
  @if(activeTeams.length===0&&!loading()){<div class="empty-state"><div class="empty-icon">⚑</div><h3>Prima crea una squadra</h3><p>Per inserire un giocatore serve una squadra con una stagione attiva. Vai in Squadre e crea la tua prima squadra.</p></div>}
  @if(formOpen()){
@@ -11,7 +11,7 @@
  <label>Piede preferito<select name="preferredFoot" [(ngModel)]="form.preferredFoot"><option value="">Non specificato</option><option>Destro</option><option>Sinistro</option><option>Ambidestro</option></select></label>
  <label>Ruolo principale<select name="primaryRole" [(ngModel)]="form.primaryRole"><option>Portiere</option><option>Difensore</option><option>Centrocampista</option><option>Attaccante</option></select></label>
  <label>Squadra *<select name="teamId" [(ngModel)]="form.teamId" required>@for(team of activeTeams;track team.id){<option [value]="team.id">{{team.name}} · {{team.seasonLabel}}</option>}</select></label>
- <label>Numero maglia (1–99)<input name="shirtNumber" type="number" [(ngModel)]="form.shirtNumber" min="1" max="99" inputmode="numeric" placeholder="Es. 10"></label>
+ <label>Numero maglia * (1–99)<input name="shirtNumber" type="number" [(ngModel)]="form.shirtNumber" min="1" max="99" inputmode="numeric" required placeholder="Es. 10"></label>
  <label>Stato<select name="status" [(ngModel)]="form.status"><option value="active">In rosa</option><option value="injured">Infortunato</option><option value="suspended">Squalificato</option><option value="left">Fuori rosa</option></select></label>
  <fieldset class="role-field wide"><legend>Ruoli in cui può giocare</legend><div class="role-options">@for(role of roles;track role){<label><input type="checkbox" [checked]="form.roles.includes(role)" (change)="toggleRole(role,$any($event.target).checked)"> {{role}}</label>}</div></fieldset>
  <label class="wide">Note<textarea name="notes" [(ngModel)]="form.notes" maxlength="500" rows="3" placeholder="Informazioni utili (facoltative)"></textarea></label>
