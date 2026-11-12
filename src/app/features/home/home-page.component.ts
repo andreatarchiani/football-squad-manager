@@ -106,18 +106,12 @@ export class HomePageComponent {
   }
 
   protected async selectTeam(teamId: string): Promise<void> {
-    const validTeamId = this.selectableTeams.some(team => team.id === teamId) ? teamId : '';
+    const validTeamId = this.selectableTeams.some(team => team.id === teamId) ? teamId : this.selectedTeamId();
+    if (!validTeamId) return;
     this.selectedTeamId.set(validTeamId);
     const uid = this.user()?.uid;
     if (uid && typeof localStorage !== 'undefined') {
-      if (validTeamId) localStorage.setItem(this.selectionStorageKey(uid), validTeamId);
-      else localStorage.removeItem(this.selectionStorageKey(uid));
-    }
-    if (!validTeamId) {
-      this.previewPlayers.set([]);
-      this.previewLineup.set({});
-      this.previewPositions.set({});
-      this.previewLoading.set(false);
+      localStorage.setItem(this.selectionStorageKey(uid), validTeamId);
     }
     void this.loadPreview();
     if (!uid || !this.db) return;
@@ -210,7 +204,11 @@ export class HomePageComponent {
       const savedPreference = String(data?.['defaultTeamId'] ?? '');
       const localPreference = uid && typeof localStorage !== 'undefined' ? localStorage.getItem(this.selectionStorageKey(uid)) ?? '' : '';
       const isSelectable = (id: string) => teams.some(team => team.id === id && !team.isArchived);
-      const selected = isSelectable(savedPreference) ? savedPreference : isSelectable(localPreference) ? localPreference : '';
+      const selected = isSelectable(savedPreference)
+        ? savedPreference
+        : isSelectable(localPreference)
+          ? localPreference
+          : teams.filter(team => !team.isArchived)[Math.floor(Math.random() * teams.filter(team => !team.isArchived).length)]?.id ?? '';
       this.selectedTeamId.set(selected);
       if (uid && typeof localStorage !== 'undefined') {
         if (selected) localStorage.setItem(this.selectionStorageKey(uid), selected);
@@ -218,7 +216,7 @@ export class HomePageComponent {
       }
       if (selected && selected !== savedPreference && uid && this.db) {
         try { await setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: selected, updatedAt: new Date() }, { merge: true }); }
-        catch (error) { console.error('Unable to restore default team preference.', error); }
+        catch (error) { console.error('Unable to save automatically selected team.', error); }
       }
       await this.loadPreview();
     } catch (error) {

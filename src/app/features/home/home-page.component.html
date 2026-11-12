@@ -17,13 +17,12 @@
   @if (loading()) { <div class="home-loading">Caricamento del tuo spazio squadra…</div> } @else {
     <section class="match-launch-panel">
       <div class="launch-heading"><div><span class="eyebrow">MATCH CENTER</span><h2>Pronto a scendere in campo?</h2><p>Seleziona la squadra e visualizza subito la formazione che hai preparato.</p></div><div class="launch-ball">⚽</div></div>
-      <label class="default-team-field">Seleziona squadra
-        <select [value]="selectedTeam?.id ?? ''" (change)="selectTeam($any($event.target).value)">
-          <option value="">Scegli una squadra</option>
-          @for (team of selectableTeams; track team.id) { <option [value]="team.id">{{ team.name }} · {{ team.category || 'Squadra' }}</option> }
-        </select>
-      </label>
       @if (selectableTeams.length > 0 && selectedTeam) {
+        <label class="default-team-field">Squadra selezionata
+          <select [value]="selectedTeam.id" (change)="selectTeam($any($event.target).value)">
+            @for (team of selectableTeams; track team.id) { <option [value]="team.id">{{ team.name }} · {{ team.category || 'Squadra' }}</option> }
+          </select>
+        </label>
         <div class="lineup-choice-heading"><strong>Scegli la formazione</strong><span>Due rose personalizzabili</span></div>
         <div class="lineup-choice-grid">
           <button type="button" class="lineup-choice" [class.active]="layoutSlot() === 1" (click)="selectLayoutSlot(1)"><span class="lineup-number">01</span><span><strong>Modulo 1</strong><small>Rosa e disposizione principale</small></span><span class="radio-indicator"></span></button>
@@ -44,7 +43,8 @@
         }
         <div class="launch-actions"><button type="button" class="customize-action" (click)="openTeams.emit()">Gestisci rosa</button><button type="button" class="launch-button" (click)="start()" [disabled]="saving()">▶ Avvia partita</button></div>
       } @else {
-        <div class="preview-placeholder">Seleziona una squadra per visualizzare i moduli e le relative rose.</div>
+        <div class="preview-placeholder">Non hai ancora squadre attive. Crea una squadra nella sezione Squadre per iniziare.</div>
+        <button type="button" class="customize-action" (click)="openTeams.emit()">Crea squadra</button>
       }
     </section>
   }
