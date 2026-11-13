@@ -79,7 +79,7 @@
           </div>
         </article>
         @if (expandedRosterId() === team.id) {
-          <section class="roster-panel tactical-panel" [attr.aria-label]="'Rosa ' + team.name">
+          <section class="roster-panel tactical-panel" [attr.data-roster-team]="team.id" [attr.aria-label]="'Rosa ' + team.name">
             <div class="roster-heading">
               <div><span class="eyebrow">STAGIONE {{ team.seasonLabel }}</span><h3>{{ team.name }} · Formazione</h3></div>
               <span class="roster-count">{{ rosterFor(team).length }} giocatori</span>
