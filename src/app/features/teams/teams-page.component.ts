@@ -485,8 +485,20 @@ export class TeamsPageComponent implements OnChanges {
       const resumeTeamId = this.resumeMatch ? localStorage.getItem('fsm-active-match-team') : null;
       if (resumeTeamId && !this.expandedRosterId()) {
         const resumeTeam = this.teams().find(item => item.id === resumeTeamId && !!item.seasonId);
-        if (resumeTeam) { this.liveMatch.set(true); await this.toggleRoster(resumeTeam); }
-        else localStorage.removeItem('fsm-active-match-team');
+        if (resumeTeam) {
+          // A resumed match already contains its own lineup, formation and positions
+          // in the live-match document. Load only its player records here; avoid
+          // loading the separate tactical layout before mounting the match panel.
+          this.expandedRosterId.set(resumeTeam.id);
+          this.layoutSlot.set(1);
+          this.rosterLoading.set(true);
+          try {
+            this.players.set(await this.playerService.list(workspaceId, this.teams()));
+            this.liveMatch.set(true);
+          } finally {
+            this.rosterLoading.set(false);
+          }
+        } else localStorage.removeItem('fsm-active-match-team');
       }
       if (this.expandedRosterId() && !this.liveMatch()) {
         this.players.set(await this.playerService.list(workspaceId, this.teams()));
