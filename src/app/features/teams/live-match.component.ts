@@ -663,6 +663,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.pending.set(action);this.selectedOutgoingId.set(null);this.voiceMessage.set('Conferma il cambio.');
   }
   protected goalsFor(player:PlayerRecord):number{return this.goals()[player.id]??0;}
+  protected assistsFor(player:PlayerRecord):number{return this.assists()[player.id]??0;}
   protected yellowCardsFor(player:PlayerRecord):number{return this.yellowCards()[player.id]??0;}
   protected playerHasRedCard(player:PlayerRecord):boolean{return this.redCards().includes(player.id);}
 }
