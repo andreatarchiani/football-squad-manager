@@ -73,6 +73,7 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly editingId = signal<string | null>(null);
   protected readonly formOpen = signal(false);
   protected form: TeamInput = this.emptyForm();
+  protected readonly teamIcons = ['⚽', '🛡️', '🏆', '⭐', '👑', '🦅', '🦁', '🐺', '🐉', '🔥', '⚡', '💎', '🏟️', '🎯', '🔱', '🌟'];
 
   constructor() {
     this.teamsLoadPromise = this.loadTeams();
@@ -377,6 +378,7 @@ export class TeamsPageComponent implements OnChanges {
       name: team.name,
       category: team.category,
       clubName: team.clubName,
+      icon: team.icon || '⚽',
       seasonLabel: team.seasonLabel || '2026/2027'
     };
     this.error.set('');
@@ -518,6 +520,6 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   private emptyForm(): TeamInput {
-    return { name: '', category: '', clubName: '', seasonLabel: '2026/2027' };
+    return { name: '', category: '', clubName: '', icon: '⚽', seasonLabel: '2026/2027' };
   }
 }

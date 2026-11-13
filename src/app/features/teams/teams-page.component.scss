@@ -48,3 +48,14 @@
 .match-resume-loading span{color:#9eaea4;font-size:13px;}
 .match-resume-ball{display:grid;place-items:center;width:64px;height:64px;margin-bottom:8px;border:1px solid rgba(160,220,176,.25);border-radius:50%;background:linear-gradient(145deg,#263f2e,#14231a);font-size:30px;box-shadow:0 0 34px rgba(108,190,130,.13);}
 
+
+/* Team identity picker */
+.team-icon-fieldset{border:0;padding:0;margin:18px 0 0;min-width:0;}
+.team-icon-fieldset legend{color:#c4d5d0;font-size:12px;font-weight:700;margin-bottom:10px;}
+.team-icon-picker{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:9px;max-width:480px;}
+.team-icon-option{display:grid;place-items:center;aspect-ratio:1;min-width:0;border:1px solid #35463f;border-radius:12px;background:#101720;color:#fff;font-size:24px;cursor:pointer;transition:background .15s,border-color .15s,transform .15s;}
+.team-icon-option:hover{background:#22372d;border-color:#86cda2;transform:translateY(-2px);}
+.team-icon-option.is-selected{border:2px solid #9bdab2;background:#254333;box-shadow:0 0 0 2px #9bdab226;}
+.team-icon-option:focus-visible{outline:2px solid #9bdab2;outline-offset:3px;}
+.team-icon-caption{display:block;margin-top:9px;color:var(--text-muted);font-size:11px;}
+@media(max-width:520px){.team-icon-picker{grid-template-columns:repeat(4,minmax(0,1fr));max-width:310px;}}

@@ -43,6 +43,17 @@
           <input name="seasonLabel" [(ngModel)]="form.seasonLabel" required maxlength="9" placeholder="2026/2027">
         </label>
       </div>
+      <fieldset class="team-icon-fieldset">
+        <legend>Icona della squadra</legend>
+        <div class="team-icon-picker" role="group" aria-label="Seleziona l'icona della squadra">
+          @for (icon of teamIcons; track icon) {
+            <button type="button" class="team-icon-option" [class.is-selected]="form.icon === icon"
+              [attr.aria-label]="'Seleziona icona ' + icon" [attr.aria-pressed]="form.icon === icon"
+              (click)="form.icon = icon">{{ icon }}</button>
+          }
+        </div>
+        <span class="team-icon-caption">L'icona scelta apparirà nelle squadre e nella Home.</span>
+      </fieldset>
       <p class="form-hint">La stagione viene creata insieme alla squadra e impostata come attiva.</p>
       <div class="form-actions">
         <button class="primary-button" type="submit" [disabled]="saving()">{{ saving() ? 'Salvataggio…' : (editingId() ? 'Salva modifiche' : 'Crea squadra') }}</button>
@@ -80,7 +91,7 @@
     <div class="team-list">
       @for (team of visibleTeams; track team.id) {
         <article class="team-card" [class.archived]="team.isArchived">
-          <div class="team-emblem">⚽</div>
+          <div class="team-emblem" aria-hidden="true">{{ team.icon || '⚽' }}</div>
           <div class="record-icon-actions" aria-label="Azioni squadra">
             <button class="icon-action archive-action" type="button" (click)="toggleArchive(team)" [attr.aria-label]="team.isArchived ? 'Ripristina squadra' : 'Archivia squadra'" [title]="team.isArchived ? 'Ripristina squadra' : 'Archivia squadra'">
               @if (team.isArchived) { <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v4H3zM5 8v12h14V8M9 12h6M12 10v4"/></svg> } @else { <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v4H3zM5 8v12h14V8M9 12h6"/></svg> }

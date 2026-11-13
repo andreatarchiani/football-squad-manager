@@ -18,6 +18,7 @@ export interface TeamRecord {
   name: string;
   category: string;
   clubName: string;
+  icon: string;
   isArchived: boolean;
   seasonId: string | null;
   seasonLabel: string;
@@ -50,6 +51,7 @@ export interface TeamInput {
   name: string;
   category: string;
   clubName: string;
+  icon: string;
   seasonLabel: string;
 }
 
@@ -74,6 +76,7 @@ export class TeamService {
         name: String(data['name'] ?? ''),
         category: String(data['category'] ?? ''),
         clubName: String(data['clubName'] ?? ''),
+        icon: String(data['icon'] ?? '⚽'),
         isArchived: data['isArchived'] === true,
         seasonId: season?.id ?? null,
         seasonLabel: String(seasonData?.['label'] ?? ''),
@@ -140,6 +143,7 @@ export class TeamService {
       name: input.name.trim(),
       category: input.category.trim(),
       clubName: input.clubName.trim(),
+      icon: input.icon,
       isArchived: false,
       createdAt: now,
       updatedAt: now
@@ -163,6 +167,7 @@ export class TeamService {
       name: input.name.trim(),
       category: input.category.trim(),
       clubName: input.clubName.trim(),
+      icon: input.icon,
       updatedAt: serverTimestamp()
     });
 

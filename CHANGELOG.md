@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-13 — v0.9 · Icone delle squadre
+- Aggiunta una selezione visuale di 16 icone nella creazione e modifica squadra.
+- Salvataggio dell'icona scelta nel documento Firestore della squadra.
+- Icona visualizzata sulla scheda della squadra e nei selettori della Home.
+- Retrocompatibilità: le squadre già create senza icona continuano a mostrare ⚽.
+- Aggiornato il pannello delle novità alla versione v0.9.
+
 ## 2026-11-13 — Correzione nomi in panchina
 - Sistemato il layout dei giocatori in panchina su schermi stretti: i nomi restano su una sola riga e quelli lunghi vengono abbreviati con ellissi, senza andare a capo lettera per lettera.
 

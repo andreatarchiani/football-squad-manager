@@ -21,7 +21,7 @@
         <div class="team-picker">
           <span class="team-picker-label">LA TUA SQUADRA</span>
           <button type="button" class="team-picker-trigger" [class.is-open]="teamDropdownOpen()" (click)="toggleTeamDropdown()" [attr.aria-expanded]="teamDropdownOpen()" aria-haspopup="listbox">
-            <span class="team-picker-crest" aria-hidden="true">⚽</span>
+            <span class="team-picker-crest" aria-hidden="true">{{ selectedTeam.icon || '⚽' }}</span>
             <span class="team-picker-current"><strong>{{ selectedTeam.name }}</strong><small>{{ selectedTeam.category || 'Squadra' }} · Squadra attiva</small></span>
             <span class="team-picker-chevron" aria-hidden="true"></span>
           </button>
@@ -30,7 +30,7 @@
               <div class="team-picker-menu-heading"><span>LE TUE SQUADRE</span><small>{{ selectableTeams.length }} disponibili</small></div>
               @for (team of selectableTeams; track team.id) {
                 <button type="button" class="team-picker-option" [class.is-selected]="team.id === selectedTeam.id" role="option" [attr.aria-selected]="team.id === selectedTeam.id" (click)="selectTeam(team.id)">
-                  <span class="team-picker-option-crest" aria-hidden="true">⚽</span>
+                  <span class="team-picker-option-crest" aria-hidden="true">{{ team.icon || '⚽' }}</span>
                   <span class="team-picker-option-copy"><strong>{{ team.name }}</strong><small>{{ team.category || 'Squadra' }}</small></span>
                   @if (team.id === selectedTeam.id) { <span class="team-picker-check" aria-hidden="true">✓</span> }
                 </button>
