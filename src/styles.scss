@@ -162,3 +162,10 @@ select optgroup {
 @media(max-width:650px){.sort-picker{width:100%;max-width:220px;}.sort-picker-trigger{min-height:42px;}.sort-picker-option{min-height:40px;}}
 
 @keyframes sort-menu-in{from{opacity:0;transform:translateY(-5px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+
+
+/* Keep every substitute name on one readable line on narrow screens. */
+.match-bench .bench-choice{display:grid;grid-template-columns:30px minmax(0,1fr) 16px;align-items:center;min-width:0}
+.match-bench .bench-choice>span:nth-child(2){display:flex;flex-direction:column;gap:3px;min-width:0;width:100%;overflow:hidden}
+.match-bench .bench-choice strong{display:block;width:100%;min-width:0;max-width:100%;white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important;overflow:hidden;text-overflow:ellipsis}
+.match-bench .bench-choice small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
