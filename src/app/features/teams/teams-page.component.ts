@@ -498,7 +498,10 @@ export class TeamsPageComponent implements OnChanges {
           } finally {
             this.rosterLoading.set(false);
           }
-        } else localStorage.removeItem('fsm-active-match-team');
+        } else {
+          localStorage.removeItem('fsm-active-match-team');
+          this.matchClosed.emit();
+        }
       }
       if (this.expandedRosterId() && !this.liveMatch()) {
         this.players.set(await this.playerService.list(workspaceId, this.teams()));
