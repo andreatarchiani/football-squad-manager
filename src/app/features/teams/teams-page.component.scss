@@ -3,7 +3,7 @@
 
 .layout-slot-switch{display:flex;gap:5px;padding:3px;border:1px solid var(--border);border-radius:9px;background:#111a20}.layout-slot-switch button{padding:7px 10px;border:0;border-radius:6px;color:#9aa6b3;background:transparent;font-size:10px;font-weight:700;cursor:pointer}.layout-slot-switch button.active{color:#102018;background:#9bdab2}
 
-/* Fully custom formation menu: never fall back to the browser's native option popup. */
+
 .formation-picker { position: relative; display: grid; gap: 7px; min-width: 132px; z-index: 30; }
 .formation-picker-label { color: #a9c4b3; font-size: 10px; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
 .formation-picker-trigger { width: 100%; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 14px; border: 1px solid rgba(151,211,174,.32); border-radius: 12px; color: #f1f8f3; background: linear-gradient(145deg,#20372b,#14221b); font: inherit; cursor: pointer; box-shadow: inset 0 1px rgba(255,255,255,.06),0 7px 18px rgba(0,0,0,.18); }
@@ -17,11 +17,11 @@
 .formation-picker-check { color: #a9e4bb; font-weight: 900; }
 @keyframes formation-menu-in { from { opacity: 0; transform: translateY(-5px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-/* Compact archive/delete icon controls anchored to each team card. */
+
 .team-card{position:relative;padding-top:52px}.record-icon-actions{position:absolute;top:10px;right:10px;z-index:2;display:flex;align-items:center;gap:7px}.icon-action{display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid #35404b;border-radius:9px;color:#b9c7c9;background:#1b2530;cursor:pointer;transition:background .18s,border-color .18s,color .18s}.icon-action svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.icon-action.archive-action:hover{border-color:#9bdab2;color:#9bdab2;background:#1b3029}.icon-action.delete-action{color:#ff9da7}.icon-action.delete-action:hover{border-color:#a94e5b;color:#ffc0c6;background:#3b2228}
 
 
-/* Keep team emblem, details and archive/delete controls on one shared row. */
+
 .team-card{display:grid;grid-template-columns:46px minmax(0,1fr) auto;grid-template-areas:"emblem details actions" "buttons buttons buttons";align-items:center;gap:12px 14px;padding:16px;}
 .team-card>.team-emblem{grid-area:emblem;}
 .team-card>.team-details{grid-area:details;}
