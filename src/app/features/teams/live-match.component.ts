@@ -332,7 +332,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     const encoder = new TextEncoder();
     const toBytes = (value: string) => encoder.encode(value);
     const wrap = (ctx: CanvasRenderingContext2D, value: string, maxWidth: number): string[] => {
-      const words = value.split(/\\s+/);
+      const words = value.split(/\s+/);
       const lines: string[] = [];
       let line = '';
       for (const word of words) {
@@ -392,13 +392,13 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       images.push(new Uint8Array(await jpeg.arrayBuffer()));
     }
 
-    const parts: Uint8Array[] = [toBytes('%PDF-1.4\\n')];
+    const parts: Uint8Array[] = [toBytes('%PDF-1.4\n')];
     const offsets: number[] = [0];
     let offset = parts[0].length;
     const addObject = (id: number, body: Uint8Array[]) => {
       offsets[id] = offset;
-      const begin = toBytes(`${id} 0 obj\\n`);
-      const finish = toBytes('\\nendobj\\n');
+      const begin = toBytes(`${id} 0 obj\n`);
+      const finish = toBytes('\nendobj\n');
       for (const part of [begin, ...body, finish]) { parts.push(part); offset += part.length; }
     };
     addObject(1, [toBytes('<< /Type /Catalog /Pages 2 0 R >>')]);
@@ -407,14 +407,14 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     images.forEach((jpeg, i) => {
       const pageId = 3 + i * 3, imageId = pageId + 1, contentId = pageId + 2;
       addObject(pageId, [toBytes(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im0 ${imageId} 0 R >> >> /Contents ${contentId} 0 R >>`)]);
-      addObject(imageId, [toBytes(`<< /Type /XObject /Subtype /Image /Width ${width} /Height ${height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\\nstream\\n`), jpeg, toBytes('\\nendstream')]);
+      addObject(imageId, [toBytes(`<< /Type /XObject /Subtype /Image /Width ${width} /Height ${height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`), jpeg, toBytes('\nendstream')]);
       const stream = toBytes('q 595 0 0 842 0 0 cm /Im0 Do Q');
-      addObject(contentId, [toBytes(`<< /Length ${stream.length} >>\\nstream\\n`), stream, toBytes('\\nendstream')]);
+      addObject(contentId, [toBytes(`<< /Length ${stream.length} >>\nstream\n`), stream, toBytes('\nendstream')]);
     });
     const xrefOffset = offset;
-    let xref = `xref\\n0 ${offsets.length}\\n0000000000 65535 f \\n`;
-    for (let id = 1; id < offsets.length; id++) xref += `${String(offsets[id]).padStart(10, '0')} 00000 n \\n`;
-    xref += `trailer\\n<< /Size ${offsets.length} /Root 1 0 R >>\\nstartxref\\n${xrefOffset}\\n%%EOF`;
+    let xref = `xref\n0 ${offsets.length}\n0000000000 65535 f \n`;
+    for (let id = 1; id < offsets.length; id++) xref += `${String(offsets[id]).padStart(10, '0')} 00000 n \n`;
+    xref += `trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
     parts.push(toBytes(xref)); offset += parts[parts.length - 1].length;
     const total = parts.reduce((sum, part) => sum + part.length, 0);
     const output = new Uint8Array(total);
