@@ -15,18 +15,17 @@
       @if (!finished()) { <button type="button" class="finish-match" (click)="finishMatch()">■ Fine partita</button> }
       @else { <button type="button" class="finish-match" (click)="finishReportOpen.set(true)">Riepilogo finale</button> }
     </div>
-    @if (voiceHelpOpen()) {
-      <section class="voice-command-guide" aria-label="Comandi vocali disponibili">
-        <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong></div><button type="button" class="voice-guide-close" (click)="closeVoiceHelp()" aria-label="Nascondi i comandi">✕</button></div>
-        <div class="voice-command-list">
+    <section class="voice-command-guide" aria-label="Comandi vocali disponibili">
+      <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong></div><button type="button" class="voice-guide-toggle" (click)="toggleVoiceHelp()" [attr.aria-expanded]="voiceHelpOpen()" aria-controls="voice-command-list"><span>{{ voiceHelpOpen() ? 'Nascondi' : 'Mostra' }}</span><svg viewBox="0 0 20 20" aria-hidden="true" [class.is-expanded]="voiceHelpOpen()"><path d="m5 7.5 5 5 5-5"/></svg></button></div>
+      @if (voiceHelpOpen()) {
+        <div class="voice-command-list" id="voice-command-list">
           <article class="voice-command-item"><span class="voice-command-icon">⚽</span><div><strong>Segnalare un gol</strong><p>“Goal numero <b>9</b>” oppure “Goal numero <b>9</b>, assist di numero <b>10</b>”.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🟨</span><div><strong>Ammonizione</strong><p>“Ammonizione numero <b>5</b>”. Alla seconda ammonizione il giocatore viene espulso automaticamente.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🟥</span><div><strong>Segnalare un'espulsione</strong><p>“Espulsione numero <b>5</b>” oppure “Cartellino rosso numero <b>5</b>”.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🔄</span><div><strong>Effettuare una sostituzione</strong><p>“Cambio numero <b>7</b> con numero <b>18</b>” oppure “Sostituzione numero <b>7</b> con numero <b>18</b>”.</p><small>Prima indica chi esce, poi chi entra.</small></div></article>
         </div>
-        
-      </section>
-    }
+      }
+    </section>
   </section>
   @if (voiceListening() || voiceMessage() || voiceDraft()) {
     <aside class="voice-feedback" [class.is-listening]="voiceListening()" role="status" aria-live="polite">

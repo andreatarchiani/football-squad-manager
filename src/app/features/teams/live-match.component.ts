@@ -62,7 +62,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly voiceListening = signal(false);
   protected readonly voiceMessage = signal('');
   protected readonly voiceDraft = signal('');
-  protected readonly voiceHelpOpen = signal(false);
+  private readonly voiceHelpStorageKey = 'fsm-voice-command-guide-open';
+  protected readonly voiceHelpOpen = signal(this.readVoiceHelpPreference());
   protected readonly matchAnimation = signal<MatchAnimation | null>(null);
   private animationTimer: ReturnType<typeof setTimeout> | null = null;
   protected readonly changesUsed = signal(0);
@@ -461,7 +462,6 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.closematch.emit();
   }
   protected startVoice(): void {
-    this.voiceHelpOpen.set(true);
     if(this.voiceListening()) { this.voice.stop(); this.voiceListening.set(false); return; }
     if(this.pending()) { this.listenForVoiceConfirmation(); return; }
     this.voiceDraft.set('');
@@ -490,8 +490,16 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       }
     );
   }
-  protected toggleVoiceHelp(): void { this.voiceHelpOpen.update(open => !open); }
-  protected closeVoiceHelp(): void { this.voiceHelpOpen.set(false); }
+  private readVoiceHelpPreference(): boolean {
+    try { return typeof window !== 'undefined' && window.localStorage.getItem(this.voiceHelpStorageKey) === 'open'; }
+    catch { return false; }
+  }
+  protected toggleVoiceHelp(): void {
+    const next = !this.voiceHelpOpen();
+    this.voiceHelpOpen.set(next);
+    try { window.localStorage.setItem(this.voiceHelpStorageKey, next ? 'open' : 'closed'); }
+    catch { /* Keep the control usable when browser storage is unavailable. */ }
+  }
   private handleVoiceTranscript(raw: string): void {
     const spoken = raw.trim().toLocaleLowerCase('it-IT')
       .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
