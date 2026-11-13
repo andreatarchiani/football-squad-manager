@@ -28,7 +28,7 @@
     </section>
   </section>
   @if (voiceListening() || voiceMessage() || voiceDraft()) {
-    <aside class="voice-feedback" [class.is-listening]="voiceListening()" role="status" aria-live="polite">
+    <aside class="voice-feedback" [class.is-listening]="voiceListening()" role="status" aria-live="polite" (click)="dismissVoiceFeedback()">
       <strong>{{ voiceListening() ? '🎙 TI ASCOLTO' : voiceDraft() ? 'COMANDO RICONOSCIUTO' : 'ASSISTENTE VOCALE' }}</strong>
       @if (voiceDraft()) { <p>«{{ voiceDraft() }}»</p> }
       @if (voiceMessage()) { <span>{{ voiceMessage() }}</span> }
