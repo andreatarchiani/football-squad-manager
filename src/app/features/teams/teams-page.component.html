@@ -75,7 +75,11 @@
             <div class="season-chip">STAGIONE {{ team.seasonLabel || 'Non definita' }}</div>
           </div>
           <div class="team-actions">
-            <button class="secondary-button" type="button" (click)="toggleRoster(team)" [attr.aria-expanded]="expandedRosterId() === team.id">{{ expandedRosterId() === team.id ? 'Chiudi rosa' : 'Rosa' }}</button>
+            <button class="roster-primary-button" type="button" (click)="toggleRoster(team)" [class.is-open]="expandedRosterId() === team.id" [attr.aria-expanded]="expandedRosterId() === team.id">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.5 5 6l-2 3 3 2 2-2v10h8V9l2 2 3-2-2-3-3-1.5a5.5 5.5 0 0 1-8 0Z"/><path d="M9 4.5c.5 2 5.5 2 6 0"/></svg>
+              <span>{{ expandedRosterId() === team.id ? 'Chiudi rosa' : 'Apri rosa' }}</span>
+              <svg class="roster-button-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+            </button>
           </div>
         </article>
         @if (expandedRosterId() === team.id) {
