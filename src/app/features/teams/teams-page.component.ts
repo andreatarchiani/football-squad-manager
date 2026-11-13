@@ -66,6 +66,7 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly showArchived = signal(false);
+  protected readonly teamSort = signal<'name-asc' | 'name-desc'>('name-asc');
   protected readonly error = signal('');
   protected readonly notice = signal('');
   protected readonly editingId = signal<string | null>(null);
@@ -88,7 +89,8 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   protected get visibleTeams(): TeamRecord[] {
-    return this.teams().filter((team) => this.showArchived() || !team.isArchived);
+    const list = this.teams().filter((team) => this.showArchived() || !team.isArchived);
+    return [...list].sort((a, b) => { const order = a.name.localeCompare(b.name, 'it', { sensitivity: 'base' }); return this.teamSort() === 'name-desc' ? -order : order; });
   }
 
   protected slots() { return this.pitchSlots[this.formation()]; }
