@@ -302,22 +302,124 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
 
   protected async shareMatchReport(): Promise<void> {
     const chronological = [...this.events()].sort((a, b) => a.minute - b.minute);
-    const lines = chronological.length ? chronological.map(event => `${event.minute}′ — ${event.description}`) : ['Nessun evento registrato.'];
-    const report = [`REPORT PARTITA · ${this.teamName()}`, `Gol squadra: ${this.score}`, `Durata: ${this.clock}`, '', 'CRONACA', ...lines].join('\\n');
     try {
-      if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-        await navigator.share({ title: `Report partita · ${this.teamName()}`, text: report });
-        this.voiceMessage.set('Resoconto condiviso.');
-      } else if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(report);
-        this.voiceMessage.set('Resoconto copiato: puoi incollarlo nella chat o nell’app che preferisci.');
+      const pdf = await this.createMatchReportPdf(chronological);
+      const file = new File([pdf], `Report-partita-${this.teamName().replace(/[^a-z0-9-_]/gi, '-')}.pdf`, { type: 'application/pdf' });
+      if (typeof navigator !== 'undefined' && typeof navigator.share === 'function'
+        && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+        await navigator.share({ title: `Report partita · ${this.teamName()}`, files: [file] });
+        this.voiceMessage.set('PDF del resoconto condiviso.');
       } else {
-        this.voiceMessage.set('La condivisione non è disponibile su questo dispositivo.');
+        const url = URL.createObjectURL(file);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = file.name;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        this.voiceMessage.set('PDF del resoconto pronto e scaricato. Puoi allegarlo alla chat che preferisci.');
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') return;
-      this.voiceMessage.set('Non è stato possibile condividere il resoconto.');
+      console.error('Unable to create or share match report PDF.', error);
+      this.voiceMessage.set('Non è stato possibile creare o condividere il PDF del resoconto.');
     }
+  }
+
+  private async createMatchReportPdf(events: MatchEvent[]): Promise<Blob> {
+    const width = 1240, height = 1754;
+    const pages = Math.max(1, Math.ceil(events.length / 14));
+    const images: Uint8Array[] = [];
+    const encoder = new TextEncoder();
+    const toBytes = (value: string) => encoder.encode(value);
+    const wrap = (ctx: CanvasRenderingContext2D, value: string, maxWidth: number): string[] => {
+      const words = value.split(/\\s+/);
+      const lines: string[] = [];
+      let line = '';
+      for (const word of words) {
+        const candidate = line ? line + ' ' + word : word;
+        if (line && ctx.measureText(candidate).width > maxWidth) { lines.push(line); line = word; }
+        else line = candidate;
+      }
+      if (line) lines.push(line);
+      return lines.length ? lines : [''];
+    };
+
+    for (let page = 0; page < pages; page++) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas non disponibile');
+      ctx.fillStyle = '#f3f6f3'; ctx.fillRect(0, 0, width, height);
+      const header = ctx.createLinearGradient(0, 0, width, 460);
+      header.addColorStop(0, '#102d20'); header.addColorStop(1, '#245b3a');
+      ctx.fillStyle = header; ctx.fillRect(0, 0, width, 440);
+      ctx.fillStyle = '#b8edc8'; ctx.font = '800 23px Arial'; ctx.fillText('FOOTBALL SQUAD MANAGER', 78, 82);
+      ctx.fillStyle = '#ffffff'; ctx.font = '800 54px Arial'; ctx.fillText(page === 0 ? 'RESOCONTO PARTITA' : 'CRONACA · CONTINUA', 78, 174);
+      ctx.font = '600 30px Arial'; ctx.fillStyle = '#d7e9dc'; ctx.fillText(this.teamName(), 78, 230);
+      ctx.font = '22px Arial'; ctx.fillStyle = '#b9d2c0'; ctx.fillText(new Intl.DateTimeFormat('it-IT', { dateStyle: 'long' }).format(new Date()), 78, 278);
+
+      let listTop = 500;
+      if (page === 0) {
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(68, 330, 1104, 220, 26); ctx.fill();
+        ctx.fillStyle = '#163d29'; ctx.font = '800 22px Arial'; ctx.fillText('RISULTATO', 105, 385);
+        ctx.fillStyle = '#153b28'; ctx.font = '800 88px Arial'; ctx.fillText(this.score, 105, 485);
+        ctx.fillStyle = '#738579'; ctx.font = '700 20px Arial'; ctx.fillText('GOL SEGNATI', 360, 428);
+        ctx.fillStyle = '#183e2b'; ctx.font = '800 38px Arial'; ctx.fillText(this.score, 360, 480);
+        ctx.fillStyle = '#738579'; ctx.font = '700 20px Arial'; ctx.fillText('DURATA', 690, 428);
+        ctx.fillStyle = '#183e2b'; ctx.font = '800 38px Arial'; ctx.fillText(this.clock, 690, 480);
+        listTop = 620;
+      }
+      ctx.fillStyle = '#183e2b'; ctx.font = '800 27px Arial'; ctx.fillText(page === 0 ? 'CRONACA DELLA PARTITA' : 'EVENTI', 78, listTop);
+      const chunk = events.slice(page * 14, page * 14 + 14);
+      if (!chunk.length) {
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(68, listTop + 28, 1104, 94, 18); ctx.fill();
+        ctx.fillStyle = '#64766a'; ctx.font = '26px Arial'; ctx.fillText('Nessun evento registrato durante la partita.', 100, listTop + 86);
+      }
+      chunk.forEach((event, index) => {
+        const y = listTop + 28 + index * 75;
+        ctx.fillStyle = index % 2 === 0 ? '#ffffff' : '#e8eee9';
+        ctx.beginPath(); ctx.roundRect(68, y, 1104, 62, 14); ctx.fill();
+        ctx.fillStyle = '#287447'; ctx.font = '800 23px Arial'; ctx.fillText(`${event.minute}′`, 98, y + 39);
+        ctx.fillStyle = '#24382b'; ctx.font = '600 21px Arial';
+        const lines = wrap(ctx, event.description, 930);
+        ctx.fillText(lines[0].slice(0, 105), 190, y + (lines.length > 1 ? 27 : 39));
+        if (lines.length > 1) { ctx.font = '18px Arial'; ctx.fillStyle = '#607267'; ctx.fillText(lines[1].slice(0, 110), 190, y + 49); }
+      });
+      ctx.fillStyle = '#839187'; ctx.font = '18px Arial';
+      ctx.fillText('Football Squad Manager · Report generato dall’app', 78, 1688);
+      ctx.textAlign = 'right'; ctx.fillText(`Pagina ${page + 1} / ${pages}`, 1160, 1688); ctx.textAlign = 'left';
+      const jpeg = await new Promise<Blob>((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Esportazione pagina non riuscita')), 'image/jpeg', .92));
+      images.push(new Uint8Array(await jpeg.arrayBuffer()));
+    }
+
+    const parts: Uint8Array[] = [toBytes('%PDF-1.4\\n')];
+    const offsets: number[] = [0];
+    let offset = parts[0].length;
+    const addObject = (id: number, body: Uint8Array[]) => {
+      offsets[id] = offset;
+      const begin = toBytes(`${id} 0 obj\\n`);
+      const finish = toBytes('\\nendobj\\n');
+      for (const part of [begin, ...body, finish]) { parts.push(part); offset += part.length; }
+    };
+    addObject(1, [toBytes('<< /Type /Catalog /Pages 2 0 R >>')]);
+    const kids = images.map((_, i) => `${3 + i * 3} 0 R`).join(' ');
+    addObject(2, [toBytes(`<< /Type /Pages /Kids [${kids}] /Count ${images.length} >>`)]);
+    images.forEach((jpeg, i) => {
+      const pageId = 3 + i * 3, imageId = pageId + 1, contentId = pageId + 2;
+      addObject(pageId, [toBytes(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /XObject << /Im0 ${imageId} 0 R >> >> /Contents ${contentId} 0 R >>`)]);
+      addObject(imageId, [toBytes(`<< /Type /XObject /Subtype /Image /Width ${width} /Height ${height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\\nstream\\n`), jpeg, toBytes('\\nendstream')]);
+      const stream = toBytes('q 595 0 0 842 0 0 cm /Im0 Do Q');
+      addObject(contentId, [toBytes(`<< /Length ${stream.length} >>\\nstream\\n`), stream, toBytes('\\nendstream')]);
+    });
+    const xrefOffset = offset;
+    let xref = `xref\\n0 ${offsets.length}\\n0000000000 65535 f \\n`;
+    for (let id = 1; id < offsets.length; id++) xref += `${String(offsets[id]).padStart(10, '0')} 00000 n \\n`;
+    xref += `trailer\\n<< /Size ${offsets.length} /Root 1 0 R >>\\nstartxref\\n${xrefOffset}\\n%%EOF`;
+    parts.push(toBytes(xref)); offset += parts[parts.length - 1].length;
+    const total = parts.reduce((sum, part) => sum + part.length, 0);
+    const output = new Uint8Array(total);
+    let cursor = 0; for (const part of parts) { output.set(part, cursor); cursor += part.length; }
+    return new Blob([output.buffer as ArrayBuffer], { type: 'application/pdf' });
   }
 
   protected updateEditMinute(value: string): void { this.editMinute.set(value); }
