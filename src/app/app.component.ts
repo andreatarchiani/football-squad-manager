@@ -85,13 +85,14 @@ export class AppComponent {
 
   protected openTeamRoster(request: { teamId: string; layoutSlot: 1 | 2 }): void {
     this.matchLaunch.set(null);
+    if (!request.teamId) { this.rosterRequest.set(null); this.activePage.set('teams'); return; }
     this.rosterRequest.set({ ...request, token: Date.now() });
     this.activePage.set('teams');
   }
 
   protected navigate(index: number): void {
     if (index === 0) this.activePage.set('overview');
-    if (index === 1) { this.matchLaunch.set(null); this.activePage.set('teams'); }
+    if (index === 1) { this.matchLaunch.set(null); this.rosterRequest.set(null); this.activePage.set('teams'); }
     if (index === 2) this.activePage.set('players');
   }
 
