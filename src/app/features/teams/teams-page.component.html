@@ -52,7 +52,18 @@
 
   <div class="list-toolbar">
     <div><strong>{{ visibleTeams.length }}</strong> squadre {{ showArchived() ? 'visualizzate' : 'registrate' }}</div>
-    <div class="list-toolbar-actions"><label class="sort-control">Ordina per<select [value]="teamSort()" (change)="teamSort.set($any($event.target).value)"><option value="name-asc">Nome · A–Z</option><option value="name-desc">Nome · Z–A</option></select></label>
+    <div class="list-toolbar-actions"><div class="sort-picker">
+      <span class="sort-picker-label">Ordina per</span>
+      <button type="button" class="sort-picker-trigger" [class.is-open]="teamSortDropdownOpen()" (click)="teamSortDropdownOpen.update(open => !open)" (keydown.escape)="teamSortDropdownOpen.set(false)" [attr.aria-expanded]="teamSortDropdownOpen()" aria-haspopup="listbox">
+        <strong>{{ teamSort() === 'name-asc' ? 'Nome · A–Z' : 'Nome · Z–A' }}</strong><span class="sort-picker-chevron" aria-hidden="true"></span>
+      </button>
+      @if (teamSortDropdownOpen()) {
+        <div class="sort-picker-menu" role="listbox" aria-label="Ordina squadre">
+          <button type="button" class="sort-picker-option" role="option" [class.is-selected]="teamSort() === 'name-asc'" [attr.aria-selected]="teamSort() === 'name-asc'" (click)="teamSort.set('name-asc'); teamSortDropdownOpen.set(false)"><span>Nome · A–Z</span>@if (teamSort() === 'name-asc') { <span class="sort-picker-check">✓</span> }</button>
+          <button type="button" class="sort-picker-option" role="option" [class.is-selected]="teamSort() === 'name-desc'" [attr.aria-selected]="teamSort() === 'name-desc'" (click)="teamSort.set('name-desc'); teamSortDropdownOpen.set(false)"><span>Nome · Z–A</span>@if (teamSort() === 'name-desc') { <span class="sort-picker-check">✓</span> }</button>
+        </div>
+      }
+    </div>
     <label class="archive-toggle"><input type="checkbox" [checked]="showArchived()" (change)="showArchived.set($any($event.target).checked)"> Mostra archiviate</label></div>
   </div>
 
