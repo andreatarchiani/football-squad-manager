@@ -26,6 +26,7 @@ export class AppComponent {
   protected readonly navigation = ['Home', 'Squadre', 'Giocatori', 'Formazioni', 'Partite'];
   protected readonly activePage = signal<'overview' | 'teams' | 'players' | 'match'>(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team') ? 'match' : 'overview');
   protected readonly matchLaunch = signal<{ team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; token: number } | null>(null);
+  protected readonly rosterRequest = signal<{ teamId: string; layoutSlot: 1 | 2; token: number } | null>(null);
   protected readonly updateAvailable = signal(false);
   protected readonly updating = signal(false);
   private readonly swUpdate = inject(SwUpdate);
@@ -75,15 +76,23 @@ export class AppComponent {
   }
 
   protected launchMatch(request: { team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2 }): void {
+    this.rosterRequest.set(null);
     this.matchLaunch.set({ ...request, token: Date.now() });
     this.activePage.set('match');
   }
 
-  protected returnHomeAfterMatch(): void { this.activePage.set('overview'); }
+  protected returnHomeAfterMatch(): void { this.matchLaunch.set(null); this.activePage.set('overview'); }
+
+  protected openTeamRoster(request: { teamId: string; layoutSlot: 1 | 2 }): void {
+    this.matchLaunch.set(null);
+    if (!request.teamId) { this.rosterRequest.set(null); this.activePage.set('teams'); return; }
+    this.rosterRequest.set({ ...request, token: Date.now() });
+    this.activePage.set('teams');
+  }
 
   protected navigate(index: number): void {
     if (index === 0) this.activePage.set('overview');
-    if (index === 1) this.activePage.set('teams');
+    if (index === 1) { this.matchLaunch.set(null); this.rosterRequest.set(null); this.activePage.set('teams'); }
     if (index === 2) this.activePage.set('players');
   }
 

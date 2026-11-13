@@ -16,8 +16,12 @@ import { LiveMatchComponent } from './live-match.component';
 })
 export class TeamsPageComponent implements OnChanges {
   @Input() launchRequest: { team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; token: number } | null = null;
+  @Input() rosterRequest: { teamId: string; layoutSlot: 1 | 2; token: number } | null = null;
+  @Input() resumeMatch = false;
   @Output() readonly matchClosed = new EventEmitter<void>();
   private handledLaunchToken = 0;
+  private handledRosterToken = 0;
+  private teamsLoadPromise: Promise<void> = Promise.resolve();
   protected readonly layoutSlot = signal<1 | 2>(1);
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamsService = inject(TeamService);
@@ -69,13 +73,17 @@ export class TeamsPageComponent implements OnChanges {
   protected form: TeamInput = this.emptyForm();
 
   constructor() {
-    void this.loadTeams();
+    this.teamsLoadPromise = this.loadTeams();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['launchRequest'] && this.launchRequest && this.launchRequest.token !== this.handledLaunchToken) {
       this.handledLaunchToken = this.launchRequest.token;
       void this.launchFromHome(this.launchRequest);
+    }
+    if (changes['rosterRequest'] && this.rosterRequest && this.rosterRequest.token !== this.handledRosterToken) {
+      this.handledRosterToken = this.rosterRequest.token;
+      void this.openRequestedRoster(this.rosterRequest);
     }
   }
 
@@ -86,6 +94,15 @@ export class TeamsPageComponent implements OnChanges {
   protected slots() { return this.pitchSlots[this.formation()]; }
 
   protected expandedTeamName(): string { return this.teams().find(team => team.id === this.expandedRosterId())?.name || 'Partita'; }
+  private async openRequestedRoster(request: NonNullable<TeamsPageComponent['rosterRequest']>): Promise<void> {
+    await this.teamsLoadPromise;
+    const team = this.teams().find(item => item.id === request.teamId && !item.isArchived);
+    if (!team) { this.error.set('La squadra selezionata non è disponibile.'); return; }
+    this.liveMatch.set(false);
+    this.autoStartMatch.set(false);
+    if (this.expandedRosterId() !== team.id) await this.toggleRoster(team);
+    if (request.layoutSlot !== this.layoutSlot()) await this.selectLayoutSlot(request.layoutSlot);
+  }
   private launchFromHome(request: NonNullable<TeamsPageComponent['launchRequest']>): void {
     const team = request.team;
     if (team.isArchived || !team.seasonId) { this.error.set('La squadra selezionata non è disponibile.'); return; }
@@ -139,15 +156,27 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   protected changeFormation(value: string): void {
+    if (!this.pitchSlots[value] || value === this.formation()) return;
+    const previousSlots = this.slots();
+    const orderedPlayers = previousSlots.map(slot => this.lineup()[slot.id]).filter((id): id is string => !!id);
+    const nextLineup: Record<string, string> = {};
+    const nextPositions = { ...this.shirtPositions() };
+    this.pitchSlots[value].forEach((slot, index) => {
+      const playerId = orderedPlayers[index];
+      if (!playerId) return;
+      nextLineup[slot.id] = playerId;
+      nextPositions[playerId] = { x: slot.x, y: slot.y };
+    });
     this.formation.set(value);
+    this.lineup.set(nextLineup);
+    this.shirtPositions.set(nextPositions);
     this.activeSlotId.set(null);
-    this.lineup.update(current => Object.fromEntries(
-      Object.entries(current).filter(([id]) => this.pitchSlots[value].some(slot => slot.id === id))
-    ));
     void this.persistTacticalLayout();
   }
 
   protected assignPlayer(slotId: string, playerId: string): void {
+    const targetSlot = this.slots().find(slot => slot.id === slotId);
+    const targetPosition = targetSlot ? this.positionForSlot(targetSlot) : null;
     this.lineup.update(current => {
       const next = { ...current };
       for (const [key, value] of Object.entries(next)) if (value === playerId) delete next[key];
@@ -155,6 +184,7 @@ export class TeamsPageComponent implements OnChanges {
       else delete next[slotId];
       return next;
     });
+    if (playerId && targetPosition) this.shirtPositions.update(current => ({ ...current, [playerId]: targetPosition }));
     this.activeSlotId.set(null);
     void this.persistTacticalLayout();
   }
@@ -440,7 +470,7 @@ export class TeamsPageComponent implements OnChanges {
     this.loading.set(true);
     try {
       this.teams.set(await this.teamsService.list(workspaceId));
-      const resumeTeamId = localStorage.getItem('fsm-active-match-team');
+      const resumeTeamId = this.resumeMatch ? localStorage.getItem('fsm-active-match-team') : null;
       if (resumeTeamId && !this.expandedRosterId()) {
         const resumeTeam = this.teams().find(item => item.id === resumeTeamId && !!item.seasonId);
         if (resumeTeam) { this.liveMatch.set(true); await this.toggleRoster(resumeTeam); }

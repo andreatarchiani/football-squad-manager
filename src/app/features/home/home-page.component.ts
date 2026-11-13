@@ -17,7 +17,7 @@ export class HomePageComponent {
   private readonly teamsService = inject(TeamService);
   private readonly playerService = inject(PlayerService);
   private readonly db = inject(FIRESTORE_DB, { optional: true });
-  @Output() readonly openTeams = new EventEmitter<void>();
+  @Output() readonly openTeams = new EventEmitter<{ teamId: string; layoutSlot: 1 | 2 }>();
   @Output() readonly launchMatch = new EventEmitter<{ team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2 }>();
   protected readonly teams = signal<TeamRecord[]>([]);
   protected readonly selectedTeamId = signal('');
