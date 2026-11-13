@@ -19,3 +19,12 @@
 
 /* Compact archive/delete icon controls anchored to each team card. */
 .team-card{position:relative;padding-top:52px}.record-icon-actions{position:absolute;top:10px;right:10px;z-index:2;display:flex;align-items:center;gap:7px}.icon-action{display:grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid #35404b;border-radius:9px;color:#b9c7c9;background:#1b2530;cursor:pointer;transition:background .18s,border-color .18s,color .18s}.icon-action svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.icon-action.archive-action:hover{border-color:#9bdab2;color:#9bdab2;background:#1b3029}.icon-action.delete-action{color:#ff9da7}.icon-action.delete-action:hover{border-color:#a94e5b;color:#ffc0c6;background:#3b2228}
+
+
+/* Keep team emblem, details and archive/delete controls on one shared row. */
+.team-card{display:grid;grid-template-columns:46px minmax(0,1fr) auto;grid-template-areas:"emblem details actions" "buttons buttons buttons";align-items:center;gap:12px 14px;padding:16px;}
+.team-card>.team-emblem{grid-area:emblem;}
+.team-card>.team-details{grid-area:details;}
+.team-card>.record-icon-actions{grid-area:actions;position:static;align-self:center;display:flex;align-items:center;gap:7px;margin:0;}
+.team-card>.team-actions{grid-area:buttons;display:flex;justify-content:flex-end;}
+@media(max-width:650px){.team-card{grid-template-columns:42px minmax(0,1fr) auto;grid-template-areas:"emblem details actions" "buttons buttons buttons";align-items:center;gap:10px;padding:13px;}.team-card>.record-icon-actions{gap:5px}.team-card .icon-action{width:32px;height:32px}.team-card>.team-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;}}
