@@ -184,7 +184,6 @@ export class HomePageComponent {
     this.previewDrag = null;
     if (drag.moved) {
       this.previewDraggedClick = true;
-      this.previewDraggedClick = true;
       void this.persistPreviewLineup();
     }
   }
