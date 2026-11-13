@@ -50,7 +50,7 @@
             <div class="pitch-line halfway"></div><div class="pitch-circle"></div><div class="pitch-box top-box"></div><div class="pitch-box bottom-box"></div>
             @for (slot of pitchSlots[previewFormation()]; track slot.id) {
               <div class="home-pitch-player" [style.left.%]="previewPosition(slot).x" [style.top.%]="previewPosition(slot).y">
-                <button type="button" class="home-pitch-shirt" [attr.aria-label]="'Cambia giocatore per ' + slot.label" (pointerdown)="startPreviewShirtPress($event, slot.id)" (pointerup)="endPreviewShirtPress()" (pointerleave)="endPreviewShirtPress()" (pointercancel)="endPreviewShirtPress()" (click)="openPreviewPlayerPicker(slot.id)">{{ previewPlayer(slot.id)?.shirtNumber ?? '+' }}</button>
+                <button type="button" class="home-pitch-shirt" [attr.aria-label]="'Cambia giocatore per ' + slot.label" (pointerdown)="startPreviewShirtDrag($event, slot.id)" (pointermove)="movePreviewShirt($event)" (pointerup)="endPreviewShirtDrag($event)" (pointercancel)="endPreviewShirtDrag($event)" (click)="openPreviewPlayerPicker(slot.id)">{{ previewPlayer(slot.id)?.shirtNumber ?? '+' }}</button>
                 <span class="home-pitch-player-name">{{ previewPlayer(slot.id)?.lastName || slot.label }}</span>
               </div>
             }
