@@ -136,6 +136,14 @@ export class HomePageComponent {
     await this.loadPreview();
   }
 
+  protected get completeStartingLineup(): boolean {
+    const slots = this.pitchSlots[this.previewFormation()] ?? [];
+    if (slots.length !== 11) return false;
+    const assignedIds = slots.map(slot => this.previewLineup()[slot.id] || '');
+    return assignedIds.every(id => !!id && this.previewPlayers().some(player => player.id === id))
+      && new Set(assignedIds).size === 11;
+  }
+
   protected previewPlayer(slotId: string): PlayerRecord | undefined {
     const id = this.previewLineup()[slotId];
     return this.previewPlayers().find(player => player.id === id);
@@ -226,6 +234,10 @@ export class HomePageComponent {
     const team = this.selectedTeam;
     if (!team || team.isArchived || !team.seasonId) {
       this.error.set('Seleziona una squadra attiva con una stagione valida prima di avviare la partita.');
+      return;
+    }
+    if (!this.completeStartingLineup) {
+      this.error.set('Per avviare la partita devi assegnare un giocatore a tutte le 11 magliette della formazione.');
       return;
     }
     this.error.set('');
