@@ -453,7 +453,7 @@ export class TeamsPageComponent implements OnChanges {
       const confirmed = await this.notifications.confirm({
         title: 'Archiviare questa squadra?',
         message: `La squadra «${team.name}» verrà archiviata e non sarà più disponibile per avviare una nuova partita. Potrai ripristinarla in seguito.`,
-        confirmText: 'Archivia squadra', cancelText: 'Annulla', tone: 'default'
+        confirmText: 'Archivia squadra', cancelText: 'Annulla', tone: 'default', icon: 'archive'
       });
       if (!confirmed) return;
     }
