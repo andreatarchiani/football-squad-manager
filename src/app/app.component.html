@@ -66,11 +66,11 @@
       }
 
       @if (activePage() === 'overview') {
-        <fsm-home-page (openTeams)="navigate(1)" (launchMatch)="launchMatch($event)" />
+        <fsm-home-page (openTeams)="openTeamRoster($event)" (launchMatch)="launchMatch($event)" />
       } @else if (activePage() === 'teams') {
-        <fsm-teams-page [launchRequest]="matchLaunch()" />
+        <fsm-teams-page [launchRequest]="matchLaunch()" [rosterRequest]="rosterRequest()" [resumeMatch]="false" />
       } @else if (activePage() === 'match') {
-        <fsm-teams-page [launchRequest]="matchLaunch()" (matchClosed)="returnHomeAfterMatch()" />
+        <fsm-teams-page [launchRequest]="matchLaunch()" [resumeMatch]="true" (matchClosed)="returnHomeAfterMatch()" />
       } @else if (activePage() === 'players') {
         <fsm-players-page />
       }
