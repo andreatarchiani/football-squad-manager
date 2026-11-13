@@ -29,6 +29,7 @@ export class VoiceCommandParser {
         name,
         clubName: this.capture(text, /\b(?:società|societa|club)\s+(?:è\s+|e\s+|si\s+chiama\s+)?(.+?)(?=\s*(?:,|;)?\s*(?:categoria|stagione)\b|$)/i) ?? '',
         category: this.capture(text, /\bcategoria\s+(?:è\s+|e\s+)?(.+?)(?=\s*(?:,|;)?\s*stagione\b|$)/i) ?? '',
+        icon: 'shield',
         seasonLabel: this.capture(text, /\bstagione\s+(?:è\s+|e\s+)?(\d{4}\s*[/\-]\s*\d{4})/i) ?? currentSeason
       }
     };
