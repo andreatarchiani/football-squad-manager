@@ -67,6 +67,7 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly saving = signal(false);
   protected readonly showArchived = signal(false);
   protected readonly teamSort = signal<'name-asc' | 'name-desc'>('name-asc');
+  protected readonly teamSortDropdownOpen = signal(false);
   protected readonly error = signal('');
   protected readonly notice = signal('');
   protected readonly editingId = signal<string | null>(null);
