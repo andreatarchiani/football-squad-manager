@@ -17,14 +17,14 @@
     </div>
     @if (voiceHelpOpen()) {
       <section class="voice-command-guide" aria-label="Comandi vocali disponibili">
-        <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong><p>Pronuncia il comando usando il numero di maglia del giocatore.</p></div><button type="button" class="voice-guide-close" (click)="closeVoiceHelp()" aria-label="Nascondi i comandi">✕</button></div>
+        <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong></div><button type="button" class="voice-guide-close" (click)="closeVoiceHelp()" aria-label="Nascondi i comandi">✕</button></div>
         <div class="voice-command-list">
           <article class="voice-command-item"><span class="voice-command-icon">⚽</span><div><strong>Segnalare un gol</strong><p>“Goal numero <b>9</b>” oppure “Goal numero <b>9</b>, assist di numero <b>10</b>”.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🟨</span><div><strong>Ammonizione</strong><p>“Ammonizione numero <b>5</b>”. Alla seconda ammonizione il giocatore viene espulso automaticamente.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🟥</span><div><strong>Segnalare un'espulsione</strong><p>“Espulsione numero <b>5</b>” oppure “Cartellino rosso numero <b>5</b>”.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🔄</span><div><strong>Effettuare una sostituzione</strong><p>“Cambio numero <b>7</b> con numero <b>18</b>” oppure “Sostituzione numero <b>7</b> con numero <b>18</b>”.</p><small>Prima indica chi esce, poi chi entra.</small></div></article>
         </div>
-        <p class="voice-guide-note">Ogni evento ti verrà mostrato per la conferma prima di essere registrato. Se vuoi cambiare l’evento in attesa, pronuncia direttamente un nuovo comando: sostituirà quello precedente. Se viene capito male, correggi il comando nella schermata di conferma. Per rimuovere un evento già registrato: “Annulla goal del numero 9”, “Annulla ammonizione del numero 8” oppure “Annulla espulsione del numero 5”.</p>
+        
       </section>
     }
   </section>
@@ -112,7 +112,7 @@
           <article><strong>{{ events().length }}</strong><span>Eventi registrati</span></article>
           <article><strong>{{ clock }}</strong><span>Tempo giocato</span></article>
         </div>
-        <div class="match-report-events-heading"><strong>Cronaca della partita</strong><span>Puoi modificare o eliminare ogni evento</span></div>
+        <div class="match-report-events-heading"><strong>Cronaca della partita</strong></div>
         <div class="match-report-events">
           @for (event of chronologicalEvents(); track $index) {
             <article class="match-report-event">
