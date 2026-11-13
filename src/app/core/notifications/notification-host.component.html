@@ -15,7 +15,9 @@
   <div class="confirmation-backdrop" (click)="resolve(false)">
     <section class="confirmation-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmation-title" aria-describedby="confirmation-message" (click)="$event.stopPropagation()">
       <div class="confirmation-symbol" [class.danger-symbol]="confirmation.tone === 'danger'" aria-hidden="true">
-        @if (confirmation.tone === 'danger') {
+        @if (confirmation.icon === 'archive') {
+          <svg viewBox="0 0 24 24"><path d="M3 4h18v5H3zM5 9v11h14V9M9 13h6"/></svg>
+        } @else if (confirmation.tone === 'danger') {
           <svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg>
         } @else {
           <span>?</span>
