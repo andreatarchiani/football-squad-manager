@@ -16,7 +16,7 @@
     </section>
   </main>
 } @else if (auth.loading()) {
-  <main class="loading-state"><div class="loading-ball-wrap" role="img" aria-label="Pallone da calcio in movimento"><span class="loading-ball">⚽</span><span class="loading-ball-shadow"></span></div><p>Preparazione del tuo spazio squadra…</p></main>
+  <main class="loading-state"><div class="loading-emblem" role="img" aria-label="Caricamento in corso"><span class="loading-ring"></span><span class="loading-emblem-ball">⚽</span></div><p>Preparazione del tuo spazio squadra…</p></main>
 } @else if (!auth.user()) {
   <fsm-auth-page />
 } @else {
