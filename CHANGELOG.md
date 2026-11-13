@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-13 — Correzione nomi in panchina
+- Sistemato il layout dei giocatori in panchina su schermi stretti: i nomi restano su una sola riga e quelli lunghi vengono abbreviati con ellissi, senza andare a capo lettera per lettera.
+
+# Changelog
+
 ## 2026-11-13 — Miglioramento aggiornamento icone PWA
 - Impostata la rivalidazione delle risorse di branding e del manifest su Firebase Hosting, per ridurre l'uso di icone obsolete dalla cache HTTP.
 - Configurato Angular Service Worker per precaricare le icone e scaricarne le nuove versioni durante gli aggiornamenti dell'app.
