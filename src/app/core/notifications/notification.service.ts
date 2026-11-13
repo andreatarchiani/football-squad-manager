@@ -23,6 +23,7 @@ export interface ConfirmationOptions {
   confirmText?: string;
   cancelText?: string;
   tone?: ConfirmationTone;
+  icon?: 'archive';
 }
 
 @Injectable({ providedIn: 'root' })
