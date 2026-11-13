@@ -69,6 +69,7 @@
               @if (playerHasRedCard(player)) { <span class="sent-off-card" aria-label="Cartellino rosso">🟥 ROSSO</span> }
               @else if (yellowCardsFor(player)) { <span class="booked-card" aria-label="Cartellino giallo">🟨 GIALLO</span> }
               @if (goalsFor(player)) { <small class="goal-indicator">⚽ {{ goalsFor(player) }}</small> }
+              @if (assistsFor(player)) { <small class="assist-indicator" [attr.aria-label]="'Assist: ' + assistsFor(player)">👟 {{ assistsFor(player) }}</small> }
             </div>
           }
         }
