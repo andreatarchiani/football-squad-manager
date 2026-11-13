@@ -71,7 +71,8 @@
             </div>
           }
         }
-        <div class="launch-actions"><button type="button" class="customize-action" (click)="openTeams.emit({ teamId: selectedTeam.id, layoutSlot: layoutSlot() })">Gestisci rosa</button><button type="button" class="launch-button" (click)="start()" [disabled]="saving() || previewSaving()">▶ Avvia partita</button></div>
+        <div class="launch-actions"><button type="button" class="customize-action" (click)="openTeams.emit({ teamId: selectedTeam.id, layoutSlot: layoutSlot() })">Gestisci rosa</button><button type="button" class="launch-button" (click)="start()" [disabled]="saving() || previewSaving() || !completeStartingLineup">▶ Avvia partita</button></div>
+        @if (!completeStartingLineup) { <p class="lineup-completion-hint" role="status">Assegna un giocatore a tutte le 11 magliette per avviare la partita.</p> }
       } @else {
         <div class="preview-placeholder">Non hai ancora squadre attive. Crea una squadra nella sezione Squadre per iniziare.</div>
         <button type="button" class="customize-action" (click)="openTeams.emit({ teamId: '', layoutSlot: 1 })">Crea squadra</button>
