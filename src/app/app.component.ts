@@ -29,10 +29,12 @@ export class AppComponent {
   protected readonly rosterRequest = signal<{ teamId: string; layoutSlot: 1 | 2; token: number } | null>(null);
   protected readonly updateAvailable = signal(false);
   protected readonly updating = signal(false);
+  protected readonly loadingMinimumElapsed = signal(false);
   private readonly swUpdate = inject(SwUpdate);
   private readonly notifications = inject(NotificationService);
 
   constructor() {
+    window.setTimeout(() => this.loadingMinimumElapsed.set(true), 2500);
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe((event) => {
         if (event.type === 'VERSION_READY') void this.activateReadyVersion();
