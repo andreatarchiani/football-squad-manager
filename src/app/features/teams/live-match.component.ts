@@ -482,16 +482,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.voiceListening.set(true);
     let retryAllowed = true;
     this.voice.start(
-      raw => {
-        const spoken = raw.trim().toLocaleLowerCase('it-IT').replace(/[.!?]/g, '');
-        if(/\bconferma\b/.test(spoken)) {
-          this.confirmAction();
-        } else if(/\b(annulla|annullare|cancella)\b/.test(spoken)) {
-          this.cancelAction();
-        } else {
-          this.parseCommand(raw);
-        }
-      },
+      raw => this.handleVoiceTranscript(raw),
       message => { this.voiceMessage.set(message); if(/permesso microfono negato|non è supportato/i.test(message)) retryAllowed=false; },
       () => {
         this.voiceListening.set(false);
