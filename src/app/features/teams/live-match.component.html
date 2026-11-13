@@ -32,6 +32,7 @@
       <strong>{{ voiceListening() ? '🎙 TI ASCOLTO' : voiceDraft() ? 'COMANDO RICONOSCIUTO' : 'ASSISTENTE VOCALE' }}</strong>
       @if (voiceDraft()) { <p>«{{ voiceDraft() }}»</p> }
       @if (voiceMessage()) { <span>{{ voiceMessage() }}</span> }
+      <button type="button" class="voice-feedback-close" aria-label="Chiudi notifica" (click)="$event.stopPropagation(); dismissVoiceFeedback()">×</button>
     </aside>
   }
   @if (matchAnimation(); as animation) {
