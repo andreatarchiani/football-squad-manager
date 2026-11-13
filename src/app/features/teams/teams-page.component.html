@@ -9,7 +9,7 @@
   @if (!liveMatch()) {
   <div class="page-heading">
     <div>
-      <div class="eyebrow">IL TUO CLUB</div>
+      
       <h2>Squadre</h2>
       <p>Gestisci le squadre del tuo club e le relative stagioni sportive.</p>
     </div>
@@ -51,8 +51,9 @@
   }
 
   <div class="list-toolbar">
-    <div><strong>{{ teams().length }}</strong> squadre registrate</div>
-    <label class="archive-toggle"><input type="checkbox" [checked]="showArchived()" (change)="showArchived.set($any($event.target).checked)"> Mostra archiviate</label>
+    <div><strong>{{ visibleTeams.length }}</strong> squadre {{ showArchived() ? 'visualizzate' : 'registrate' }}</div>
+    <div class="list-toolbar-actions"><label class="sort-control">Ordina per<select [value]="teamSort()" (change)="teamSort.set($any($event.target).value)"><option value="name-asc">Nome · A–Z</option><option value="name-desc">Nome · Z–A</option></select></label>
+    <label class="archive-toggle"><input type="checkbox" [checked]="showArchived()" (change)="showArchived.set($any($event.target).checked)"> Mostra archiviate</label></div>
   </div>
 
   @if (loading()) {
