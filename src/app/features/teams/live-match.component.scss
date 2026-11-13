@@ -130,3 +130,6 @@
 .voice-feedback-close:hover{background:#ffffff24}
 .voice-feedback-close:focus-visible{outline:2px solid #a5efba;outline-offset:2px}
 .voice-feedback{position:fixed;padding-right:42px}
+
+
+.assist-indicator{display:inline-flex;align-items:center;gap:3px;margin-top:3px;padding:2px 5px;border:1px solid #a5c9ff55;border-radius:5px;background:#18365c;color:#d9e9ff;font-size:9px;font-weight:950;line-height:1.2;box-shadow:0 2px 8px #0007}
