@@ -468,7 +468,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.voiceMessage.set('Pronuncia un comando, ad esempio: goal numero 9.');
     this.voiceListening.set(true);
     this.voice.start(
-      text => this.parseCommand(text),
+      text => this.handleVoiceTranscript(text),
       message => this.voiceMessage.set(message),
       () => {
         this.voiceListening.set(false);
@@ -501,6 +501,27 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
   protected toggleVoiceHelp(): void { this.voiceHelpOpen.update(open => !open); }
   protected closeVoiceHelp(): void { this.voiceHelpOpen.set(false); }
+  private handleVoiceTranscript(raw: string): void {
+    const spoken = raw.trim().toLocaleLowerCase('it-IT')
+      .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
+      .replace(/[^\\p{L}\\p{N}\\s]/gu, ' ')
+      .replace(/\\s+/g, ' ').trim();
+
+    // While an event is awaiting confirmation, always give confirmation/cancellation
+    // words priority over event parsing. A newly spoken event updates the pending draft;
+    // the following "conferma" must still commit that latest draft.
+    if (this.pending() && /\\bconferma(?:re)?\\b/.test(spoken)) {
+      this.confirmAction();
+      return;
+    }
+    if (this.pending() && /\\b(annulla|annullare|cancella)\\b/.test(spoken)) {
+      this.cancelAction();
+      return;
+    }
+
+    this.parseCommand(raw);
+  }
+
   private parseCommand(raw: string): void {
     this.voiceDraft.set(raw);
     const text=raw.toLocaleLowerCase('it-IT');
