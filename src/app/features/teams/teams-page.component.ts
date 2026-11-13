@@ -102,6 +102,10 @@ export class TeamsPageComponent implements OnChanges {
     this.autoStartMatch.set(false);
     if (this.expandedRosterId() !== team.id) await this.toggleRoster(team);
     if (request.layoutSlot !== this.layoutSlot()) await this.selectLayoutSlot(request.layoutSlot);
+    await new Promise<void>(resolve => setTimeout(resolve, 120));
+    const rosterPanel = Array.from(document.querySelectorAll<HTMLElement>('[data-roster-team]'))
+      .find(element => element.dataset['rosterTeam'] === team.id);
+    rosterPanel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   private launchFromHome(request: NonNullable<TeamsPageComponent['launchRequest']>): void {
     const team = request.team;
@@ -445,6 +449,14 @@ export class TeamsPageComponent implements OnChanges {
   protected async toggleArchive(team: TeamRecord): Promise<void> {
     const workspaceId = this.auth.workspaceId();
     if (!workspaceId) return;
+    if (!team.isArchived) {
+      const confirmed = await this.notifications.confirm({
+        title: 'Archiviare questa squadra?',
+        message: `La squadra «${team.name}» verrà archiviata e non sarà più disponibile per avviare una nuova partita. Potrai ripristinarla in seguito.`,
+        confirmText: 'Archivia squadra', cancelText: 'Annulla', tone: 'warning'
+      });
+      if (!confirmed) return;
+    }
 
     try {
       await this.teamsService.setArchived(workspaceId, team, !team.isArchived);
