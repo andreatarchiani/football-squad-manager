@@ -28,3 +28,16 @@
 .team-card>.record-icon-actions{grid-area:actions;position:static;align-self:center;display:flex;align-items:center;gap:7px;margin:0;}
 .team-card>.team-actions{grid-area:buttons;display:flex;justify-content:flex-end;}
 @media(max-width:650px){.team-card{grid-template-columns:42px minmax(0,1fr) auto;grid-template-areas:"emblem details actions" "buttons buttons buttons";align-items:center;gap:10px;padding:13px;}.team-card>.record-icon-actions{gap:5px}.team-card .icon-action{width:32px;height:32px}.team-card>.team-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;}}
+
+
+/* Primary action: open the squad roster. */
+.team-card>.team-actions{justify-content:flex-end;}
+.roster-primary-button{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-width:154px;min-height:46px;padding:0 16px;border:1px solid #a9e5ba;border-radius:12px;color:#102018;background:linear-gradient(135deg,#b8efc8 0%,#8bd4a3 54%,#70bd8c 100%);font:inherit;font-size:12px;font-weight:850;letter-spacing:.01em;cursor:pointer;box-shadow:0 7px 20px #70c58a24,inset 0 1px #ffffffa6;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;}
+.roster-primary-button>svg:first-child{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.roster-primary-button .roster-button-arrow{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s ease;}
+.roster-primary-button:hover{filter:brightness(1.045);transform:translateY(-2px);box-shadow:0 10px 25px #70c58a35,inset 0 1px #ffffffb8;}
+.roster-primary-button:active{transform:translateY(0) scale(.985);}
+.roster-primary-button:focus-visible{outline:3px solid #b8efc8;outline-offset:3px;}
+.roster-primary-button.is-open{border-color:#7fc99a;color:#d5f5df;background:linear-gradient(135deg,#294b36,#1b3427);box-shadow:inset 0 1px #ffffff12,0 5px 16px #0003;}
+.roster-primary-button.is-open .roster-button-arrow{transform:rotate(180deg);}
+@media(max-width:650px){.team-card>.team-actions{display:flex;justify-content:stretch;width:100%;}.roster-primary-button{width:100%;min-height:48px;}}
