@@ -59,3 +59,43 @@
 .team-icon-option:focus-visible{outline:2px solid #9bdab2;outline-offset:3px;}
 .team-icon-caption{display:block;margin-top:9px;color:var(--text-muted);font-size:11px;}
 @media(max-width:520px){.team-icon-picker{grid-template-columns:repeat(4,minmax(0,1fr));max-width:310px;}}
+
+
+/* Mobile bench: keep names readable and move the role below the name. */
+@media (max-width: 650px) {
+  .bench-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bench-player {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 3px;
+    min-height: 58px;
+  }
+
+  .bench-player > span:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: normal;
+    line-height: 1.25;
+  }
+
+  .bench-player small {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: break-word;
+    line-height: 1.25;
+  }
+
+  .bench-number {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+}
