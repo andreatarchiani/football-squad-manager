@@ -7,9 +7,9 @@
 .loading-emblem::before { content: ""; position: absolute; inset: 3px; border: 1px solid #294638; border-radius: 50%; box-shadow: 0 0 24px #65cb9118, inset 0 0 18px #65cb910a; }
 .loading-emblem-ball { position: relative; z-index: 1; display: grid; place-items: center; width: 46px; height: 46px; border: 1px solid #ffffff12; border-radius: 50%; background: radial-gradient(circle at 35% 25%, #263a32, #151f22 75%); font-size: 25px; line-height: 1; box-shadow: 0 5px 22px #0005; }
 .loading-progress { display: flex; justify-content: center; align-items: center; gap: 8px; height: 12px; margin-top: 1px; }
-.loading-progress span { width: 5px; height: 5px; border-radius: 50%; background: #527b65; opacity: .32; animation: loading-dot-breathe 3.6s ease-in-out infinite; }
-.loading-progress span:nth-child(2) { animation-delay: 1.2s; }
-.loading-progress span:nth-child(3) { animation-delay: 2.4s; }
+.loading-progress span { width: 5px; height: 5px; border-radius: 50%; background: #527b65; opacity: .32; animation: loading-dot-breathe 2.4s ease-in-out infinite; }
+.loading-progress span:nth-child(2) { animation-delay: .8s; }
+.loading-progress span:nth-child(3) { animation-delay: 1.6s; }
 @keyframes loading-dot-breathe { 0%, 72%, 100% { opacity: .28; transform: scale(.85); background: #527b65; } 36% { opacity: 1; transform: scale(1.25); background: #a5dfba; box-shadow: 0 0 9px #65cb9180; } }
 .loading-state p { margin: 0; font-size: 12px; letter-spacing: .015em; }
 .app-shell { min-height: 100vh; }

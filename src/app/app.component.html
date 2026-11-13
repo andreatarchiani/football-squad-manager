@@ -15,7 +15,7 @@
       <p class="setup-note">La guida completa è in <code>docs/firebase-setup.md</code>. Non attivare Blaze e non aggiungere un metodo di pagamento.</p>
     </section>
   </main>
-} @else if (auth.loading()) {
+} @else if (auth.loading() || !loadingMinimumElapsed()) {
   <main class="loading-state"><div class="loading-emblem" role="img" aria-label="Caricamento in corso"><span class="loading-emblem-ball">⚽</span></div><div class="loading-progress" aria-hidden="true"><span></span><span></span><span></span></div><p>Preparazione del tuo spazio squadra…</p></main>
 } @else if (!auth.user()) {
   <fsm-auth-page />
