@@ -31,8 +31,8 @@ export class HomePageComponent {
   protected readonly previewActiveSlotId = signal<string | null>(null);
   protected readonly previewSaving = signal(false);
   protected readonly previewLoading = signal(false);
-  private previewPressTimer: ReturnType<typeof setTimeout> | null = null;
-  private previewLongPressTriggered = false;
+  private previewDrag: { slotId: string; pointerId: number; startX: number; startY: number; moved: boolean } | null = null;
+  private previewDraggedClick = false;
   private previewSaveQueue: Promise<void> = Promise.resolve();
   protected readonly pitchSlots: Record<string, { id: string; label: string; role: string; x: number; y: number }[]> = {
     '4-3-3': [
@@ -155,24 +155,41 @@ export class HomePageComponent {
     return { x: Math.max(9, Math.min(91, position.x)), y: Math.max(9, Math.min(91, position.y)) };
   }
 
-  protected startPreviewShirtPress(event: PointerEvent, slotId: string): void {
+  protected startPreviewShirtDrag(event: PointerEvent, slotId: string): void {
     if (event.button !== 0) return;
-    this.previewLongPressTriggered = false;
-    if (this.previewPressTimer) clearTimeout(this.previewPressTimer);
-    this.previewPressTimer = setTimeout(() => {
-      this.previewLongPressTriggered = true;
-      this.previewActiveSlotId.set(slotId);
-      this.previewPressTimer = null;
-    }, 450);
+    const target = event.currentTarget as HTMLElement;
+    target.setPointerCapture(event.pointerId);
+    this.previewDrag = { slotId, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, moved: false };
   }
 
-  protected endPreviewShirtPress(): void {
-    if (this.previewPressTimer) clearTimeout(this.previewPressTimer);
-    this.previewPressTimer = null;
+  protected movePreviewShirt(event: PointerEvent): void {
+    const drag = this.previewDrag;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const player = this.previewPlayer(drag.slotId);
+    if (!player) return;
+    const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
+    if (!drag.moved && distance < 5) return;
+    drag.moved = true;
+    const pitch = (event.currentTarget as HTMLElement).closest('.home-football-pitch') as HTMLElement | null;
+    if (!pitch) return;
+    const bounds = pitch.getBoundingClientRect();
+    const x = Math.max(5, Math.min(95, ((event.clientX - bounds.left) / bounds.width) * 100));
+    const y = Math.max(5, Math.min(95, ((event.clientY - bounds.top) / bounds.height) * 100));
+    this.previewPositions.update(current => ({ ...current, [player.id]: { x, y } }));
+  }
+
+  protected endPreviewShirtDrag(event: PointerEvent): void {
+    const drag = this.previewDrag;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    this.previewDrag = null;
+    if (drag.moved) {
+      this.previewDraggedClick = true;
+      void this.persistPreviewLineup();
+    }
   }
 
   protected openPreviewPlayerPicker(slotId: string): void {
-    if (this.previewLongPressTriggered) { this.previewLongPressTriggered = false; return; }
+    if (this.previewDraggedClick) { this.previewDraggedClick = false; return; }
     this.previewActiveSlotId.set(slotId);
   }
 
