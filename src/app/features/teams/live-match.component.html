@@ -15,7 +15,7 @@
       @if (!finished()) { <button type="button" class="finish-match" (click)="finishMatch()">■ Fine partita</button> }
       @else { <button type="button" class="finish-match" (click)="finishReportOpen.set(true)">Riepilogo finale</button> }
     </div>
-    <section class="voice-command-guide" aria-label="Comandi vocali disponibili">
+    <section class="voice-command-guide" [class.is-collapsed]="!voiceHelpOpen()" aria-label="Comandi vocali disponibili">
       <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong></div><button type="button" class="voice-guide-toggle" (click)="toggleVoiceHelp()" [attr.aria-expanded]="voiceHelpOpen()" aria-controls="voice-command-list"><span>{{ voiceHelpOpen() ? 'Nascondi' : 'Mostra' }}</span><svg viewBox="0 0 20 20" aria-hidden="true" [class.is-expanded]="voiceHelpOpen()"><path d="m5 7.5 5 5 5-5"/></svg></button></div>
       @if (voiceHelpOpen()) {
         <div class="voice-command-list" id="voice-command-list">

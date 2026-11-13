@@ -74,7 +74,6 @@
       } @else if (activePage() === 'players') {
         <fsm-players-page />
       }
-      <footer class="page-footer">FOOTBALL SQUAD MANAGER <span>•</span> Gestione squadra, senza complicazioni.</footer>
     </main>
 
     <nav class="mobile-bottom-nav" aria-label="Navigazione principale">
@@ -100,6 +99,8 @@
         <button type="button" class="release-changelog-close" aria-label="Chiudi changelog" (click)="closeReleaseChangelog()">×</button>
       </header>
       <div class="release-changelog-list">
+        <article><span class="release-note-icon">✦</span><div><strong>Interfaccia più essenziale</strong><p>Rimosso il testo promozionale in fondo alle pagine per lasciare più spazio ai contenuti.</p></div></article>
+        <article><span class="release-note-icon">🎙</span><div><strong>Comandi vocali compatti</strong><p>Quando la guida è nascosta, il suo sfondo si restringe attorno al titolo e al pulsante Mostra, allineandosi a sinistra.</p></div></article>
         <article><span class="release-note-icon">▶</span><div><strong>Ripristino diretto della partita</strong><p>Quando ricarichi la pagina durante una partita, si apre direttamente la schermata del match senza mostrare per qualche secondo la sezione Squadre.</p></div></article>
         <article><span class="release-note-icon">🎙</span><div><strong>Assistente vocale più affidabile</strong><p>Puoi correggere un evento in attesa pronunciando un nuovo comando e confermare direttamente l'ultima versione riconosciuta.</p></div></article>
         <article><span class="release-note-icon">⚽</span><div><strong>Gestione squadre e giocatori</strong><p>Le azioni Modifica, Archivia ed Elimina sono raccolte in icone compatte e allineate.</p></div></article>
