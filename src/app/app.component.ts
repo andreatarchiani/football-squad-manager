@@ -28,12 +28,19 @@ export class AppComponent {
   protected readonly matchLaunch = signal<{ team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; token: number } | null>(null);
   protected readonly rosterRequest = signal<{ teamId: string; layoutSlot: 1 | 2; token: number } | null>(null);
   protected readonly updateAvailable = signal(false);
+  protected readonly releaseChangelogOpen = signal(false);
+  private readonly releaseChangelogStorageKey = 'fsm-pending-release-changelog';
+  protected readonly releaseVersion = 'v0.3';
   protected readonly updating = signal(false);
   protected readonly loadingMinimumElapsed = signal(false);
   private readonly swUpdate = inject(SwUpdate);
   private readonly notifications = inject(NotificationService);
 
   constructor() {
+    if (localStorage.getItem(this.releaseChangelogStorageKey) === this.releaseVersion) {
+      localStorage.removeItem(this.releaseChangelogStorageKey);
+      this.releaseChangelogOpen.set(true);
+    }
     window.setTimeout(() => this.loadingMinimumElapsed.set(true), 2500);
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe((event) => {
@@ -49,9 +56,11 @@ export class AppComponent {
     this.updating.set(true);
     try {
       await this.swUpdate.activateUpdate();
+      localStorage.setItem(this.releaseChangelogStorageKey, this.releaseVersion);
       window.location.reload();
     } catch (error) {
       console.error('Unable to activate application update.', error);
+      localStorage.removeItem(this.releaseChangelogStorageKey);
       this.updating.set(false);
       this.updateAvailable.set(true);
     }
@@ -62,12 +71,16 @@ export class AppComponent {
     this.updating.set(true);
     try {
       await this.swUpdate.activateUpdate();
+      localStorage.setItem(this.releaseChangelogStorageKey, this.releaseVersion);
       window.location.reload();
     } catch (error) {
       console.error('Unable to activate application update.', error);
+      localStorage.removeItem(this.releaseChangelogStorageKey);
       this.updating.set(false);
     }
   }
+
+  protected closeReleaseChangelog(): void { this.releaseChangelogOpen.set(false); }
 
   private async checkForUpdate(): Promise<void> {
     try {
