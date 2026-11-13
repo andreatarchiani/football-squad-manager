@@ -1,3 +1,10 @@
+@if (resumeMatch && !liveMatch()) {
+  <section class="match-resume-loading" role="status" aria-live="polite">
+    <div class="match-resume-ball" aria-hidden="true">⚽</div>
+    <strong>Ripristino della partita…</strong>
+    <span>Stiamo riaprendo il campo e gli eventi salvati.</span>
+  </section>
+} @else {
 <section class="teams-page">
   @if (!liveMatch()) {
   <div class="page-heading">
@@ -186,3 +193,4 @@
     <fsm-live-match [teamName]="expandedTeamName()" [workspaceId]="auth.workspaceId()!" [teamId]="expandedRosterId()!" [seasonId]="teams().find(item => item.id === expandedRosterId())!.seasonId!" [players]="rosterForExpanded()" [initialLineup]="lineup()" [formation]="formation()" [initialPositions]="shirtPositions()" [autoStart]="autoStartMatch()" (closematch)="closeMatch()" />
   }
 </section>
+}

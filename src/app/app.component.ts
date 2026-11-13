@@ -30,7 +30,7 @@ export class AppComponent {
   protected readonly updateAvailable = signal(false);
   protected readonly releaseChangelogOpen = signal(false);
   private readonly releaseChangelogStorageKey = 'fsm-pending-release-changelog';
-  protected readonly releaseVersion = 'v0.3';
+  protected readonly releaseVersion = 'v0.4';
   protected readonly updating = signal(false);
   protected readonly loadingMinimumElapsed = signal(false);
   private readonly swUpdate = inject(SwUpdate);
