@@ -502,18 +502,17 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
   private handleVoiceTranscript(raw: string): void {
     const spoken = raw.trim().toLocaleLowerCase('it-IT')
-      .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
-      .replace(/[^\\p{L}\\p{N}\\s]/gu, ' ')
-      .replace(/\\s+/g, ' ').trim();
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+      .replace(/\s+/g, ' ').trim();
 
-    // While an event is awaiting confirmation, always give confirmation/cancellation
-    // words priority over event parsing. A newly spoken event updates the pending draft;
-    // the following "conferma" must still commit that latest draft.
-    if (this.pending() && /\\bconferma(?:re)?\\b/.test(spoken)) {
+    // While an event is awaiting confirmation, confirmation and cancellation
+    // must take priority over event parsing.
+    if (this.pending() && /\bconferma(?:re)?\b/.test(spoken)) {
       this.confirmAction();
       return;
     }
-    if (this.pending() && /\\b(annulla|annullare|cancella)\\b/.test(spoken)) {
+    if (this.pending() && /\b(annulla|annullare|cancella)\b/.test(spoken)) {
       this.cancelAction();
       return;
     }
