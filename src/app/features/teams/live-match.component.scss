@@ -50,7 +50,7 @@
 .confirm-edit-label{display:block;margin:14px 0 6px;text-align:left;color:#a9beb0;font-size:11px;font-weight:800}.confirm-edit-input{display:block;width:100%;box-sizing:border-box;resize:vertical;min-height:58px;padding:10px 12px;border:1px solid #ffffff30;border-radius:10px;background:#07120c;color:#f4fff6;font:inherit;font-size:13px;line-height:1.45}.confirm-correct{width:100%;margin:8px 0 12px;padding:10px;border:1px solid #8dff9b66;border-radius:9px;background:#173d29;color:#baf4c9;font-weight:800}
 
 /* Keep voice recognition feedback above the tactical pitch on every screen size. */
-.voice-feedback{position:fixed;z-index:1500;top:calc(env(safe-area-inset-top,0px) + 82px);left:50%;transform:translateX(-50%);width:min(92vw,520px);box-sizing:border-box;padding:13px 16px;border:1px solid #8dff9b70;border-radius:14px;background:linear-gradient(145deg,#10281cF5,#07140ef5);box-shadow:0 12px 36px #0009;color:#f2fff5;text-align:center;pointer-events:none;overflow-wrap:anywhere}
+.voice-feedback{position:fixed;z-index:1500;top:calc(env(safe-area-inset-top,0px) + 82px);left:50%;transform:translateX(-50%);width:min(92vw,520px);box-sizing:border-box;padding:13px 16px;border:1px solid #8dff9b70;border-radius:14px;background:linear-gradient(145deg,#10281cF5,#07140ef5);box-shadow:0 12px 36px #0009;color:#f2fff5;text-align:center;pointer-events:auto;overflow-wrap:anywhere;cursor:pointer}
 .voice-feedback strong{display:block;margin-bottom:5px;color:#a5efba;font-size:11px;font-weight:950;letter-spacing:.13em}
 .voice-feedback p{margin:4px 0;color:#fff;font-size:15px;font-weight:800;line-height:1.4}
 .voice-feedback span{display:block;color:#d1e5d6;font-size:13px;line-height:1.45}
@@ -125,3 +125,8 @@
 .voice-confirm-instruction{margin:12px 0 16px;padding:11px 13px;border:1px solid #8dff9b45;border-radius:10px;background:#173d292e;color:#c8dfcf;font-size:12px;line-height:1.55;text-align:left}.voice-confirm-instruction strong{color:#a5efba;font-weight:900}
 
 .share-match-report{display:inline-flex;align-items:center;justify-content:center;gap:10px}.share-match-report svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+.voice-feedback-close{position:absolute;top:6px;right:8px;display:grid;place-items:center;width:28px;height:28px;border:0;border-radius:8px;background:#ffffff12;color:#e8fff0;font-size:21px;line-height:1;cursor:pointer}
+.voice-feedback-close:hover{background:#ffffff24}
+.voice-feedback-close:focus-visible{outline:2px solid #a5efba;outline-offset:2px}
+.voice-feedback{position:relative;padding-right:42px}
