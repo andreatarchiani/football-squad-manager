@@ -125,24 +125,36 @@ export class TeamsPageComponent implements OnChanges {
       .find(element => element.dataset['rosterTeam'] === team.id);
     rosterPanel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
-  private launchFromHome(request: NonNullable<TeamsPageComponent['launchRequest']>): void {
+  private async launchFromHome(request: NonNullable<TeamsPageComponent['launchRequest']>): Promise<void> {
+    await this.teamsLoadPromise;
     const team = request.team;
     if (team.isArchived || !team.seasonId) { this.error.set('La squadra selezionata non è disponibile.'); return; }
     if (!this.teams().some(item => item.id === team.id)) this.teams.update(items => [...items, team]);
-    this.players.set([...request.players]);
+    const workspaceId = this.auth.workspaceId();
+    if (workspaceId) {
+      try {
+        // Home sends only active starters/players. Reload the complete team roster
+        // so the live match can also display injured, suspended and other members.
+        this.players.set(await this.playerService.list(workspaceId, this.teams()));
+      } catch (error) {
+        console.error('Unable to reload the full squad before starting the match.', error);
+        this.players.set([...request.players]);
+        this.error.set('Non è stato possibile caricare tutta la rosa. Alcuni giocatori potrebbero non comparire.');
+      }
+    } else {
+      this.players.set([...request.players]);
+    }
     this.matchOpponentName.set(request.opponentName || '');
     this.expandedRosterId.set(team.id);
     this.layoutSlot.set(request.layoutSlot);
     this.activeSlotId.set(null);
     this.rosterLoading.set(false);
-    this.error.set('');
+    if (!this.error()) this.error.set('');
     this.formation.set(this.formations.includes(request.formation) ? request.formation : '4-3-3');
     this.lineup.set({ ...request.lineup });
     this.shirtPositions.set({ ...request.positions });
     this.autoStartMatch.set(true);
     localStorage.setItem('fsm-active-match-team', team.id);
-    // Show the match panel immediately; the live-match component starts its clock
-    // before performing any asynchronous persistence.
     this.liveMatch.set(true);
   }
   protected closeMatch(): void { this.liveMatch.set(false); this.autoStartMatch.set(false); localStorage.removeItem('fsm-active-match-team'); this.matchClosed.emit(); }
@@ -153,7 +165,11 @@ export class TeamsPageComponent implements OnChanges {
 
   protected rosterForExpanded(): PlayerRecord[] {
     const team = this.teams().find(item => item.id === this.expandedRosterId());
-    return team ? this.rosterFor(team).filter(player => player.status === 'active') : [];
+    return team ? this.rosterFor(team) : [];
+  }
+
+  private eligibleRosterForExpanded(): PlayerRecord[] {
+    return this.rosterForExpanded().filter(player => player.status === 'active');
   }
 
   protected async setCaptaincy(role: 'captain' | 'viceCaptain', playerId: string): Promise<void> {
@@ -200,7 +216,7 @@ export class TeamsPageComponent implements OnChanges {
 
   protected benchPlayers(): PlayerRecord[] {
     const starters = new Set(Object.values(this.lineup()).filter(Boolean));
-    return this.rosterForExpanded().filter(player => !starters.has(player.id));
+    return this.eligibleRosterForExpanded().filter(player => !starters.has(player.id));
   }
 
   protected async selectLayoutSlot(slot: 1 | 2): Promise<void> {
@@ -211,7 +227,7 @@ export class TeamsPageComponent implements OnChanges {
     this.layoutSlot.set(slot);
     this.persistSelectedLayoutSlot(slot);
     const saved = await this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, slot);
-    const validIds = new Set(this.rosterForExpanded().map(player => player.id));
+    const validIds = new Set(this.eligibleRosterForExpanded().map(player => player.id));
     const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
     this.formation.set(formation);
     if (saved) {
@@ -314,7 +330,7 @@ export class TeamsPageComponent implements OnChanges {
 
     // Show only players eligible for this role. Keep the current selection
     // visible in its own dropdown, but never offer a player used in another slot.
-    return this.rosterForExpanded()
+    return this.eligibleRosterForExpanded()
       .filter(player => this.playerHasRole(player, slot.role)
         && (!usedElsewhere.has(player.id) || player.id === selectedId))
       .sort((a, b) => (a.shirtNumber ?? 100) - (b.shirtNumber ?? 100)
@@ -326,7 +342,7 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   private autoArrange(): void {
-    const remaining = [...this.rosterForExpanded()];
+    const remaining = [...this.eligibleRosterForExpanded()];
     const next: Record<string, string> = {};
     // Preserve every still-valid assignment first: adding a player must never
     // reshuffle shirts already positioned on the pitch.
