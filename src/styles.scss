@@ -235,21 +235,25 @@ select optgroup {
 .roster-panel{position:relative;z-index:2;overflow:visible}.captaincy-picker{position:relative;z-index:80;overflow:visible}.captaincy-field{position:relative;z-index:1;min-width:0}.captaincy-field.dropdown-open{z-index:260}.captaincy-dropdown{position:relative;z-index:260}.captaincy-dropdown .formation-picker-menu{z-index:400;max-height:min(300px,45vh);overscroll-behavior:contain}
 
 
-/* Correct the live-match header: three visible blocks, three balanced columns. */
+/* Center and enlarge the match clock/score without squeezing the team labels. */
 .live-match .match-topbar.match-scoreboard-header{
   display:grid;
-  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  grid-template-columns:minmax(0,1fr) minmax(230px,1.25fr) minmax(0,1fr);
   align-items:center;
   justify-items:stretch;
   width:100%;
   max-width:1240px;
   margin-inline:auto;
   box-sizing:border-box;
+  gap:clamp(10px,2vw,24px);
 }
 .live-match .match-scoreboard-header>.match-home-team{grid-column:1;justify-self:start;width:100%;min-width:0}
-.live-match .match-scoreboard-header>.match-scoreboard{grid-column:2;justify-self:center}
+.live-match .match-scoreboard-header>.match-scoreboard{grid-column:2;justify-self:stretch;width:100%;min-width:0;box-sizing:border-box;padding:14px 22px;gap:10px}
 .live-match .match-scoreboard-header>.match-away-team{grid-column:3;justify-self:end;width:100%;min-width:0}
 .live-match .match-scoreboard-header .match-team strong{min-width:0;overflow-wrap:anywhere}
+.live-match .match-scoreboard .scoreboard-clock>strong{font-size:clamp(25px,3vw,34px)}
+.live-match .match-scoreboard .match-score span{font-size:clamp(36px,4.5vw,48px)}
+.live-match .match-scoreboard .match-score b{font-size:clamp(24px,2.8vw,30px)}
 .live-match .match-controls-panel{
   display:flex;
   flex-direction:column;
@@ -277,20 +281,26 @@ select optgroup {
 }
 @media(max-width:760px){
   .live-match .match-topbar.match-scoreboard-header{
-    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+    grid-template-columns:minmax(0,1fr) minmax(138px,1.15fr) minmax(0,1fr);
     gap:7px;
     padding:11px 0 13px;
   }
   .live-match .match-scoreboard-header>.match-home-team{grid-column:1}
-  .live-match .match-scoreboard-header>.match-scoreboard{grid-column:2}
+  .live-match .match-scoreboard-header>.match-scoreboard{grid-column:2;padding:11px 10px;gap:8px}
   .live-match .match-scoreboard-header>.match-away-team{grid-column:3}
+  .live-match .match-scoreboard .scoreboard-clock>strong{font-size:clamp(21px,4vw,27px)}
+  .live-match .match-scoreboard .match-score span{font-size:clamp(30px,5vw,38px)}
+  .live-match .match-scoreboard .match-score b{font-size:21px}
   .live-match .match-controls-panel{gap:9px;padding:10px}
   .live-match .match-controls-panel>.clock-controls{width:100%}
   .live-match .match-controls-panel>.voice-hold-button,
   .live-match .match-controls-panel>.voice-command-guide{width:100%;max-width:620px}
 }
 @media(max-width:420px){
-  .live-match .match-topbar.match-scoreboard-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:5px}
+  .live-match .match-topbar.match-scoreboard-header{grid-template-columns:minmax(0,1fr) minmax(126px,1.1fr) minmax(0,1fr);gap:5px}
   .live-match .match-scoreboard-header .match-team strong{font-size:10px}
-  .live-match .match-scoreboard{min-width:0}
+  .live-match .match-scoreboard{min-width:0;padding:10px 7px}
+  .live-match .match-scoreboard .scoreboard-clock>strong{font-size:21px}
+  .live-match .match-scoreboard .match-score span{font-size:29px}
+  .live-match .match-scoreboard .match-score b{font-size:18px}
 }
