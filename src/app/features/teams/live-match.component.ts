@@ -75,6 +75,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   private runBaseSeconds = 0;
   private lastPersistedElapsed = 0;
   private formationPlayerOrder: string[] = [];
+  private voiceTranscriptBuffer = '';
+  private voiceTranscriptTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly formations: Record<string, { id: string; label: string; x: number; y: number }[]> = {
     '4-3-3': [
@@ -114,7 +116,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       }
     } catch (error) { console.error('Unable to restore live match.', error); this.voiceMessage.set('Partita caricata, ma non è stato possibile recuperare gli ultimi dati salvati.'); }
   }
-  ngOnDestroy(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.settleRunningClock(); this.voice.stop(); if(this.animationTimer) clearTimeout(this.animationTimer); if(!this.exitingMatch) void this.persistMatchState(); }
+  ngOnDestroy(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.settleRunningClock(); this.clearVoiceTranscriptBuffer(); this.voice.stop(); if(this.animationTimer) clearTimeout(this.animationTimer); if(!this.exitingMatch) void this.persistMatchState(); }
   private async persistMatchState(): Promise<void> {
     if(this.exitingMatch) return;
     const snapshot = {
@@ -213,6 +215,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.running.set(false);
     this.finished.set(true);
     this.finishReportOpen.set(true);
+    this.clearVoiceTranscriptBuffer();
     this.voice.stop();
     this.voiceListening.set(false);
     this.voiceMessage.set('');
@@ -447,6 +450,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.settleRunningClock();
     if(this.timer){clearInterval(this.timer);this.timer=null;}
     this.running.set(false);
+    this.clearVoiceTranscriptBuffer();
     this.voice.stop();
     this.voiceListening.set(false);
     this.exitingMatch = true;
@@ -462,15 +466,17 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.closematch.emit();
   }
   protected startVoice(): void {
-    if(this.voiceListening()) { this.voice.stop(); this.voiceListening.set(false); return; }
+    if(this.voiceListening()) { this.clearVoiceTranscriptBuffer(); this.voice.stop(); this.voiceListening.set(false); return; }
     if(this.pending()) { this.listenForVoiceConfirmation(); return; }
+    this.clearVoiceTranscriptBuffer();
     this.voiceDraft.set('');
     this.voiceMessage.set('Pronuncia un comando, ad esempio: goal numero 9.');
     this.voiceListening.set(true);
     this.voice.start(
-      text => this.handleVoiceTranscript(text),
+      text => this.queueVoiceTranscript(text),
       message => this.voiceMessage.set(message),
       () => {
+        this.flushVoiceTranscript();
         this.voiceListening.set(false);
         if(this.pending()) this.listenForVoiceConfirmation();
       }
@@ -478,17 +484,51 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
   private listenForVoiceConfirmation(): void {
     if(!this.pending()) return;
+    this.clearVoiceTranscriptBuffer();
     this.voiceMessage.set('Per confermare, pronuncia «Conferma». Per annullare, pronuncia «Annulla».');
     this.voiceListening.set(true);
     let retryAllowed = true;
     this.voice.start(
-      raw => this.handleVoiceTranscript(raw),
+      raw => this.queueVoiceTranscript(raw),
       message => { this.voiceMessage.set(message); if(/permesso microfono negato|non è supportato/i.test(message)) retryAllowed=false; },
       () => {
+        this.flushVoiceTranscript();
         this.voiceListening.set(false);
         if(this.pending() && retryAllowed) this.listenForVoiceConfirmation();
       }
     );
+  }
+  private queueVoiceTranscript(raw: string): void {
+    const fragment = raw.trim();
+    if (!fragment) return;
+    this.voiceTranscriptBuffer = [this.voiceTranscriptBuffer, fragment].filter(Boolean).join(' ');
+    if (this.voiceTranscriptTimer) clearTimeout(this.voiceTranscriptTimer);
+    // SpeechRecognition can finalize one phrase in several chunks. Wait for a
+    // meaningful silence before parsing so numbers and clauses are not lost.
+    this.voiceTranscriptTimer = setTimeout(() => {
+      this.voiceTranscriptTimer = null;
+      const wasPending = !!this.pending();
+      this.flushVoiceTranscript();
+      if (!wasPending && this.pending()) {
+        this.voice.stop();
+        this.voiceListening.set(false);
+        this.listenForVoiceConfirmation();
+      }
+    }, 1800);
+  }
+  private flushVoiceTranscript(): void {
+    if (this.voiceTranscriptTimer) {
+      clearTimeout(this.voiceTranscriptTimer);
+      this.voiceTranscriptTimer = null;
+    }
+    const transcript = this.voiceTranscriptBuffer.trim();
+    this.voiceTranscriptBuffer = '';
+    if (transcript) this.handleVoiceTranscript(transcript);
+  }
+  private clearVoiceTranscriptBuffer(): void {
+    if (this.voiceTranscriptTimer) clearTimeout(this.voiceTranscriptTimer);
+    this.voiceTranscriptTimer = null;
+    this.voiceTranscriptBuffer = '';
   }
   private readVoiceHelpPreference(): boolean {
     try { return typeof window !== 'undefined' && window.localStorage.getItem(this.voiceHelpStorageKey) === 'open'; }
@@ -588,6 +628,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
 
   protected dismissVoiceFeedback(): void {
+    this.clearVoiceTranscriptBuffer();
     this.voice.stop();
     this.voiceListening.set(false);
     this.voiceMessage.set('');
@@ -625,6 +666,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
   protected confirmAction(): void {
     const action=this.pending();if(!action)return;
+    this.clearVoiceTranscriptBuffer();
     this.voice.stop(); this.voiceListening.set(false);
     const minute=this.minute;
     if(action.type==='goal'&&action.playerId){
@@ -654,7 +696,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     }
     this.pending.set(null);this.voiceDraft.set('');this.voiceMessage.set(''); void this.persistMatchState();
   }
-  protected cancelAction(): void { this.voice.stop(); this.voiceListening.set(false); this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set(''); }
+  protected cancelAction(): void { this.clearVoiceTranscriptBuffer(); this.voice.stop(); this.voiceListening.set(false); this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set(''); }
   protected chooseOutgoing(player:PlayerRecord): void { if(this.playerHasRedCard(player)){this.voiceMessage.set('Un giocatore espulso non può essere sostituito. La squadra continua in inferiorità numerica.');return;} this.selectedOutgoingId.set(player.id);this.voiceMessage.set(`Selezionato ${player.lastName}. Ora scegli chi entra dalla panchina.`); }
   protected chooseIncoming(player:PlayerRecord): void {
     const outgoing=this.selectedOutgoingId();if(!outgoing)return;
