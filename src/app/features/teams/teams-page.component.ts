@@ -37,6 +37,9 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly formation = signal('4-3-3');
   protected readonly formationDropdownOpen = signal(false);
   protected readonly lineup = signal<Record<string, string>>({});
+  protected readonly captainId = signal('');
+  protected readonly viceCaptainId = signal('');
+  protected readonly captaincySaving = signal(false);
   protected readonly activeSlotId = signal<string | null>(null);
   protected readonly liveMatch = signal(false);
   protected readonly autoStartMatch = signal(false);
@@ -139,6 +142,29 @@ export class TeamsPageComponent implements OnChanges {
   protected rosterForExpanded(): PlayerRecord[] {
     const team = this.teams().find(item => item.id === this.expandedRosterId());
     return team ? this.rosterFor(team).filter(player => player.status === 'active') : [];
+  }
+
+  protected async setCaptaincy(role: 'captain' | 'viceCaptain', playerId: string): Promise<void> {
+    const nextCaptain = role === 'captain' ? playerId : this.captainId();
+    const nextVice = role === 'viceCaptain' ? playerId : this.viceCaptainId();
+    if (nextCaptain && nextCaptain === nextVice) {
+      if (role === 'captain') this.viceCaptainId.set('');
+      else this.captainId.set('');
+    }
+    this.captainId.set(nextCaptain);
+    this.viceCaptainId.set(nextVice);
+    const team = this.teams().find(item => item.id === this.expandedRosterId());
+    const workspaceId = this.auth.workspaceId();
+    if (!team?.seasonId || !workspaceId) return;
+    this.captaincySaving.set(true);
+    try {
+      await this.teamsService.saveCaptaincy(workspaceId, team.id, team.seasonId, this.captainId(), this.viceCaptainId());
+    } catch (error) {
+      console.error('Unable to save team captaincy.', error);
+      this.error.set('Non è stato possibile salvare capitano e vicecapitano. Riprova.');
+    } finally {
+      this.captaincySaving.set(false);
+    }
   }
 
   protected benchPlayers(): PlayerRecord[] {
@@ -315,12 +341,15 @@ export class TeamsPageComponent implements OnChanges {
     try {
       const seasonId = team.seasonId;
       this.layoutSlot.set(1);
-      const [players, saved] = await Promise.all([
+      const [players, saved, captaincy] = await Promise.all([
         this.playerService.list(workspaceId, this.teams()),
-        seasonId ? this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId, 1) : Promise.resolve(null)
+        seasonId ? this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId, 1) : Promise.resolve(null),
+        seasonId ? this.teamsService.loadCaptaincy(workspaceId, team.id, seasonId) : Promise.resolve({ captainId: '', viceCaptainId: '' })
       ]);
       this.players.set(players);
       const validPlayerIds = new Set(this.rosterForExpanded().map(player => player.id));
+      this.captainId.set(validPlayerIds.has(captaincy.captainId) ? captaincy.captainId : '');
+      this.viceCaptainId.set(validPlayerIds.has(captaincy.viceCaptainId) && captaincy.viceCaptainId !== captaincy.captainId ? captaincy.viceCaptainId : '');
       const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
       this.formation.set(formation);
       if (saved) {
