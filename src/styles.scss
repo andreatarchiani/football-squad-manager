@@ -229,3 +229,7 @@ select optgroup {
  .match-scoreboard-header .match-score span{font-size:22px}
  .match-scoreboard-header .match-score b{font-size:14px}
 }
+
+
+/* Captaincy menus must stack above the pitch, cards and the other selector. */
+.roster-panel{position:relative;z-index:2;overflow:visible}.captaincy-picker{position:relative;z-index:80;overflow:visible}.captaincy-field{position:relative;z-index:1;min-width:0}.captaincy-field.dropdown-open{z-index:260}.captaincy-dropdown{position:relative;z-index:260}.captaincy-dropdown .formation-picker-menu{z-index:400;max-height:min(300px,45vh);overscroll-behavior:contain}
