@@ -44,6 +44,8 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly captaincySaving = signal(false);
   protected readonly captaincySaveStatus = signal('Ruoli salvati automaticamente');
   private captaincySaveQueue: Promise<void> = Promise.resolve();
+  private layoutSlotStorageKey(): string { return `fsm-layout-slot-${this.auth.user()?.uid ?? 'anonymous'}`; }
+  private persistSelectedLayoutSlot(slot: 1 | 2): void { if (typeof localStorage !== 'undefined') localStorage.setItem(this.layoutSlotStorageKey(), String(slot)); }
 
   protected readonly activeSlotId = signal<string | null>(null);
   protected readonly liveMatch = signal(false);
@@ -207,6 +209,7 @@ export class TeamsPageComponent implements OnChanges {
     if (!team?.seasonId || !workspaceId || slot === this.layoutSlot()) return;
     await this.persistTacticalLayout();
     this.layoutSlot.set(slot);
+    this.persistSelectedLayoutSlot(slot);
     const saved = await this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, slot);
     const validIds = new Set(this.rosterForExpanded().map(player => player.id));
     const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
@@ -369,7 +372,8 @@ export class TeamsPageComponent implements OnChanges {
     this.rosterLoading.set(true);
     try {
       const seasonId = team.seasonId;
-      this.layoutSlot.set(1);
+      const preferredSlot = typeof localStorage !== 'undefined' && localStorage.getItem(this.layoutSlotStorageKey()) === '2' ? 2 : 1;
+      this.layoutSlot.set(preferredSlot);
       const [loadedPlayers, saved, legacyCaptaincy] = await Promise.all([
         this.playerService.list(workspaceId, this.teams()),
         seasonId ? this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId, 1) : Promise.resolve(null),
