@@ -45,7 +45,7 @@
   </section>
   @if (voiceListening() || voiceMessage() || voiceDraft()) {
     <aside class="voice-feedback" [class.is-listening]="voiceListening()" role="status" aria-live="polite" (click)="dismissVoiceFeedback()">
-      <strong>{{ voiceListening() ? '🎙 TI ASCOLTO' : voiceDraft() ? 'COMANDO RICONOSCIUTO' : 'ASSISTENTE VOCALE' }}</strong>
+      <strong>{{ voiceListening() ? '🎙 TI ASCOLTO' : voiceDraft() ? 'COMANDO ASCOLTATO' : 'ASSISTENTE VOCALE' }}</strong>
       @if (voiceDraft()) { <p>«{{ voiceDraft() }}»</p> }
       @if (voiceMessage()) { <span>{{ voiceMessage() }}</span> }
       <button type="button" class="voice-feedback-close" aria-label="Chiudi notifica" (click)="$event.stopPropagation(); dismissVoiceFeedback()">×</button>
