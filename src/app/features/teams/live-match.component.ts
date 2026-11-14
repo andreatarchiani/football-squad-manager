@@ -601,7 +601,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       return matches.length === 1 ? matches[0] : undefined;
     };
     const onField = (id: string) => Object.values(this.lineup()).includes(id);
-    const assistMatch = text.match(/assist(?:ito)?\s+(?:di\s+)?(?:numero\s*)?(\d{1,2})/);
+    const assistMatch = text.match(/assist(?:ito)?\s+(?:(?:di|del|della|da)\s+)?(?:numero\s*)?(\d{1,2})/);
     const assistNumber = assistMatch ? Number(assistMatch[1]) : undefined;
 
     if (/\b(goal|gol|ha segnato|segnato|rete)\b/.test(text)) {
