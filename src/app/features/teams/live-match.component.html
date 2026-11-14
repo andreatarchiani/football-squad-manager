@@ -32,13 +32,13 @@
       <span>{{ voiceListening() ? 'TI STO ASCOLTANDO · RILASCIA PER ESEGUIRE' : 'TOCCA E TIENI PREMUTO PER ESEGUIRE IL COMANDO' }}</span>
     </button>
     <section class="voice-command-guide" [class.is-collapsed]="!voiceHelpOpen()" aria-label="Comandi vocali disponibili">
-      <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong></div><button type="button" class="voice-guide-toggle" (click)="toggleVoiceHelp()" [attr.aria-expanded]="voiceHelpOpen()" aria-controls="voice-command-list"><span>{{ voiceHelpOpen() ? 'Nascondi' : 'Mostra' }}</span><svg viewBox="0 0 20 20" aria-hidden="true" [class.is-expanded]="voiceHelpOpen()"><path d="m5 7.5 5 5 5-5"/></svg></button></div>
+      <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong><p>Tieni premuto il pulsante, pronuncia una frase e rilascialo. Il comando viene eseguito al rilascio.</p></div><button type="button" class="voice-guide-toggle" (click)="toggleVoiceHelp()" [attr.aria-expanded]="voiceHelpOpen()" aria-controls="voice-command-list"><span>{{ voiceHelpOpen() ? 'Nascondi' : 'Mostra' }}</span><svg viewBox="0 0 20 20" aria-hidden="true" [class.is-expanded]="voiceHelpOpen()"><path d="m5 7.5 5 5 5-5"/></svg></button></div>
       @if (voiceHelpOpen()) {
         <div class="voice-command-list" id="voice-command-list">
-          <article class="voice-command-item"><span class="voice-command-icon">⚽</span><div><strong>Segnalare un gol</strong><p>“Goal numero <b>9</b>” oppure “Goal numero <b>9</b>, assist di numero <b>10</b>”.</p></div></article>
-          <article class="voice-command-item"><span class="voice-command-icon">🟨</span><div><strong>Ammonizione</strong><p>“Ammonizione numero <b>5</b>”. Alla seconda ammonizione il giocatore viene espulso automaticamente.</p></div></article>
-          <article class="voice-command-item"><span class="voice-command-icon">🟥</span><div><strong>Segnalare un'espulsione</strong><p>“Espulsione numero <b>5</b>” oppure “Cartellino rosso numero <b>5</b>”.</p></div></article>
-          <article class="voice-command-item"><span class="voice-command-icon">🔄</span><div><strong>Effettuare una sostituzione</strong><p>“Cambio numero <b>7</b> con numero <b>18</b>” oppure “Sostituzione numero <b>7</b> con numero <b>18</b>”.</p><small>Prima indica chi esce, poi chi entra.</small></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">⚽</span><div><strong>Segnalare un gol</strong><p>“Goal numero <b>9</b>”, “ha segnato il <b>9</b>” oppure “gol del <b>9</b> con assist del <b>10</b>”.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🟨</span><div><strong>Ammonizione</strong><p>“Ammonito numero <b>5</b>” oppure “ammonizione del numero <b>5</b>”. Alla seconda ammonizione il giocatore viene espulso automaticamente.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🟥</span><div><strong>Segnalare un'espulsione</strong><p>“Espulsione numero <b>5</b>”, “espulso il <b>5</b>” oppure “cartellino rosso al <b>5</b>”.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🔄</span><div><strong>Effettuare una sostituzione</strong><p>“Cambio numero <b>7</b> con numero <b>18</b>”, “cambio del numero <b>7</b> con il numero <b>18</b>” oppure “esce il <b>7</b>, entra il <b>18</b>”.</p><small>Prima indica chi esce, poi chi entra.</small></div></article>
         </div>
       }
     </section>
