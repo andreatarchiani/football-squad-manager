@@ -36,6 +36,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly running = signal(false);
   protected readonly finished = signal(false);
   protected readonly finishReportOpen = signal(false);
+  protected readonly finishConfirmationOpen = signal(false);
   protected readonly editingEvent = signal<MatchEvent | null>(null);
   protected readonly editMinute = signal('0');
   protected readonly editPlayerId = signal('');
@@ -233,6 +234,14 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
 
   protected finishMatch(): void {
     if (this.finished()) { this.finishReportOpen.set(true); return; }
+    this.finishConfirmationOpen.set(true);
+  }
+
+  protected cancelFinishMatch(): void { this.finishConfirmationOpen.set(false); }
+
+  protected confirmFinishMatch(): void {
+    if (this.finished()) { this.finishConfirmationOpen.set(false); this.finishReportOpen.set(true); return; }
+    this.finishConfirmationOpen.set(false);
     this.settleRunningClock();
     if (this.timer) { clearInterval(this.timer); this.timer = null; }
     this.running.set(false);
