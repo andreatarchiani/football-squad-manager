@@ -146,7 +146,7 @@
           <b>#{{ player.shirtNumber ?? '—' }}</b>
           <span>{{ player.firstName }} {{ player.lastName }}</span>
           <small>{{ redCards().includes(player.id) ? 'Espulso' : availabilityLabel(player) || (player.roles.join(' · ') || player.primaryRole) }}</small>
-          @if (Object.values(lineup()).includes(player.id)) { <em>IN CAMPO</em> }
+          @if (isOnField(player.id)) { <em>IN CAMPO</em> }
         </div>
       }
     </div>
