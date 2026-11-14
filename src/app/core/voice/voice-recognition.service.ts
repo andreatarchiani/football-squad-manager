@@ -59,13 +59,19 @@ export class VoiceRecognitionService {
     recognition.lang = 'it-IT';
     recognition.continuous = true;
     recognition.interimResults = true;
+    // Chrome may report resultIndex = 0 again while keeping earlier final
+    // results in the results list. Track indexes so each final segment is
+    // delivered to the command parser only once per recognition session.
+    const processedFinalResultIndexes = new Set<number>();
     recognition.onresult = (event) => {
-      let finalTranscript = '';
+      const newFinalSegments: string[] = [];
       for (let index = event.resultIndex; index < event.results.length; index += 1) {
         const result = event.results[index];
-        if (result?.isFinal && result[0]) finalTranscript += result[0].transcript;
+        if (!result?.isFinal || !result[0] || processedFinalResultIndexes.has(index)) continue;
+        processedFinalResultIndexes.add(index);
+        newFinalSegments.push(result[0].transcript);
       }
-      const transcript = finalTranscript.trim();
+      const transcript = newFinalSegments.join(' ').trim();
       if (transcript) onFinalTranscript(transcript);
     };
     recognition.onerror = (event) => {
