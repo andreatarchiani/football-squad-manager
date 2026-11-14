@@ -124,6 +124,19 @@
     @for (event of events(); track $index) { <div class="match-event"><b>{{ event.minute }}′</b><span>{{ event.description }}</span></div> }
     @empty { <p class="events-empty">Gli eventi registrati durante la partita compariranno qui.</p> }
   </section>
+  @if (finishConfirmationOpen()) {
+    <div class="match-finish-confirm-backdrop">
+      <section class="match-finish-confirm" role="dialog" aria-modal="true" aria-labelledby="finish-match-title">
+        <span class="finish-confirm-eyebrow">CONFERMA OPERAZIONE</span>
+        <h2 id="finish-match-title">Vuoi davvero terminare la partita?</h2>
+        <p>Il cronometro verrà fermato e la partita sarà contrassegnata come terminata. Potrai comunque consultare il riepilogo e la cronaca.</p>
+        <div class="match-finish-confirm-actions">
+          <button type="button" class="finish-confirm-cancel" (click)="cancelFinishMatch()">Annulla</button>
+          <button type="button" class="finish-confirm-yes" (click)="confirmFinishMatch()">Conferma fine partita</button>
+        </div>
+      </section>
+    </div>
+  }
   @if (finishReportOpen()) {
     <div class="match-report-backdrop">
       <section class="match-report-panel" role="dialog" aria-modal="true" aria-labelledby="match-report-title">
