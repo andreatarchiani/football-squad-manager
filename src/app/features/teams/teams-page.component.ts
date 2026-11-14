@@ -374,9 +374,28 @@ export class TeamsPageComponent implements OnChanges {
       const teamPlayers = players.filter(player => !player.isArchived
         && player.teamId === team.id && player.seasonId === seasonId);
       const hasRosterLeadership = teamPlayers.some(player => player.isCaptain || player.isViceCaptain);
-      if (!hasRosterLeadership && (legacyCaptaincy.captainId || legacyCaptaincy.viceCaptainId)) {
-        await this.teamsService.saveCaptaincy(workspaceId, team.id, seasonId!, legacyCaptaincy.captainId, legacyCaptaincy.viceCaptainId);
-        players = await this.playerService.list(workspaceId, this.teams());
+      if (!hasRosterLeadership) {
+        let legacyCaptainId = legacyCaptaincy.captainId;
+        let legacyViceCaptainId = legacyCaptaincy.viceCaptainId;
+        // Recover selections made by the previous version even if their cloud
+        // write did not complete: the old implementation kept a local backup.
+        try {
+          const cachedRaw = localStorage.getItem(`fsm-captaincy:${workspaceId}:${team.id}:${seasonId}`);
+          if (cachedRaw) {
+            const cached = JSON.parse(cachedRaw) as { captainId?: unknown; viceCaptainId?: unknown; savedAtMs?: unknown };
+            if (typeof cached.captainId === 'string' && typeof cached.viceCaptainId === 'string'
+              && typeof cached.savedAtMs === 'number' && cached.savedAtMs > legacyCaptaincy.updatedAtMs) {
+              legacyCaptainId = cached.captainId;
+              legacyViceCaptainId = cached.viceCaptainId;
+            }
+          }
+        } catch (error) {
+          console.warn('Unable to read previous local captaincy backup.', error);
+        }
+        if (legacyCaptainId || legacyViceCaptainId) {
+          await this.teamsService.saveCaptaincy(workspaceId, team.id, seasonId!, legacyCaptainId, legacyViceCaptainId);
+          players = await this.playerService.list(workspaceId, this.teams());
+        }
       }
       this.players.set(players);
       const validPlayerIds = new Set(players.filter(player => !player.isArchived
