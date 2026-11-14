@@ -5,7 +5,7 @@ import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { PlayerService } from '../players/player.service';
 import { TeamService } from './team.service';
 
-type MatchEventType = 'goal' | 'key-pass' | 'yellow-card' | 'red-card' | 'substitution' | 'formation';
+type MatchEventType = 'goal' | 'opponent-goal' | 'key-pass' | 'yellow-card' | 'red-card' | 'substitution' | 'formation';
 interface MatchEvent { type: MatchEventType; minute: number; description: string; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string; }
 interface PendingAction { type: MatchEventType; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string; description: string; }
 interface MatchAnimation { type: 'goal' | 'yellow-card' | 'red-card' | 'substitution'; title: string; detail: string; outgoingNumber?: number | null; incomingNumber?: number | null; playerNumber?: number | null; assistDetail?: string | null; }
@@ -330,6 +330,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       }
       return result;
     };
+    const oldOpponentGoals = previous.filter(event => event.type === 'opponent-goal').length;
+    const newOpponentGoals = next.filter(event => event.type === 'opponent-goal').length;
     const oldGoals = count(previous, 'goal', 'playerId'), newGoals = count(next, 'goal', 'playerId');
     const oldAssists = count(previous, 'goal', 'assistPlayerId'), newAssists = count(next, 'goal', 'assistPlayerId');
     const oldYellows = count(previous, 'yellow-card', 'playerId'), newYellows = count(next, 'yellow-card', 'playerId');
@@ -358,7 +360,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       await Promise.all(changes);
     }
     this.events.set(next);
-    this.goals.set(newGoals); this.assists.set(newAssists); this.yellowCards.set(newYellows); this.keyPasses.set(newKeyPasses); this.redCards.set(newReds);
+    this.goals.set(newGoals); this.opponentGoals.update(value => Math.max(0, value + newOpponentGoals - oldOpponentGoals)); this.assists.set(newAssists); this.yellowCards.set(newYellows); this.keyPasses.set(newKeyPasses); this.redCards.set(newReds);
     this.changesUsed.set(Math.min(this.maxChanges, next.filter(e => e.type === 'substitution').length));
     await this.persistMatchState();
   }
@@ -664,6 +666,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       if (!player) { this.rejectVoiceCommand('Il numero '+numbers[0]+' non identifica un solo giocatore.'); return; }
       if (!onField(player.id)) { this.rejectVoiceCommand('#'+numbers[0]+' è in rosa ma non è attualmente in campo: non può essere registrato come autore del passaggio chiave.'); return; }
       this.pending.set({type:'key-pass',playerId:player.id,description:'Passaggio chiave di #'+player.shirtNumber+' '+player.firstName+' '+player.lastName});
+    } else if (/\\b(?:(?:goal|gol|rete)\\s+(?:pres[oaie]|subit[oaie]|incassat[oaie])|(?:abbiamo|abbiam|ci hanno|ci ha)\\s+(?:preso|subito|incassato)\\s+(?:un\\s+)?(?:goal|gol|rete)|ci hanno segnato|ci ha segnato|goal\\s+dell?\\s+avversario)\\b/.test(text)) {
+      this.pending.set({ type: 'opponent-goal', description: raw.trim() });
     } else if (/\b(goal|gol|ha segnato|segnato|rete)\b/.test(text)) {
       const scorerNumber = numbers.find(number => number !== assistNumber);
       if (scorerNumber === undefined) {
@@ -770,6 +774,10 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     const action=this.pending();if(!action)return;
     this.voice.cancel(); this.voiceListening.set(false);
     const minute=this.minute;
+    if(action.type==='opponent-goal'){
+      this.opponentGoals.update(value => value + 1);
+      this.events.update(events => [{ type: 'opponent-goal', minute, description: action.description }, ...events]);
+    }
     if(action.type==='goal'&&action.playerId){
       const scorer=this.player(action.playerId), assister=action.assistPlayerId ? this.player(action.assistPlayerId) : undefined; this.showMatchAnimation({type:'goal',title:'GOOOL!',detail:scorer?`${scorer.firstName} ${scorer.lastName}`:'Rete della squadra',playerNumber:scorer?.shirtNumber,assistDetail:assister?`#${assister.shirtNumber} · ${assister.firstName} ${assister.lastName}`:null});
       this.goals.update(g=>({...g,[action.playerId!]: (g[action.playerId!]??0)+1}));
@@ -804,7 +812,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       else {this.voiceMessage.set(this.changesUsed()>=this.maxChanges?'Hai esaurito i cambi disponibili.':'Il giocatore da sostituire non è in campo.');this.pending.set(null);return;}
     }
     this.pending.set(null);
-    this.voiceMessage.set(action.type === 'goal' ? 'Gol registrato.' : action.type === 'key-pass' ? 'Passaggio chiave registrato.' : action.type === 'yellow-card' ? 'Ammonizione registrata.' : action.type === 'red-card' ? 'Espulsione registrata.' : 'Sostituzione eseguita.');
+    this.voiceMessage.set(action.type === 'opponent-goal' ? 'Gol subito registrato.' : action.type === 'goal' ? 'Gol registrato.' : action.type === 'key-pass' ? 'Passaggio chiave registrato.' : action.type === 'yellow-card' ? 'Ammonizione registrata.' : action.type === 'red-card' ? 'Espulsione registrata.' : 'Sostituzione eseguita.');
     void this.persistMatchState();
   }
   protected cancelAction(): void { this.voice.cancel(); this.voiceListening.set(false); this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set('Evento annullato.'); }
