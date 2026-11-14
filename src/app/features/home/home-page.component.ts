@@ -137,8 +137,8 @@ export class HomePageComponent {
   protected async setCaptaincy(role: 'captain' | 'viceCaptain', playerId: string): Promise<void> {
     const nextCaptain = role === 'captain' ? playerId : this.captainId();
     const nextVice = role === 'viceCaptain' ? playerId : this.viceCaptainId();
-    this.captainId.set(nextCaptain === nextVice ? (role === 'captain' ? '' : nextCaptain) : nextCaptain);
-    this.viceCaptainId.set(nextCaptain === nextVice ? (role === 'viceCaptain' ? '' : nextVice) : nextVice);
+    this.captainId.set(nextCaptain === nextVice ? (role === 'captain' ? nextCaptain : '') : nextCaptain);
+    this.viceCaptainId.set(nextCaptain === nextVice ? (role === 'viceCaptain' ? nextVice : '') : nextVice);
     const team = this.selectedTeam;
     const workspaceId = this.auth.workspaceId();
     if (!team?.seasonId || !workspaceId) return;
