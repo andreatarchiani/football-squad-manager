@@ -6,7 +6,7 @@
       <label class="opponent-field"><span>AVVERSARIO</span><input type="text" maxlength="80" [value]="opponentName()" (input)="setOpponentName($any($event.target).value)" placeholder="Nome della squadra avversaria" autocomplete="off"></label>
     </section>
     <section class="home-roster-panel">
-      <div class="home-roster-heading"><div><span class="eyebrow">{{ selectedTeam.name }}</span><h2>La tua rosa</h2><p>{{ previewFormation() }} · {{ previewPlayers().length }} giocatori disponibili</p></div><button type="button" class="customize-action" (click)="openTeams.emit({ teamId: selectedTeam.id, layoutSlot: 1 })">Apri e modifica rosa</button></div>
+      <div class="home-roster-heading"><div><span class="eyebrow">{{ selectedTeam.name }}</span><h2>La tua rosa</h2><p>{{ previewFormation() }} · {{ previewPlayers().length }} giocatori disponibili</p></div><button type="button" class="customize-action" (click)="openTeams.emit({ teamId: selectedTeam.id, layoutSlot: layoutSlot() })">Apri e modifica rosa</button></div>
       @if (previewLoading()) { <div class="preview-placeholder">Caricamento formazione…</div> }
       @else {
         <div class="home-pitch-stage"><div class="home-football-pitch" aria-label="Anteprima non modificabile della formazione">
@@ -23,6 +23,6 @@
       @if (!completeStartingLineup) { <p class="lineup-completion-hint" role="status">La formazione non è completa. Apri la rosa per sistemare gli 11 titolari.</p> }
     </section>
   } @else {
-    <section class="home-roster-panel"><div class="next-match-heading"><span class="eyebrow">FOOTBALL SQUAD MANAGER</span><h2>Nessuna squadra attiva</h2><p>Crea una squadra per visualizzare la rosa e preparare la prossima partita.</p></div><button type="button" class="customize-action" (click)="openTeams.emit({ teamId: '', layoutSlot: 1 })">Vai a Squadre</button></section>
+    <section class="home-roster-panel"><div class="next-match-heading"><span class="eyebrow">FOOTBALL SQUAD MANAGER</span><h2>Nessuna squadra attiva</h2><p>Crea una squadra per visualizzare la rosa e preparare la prossima partita.</p></div><button type="button" class="customize-action" (click)="openTeams.emit({ teamId: '', layoutSlot: layoutSlot() })">Vai a Squadre</button></section>
   }
 </section>
