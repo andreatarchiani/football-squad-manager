@@ -126,16 +126,16 @@
               <div class="captaincy-picker" aria-label="Ruoli di squadra">
                 <label><span><span class="captain-armband-icon" aria-hidden="true">C</span> Capitano</span>
                   <select [value]="captainId()" (change)="setCaptaincy('captain', $any($event.target).value)">
-                    <option value="">Non assegnato</option>
-                    @for (player of rosterForExpanded(); track player.id) {
+                    <option value="" disabled hidden>Seleziona giocatore</option>
+                    @for (player of rosterFor(team); track player.id) {
                       <option [value]="player.id">{{ player.shirtNumber }} · {{ player.firstName }} {{ player.lastName }}</option>
                     }
                   </select>
                 </label>
                 <label><span><span class="vice-armband-icon" aria-hidden="true">VC</span> Vicecapitano</span>
                   <select [value]="viceCaptainId()" (change)="setCaptaincy('viceCaptain', $any($event.target).value)">
-                    <option value="">Non assegnato</option>
-                    @for (player of rosterForExpanded(); track player.id) {
+                    <option value="" disabled hidden>Seleziona giocatore</option>
+                    @for (player of rosterFor(team); track player.id) {
                       <option [value]="player.id">{{ player.shirtNumber }} · {{ player.firstName }} {{ player.lastName }}</option>
                     }
                   </select>

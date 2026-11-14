@@ -40,6 +40,7 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly captainId = signal('');
   protected readonly viceCaptainId = signal('');
   protected readonly captaincySaving = signal(false);
+  private captaincySaveQueue: Promise<void> = Promise.resolve();
   protected readonly activeSlotId = signal<string | null>(null);
   protected readonly liveMatch = signal(false);
   protected readonly autoStartMatch = signal(false);
@@ -145,26 +146,33 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   protected async setCaptaincy(role: 'captain' | 'viceCaptain', playerId: string): Promise<void> {
-    const nextCaptain = role === 'captain' ? playerId : this.captainId();
-    const nextVice = role === 'viceCaptain' ? playerId : this.viceCaptainId();
+    let nextCaptain = role === 'captain' ? playerId : this.captainId();
+    let nextVice = role === 'viceCaptain' ? playerId : this.viceCaptainId();
     if (nextCaptain && nextCaptain === nextVice) {
-      if (role === 'captain') this.viceCaptainId.set('');
-      else this.captainId.set('');
+      if (role === 'captain') nextVice = '';
+      else nextCaptain = '';
     }
     this.captainId.set(nextCaptain);
     this.viceCaptainId.set(nextVice);
     const team = this.teams().find(item => item.id === this.expandedRosterId());
     const workspaceId = this.auth.workspaceId();
     if (!team?.seasonId || !workspaceId) return;
-    this.captaincySaving.set(true);
-    try {
-      await this.teamsService.saveCaptaincy(workspaceId, team.id, team.seasonId, this.captainId(), this.viceCaptainId());
-    } catch (error) {
-      console.error('Unable to save team captaincy.', error);
-      this.error.set('Non è stato possibile salvare capitano e vicecapitano. Riprova.');
-    } finally {
-      this.captaincySaving.set(false);
-    }
+
+    // Serialize writes so quick dropdown changes cannot finish out of order.
+    const captainId = nextCaptain;
+    const viceCaptainId = nextVice;
+    this.captaincySaveQueue = this.captaincySaveQueue.catch(() => undefined).then(async () => {
+      this.captaincySaving.set(true);
+      try {
+        await this.teamsService.saveCaptaincy(workspaceId, team.id, team.seasonId!, captainId, viceCaptainId);
+      } catch (error) {
+        console.error('Unable to save team captaincy.', error);
+        this.error.set('Non è stato possibile salvare capitano e vicecapitano. Riprova.');
+      } finally {
+        this.captaincySaving.set(false);
+      }
+    });
+    await this.captaincySaveQueue;
   }
 
   protected benchPlayers(): PlayerRecord[] {
@@ -347,7 +355,8 @@ export class TeamsPageComponent implements OnChanges {
         seasonId ? this.teamsService.loadCaptaincy(workspaceId, team.id, seasonId) : Promise.resolve({ captainId: '', viceCaptainId: '' })
       ]);
       this.players.set(players);
-      const validPlayerIds = new Set(this.rosterForExpanded().map(player => player.id));
+      // Keep assignments for players still in this team's season, even if injured/suspended.
+      const validPlayerIds = new Set(this.rosterFor(team).map(player => player.id));
       this.captainId.set(validPlayerIds.has(captaincy.captainId) ? captaincy.captainId : '');
       this.viceCaptainId.set(validPlayerIds.has(captaincy.viceCaptainId) && captaincy.viceCaptainId !== captaincy.captainId ? captaincy.viceCaptainId : '');
       const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
