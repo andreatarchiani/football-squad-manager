@@ -138,22 +138,6 @@
     @for (event of events(); track $index) { <div class="match-event"><b>{{ event.minute }}′</b><span>{{ event.description }}</span></div> }
     @empty { <p class="events-empty">Gli eventi registrati durante la partita compariranno qui.</p> }
   </section>
-  <details class="match-complete-roster">
-    <summary><span>Rosa completa</span><strong>{{ players().length }} giocatori</strong></summary>
-    <div class="match-complete-roster-list">
-      @for (player of completeRoster(); track player.id) {
-        <div class="match-complete-roster-player">
-          <b>#{{ player.shirtNumber ?? '—' }}</b>
-          <span>{{ player.firstName }} {{ player.lastName }}</span>
-          <small>{{ redCards().includes(player.id) ? 'Espulso' : availabilityLabel(player) || (player.roles.join(' · ') || player.primaryRole) }}</small>
-          @if (isOnField(player.id)) { <em>IN CAMPO</em> }
-        </div>
-      }
-    </div>
-  </details>
-  <footer class="match-bottom-actions">
-    <button type="button" class="edit-roster-button" (click)="editroster.emit()">✎ Modifica la rosa</button>
-  </footer>
   @if (finishConfirmationOpen()) {
     <div class="match-finish-confirm-backdrop">
       <section class="match-finish-confirm" role="dialog" aria-modal="true" aria-labelledby="finish-match-title">
