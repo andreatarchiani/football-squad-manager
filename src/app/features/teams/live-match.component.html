@@ -11,6 +11,8 @@
     <div class="clock-controls">
       @if (!running() && !finished()) { <button type="button" class="start-match" (click)="start()">{{ elapsedSeconds() ? '▶ Riprendi' : '▶ Avvia partita' }}</button> }
       @if (running()) { <button type="button" class="pause-match" (click)="pause()">Ⅱ Pausa</button> }
+      @if (!finished()) { <button type="button" class="finish-match" (click)="finishMatch()">■ Fine partita</button> }
+      @else { <button type="button" class="finish-match" (click)="finishReportOpen.set(true)">Riepilogo finale</button> }
     </div>
     <button
       type="button"
@@ -29,9 +31,6 @@
       <span class="voice-hold-icon" aria-hidden="true">🎙</span>
       <span>{{ voiceListening() ? 'TI STO ASCOLTANDO · RILASCIA PER ESEGUIRE' : 'TOCCA E TIENI PREMUTO PER ESEGUIRE IL COMANDO' }}</span>
     </button>
-      @if (!finished()) { <button type="button" class="finish-match" (click)="finishMatch()">■ Fine partita</button> }
-      @else { <button type="button" class="finish-match" (click)="finishReportOpen.set(true)">Riepilogo finale</button> }
-    </div>
     <section class="voice-command-guide" [class.is-collapsed]="!voiceHelpOpen()" aria-label="Comandi vocali disponibili">
       <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong></div><button type="button" class="voice-guide-toggle" (click)="toggleVoiceHelp()" [attr.aria-expanded]="voiceHelpOpen()" aria-controls="voice-command-list"><span>{{ voiceHelpOpen() ? 'Nascondi' : 'Mostra' }}</span><svg viewBox="0 0 20 20" aria-hidden="true" [class.is-expanded]="voiceHelpOpen()"><path d="m5 7.5 5 5 5-5"/></svg></button></div>
       @if (voiceHelpOpen()) {
