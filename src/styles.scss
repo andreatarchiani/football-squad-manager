@@ -47,14 +47,14 @@ button, input, textarea, select { font: inherit; }
 /* Compact, contained tactical pitch and cleaner 3D jersey markers. */
 .pitch-stage{width:100%;max-width:620px;min-width:0;min-height:0;padding:22px 12px 30px;overflow:hidden;perspective:1100px;perspective-origin:50% 45%;border-radius:18px;}
 .pitch-stage::before{inset:8px;opacity:.48;clip-path:none;transform:translateZ(-35px);}
-.pitch-stage .football-pitch{width:min(100%,430px);max-width:430px;min-width:0;transform:perspective(1100px) rotateX(25deg) scale(.96);transform-origin:50% 50%;border-width:4px;box-shadow:0 20px 0 -4px #142b20,0 27px 0 -4px #0b1913,0 36px 28px #000a,inset 0 0 0 2px #ffffff30,inset 0 0 36px #03150c;}
+.pitch-stage .football-pitch{width:min(100%,430px);max-width:430px;min-width:0;transform:perspective(1100px) rotateX(7deg) scale(.96);transform-origin:50% 50%;border-width:4px;box-shadow:0 20px 0 -4px #142b20,0 27px 0 -4px #0b1913,0 36px 28px #000a,inset 0 0 0 2px #ffffff30,inset 0 0 36px #03150c;}
 .pitch-stage .pitch-player{width:58px;transform:translate3d(-50%,-50%,24px);filter:drop-shadow(0 7px 5px #020b0699);}
 .pitch-stage .pitch-player::before{top:29px;width:32px;height:9px;filter:blur(4px);}
 .pitch-stage .pitch-shirt{position:relative;display:grid;place-items:center;width:34px;height:39px;padding:0;overflow:visible;clip-path:polygon(24% 0,39% 9%,61% 9%,76% 0,100% 17%,85% 39%,76% 32%,76% 100%,24% 100%,24% 32%,15% 39%,0 17%);border:0;border-radius:0;color:#123321;background:linear-gradient(105deg,#f1fff5 0%,#d4f5df 24%,#8bd5a5 52%,#3c9560 78%,#1c633b 100%);font-size:11px;font-weight:900;text-shadow:0 1px 0 #ffffffa8;box-shadow:none;filter:drop-shadow(1px 1px 0 #276641) drop-shadow(2px 3px 0 #17472e) drop-shadow(4px 6px 3px #020b06b8);transform:perspective(650px) rotateX(-24deg) translateZ(4px);transform-origin:50% 50%;}
 .pitch-stage .pitch-shirt::before{content:"";position:absolute;inset:3px 7px 8px;border-radius:2px 2px 5px 5px;background:linear-gradient(90deg,#ffffff30,transparent 38%,#0d48251c 78%,#0b3b20a0);pointer-events:none;}
 .pitch-stage .pitch-shirt::after{content:"";position:absolute;top:3px;left:50%;width:9px;height:4px;transform:translateX(-50%);border-radius:0 0 5px 5px;background:#276641;box-shadow:0 1px 0 #ffffff7a;pointer-events:none;}
 .pitch-stage .pitch-player-name{max-width:58px;padding:2px 4px;border:1px solid #d7f5df44;border-radius:4px;background:linear-gradient(180deg,#183d2ceF,#081b13f2);font-size:9px;line-height:1.15;overflow-wrap:anywhere;box-shadow:0 3px 6px #0008;transform:none;}
-@media(max-width:650px){.pitch-stage{width:100%;max-width:100%;min-height:0;padding:16px 7px 23px;border-radius:14px;}.pitch-stage .football-pitch{width:min(100%,390px);transform:perspective(950px) rotateX(22deg) scale(.95);}.pitch-stage .pitch-player{width:52px;transform:translate3d(-50%,-50%,20px);}.pitch-stage .pitch-shirt{width:29px;height:34px;font-size:10px;}.pitch-stage .pitch-player-name{max-width:52px;font-size:8px;}}
+@media(max-width:650px){.pitch-stage{width:100%;max-width:100%;min-height:0;padding:16px 7px 23px;border-radius:14px;}.pitch-stage .football-pitch{width:min(100%,390px);transform:perspective(950px) rotateX(7deg) scale(.95);}.pitch-stage .pitch-player{width:52px;transform:translate3d(-50%,-50%,6px);}.pitch-stage .pitch-shirt{width:29px;height:34px;font-size:10px;}.pitch-stage .pitch-player-name{max-width:52px;font-size:8px;}}
 
 /* Live match presentation (global to keep the component stylesheet within its Angular budget). */
 .live-match{--ink:#f4f8f5;--muted:#91a99a;position:fixed;inset:0;z-index:12000;overflow:auto;background:radial-gradient(ellipse at 50% -20%,#294a38 0,#101e17 48%,#08110d 100%);color:var(--ink);padding:env(safe-area-inset-top) clamp(12px,3vw,30px) max(18px,env(safe-area-inset-bottom));font-family:inherit}
@@ -86,7 +86,7 @@ button, input, textarea, select { font: inherit; }
 .match-pitch-wrap.pitch-stage .match-pitch.football-pitch{position:relative;width:min(100%,430px);max-width:430px;min-width:0;aspect-ratio:.78;overflow:visible;transform:perspective(1100px) rotateX(25deg) scale(.96);transform-origin:50% 50%;border:4px solid #b9d7c1;border-radius:9px 9px 15px 15px;background:repeating-linear-gradient(0deg,transparent 0%,transparent 12.2%,#ffffff08 12.2%,#ffffff08 24.8%),linear-gradient(110deg,#174c30 0%,#287447 42%,#1d5b38 100%);box-shadow:0 20px 0 -4px #142b20,0 27px 0 -4px #0b1913,0 36px 28px #000a,inset 0 0 0 2px #ffffff30,inset 0 0 36px #03150c;}
 .match-pitch-wrap.pitch-stage .match-pitch.football-pitch::before{inset:0;border:0;background:radial-gradient(ellipse at 50% 46%,transparent 32%,#06190e88 100%),linear-gradient(180deg,#ffffff20 0%,transparent 25%,transparent 72%,#03160b66 100%);}
 .match-pitch-wrap.pitch-stage .match-pitch.football-pitch::after{inset:8px;border:2px solid #e7f8e9b0;box-shadow:inset 0 0 0 2px #061b1055,0 0 18px #d9ffe522;transform:translateZ(2px);}
-.match-pitch-wrap.pitch-stage .match-shirt-player.pitch-player{z-index:2;min-width:0;transform:translate3d(-50%,-50%,24px);transform-style:preserve-3d;filter:drop-shadow(0 7px 5px #020b0699);}
+.match-pitch-wrap.pitch-stage .match-shirt-player.pitch-player{z-index:2;min-width:0;transform:translate3d(-50%,-50%,8px);transform-style:preserve-3d;filter:drop-shadow(0 7px 5px #020b0699);}
 .match-pitch-wrap.pitch-stage .match-shirt-player.pitch-player::before{top:29px;width:32px;height:9px;filter:blur(4px);background:#020804d9;}
 .match-pitch-wrap.pitch-stage .match-shirt.pitch-shirt{display:grid;place-items:center;width:34px;height:39px;padding:0;overflow:visible;clip-path:polygon(24% 0,39% 9%,61% 9%,76% 0,100% 17%,85% 39%,76% 32%,76% 100%,24% 100%,24% 32%,15% 39%,0 17%);border:0;border-radius:0;color:#123321;background:linear-gradient(105deg,#f1fff5 0%,#d4f5df 24%,#8bd5a5 52%,#3c9560 78%,#1c633b 100%);font-size:11px;font-weight:900;text-shadow:0 1px 0 #ffffffa8;box-shadow:none;filter:drop-shadow(1px 1px 0 #276641) drop-shadow(2px 3px 0 #17472e) drop-shadow(4px 6px 3px #020b06b8);transform:perspective(650px) rotateX(-24deg) translateZ(4px);transform-origin:50% 50%;}
 .match-pitch-wrap.pitch-stage .match-shirt.pitch-shirt::before{content:"";position:absolute;inset:3px 7px 8px;border-radius:2px 2px 5px 5px;background:linear-gradient(90deg,#ffffff30,transparent 38%,#0d48251c 78%,#0b3b20a0);pointer-events:none;}
@@ -172,7 +172,7 @@ select optgroup {
 
 
 /* Football-style scoreboard: both teams flank the centered clock and score. */
-.match-topbar.match-scoreboard-header{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(150px,auto) minmax(0,1fr);align-items:center;gap:clamp(10px,2vw,24px);padding:17px 0 19px}
+.match-topbar.match-scoreboard-header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(10px,2vw,24px);padding:17px 0 19px}
 .match-scoreboard-header .match-team{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto auto;align-items:center;column-gap:11px;row-gap:3px}
 .match-scoreboard-header .match-team-badge{grid-column:1;grid-row:1/4;display:grid;place-items:center;width:clamp(42px,5vw,58px);aspect-ratio:1;border:1px solid #9bdab255;border-radius:15px;background:linear-gradient(145deg,#294b36,#14251b);color:#dff9e6;font-size:clamp(19px,3vw,26px);font-weight:950;box-shadow:inset 0 1px #ffffff18,0 7px 18px #0003}
 .match-scoreboard-header .match-team small{grid-column:2;grid-row:1}
@@ -198,7 +198,7 @@ select optgroup {
 .match-controls-panel .voice-hold-button{margin-top:0}
 .match-controls-panel .voice-command-guide{margin-top:0}
 @media(max-width:760px){
- .match-topbar.match-scoreboard-header{grid-template-columns:auto minmax(0,1fr) minmax(112px,auto) minmax(0,1fr);gap:7px;padding:11px 0 13px}
+ .match-topbar.match-scoreboard-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:7px;padding:11px 0 13px}
  .match-scoreboard-header .match-team{column-gap:6px;row-gap:3px}
  .match-scoreboard-header .match-team-badge{width:34px;border-radius:10px;font-size:16px}
  .match-scoreboard-header .match-team strong{font-size:clamp(11px,2.8vw,14px);white-space:normal;line-height:1.15;overflow-wrap:anywhere}
