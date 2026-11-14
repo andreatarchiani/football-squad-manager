@@ -555,7 +555,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       .replace(/[^\p{L}\p{N}\s]/gu, ' ')
       .replace(/\s+/g, ' ')
       // In the football-match context, speech recognition can confuse “gol” with “golf”.
-      .replace(/\bgolf\b/g, 'gol')
+      .replace(/\b(?:golf|golden)\b/g, 'gol')
       .trim();
     const smallNumbers: Record<string, string> = {
       zero: '0', uno: '1', due: '2', tre: '3', quattro: '4',
