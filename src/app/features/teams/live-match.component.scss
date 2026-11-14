@@ -224,3 +224,10 @@
 .finish-confirm-cancel{border:1px solid #ffffff30;background:#ffffff0b;color:#e8f5eb}
 .finish-confirm-yes{border:1px solid #ffb45a55;background:linear-gradient(135deg,#a84b20,#e07831);color:#fff}
 @media(max-width:420px){.match-finish-confirm-actions{flex-direction:column-reverse}}
+
+ 
+/* Captain and vice-captain markers remain visible on the live-match pitch. */
+.match-shirt-player{position:relative}
+.match-leadership-badge{position:absolute;top:-10px;right:-12px;z-index:4;display:grid;place-items:center;min-width:19px;height:19px;padding:0 3px;border:2px solid #102318;border-radius:50%;box-sizing:border-box;font-size:9px;font-weight:1000;line-height:1;box-shadow:0 2px 7px #0009}
+.captain-badge{background:linear-gradient(145deg,#ffe9a0,#d59a28);color:#382507}
+.vice-captain-badge{background:linear-gradient(145deg,#f4f7f8,#9daab0);color:#263238}
