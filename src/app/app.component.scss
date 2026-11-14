@@ -101,3 +101,7 @@
 @keyframes release-card-in{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:520px){.release-changelog-backdrop{align-items:end;padding:12px 12px max(12px,env(safe-area-inset-bottom));}.release-changelog{border-radius:19px}.release-changelog-header{padding:22px 19px 18px}.release-changelog-header h2{font-size:19px}.release-changelog-list{padding:5px 19px}.release-changelog-list article{padding:14px 0}.release-changelog-footer{padding:15px 19px 19px}}
 @media(prefers-reduced-motion:reduce){.release-changelog-backdrop,.release-changelog{animation:none}}
+
+/* Fallback globale per gli aggiornamenti che non si installano automaticamente. */
+.update-banner { position: fixed; z-index: 11000; top: max(16px, env(safe-area-inset-top)); left: 50%; width: min(720px, calc(100% - 32px)); margin: 0; transform: translateX(-50%); box-shadow: 0 16px 48px #0008; }
+@media (max-width: 520px) { .update-banner { top: max(10px, env(safe-area-inset-top)); width: calc(100% - 20px); } }

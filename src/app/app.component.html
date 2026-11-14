@@ -116,4 +116,11 @@
   </div>
 }
 
+      @if (updateAvailable()) {
+        <section class="update-banner" role="status" aria-live="polite">
+          <div class="update-copy"><strong>Nuova versione disponibile</strong><span>L'aggiornamento automatico non è riuscito. Puoi installarlo manualmente.</span></div>
+          <button class="update-button" type="button" [disabled]="updating()" (click)="applyUpdate()">{{ updating() ? 'Aggiornamento…' : 'Aggiorna ora' }}</button>
+        </section>
+      }
+
 <fsm-notification-host />
