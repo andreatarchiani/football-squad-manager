@@ -286,8 +286,11 @@ export class TeamsPageComponent implements OnChanges {
 
   protected positionForSlot(slot: { id: string; x: number; y: number }): { x: number; y: number } {
     const playerId = this.lineup()[slot.id];
-    const position = (playerId && this.shirtPositions()[playerId]) || { x: slot.x, y: slot.y };
-    // Keep the full shirt and name tag inside the pitch, including older saved layouts.
+    const candidate = playerId ? this.shirtPositions()[playerId] : undefined;
+    const position = candidate && Number.isFinite(candidate.x) && Number.isFinite(candidate.y)
+      && candidate.x >= 0 && candidate.x <= 100 && candidate.y >= 0 && candidate.y <= 100
+      ? candidate : { x: slot.x, y: slot.y };
+    // Ignore malformed or obsolete saved coordinates instead of rendering shirts at invalid positions.
     return { x: Math.max(9, Math.min(91, position.x)), y: Math.max(9, Math.min(91, position.y)) };
   }
 
