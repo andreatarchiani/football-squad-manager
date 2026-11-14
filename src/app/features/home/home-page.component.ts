@@ -175,7 +175,10 @@ export class HomePageComponent {
 
   protected previewPosition(slot: { id: string; x: number; y: number }): { x: number; y: number } {
     const player = this.previewPlayer(slot.id);
-    const position = (player && this.previewPositions()[player.id]) || { x: slot.x, y: slot.y };
+    const candidate = player ? this.previewPositions()[player.id] : undefined;
+    const position = candidate && Number.isFinite(candidate.x) && Number.isFinite(candidate.y)
+      && candidate.x >= 0 && candidate.x <= 100 && candidate.y >= 0 && candidate.y <= 100
+      ? candidate : { x: slot.x, y: slot.y };
     return { x: Math.max(9, Math.min(91, position.x)), y: Math.max(9, Math.min(91, position.y)) };
   }
 

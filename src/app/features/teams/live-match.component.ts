@@ -139,7 +139,15 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     const f = this.formations[this.formation()] ? this.formation() : '4-3-3'; this.matchFormation.set(f);
     this.formationPlayerOrder = this.formations[f].map(slot => this.initialLineup()[slot.id]).filter((id): id is string => !!id);
     const p: Record<string, {x:number;y:number}> = {};
-    for (const slot of this.formations[f]) { const id=this.initialLineup()[slot.id]; if(id) p[id]=this.initialPositions()[id] ?? {x:slot.x,y:slot.y}; }
+    for (const slot of this.formations[f]) {
+      const id = this.initialLineup()[slot.id];
+      if (!id) continue;
+      const saved = this.initialPositions()[id];
+      p[id] = saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)
+        && saved.x >= 0 && saved.x <= 100 && saved.y >= 0 && saved.y <= 100
+        ? { x: Math.max(9, Math.min(91, saved.x)), y: Math.max(9, Math.min(91, saved.y)) }
+        : { x: slot.x, y: slot.y };
+    }
     this.matchPositions.set(p);
     if (this.autoStart()) { this.start(); return; }
     try {
@@ -177,7 +185,13 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected slots() {
     const formationSlots = this.formations[this.matchFormation()] ?? this.formations['4-3-3'];
     const currentLineup = this.lineup(); const positions = this.matchPositions();
-    return formationSlots.map(slot => { const playerId = currentLineup[slot.id]; const saved = playerId ? positions[playerId] : undefined; return saved ? { ...slot, x: Math.max(9, Math.min(91, saved.x)), y: Math.max(9, Math.min(91, saved.y)) } : slot; });
+    return formationSlots.map(slot => {
+      const playerId = currentLineup[slot.id];
+      const saved = playerId ? positions[playerId] : undefined;
+      const valid = saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)
+        && saved.x >= 0 && saved.x <= 100 && saved.y >= 0 && saved.y <= 100;
+      return valid ? { ...slot, x: Math.max(9, Math.min(91, saved.x)), y: Math.max(9, Math.min(91, saved.y)) } : slot;
+    });
   }
   protected formationOptions(): string[] { return Object.keys(this.formations); }
   protected changeMatchFormation(next: string): void { if (!this.formations[next] || next === this.matchFormation()) return; const previous=this.matchFormation(); const ids=this.formationPlayerOrder.length ? this.formationPlayerOrder : this.formations[previous].map(slot=>this.lineup()[slot.id]).filter((id): id is string => !!id); this.formationPlayerOrder=[...ids]; const lineup: Record<string,string>={}; const positions: Record<string,{x:number;y:number}>={}; this.formations[next].forEach((slot,i)=>{const id=ids[i];if(id){lineup[slot.id]=id;positions[id]={x:slot.x,y:slot.y};}}); this.lineup.set(lineup);this.matchPositions.set(positions);this.matchFormation.set(next);this.selectedOutgoingId.set(null);this.events.update(items=>[{type:'formation',minute:this.minute,description:'Cambio modulo: '+previous+' → '+next},...items]);this.voiceMessage.set('');this.voiceDraft.set(''); void this.persistMatchState(); }
