@@ -1,12 +1,5 @@
 import { Injectable } from '@angular/core';
 
-/**
- * The recognition transport is deliberately isolated from command parsing and execution.
- * A future wake-word/always-on adapter can implement the same lifecycle without changing
- * the assistant UI or the command pipeline.
- */
-export type VoiceActivationMode = 'push-to-talk' | 'wake-word';
-
 interface SpeechRecognitionAlternativeLike { transcript: string; }
 interface SpeechRecognitionResultLike extends ArrayLike<SpeechRecognitionAlternativeLike> { isFinal: boolean; }
 interface SpeechRecognitionEventLike extends Event {
@@ -31,7 +24,6 @@ interface SpeechRecognitionWindow extends Window {
 
 @Injectable({ providedIn: 'root' })
 export class VoiceRecognitionService {
-  readonly activationMode: VoiceActivationMode = 'push-to-talk';
   private recognition: SpeechRecognitionLike | null = null;
 
   get supported(): boolean {
@@ -40,17 +32,21 @@ export class VoiceRecognitionService {
     return Boolean(browserWindow.SpeechRecognition ?? browserWindow.webkitSpeechRecognition);
   }
 
+  /**
+   * Starts one bounded recording session. The caller owns the start/stop gesture.
+   * Every result callback receives a complete snapshot, never an appended fragment.
+   */
   start(
-    onFinalTranscript: (transcript: string) => void,
+    onTranscript: (transcript: string, isFinal: boolean) => void,
     onError: (message: string) => void,
-    onEnd: () => void
+    onEnd: (finalTranscript: string) => void
   ): void {
-    this.stop();
+    this.cancel();
     const browserWindow = window as SpeechRecognitionWindow;
     const Recognition = browserWindow.SpeechRecognition ?? browserWindow.webkitSpeechRecognition;
     if (!Recognition) {
-      onError('Il riconoscimento vocale non è supportato da questo browser. Prova con Google Chrome o Microsoft Edge.');
-      onEnd();
+      onError('Il riconoscimento vocale non è supportato da questo browser. Usa Google Chrome o Microsoft Edge aggiornato.');
+      onEnd('');
       return;
     }
 
@@ -59,50 +55,81 @@ export class VoiceRecognitionService {
     recognition.lang = 'it-IT';
     recognition.continuous = true;
     recognition.interimResults = true;
-    // Chrome may report resultIndex = 0 again while keeping earlier final
-    // results in the results list. Track indexes so each final segment is
-    // delivered to the command parser only once per recognition session.
-    const processedFinalResultIndexes = new Set<number>();
+
+    const finalSegments: string[] = [];
+    const seenFinalSegments = new Set<string>();
+    let finalTranscript = '';
+
     recognition.onresult = (event) => {
-      const newFinalSegments: string[] = [];
-      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+      const interimSegments: string[] = [];
+      // Read the current result list as a snapshot. Do not concatenate event
+      // deltas: some browser versions replay old final results on later events.
+      for (let index = 0; index < event.results.length; index += 1) {
         const result = event.results[index];
-        if (!result?.isFinal || !result[0] || processedFinalResultIndexes.has(index)) continue;
-        processedFinalResultIndexes.add(index);
-        newFinalSegments.push(result[0].transcript);
+        const transcript = result?.[0]?.transcript?.trim();
+        if (!transcript) continue;
+        if (result.isFinal) {
+          const key = transcript.toLocaleLowerCase('it-IT')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          // Duplicate final segments are discarded even if a browser reports
+          // them at a different result index during the same button press.
+          if (key && !seenFinalSegments.has(key)) {
+            seenFinalSegments.add(key);
+            finalSegments.push(transcript);
+          }
+        } else {
+          interimSegments.push(transcript);
+        }
       }
-      const transcript = newFinalSegments.join(' ').trim();
-      if (transcript) onFinalTranscript(transcript);
+      finalTranscript = finalSegments.join(' ').replace(/\s+/g, ' ').trim();
+      const snapshot = [finalTranscript, interimSegments.join(' ')].filter(Boolean).join(' ').trim();
+      if (snapshot) onTranscript(snapshot, false);
     };
+
     recognition.onerror = (event) => {
       const messages: Record<string, string> = {
         'not-allowed': 'Permesso microfono negato. Consenti l’accesso al microfono nelle impostazioni del browser.',
-        'no-speech': 'Non ho sentito nessuna voce. Premi il microfono e riprova.',
-        'audio-capture': 'Non riesco ad accedere a un microfono. Controlla che sia collegato e disponibile.',
+        'service-not-allowed': 'Il browser non consente l’uso del riconoscimento vocale su questo sito.',
+        'no-speech': 'Non ho sentito la voce. Tieni premuto il pulsante e riprova.',
+        'audio-capture': 'Non riesco ad accedere al microfono. Controlla che sia disponibile.',
         network: 'Il riconoscimento vocale non è riuscito per un problema di rete.'
       };
       onError(messages[event.error] ?? 'Si è verificato un errore durante il riconoscimento vocale.');
     };
+
     recognition.onend = () => {
       if (this.recognition === recognition) this.recognition = null;
-      onEnd();
+      onEnd(finalTranscript);
     };
 
     try {
       recognition.start();
     } catch {
-      this.recognition = null;
+      if (this.recognition === recognition) this.recognition = null;
       onError('Non è stato possibile avviare il microfono. Riprova.');
-      onEnd();
+      onEnd('');
     }
   }
 
+  /** Gracefully stops recording and waits for the browser's final result. */
   stop(): void {
     const recognition = this.recognition;
+    if (!recognition) return;
+    try { recognition.stop(); } catch { /* The browser may already have stopped. */ }
+  }
+
+  /** Cancels recording without processing a partial command. */
+  cancel(): void {
+    const recognition = this.recognition;
     this.recognition = null;
-    if (recognition) {
-      recognition.onend = null;
-      try { recognition.stop(); } catch { /* The browser may already have stopped it. */ }
-    }
+    if (!recognition) return;
+    recognition.onresult = null;
+    recognition.onerror = null;
+    recognition.onend = null;
+    try { recognition.stop(); } catch { /* The browser may already have stopped. */ }
   }
 }

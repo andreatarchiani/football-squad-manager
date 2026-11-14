@@ -75,8 +75,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   private runBaseSeconds = 0;
   private lastPersistedElapsed = 0;
   private formationPlayerOrder: string[] = [];
-  private voiceTranscriptBuffer = '';
-  private voiceTranscriptTimer: ReturnType<typeof setTimeout> | null = null;
+  private voicePointerId: number | null = null;
+  private voiceStartFailed = false;
 
   readonly formations: Record<string, { id: string; label: string; x: number; y: number }[]> = {
     '4-3-3': [
@@ -116,7 +116,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       }
     } catch (error) { console.error('Unable to restore live match.', error); this.voiceMessage.set('Partita caricata, ma non è stato possibile recuperare gli ultimi dati salvati.'); }
   }
-  ngOnDestroy(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.settleRunningClock(); this.clearVoiceTranscriptBuffer(); this.voice.stop(); if(this.animationTimer) clearTimeout(this.animationTimer); if(!this.exitingMatch) void this.persistMatchState(); }
+  ngOnDestroy(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} this.settleRunningClock(); this.voice.cancel(); if(this.animationTimer) clearTimeout(this.animationTimer); if(!this.exitingMatch) void this.persistMatchState(); }
   private async persistMatchState(): Promise<void> {
     if(this.exitingMatch) return;
     const snapshot = {
@@ -215,8 +215,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.running.set(false);
     this.finished.set(true);
     this.finishReportOpen.set(true);
-    this.clearVoiceTranscriptBuffer();
-    this.voice.stop();
+    this.voice.cancel();
     this.voiceListening.set(false);
     this.voiceMessage.set('');
     void this.persistMatchState();
@@ -450,8 +449,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.settleRunningClock();
     if(this.timer){clearInterval(this.timer);this.timer=null;}
     this.running.set(false);
-    this.clearVoiceTranscriptBuffer();
-    this.voice.stop();
+    this.voice.cancel();
     this.voiceListening.set(false);
     this.exitingMatch = true;
     try {
@@ -465,70 +463,77 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     }
     this.closematch.emit();
   }
-  protected startVoice(): void {
-    if(this.voiceListening()) { this.clearVoiceTranscriptBuffer(); this.voice.stop(); this.voiceListening.set(false); return; }
-    if(this.pending()) { this.listenForVoiceConfirmation(); return; }
-    this.clearVoiceTranscriptBuffer();
+  protected beginVoiceHold(event: PointerEvent): void {
+    if (this.finished() || this.voiceListening()) return;
+    event.preventDefault();
+    this.voicePointerId = event.pointerId;
+    try { (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Pointer capture is not available in every embedded browser. */ }
+    this.startVoiceCapture();
+  }
+
+  protected endVoiceHold(event: PointerEvent): void {
+    if (this.voicePointerId !== event.pointerId) return;
+    this.voicePointerId = null;
+    event.preventDefault();
+    this.finishVoiceCapture();
+  }
+
+  protected cancelVoiceHold(): void {
+    if (this.voicePointerId === null) return;
+    this.voicePointerId = null;
+    this.voice.cancel();
+    this.voiceListening.set(false);
+    this.voiceMessage.set('Ascolto annullato.');
+  }
+
+  protected beginVoiceKeyboard(event: KeyboardEvent): void {
+    if ((event.code !== 'Space' && event.code !== 'Enter') || event.repeat) return;
+    event.preventDefault();
+    if (!this.voiceListening()) this.startVoiceCapture();
+  }
+
+  protected endVoiceKeyboard(event: KeyboardEvent): void {
+    if (event.code !== 'Space' && event.code !== 'Enter') return;
+    event.preventDefault();
+    if (this.voiceListening()) this.finishVoiceCapture();
+  }
+
+  private startVoiceCapture(): void {
+    this.voiceStartFailed = false;
     this.voiceDraft.set('');
-    this.voiceMessage.set('Pronuncia un comando, ad esempio: goal numero 9.');
+    this.voiceMessage.set('Ti ascolto. Rilascia il pulsante per eseguire il comando.');
     this.voiceListening.set(true);
     this.voice.start(
-      text => this.queueVoiceTranscript(text),
-      message => this.voiceMessage.set(message),
-      () => {
-        this.flushVoiceTranscript();
+      transcript => { if (this.voiceListening()) this.voiceDraft.set(transcript); },
+      message => {
+        this.voiceStartFailed = true;
         this.voiceListening.set(false);
-        if(this.pending()) this.listenForVoiceConfirmation();
+        this.voiceMessage.set(message);
+      },
+      transcript => {
+        this.voiceListening.set(false);
+        this.voicePointerId = null;
+        if (this.voiceStartFailed) return;
+        this.executeVoiceCommand(this.voiceDraft() || transcript);
       }
     );
   }
-  private listenForVoiceConfirmation(): void {
-    if(!this.pending()) return;
-    this.clearVoiceTranscriptBuffer();
-    this.voiceMessage.set('Per confermare, pronuncia «Conferma». Per annullare, pronuncia «Annulla».');
-    this.voiceListening.set(true);
-    let retryAllowed = true;
-    this.voice.start(
-      raw => this.queueVoiceTranscript(raw),
-      message => { this.voiceMessage.set(message); if(/permesso microfono negato|non è supportato/i.test(message)) retryAllowed=false; },
-      () => {
-        this.flushVoiceTranscript();
-        this.voiceListening.set(false);
-        if(this.pending() && retryAllowed) this.listenForVoiceConfirmation();
-      }
-    );
+
+  private finishVoiceCapture(): void {
+    if (!this.voiceListening()) return;
+    this.voiceMessage.set('Elaboro il comando…');
+    this.voice.stop();
   }
-  private queueVoiceTranscript(raw: string): void {
-    const fragment = raw.trim();
-    if (!fragment) return;
-    this.voiceTranscriptBuffer = [this.voiceTranscriptBuffer, fragment].filter(Boolean).join(' ');
-    if (this.voiceTranscriptTimer) clearTimeout(this.voiceTranscriptTimer);
-    // SpeechRecognition can finalize one phrase in several chunks. Wait for a
-    // meaningful silence before parsing so numbers and clauses are not lost.
-    this.voiceTranscriptTimer = setTimeout(() => {
-      this.voiceTranscriptTimer = null;
-      const wasPending = !!this.pending();
-      this.flushVoiceTranscript();
-      if (!wasPending && this.pending()) {
-        this.voice.stop();
-        this.voiceListening.set(false);
-        this.listenForVoiceConfirmation();
-      }
-    }, 1800);
-  }
-  private flushVoiceTranscript(): void {
-    if (this.voiceTranscriptTimer) {
-      clearTimeout(this.voiceTranscriptTimer);
-      this.voiceTranscriptTimer = null;
+
+  private executeVoiceCommand(raw: string): void {
+    const transcript = raw.trim();
+    if (!transcript) {
+      this.voiceMessage.set('Non ho riconosciuto parole. Tieni premuto e riprova parlando chiaramente.');
+      return;
     }
-    const transcript = this.voiceTranscriptBuffer.trim();
-    this.voiceTranscriptBuffer = '';
-    if (transcript) this.handleVoiceTranscript(transcript);
-  }
-  private clearVoiceTranscriptBuffer(): void {
-    if (this.voiceTranscriptTimer) clearTimeout(this.voiceTranscriptTimer);
-    this.voiceTranscriptTimer = null;
-    this.voiceTranscriptBuffer = '';
+    this.voiceDraft.set(transcript);
+    this.parseCommand(transcript);
+    if (this.pending()) this.confirmAction();
   }
   private readVoiceHelpPreference(): boolean {
     try { return typeof window !== 'undefined' && window.localStorage.getItem(this.voiceHelpStorageKey) === 'open'; }
@@ -540,28 +545,41 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     try { window.localStorage.setItem(this.voiceHelpStorageKey, next ? 'open' : 'closed'); }
     catch { /* Keep the control usable when browser storage is unavailable. */ }
   }
-  private handleVoiceTranscript(raw: string): void {
-    const spoken = raw.trim().toLocaleLowerCase('it-IT')
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  private normalizeVoiceCommand(raw: string): string {
+    const normalized = raw.toLocaleLowerCase('it-IT')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^\p{L}\p{N}\s]/gu, ' ')
-      .replace(/\s+/g, ' ').trim();
-
-    // While an event is awaiting confirmation, confirmation and cancellation
-    // must take priority over event parsing.
-    if (this.pending() && /\bconferma(?:re)?\b/.test(spoken)) {
-      this.confirmAction();
-      return;
-    }
-    if (this.pending() && /\b(annulla|annullare|cancella)\b/.test(spoken)) {
-      this.cancelAction();
-      return;
-    }
-
-    this.parseCommand(raw);
+      .replace(/\s+/g, ' ')
+      .trim();
+    const smallNumbers: Record<string, string> = {
+      zero: '0', uno: '1', due: '2', tre: '3', quattro: '4',
+      cinque: '5', sei: '6', sette: '7', otto: '8', nove: '9', dieci: '10',
+      undici: '11', dodici: '12', tredici: '13', quattordici: '14', quindici: '15',
+      sedici: '16', diciassette: '17', diciotto: '18', diciannove: '19', venti: '20'
+    };
+    const tens: Record<string, number> = {
+      venti: 20, trenta: 30, quaranta: 40, cinquanta: 50, sessanta: 60,
+      settanta: 70, ottanta: 80, novanta: 90
+    };
+    const units: Record<string, number> = {
+      uno: 1, una: 1, due: 2, tre: 3, quattro: 4, cinque: 5,
+      sei: 6, sette: 7, otto: 8, nove: 9
+    };
+    return normalized.split(' ').map(token => {
+      if (smallNumbers[token]) return smallNumbers[token];
+      for (const [prefix, value] of Object.entries(tens)) {
+        if (token.startsWith(prefix) && token.length > prefix.length) {
+          const suffix = token.slice(prefix.length);
+          if (units[suffix]) return String(value + units[suffix]);
+        }
+      }
+      return token;
+    }).join(' ');
   }
 
   private rejectVoiceCommand(message: string): void {
-    this.voice.stop();
+    this.voice.cancel();
     this.voiceListening.set(false);
     this.pending.set(null);
     this.voiceMessage.set(message);
@@ -569,78 +587,98 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
 
   private parseCommand(raw: string): void {
     this.voiceDraft.set(raw);
-    const text=raw.toLocaleLowerCase('it-IT');
-    if(this.finished()){this.rejectVoiceCommand('La partita è terminata: non puoi aggiungere o modificare eventi.');return;}
-    const undoMatch=text.match(/annulla\s+(goal|gol|ammonizione|giallo|espulsione|rosso)\s+(?:del\s+)?(?:numero\s*)?(\d{1,2})/);
-    if(undoMatch){this.undoMatchEvent(undoMatch[1],Number(undoMatch[2]));return;}
-    const numbers=[...text.matchAll(/\b(?:numero\s*)?(\d{1,2})\b/g)].map(m=>Number(m[1]));
-    const byNumber=(n:number)=>this.players().filter(p=>p.shirtNumber===n);
-    const findUnique=(n:number)=>{const matches=byNumber(n);return matches.length===1?matches[0]:undefined;};
-    const onField=(id:string)=>Object.values(this.lineup()).includes(id);
-    const assistMatch=text.match(/assist(?:ito)?\s+(?:di\s+)?(?:numero\s*)?(\d{1,2})/);
-    const assistNumber=assistMatch?Number(assistMatch[1]):undefined;
-    if(/goal|gol|ha segnato|rete/.test(text)){
-      const scorerNumber=numbers.find(n=>n!==assistNumber);
-      if(scorerNumber===undefined){this.rejectVoiceCommand('Per registrare un gol devi indicare il numero di maglia del marcatore.');return;}
-      const scorerMatches=byNumber(scorerNumber), scorer=findUnique(scorerNumber);
-      if(!scorerMatches.length){this.rejectVoiceCommand(`Il numero ${scorerNumber} non è presente nella rosa.`);return;}
-      if(!scorer){this.rejectVoiceCommand(`Ci sono più giocatori con la maglia ${scorerNumber}: assegna numeri distinti prima di usare il comando.`);return;}
-      const assister=assistNumber===undefined?undefined:findUnique(assistNumber);
-      if(assistNumber!==undefined&&!byNumber(assistNumber).length){this.rejectVoiceCommand(`Il numero ${assistNumber} indicato per l’assist non è presente nella rosa.`);return;}
-      if(assistNumber!==undefined&&!assister){this.rejectVoiceCommand(`Il numero ${assistNumber} per l’assist non identifica un solo giocatore.`);return;}
-      if(!onField(scorer.id)){this.rejectVoiceCommand(`#${scorerNumber} è in rosa ma non è attualmente in campo: non può essere registrato come marcatore.`);return;}
-      if(assister&&!onField(assister.id)){this.rejectVoiceCommand(`#${assistNumber} è in rosa ma non è attualmente in campo: non può essere registrato come autore dell’assist.`);return;}
-      if(assister&&scorer.id===assister.id){this.rejectVoiceCommand('Il marcatore e l’autore dell’assist devono essere due giocatori diversi.');return;}
-      const description=`Gol di #${scorer.shirtNumber} ${scorer.firstName} ${scorer.lastName}${assister?` · assist di #${assister.shirtNumber} ${assister.lastName}`:''}`;
-      this.pending.set({type:'goal',playerId:scorer.id,assistPlayerId:assister?.id,description});
-    } else if(/ammon|cartellino giallo|giallo/.test(text) || (/cartellino/.test(text) && this.pending()?.type === 'yellow-card')){
-      if(!numbers.length){this.rejectVoiceCommand('Dimmi il numero di maglia da ammonire, per esempio: ammonizione numero 5.');return;}
-      const p=findUnique(numbers[0]);
-      if(!byNumber(numbers[0]).length){this.rejectVoiceCommand(`Il numero ${numbers[0]} non è presente nella rosa.`);return;}
-      if(!p){this.rejectVoiceCommand(`Il numero ${numbers[0]} non identifica un solo giocatore.`);return;}
-      if(this.redCards().includes(p.id)){this.rejectVoiceCommand(`${p.firstName} ${p.lastName} è già stato espulso.`);return;}
-      const next=(this.yellowCards()[p.id]??0)+1;
-      this.pending.set({type:'yellow-card',playerId:p.id,description:next>=2?`Seconda ammonizione: #${p.shirtNumber} ${p.firstName} ${p.lastName} · espulsione automatica`:`Ammonizione a #${p.shirtNumber} ${p.firstName} ${p.lastName} (prima ammonizione)`});
-    } else if(/espuls|cartellino rosso|rosso/.test(text) || (/cartellino/.test(text) && this.pending()?.type === 'red-card')){
-      if(!numbers.length){this.rejectVoiceCommand('Indica il numero di maglia del giocatore da espellere.');return;}
-      const p=findUnique(numbers[0]);
-      if(!byNumber(numbers[0]).length){this.rejectVoiceCommand(`Il numero ${numbers[0]} non è presente nella rosa.`);return;}
-      if(!p){this.rejectVoiceCommand(`Il numero ${numbers[0]} non identifica un solo giocatore.`);return;}
-      if(this.redCards().includes(p.id)){this.rejectVoiceCommand(`${p.firstName} ${p.lastName} è già stato espulso.`);return;}
-      this.pending.set({type:'red-card',playerId:p.id,description:`Espulsione di #${p.shirtNumber} ${p.firstName} ${p.lastName}`});
-    } else if(/cambio|sostituz/.test(text)){
-      if(numbers.length<2){this.rejectVoiceCommand('Indica entrambi i numeri: cambio numero 7 con numero 9.');return;}
-      const [outNumber,inNumber]=numbers;
-      const outMatches=byNumber(outNumber),inMatches=byNumber(inNumber);
-      const outgoing=findUnique(outNumber),incoming=findUnique(inNumber);
-      if(!outMatches.length){this.rejectVoiceCommand(`Il numero ${outNumber} che deve uscire non è presente nella rosa.`);return;}
-      if(!inMatches.length){this.rejectVoiceCommand(`Il numero ${inNumber} che deve entrare non è presente nella rosa.`);return;}
-      if(!outgoing||!incoming){this.rejectVoiceCommand('Uno dei numeri indicati è assegnato a più giocatori.');return;}
-      if(outgoing.id===incoming.id){this.rejectVoiceCommand('Non puoi sostituire un giocatore con sé stesso.');return;}
-      if(!onField(outgoing.id)){this.rejectVoiceCommand(`#${outNumber} non è in campo e quindi non può uscire.`);return;}
-      if(onField(incoming.id)){this.rejectVoiceCommand(`#${inNumber} è già in campo e non può entrare dalla panchina.`);return;}
-      if(this.redCards().includes(incoming.id)){this.rejectVoiceCommand(`#${inNumber} è stato espulso e non può entrare.`);return;}
-      if(this.redCards().includes(outgoing.id)){this.rejectVoiceCommand(`#${outNumber} è già stato espulso e non può essere sostituito.`);return;}
-      if(this.changesUsed()>=this.maxChanges){this.rejectVoiceCommand('Hai esaurito i 5 cambi disponibili.');return;}
-      this.pending.set({type:'substitution',outgoingId:outgoing.id,incomingId:incoming.id,description:`Cambio: esce #${outgoing.shirtNumber} ${outgoing.lastName}, entra #${incoming.shirtNumber} ${incoming.lastName}`});
-    } else { this.rejectVoiceCommand('Comando non riconosciuto. Puoi segnalare gol, ammonizioni, espulsioni e cambi.');return; }
-    this.voiceMessage.set('Controlla l’evento e conferma per registrarlo.');
+    const text = this.normalizeVoiceCommand(raw);
+    if (this.finished()) {
+      this.rejectVoiceCommand('La partita è terminata: non puoi aggiungere o modificare eventi.');
+      return;
+    }
+    const undoMatch = text.match(/annulla\s+(?:(?:il|la|lo)\s+)?(goal|gol|ammonizione|giallo|espulsione|rosso)\s+(?:del\s+)?(?:numero\s*)?(\d{1,2})/);
+    if (undoMatch) { this.undoMatchEvent(undoMatch[1], Number(undoMatch[2])); return; }
+    const numbers = [...text.matchAll(/\b(?:numero\s*)?(\d{1,2})\b/g)].map(match => Number(match[1]));
+    const byNumber = (number: number) => this.players().filter(player => player.shirtNumber === number);
+    const findUnique = (number: number) => {
+      const matches = byNumber(number);
+      return matches.length === 1 ? matches[0] : undefined;
+    };
+    const onField = (id: string) => Object.values(this.lineup()).includes(id);
+    const assistMatch = text.match(/assist(?:ito)?\s+(?:(?:di|del|della|da)\s+)?(?:numero\s*)?(\d{1,2})/);
+    const assistNumber = assistMatch ? Number(assistMatch[1]) : undefined;
+
+    if (/\b(goal|gol|ha segnato|segnato|rete)\b/.test(text)) {
+      const scorerNumber = numbers.find(number => number !== assistNumber);
+      if (scorerNumber === undefined) {
+        this.rejectVoiceCommand('Per registrare un gol devi indicare il numero di maglia del marcatore.');
+        return;
+      }
+      const scorerMatches = byNumber(scorerNumber), scorer = findUnique(scorerNumber);
+      if (!scorerMatches.length) { this.rejectVoiceCommand('Il numero ' + scorerNumber + ' non è presente nella rosa.'); return; }
+      if (!scorer) { this.rejectVoiceCommand('Ci sono più giocatori con la maglia ' + scorerNumber + ': assegna numeri distinti prima di usare il comando.'); return; }
+      const assister = assistNumber === undefined ? undefined : findUnique(assistNumber);
+      if (assistNumber !== undefined && !byNumber(assistNumber).length) { this.rejectVoiceCommand('Il numero ' + assistNumber + ' indicato per l’assist non è presente nella rosa.'); return; }
+      if (assistNumber !== undefined && !assister) { this.rejectVoiceCommand('Il numero ' + assistNumber + ' per l’assist non identifica un solo giocatore.'); return; }
+      if (!onField(scorer.id)) { this.rejectVoiceCommand('#' + scorerNumber + ' è in rosa ma non è attualmente in campo: non può essere registrato come marcatore.'); return; }
+      if (assister && !onField(assister.id)) { this.rejectVoiceCommand('#' + assistNumber + ' è in rosa ma non è attualmente in campo: non può essere registrato come autore dell’assist.'); return; }
+      if (assister && scorer.id === assister.id) { this.rejectVoiceCommand('Il marcatore e l’autore dell’assist devono essere due giocatori diversi.'); return; }
+      const description = 'Gol di #' + scorer.shirtNumber + ' ' + scorer.firstName + ' ' + scorer.lastName + (assister ? ' · assist di #' + assister.shirtNumber + ' ' + assister.lastName : '');
+      this.pending.set({ type: 'goal', playerId: scorer.id, assistPlayerId: assister?.id, description });
+    } else if (/\b(ammon|ammonito|ammonizione|cartellino giallo|giallo)\b/.test(text)) {
+      if (!numbers.length) { this.rejectVoiceCommand('Dimmi il numero di maglia da ammonire, per esempio: ammonito numero 5.'); return; }
+      const player = findUnique(numbers[0]);
+      if (!byNumber(numbers[0]).length) { this.rejectVoiceCommand('Il numero ' + numbers[0] + ' non è presente nella rosa.'); return; }
+      if (!player) { this.rejectVoiceCommand('Il numero ' + numbers[0] + ' non identifica un solo giocatore.'); return; }
+      if (this.redCards().includes(player.id)) { this.rejectVoiceCommand(player.firstName + ' ' + player.lastName + ' è già stato espulso.'); return; }
+      const next = (this.yellowCards()[player.id] ?? 0) + 1;
+      this.pending.set({
+        type: 'yellow-card',
+        playerId: player.id,
+        description: next >= 2
+          ? 'Seconda ammonizione: #' + player.shirtNumber + ' ' + player.firstName + ' ' + player.lastName + ' · espulsione automatica'
+          : 'Ammonizione a #' + player.shirtNumber + ' ' + player.firstName + ' ' + player.lastName + ' (prima ammonizione)'
+      });
+    } else if (/\b(espuls|espulso|espell|cartellino rosso|rosso)\b/.test(text)) {
+      if (!numbers.length) { this.rejectVoiceCommand('Indica il numero di maglia del giocatore da espellere.'); return; }
+      const player = findUnique(numbers[0]);
+      if (!byNumber(numbers[0]).length) { this.rejectVoiceCommand('Il numero ' + numbers[0] + ' non è presente nella rosa.'); return; }
+      if (!player) { this.rejectVoiceCommand('Il numero ' + numbers[0] + ' non identifica un solo giocatore.'); return; }
+      if (this.redCards().includes(player.id)) { this.rejectVoiceCommand(player.firstName + ' ' + player.lastName + ' è già stato espulso.'); return; }
+      this.pending.set({ type: 'red-card', playerId: player.id, description: 'Espulsione di #' + player.shirtNumber + ' ' + player.firstName + ' ' + player.lastName });
+    } else if (/\b(cambio|cambiare|sostituz|sostituisc|esce|entra)\b/.test(text)) {
+      if (numbers.length < 2) {
+        this.rejectVoiceCommand('Indica chi esce e chi entra: «cambio del numero 7 con il numero 9».');
+        return;
+      }
+      const [outNumber, inNumber] = numbers;
+      const outMatches = byNumber(outNumber), inMatches = byNumber(inNumber);
+      const outgoing = findUnique(outNumber), incoming = findUnique(inNumber);
+      if (!outMatches.length) { this.rejectVoiceCommand('Il numero ' + outNumber + ' che deve uscire non è presente nella rosa.'); return; }
+      if (!inMatches.length) { this.rejectVoiceCommand('Il numero ' + inNumber + ' che deve entrare non è presente nella rosa.'); return; }
+      if (!outgoing || !incoming) { this.rejectVoiceCommand('Uno dei numeri indicati è assegnato a più giocatori.'); return; }
+      if (outgoing.id === incoming.id) { this.rejectVoiceCommand('Non puoi sostituire un giocatore con sé stesso.'); return; }
+      if (!onField(outgoing.id)) { this.rejectVoiceCommand('#' + outNumber + ' non è in campo e quindi non può uscire.'); return; }
+      if (onField(incoming.id)) { this.rejectVoiceCommand('#' + inNumber + ' è già in campo e non può entrare dalla panchina.'); return; }
+      if (this.redCards().includes(incoming.id)) { this.rejectVoiceCommand('#' + inNumber + ' è stato espulso e non può entrare.'); return; }
+      if (this.redCards().includes(outgoing.id)) { this.rejectVoiceCommand('#' + outNumber + ' è già stato espulso e non può essere sostituito.'); return; }
+      if (this.changesUsed() >= this.maxChanges) { this.rejectVoiceCommand('Hai esaurito i 5 cambi disponibili.'); return; }
+      this.pending.set({
+        type: 'substitution',
+        outgoingId: outgoing.id,
+        incomingId: incoming.id,
+        description: 'Cambio: esce #' + outgoing.shirtNumber + ' ' + outgoing.lastName + ', entra #' + incoming.shirtNumber + ' ' + incoming.lastName
+      });
+    } else {
+      this.rejectVoiceCommand('Comando non riconosciuto. Puoi segnalare gol, ammonizioni, espulsioni e cambi.');
+      return;
+    }
+    this.voiceMessage.set('Comando riconosciuto. Eseguo…');
   }
 
   protected dismissVoiceFeedback(): void {
-    this.clearVoiceTranscriptBuffer();
-    this.voice.stop();
+    this.voice.cancel();
     this.voiceListening.set(false);
     this.voiceMessage.set('');
     this.voiceDraft.set('');
   }
-  protected updateVoiceDraft(value: string): void { this.voiceDraft.set(value); }
-  protected reinterpretDraft(): void {
-    const corrected=this.voiceDraft().trim();
-    if(!corrected){this.voiceMessage.set('Scrivi o pronuncia il comando corretto prima di continuare.');return;}
-    this.pending.set(null); this.parseCommand(corrected);
-    if(this.pending()) this.voiceMessage.set('Comando corretto. Controlla i dettagli e conferma.');
-  }
+
   private undoMatchEvent(kind: string, shirtNumber: number): void {
     const player=this.players().find(p=>p.shirtNumber===shirtNumber);
     if(!player){this.voiceMessage.set('Non trovo il giocatore numero '+shirtNumber+'.');return;}
@@ -666,8 +704,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
   protected confirmAction(): void {
     const action=this.pending();if(!action)return;
-    this.clearVoiceTranscriptBuffer();
-    this.voice.stop(); this.voiceListening.set(false);
+    this.voice.cancel(); this.voiceListening.set(false);
     const minute=this.minute;
     if(action.type==='goal'&&action.playerId){
       const scorer=this.player(action.playerId); this.showMatchAnimation({type:'goal',title:'GOOOL!',detail:scorer?`#${scorer.shirtNumber} ${scorer.lastName}`:'Rete della squadra'});
@@ -694,9 +731,11 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       if(slot&&this.changesUsed()<this.maxChanges){const outgoing=this.player(action.outgoingId), incoming=this.player(action.incomingId);this.showMatchAnimation({type:'substitution',title:'SOSTITUZIONE',detail:`${outgoing?.lastName ?? 'Esce'}  →  ${incoming?.lastName ?? 'Entra'}`,outgoingNumber:outgoing?.shirtNumber,incomingNumber:incoming?.shirtNumber});const pos=this.matchPositions()[action.outgoingId];this.lineup.update(l=>({...l,[slot]:action.incomingId!}));if(pos)this.matchPositions.update(p=>({...p,[action.incomingId!]:pos}));this.formationPlayerOrder=this.formationPlayerOrder.map(id=>id===action.outgoingId?action.incomingId!:id);this.changesUsed.update(v=>v+1);this.events.update(e=>[{type:'substitution',minute,description:action.description,outgoingId:action.outgoingId,incomingId:action.incomingId},...e]);}
       else {this.voiceMessage.set(this.changesUsed()>=this.maxChanges?'Hai esaurito i cambi disponibili.':'Il giocatore da sostituire non è in campo.');this.pending.set(null);return;}
     }
-    this.pending.set(null);this.voiceDraft.set('');this.voiceMessage.set(''); void this.persistMatchState();
+    this.pending.set(null);
+    this.voiceMessage.set(action.type === 'goal' ? 'Gol registrato.' : action.type === 'yellow-card' ? 'Ammonizione registrata.' : action.type === 'red-card' ? 'Espulsione registrata.' : 'Sostituzione eseguita.');
+    void this.persistMatchState();
   }
-  protected cancelAction(): void { this.clearVoiceTranscriptBuffer(); this.voice.stop(); this.voiceListening.set(false); this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set(''); }
+  protected cancelAction(): void { this.voice.cancel(); this.voiceListening.set(false); this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set('Evento annullato.'); }
   protected chooseOutgoing(player:PlayerRecord): void { if(this.playerHasRedCard(player)){this.voiceMessage.set('Un giocatore espulso non può essere sostituito. La squadra continua in inferiorità numerica.');return;} this.selectedOutgoingId.set(player.id);this.voiceMessage.set(`Selezionato ${player.lastName}. Ora scegli chi entra dalla panchina.`); }
   protected chooseIncoming(player:PlayerRecord): void {
     const outgoing=this.selectedOutgoingId();if(!outgoing)return;
