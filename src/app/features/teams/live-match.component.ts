@@ -672,6 +672,13 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.voiceMessage.set('Comando riconosciuto. Eseguo…');
   }
 
+  protected dismissVoiceFeedback(): void {
+    this.voice.cancel();
+    this.voiceListening.set(false);
+    this.voiceMessage.set('');
+    this.voiceDraft.set('');
+  }
+
   private undoMatchEvent(kind: string, shirtNumber: number): void {
     const player=this.players().find(p=>p.shirtNumber===shirtNumber);
     if(!player){this.voiceMessage.set('Non trovo il giocatore numero '+shirtNumber+'.');return;}
