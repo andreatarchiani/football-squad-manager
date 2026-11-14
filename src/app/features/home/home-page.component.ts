@@ -69,6 +69,7 @@ export class HomePageComponent {
   private loadRequest = 0;
 
   private selectionStorageKey(uid: string): string { return `fsm-default-team-${uid}`; }
+  private layoutSlotStorageKey(uid: string): string { return `fsm-layout-slot-${uid}`; }
 
   constructor() { effect(() => { if (this.auth.workspaceId()) void this.load(); }); }
 
@@ -281,7 +282,7 @@ export class HomePageComponent {
       return;
     }
     this.error.set('');
-    this.launchMatch.emit({ team, players: [...this.previewPlayers()], lineup: { ...this.previewLineup() }, formation: this.previewFormation(), positions: { ...this.previewPositions() }, layoutSlot: 1, opponentName: this.opponentName().trim() });
+    this.launchMatch.emit({ team, players: [...this.previewPlayers()], lineup: { ...this.previewLineup() }, formation: this.previewFormation(), positions: { ...this.previewPositions() }, layoutSlot: this.layoutSlot(), opponentName: this.opponentName().trim() });
   }
 
   private async loadPreview(): Promise<void> {
@@ -337,6 +338,8 @@ export class HomePageComponent {
       const role = String(data?.['accountRole'] ?? 'Allenatore');
       this.accountRole.set(['Società', 'Allenatore', 'Collaboratore', 'Altro'].includes(role) ? role : 'Allenatore');
       const savedPreference = String(data?.['defaultTeamId'] ?? '');
+      const savedLayoutSlot = uid && typeof localStorage !== 'undefined' ? localStorage.getItem(this.layoutSlotStorageKey(uid)) : null;
+      this.layoutSlot.set(savedLayoutSlot === '2' ? 2 : 1);
       const localPreference = uid && typeof localStorage !== 'undefined' ? localStorage.getItem(this.selectionStorageKey(uid)) ?? '' : '';
       const isSelectable = (id: string) => teams.some(team => team.id === id && !team.isArchived);
       const selected = isSelectable(savedPreference)
