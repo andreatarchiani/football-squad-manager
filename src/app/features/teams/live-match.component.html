@@ -176,7 +176,7 @@
         @if (event.type === 'goal') {
           <label>Marcatore <select [value]="editPlayerId()" (change)="updateEditPlayer($any($event.target).value)"><option value="">Seleziona giocatore</option>@for (player of players(); track player.id) { <option [value]="player.id">#{{ player.shirtNumber }} · {{ player.firstName }} {{ player.lastName }}</option> }</select></label>
           <label>Assist (facoltativo) <select [value]="editAssistPlayerId()" (change)="updateEditAssist($any($event.target).value)"><option value="">Nessun assist</option>@for (player of players(); track player.id) { <option [value]="player.id">#{{ player.shirtNumber }} · {{ player.firstName }} {{ player.lastName }}</option> }</select></label>
-        } @else if (event.type === 'yellow-card' || event.type === 'red-card') {
+        } @else if (event.type === 'key-pass' || event.type === 'yellow-card' || event.type === 'red-card') {
           <label>Giocatore <select [value]="editPlayerId()" (change)="updateEditPlayer($any($event.target).value)"><option value="">Seleziona giocatore</option>@for (player of players(); track player.id) { <option [value]="player.id">#{{ player.shirtNumber }} · {{ player.firstName }} {{ player.lastName }}</option> }</select></label>
         } @else if (event.type === 'substitution') {
           <label>Giocatore che esce <select [value]="editOutgoingId()" (change)="updateEditOutgoing($any($event.target).value)"><option value="">Seleziona giocatore</option>@for (player of players(); track player.id) { <option [value]="player.id">#{{ player.shirtNumber }} · {{ player.firstName }} {{ player.lastName }}</option> }</select></label>
