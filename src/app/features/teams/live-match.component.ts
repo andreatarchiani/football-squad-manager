@@ -30,6 +30,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   readonly initialPositions = input.required<Record<string, { x: number; y: number }>>();
   readonly autoStart = input(false);
   readonly closematch = output<void>();
+  readonly editroster = output<void>();
   private readonly voice = inject(VoiceRecognitionService);
   private readonly auth = inject(FirebaseAuthService);
   private readonly playerService = inject(PlayerService);
