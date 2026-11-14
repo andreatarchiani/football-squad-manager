@@ -554,8 +554,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^\p{L}\p{N}\s]/gu, ' ')
       .replace(/\s+/g, ' ')
-      // In the football-match context, speech recognition can confuse “gol” with “golf”.
-      .replace(/\b(?:golf|golden)\b/g, 'gol')
+      // In the football-match context, speech recognition can transcribe “gol” as similar-sounding words.
+      .replace(/\b(?:golf|golden|gold|gool|gole)\b/g, 'gol')
       .trim();
     const smallNumbers: Record<string, string> = {
       zero: '0', uno: '1', due: '2', tre: '3', quattro: '4',
