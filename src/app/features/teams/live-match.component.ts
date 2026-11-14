@@ -514,7 +514,10 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
         this.voiceListening.set(false);
         this.voicePointerId = null;
         if (this.voiceStartFailed) return;
-        this.executeVoiceCommand(this.voiceDraft() || transcript);
+        // Execute only the definitive transcript returned when recognition ends.
+        // The live draft can contain interim words and browser-replayed fragments;
+        // using it as a fallback may execute an incomplete or duplicated command.
+        this.executeVoiceCommand(transcript);
       }
     );
   }
