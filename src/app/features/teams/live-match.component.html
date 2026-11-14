@@ -1,8 +1,6 @@
 <main class="live-match" aria-label="Modalità partita in corso">
   <header class="match-topbar match-scoreboard-header">
-    <button type="button" class="match-close" (click)="close()" aria-label="Esci dalla partita">‹</button>
     <div class="match-team match-home-team">
-      <span class="match-team-badge" aria-hidden="true">{{ teamName().slice(0, 1).toUpperCase() }}</span>
       <small><span class="live-dot"></span> CASA</small>
       <strong>{{ teamName() }}</strong>
       <em>FORMAZIONE {{ matchFormation() }}</em>
@@ -16,14 +14,8 @@
       <div class="match-score"><span>{{ score }}</span><b>–</b><span>{{ opponentGoals() }}</span></div>
     </div>
     <div class="match-team match-away-team">
-      <span class="match-team-badge" aria-hidden="true">{{ (opponentName() || 'Avversari').slice(0, 1).toUpperCase() }}</span>
       <small>TRASFERTA</small>
       <strong>{{ opponentName() || 'Avversari' }}</strong>
-      <div class="opponent-goal-controls" aria-label="Modifica gol avversari">
-        <button type="button" (click)="removeOpponentGoal()" [disabled]="opponentGoals() === 0" aria-label="Rimuovi un gol avversario">−</button>
-        <span>GOL</span>
-        <button type="button" (click)="addOpponentGoal()" [disabled]="finished()" aria-label="Aggiungi un gol avversario">+</button>
-      </div>
     </div>
   </header>
   <section class="match-clock match-controls-panel">
@@ -55,6 +47,7 @@
       @if (voiceHelpOpen()) {
         <div class="voice-command-list" id="voice-command-list">
           <article class="voice-command-item"><span class="voice-command-icon">⚽</span><div><strong>Segnalare un gol</strong><p>“Goal numero <b>9</b>”, “ha segnato il <b>9</b>” oppure “gol del <b>9</b> con assist del <b>10</b>”.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🥅</span><div><strong>Segnalare un gol subito</strong><p>“Goal subito”, “goal preso”, “rete subita” oppure “goal subito a causa dell’errore del <b>6</b>”. L’intera frase pronunciata viene salvata nella cronaca.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🔑</span><div><strong>Passaggio chiave</strong><p>“Passaggio chiave numero <b>8</b>” oppure “chiave del numero <b>8</b>”.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🟨</span><div><strong>Ammonizione</strong><p>“Ammonito numero <b>5</b>” oppure “ammonizione del numero <b>5</b>”. Alla seconda ammonizione il giocatore viene espulso automaticamente.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🟥</span><div><strong>Segnalare un'espulsione</strong><p>“Espulsione numero <b>5</b>”, “espulso il <b>5</b>” oppure “cartellino rosso al <b>5</b>”.</p></div></article>
