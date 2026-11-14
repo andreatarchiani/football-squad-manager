@@ -44,6 +44,21 @@
           <button type="button" class="lineup-choice" [class.active]="layoutSlot() === 2" (click)="selectLayoutSlot(2)"><span class="lineup-number">02</span><span><strong>Modulo 2</strong><small>Seconda rosa e disposizione alternativa</small></span><span class="radio-indicator"></span></button>
         </div>
         <div class="home-preview-heading"><div><strong>Anteprima formazione</strong><span>{{ previewFormation() }} · {{ layoutSlot() === 1 ? 'Modulo 1' : 'Modulo 2' }} · Tieni premuta una maglietta per cambiare giocatore</span></div><button type="button" class="customize-action" (click)="openTeams.emit({ teamId: selectedTeam.id, layoutSlot: layoutSlot() })">Modifica rosa</button></div>
+        <div class="home-captaincy-picker" aria-label="Ruoli della squadra">
+          <label><span><span class="captain-armband-icon" aria-hidden="true">C</span> Capitano</span>
+            <select [value]="captainId()" (change)="setCaptaincy('captain', $any($event.target).value)">
+              <option value="">Non assegnato</option>
+              @for (player of previewPlayers(); track player.id) { <option [value]="player.id">{{ player.shirtNumber ?? '—' }} · {{ player.firstName }} {{ player.lastName }}</option> }
+            </select>
+          </label>
+          <label><span><span class="vice-armband-icon" aria-hidden="true">VC</span> Vicecapitano</span>
+            <select [value]="viceCaptainId()" (change)="setCaptaincy('viceCaptain', $any($event.target).value)">
+              <option value="">Non assegnato</option>
+              @for (player of previewPlayers(); track player.id) { <option [value]="player.id">{{ player.shirtNumber ?? '—' }} · {{ player.firstName }} {{ player.lastName }}</option> }
+            </select>
+          </label>
+          <span class="home-captaincy-status" aria-live="polite">{{ captaincySaving() ? 'Salvataggio…' : 'Ruoli salvati automaticamente' }}</span>
+        </div>
         @if (previewLoading()) { <div class="preview-placeholder">Caricamento formazione…</div> }
         @else {
           <div class="home-pitch-stage"><div class="home-football-pitch">
@@ -51,7 +66,7 @@
             @for (slot of pitchSlots[previewFormation()]; track slot.id) {
               <div class="home-pitch-player" [style.left.%]="previewPosition(slot).x" [style.top.%]="previewPosition(slot).y">
                 <button type="button" class="home-pitch-shirt" [attr.aria-label]="'Cambia giocatore per ' + slot.label" (pointerdown)="startPreviewShirtDrag($event, slot.id)" (pointermove)="movePreviewShirt($event)" (pointerup)="endPreviewShirtDrag($event)" (pointercancel)="endPreviewShirtDrag($event)" (click)="openPreviewPlayerPicker(slot.id)">{{ previewPlayer(slot.id)?.shirtNumber ?? '+' }}</button>
-                <span class="home-pitch-player-name">{{ previewPlayer(slot.id)?.lastName || slot.label }}</span>
+                <span class="home-pitch-player-name">{{ previewPlayer(slot.id)?.lastName || slot.label }}@if (previewPlayer(slot.id); as player) { @if (player.id === captainId()) { <span class="home-leadership-mark captain-armband-mark" title="Capitano" aria-label="Capitano">C</span> } @else if (player.id === viceCaptainId()) { <span class="home-leadership-mark vice-armband-mark" title="Vicecapitano" aria-label="Vicecapitano">VC</span> } }</span>
               </div>
             }
           </div></div>
