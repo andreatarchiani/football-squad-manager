@@ -621,7 +621,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       if (assister && scorer.id === assister.id) { this.rejectVoiceCommand('Il marcatore e l’autore dell’assist devono essere due giocatori diversi.'); return; }
       const description = 'Gol di #' + scorer.shirtNumber + ' ' + scorer.firstName + ' ' + scorer.lastName + (assister ? ' · assist di #' + assister.shirtNumber + ' ' + assister.lastName : '');
       this.pending.set({ type: 'goal', playerId: scorer.id, assistPlayerId: assister?.id, description });
-    } else if (/\b(ammon|ammonito|ammonizione|cartellino giallo|giallo)\b/.test(text)) {
+    } else if (/ammon|cartellino giallo|\bgiallo\b/.test(text)) {
       if (!numbers.length) { this.rejectVoiceCommand('Dimmi il numero di maglia da ammonire, per esempio: ammonito numero 5.'); return; }
       const player = findUnique(numbers[0]);
       if (!byNumber(numbers[0]).length) { this.rejectVoiceCommand('Il numero ' + numbers[0] + ' non è presente nella rosa.'); return; }
@@ -635,14 +635,14 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
           ? 'Seconda ammonizione: #' + player.shirtNumber + ' ' + player.firstName + ' ' + player.lastName + ' · espulsione automatica'
           : 'Ammonizione a #' + player.shirtNumber + ' ' + player.firstName + ' ' + player.lastName + ' (prima ammonizione)'
       });
-    } else if (/\b(espuls|espulso|espell|cartellino rosso|rosso)\b/.test(text)) {
+    } else if (/espuls|espulso|espell|cartellino rosso|\brosso\b/.test(text)) {
       if (!numbers.length) { this.rejectVoiceCommand('Indica il numero di maglia del giocatore da espellere.'); return; }
       const player = findUnique(numbers[0]);
       if (!byNumber(numbers[0]).length) { this.rejectVoiceCommand('Il numero ' + numbers[0] + ' non è presente nella rosa.'); return; }
       if (!player) { this.rejectVoiceCommand('Il numero ' + numbers[0] + ' non identifica un solo giocatore.'); return; }
       if (this.redCards().includes(player.id)) { this.rejectVoiceCommand(player.firstName + ' ' + player.lastName + ' è già stato espulso.'); return; }
       this.pending.set({ type: 'red-card', playerId: player.id, description: 'Espulsione di #' + player.shirtNumber + ' ' + player.firstName + ' ' + player.lastName });
-    } else if (/\b(cambio|cambiare|sostituz|sostituisc|esce|entra)\b/.test(text)) {
+    } else if (/\b(cambio|cambiare|esce|entra)\b|sostituz|sostituisc/.test(text)) {
       if (numbers.length < 2) {
         this.rejectVoiceCommand('Indica chi esce e chi entra: «cambio del numero 7 con il numero 9».');
         return;
