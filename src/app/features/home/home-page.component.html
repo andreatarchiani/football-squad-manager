@@ -6,7 +6,7 @@
       <label class="opponent-field"><span>AVVERSARIO</span><input type="text" maxlength="80" [value]="opponentName()" (input)="setOpponentName($any($event.target).value)" placeholder="Nome della squadra avversaria" autocomplete="off"></label>
     </section>
     <section class="home-roster-panel">
-      <div class="home-roster-heading"><div><span class="eyebrow">{{ selectedTeam.name }}</span><h2>La tua rosa</h2><p>{{ previewFormation() }} · {{ previewPlayers().length }} giocatori disponibili</p></div><button type="button" class="customize-action" (click)="openTeams.emit({ teamId: selectedTeam.id, layoutSlot: layoutSlot() })">Apri e modifica rosa</button></div>
+      <div class="home-roster-heading"><div><span class="eyebrow">{{ selectedTeam.name }}</span><h2>La tua rosa</h2><p>{{ previewFormation() }} · {{ previewPlayers().length }} giocatori disponibili</p></div><button type="button" class="launch-button" (click)="start()" [disabled]="previewLoading() || !completeStartingLineup">▶ Inizia partita</button></div>
       @if (previewLoading()) { <div class="preview-placeholder">Caricamento formazione…</div> }
       @else {
         <div class="home-pitch-stage"><div class="home-football-pitch" aria-label="Anteprima non modificabile della formazione">
@@ -19,7 +19,6 @@
           }
         </div></div>
       }
-      <div class="launch-actions"><button type="button" class="launch-button" (click)="start()" [disabled]="previewLoading() || !completeStartingLineup">▶ Inizia partita</button></div>
       @if (!completeStartingLineup) { <p class="lineup-completion-hint" role="status">La formazione non è completa. Apri la rosa per sistemare gli 11 titolari.</p> }
     </section>
   } @else {
