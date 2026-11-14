@@ -384,7 +384,7 @@ export class TeamsPageComponent implements OnChanges {
       const [players, saved, captaincy] = await Promise.all([
         this.playerService.list(workspaceId, this.teams()),
         seasonId ? this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId, 1) : Promise.resolve(null),
-        seasonId ? this.teamsService.loadCaptaincy(workspaceId, team.id, seasonId) : Promise.resolve({ captainId: '', viceCaptainId: '' })
+        seasonId ? this.teamsService.loadCaptaincy(workspaceId, team.id, seasonId) : Promise.resolve({ captainId: '', viceCaptainId: '', updatedAtMs: 0 })
       ]);
       this.players.set(players);
       // Keep assignments for players still in this team's season, even if injured/suspended.
