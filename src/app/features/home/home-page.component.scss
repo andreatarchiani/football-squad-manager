@@ -51,3 +51,15 @@
 
 /* Drag dei giocatori direttamente nella formazione della Home */
 .home-pitch-shirt{touch-action:none;cursor:grab}.home-pitch-shirt:active{cursor:grabbing}.home-pitch-player{touch-action:none;user-select:none}
+
+
+.home-captaincy-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px;padding:14px;border:1px solid #385342;border-radius:12px;background:#101a18a8}
+.home-captaincy-picker label{display:grid;gap:8px;color:#c9d7ce;font-size:10px;font-weight:800}
+.home-captaincy-picker label>span{display:flex;align-items:center;gap:7px}
+.home-captaincy-picker select{width:100%;min-width:0;padding:10px 11px;border:1px solid #40594a;border-radius:8px;color:#edf4f0;background:#111a20;font:inherit;font-size:11px}
+.home-captaincy-status{grid-column:1/-1;color:#91a99a;font-size:9px}
+.captain-armband-icon,.vice-armband-icon{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 4px;border-radius:5px;font-size:10px;font-weight:950}
+.captain-armband-icon,.captain-armband-mark{color:#352600;background:linear-gradient(135deg,#ffe27a,#d7a92c);border:1px solid #ffe38a}
+.vice-armband-icon,.vice-armband-mark{color:#12344a;background:linear-gradient(135deg,#d9f2ff,#75b9dc);border:1px solid #d5f0ff}
+.home-leadership-mark{display:inline-grid;place-items:center;min-width:15px;height:15px;margin-left:3px;padding:0 2px;border-radius:4px;font-size:7px;font-weight:950;vertical-align:middle}
+@media(max-width:520px){.home-captaincy-picker{grid-template-columns:1fr}.home-captaincy-status{grid-column:auto}}

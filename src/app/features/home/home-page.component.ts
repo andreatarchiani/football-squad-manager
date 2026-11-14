@@ -30,6 +30,9 @@ export class HomePageComponent {
   protected readonly previewPositions = signal<Record<string, { x: number; y: number }>>({});
   protected readonly previewActiveSlotId = signal<string | null>(null);
   protected readonly previewSaving = signal(false);
+  protected readonly captainId = signal('');
+  protected readonly viceCaptainId = signal('');
+  protected readonly captaincySaving = signal(false);
   protected readonly previewLoading = signal(false);
   private previewDrag: { slotId: string; pointerId: number; startX: number; startY: number; moved: boolean } | null = null;
   private previewDraggedClick = false;
@@ -129,6 +132,20 @@ export class HomePageComponent {
     try { await setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: validTeamId, updatedAt: new Date() }, { merge: true }); }
     catch (error) { console.error('Unable to save default team.', error); this.error.set('Non è stato possibile salvare la squadra predefinita.'); }
     finally { this.saving.set(false); }
+  }
+
+  protected async setCaptaincy(role: 'captain' | 'viceCaptain', playerId: string): Promise<void> {
+    const nextCaptain = role === 'captain' ? playerId : this.captainId();
+    const nextVice = role === 'viceCaptain' ? playerId : this.viceCaptainId();
+    this.captainId.set(nextCaptain === nextVice ? (role === 'captain' ? nextCaptain : '') : nextCaptain);
+    this.viceCaptainId.set(nextCaptain === nextVice ? (role === 'viceCaptain' ? nextVice : '') : nextVice);
+    const team = this.selectedTeam;
+    const workspaceId = this.auth.workspaceId();
+    if (!team?.seasonId || !workspaceId) return;
+    this.captaincySaving.set(true);
+    try { await this.teamsService.saveCaptaincy(workspaceId, team.id, team.seasonId, this.captainId(), this.viceCaptainId()); }
+    catch (error) { console.error('Unable to save home team captaincy.', error); this.error.set('Non è stato possibile salvare capitano e vicecapitano. Riprova.'); }
+    finally { this.captaincySaving.set(false); }
   }
 
   protected async selectLayoutSlot(slot: 1 | 2): Promise<void> {
@@ -274,12 +291,16 @@ export class HomePageComponent {
     }
     this.previewLoading.set(true);
     try {
-      const [players, saved] = await Promise.all([
+      const [players, saved, captaincy] = await Promise.all([
         this.playerService.list(workspaceId, this.teams()),
-        this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, this.layoutSlot())
+        this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, this.layoutSlot()),
+        this.teamsService.loadCaptaincy(workspaceId, team.id, team.seasonId)
       ]);
       if (request !== this.previewRequest || this.selectedTeamId() !== team.id) return;
       this.previewPlayers.set(players.filter(player => !player.isArchived && player.status === 'active' && player.teamId === team.id && player.seasonId === team.seasonId));
+      const validPlayerIds = new Set(this.previewPlayers().map(player => player.id));
+      this.captainId.set(validPlayerIds.has(captaincy.captainId) ? captaincy.captainId : '');
+      this.viceCaptainId.set(validPlayerIds.has(captaincy.viceCaptainId) && captaincy.viceCaptainId !== captaincy.captainId ? captaincy.viceCaptainId : '');
       const formation = saved?.formation && ['4-3-3', '4-4-2', '3-5-2'].includes(saved.formation) ? saved.formation : '4-3-3';
       this.previewFormation.set(formation);
       const validSlots = new Set(this.pitchSlots[formation].map(slot => slot.id));
