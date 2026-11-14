@@ -66,7 +66,7 @@
           <div class="animated-card yellow-card-animation">🟨</div>
         } @else {
           <div class="goal-animation">⚽</div>
-          @if (animation.playerNumber != null) { <div class="goal-scorer-number">#{{ animation.playerNumber }}</div> }
+          @if (animation.playerNumber != null) { <div class="goal-scorer-number">N. {{ animation.playerNumber }}</div> }
         }
         <strong>{{ animation.title }}</strong><span>{{ animation.detail }}</span>
         @if (animation.type === 'goal' && animation.assistDetail) { <div class="goal-assist-line"><span class="goal-assist-boot" aria-hidden="true">👟</span><span>ASSIST DI <b>{{ animation.assistDetail }}</b></span></div> }

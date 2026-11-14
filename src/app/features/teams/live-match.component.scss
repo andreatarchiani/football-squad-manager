@@ -202,3 +202,10 @@
 .goal-assist-boot{font-size:22px;filter:drop-shadow(0 0 7px #9bc7ff66)}
 @keyframes scorer-number-pop{0%{opacity:0;transform:scale(.55) rotate(-12deg)}75%{transform:scale(1.12) rotate(3deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
 @media(prefers-reduced-motion:reduce){.goal-scorer-number{animation:none}}
+
+
+/* Goal celebration: restrained typography, no number badge or saturated blue. */
+.goal-scorer-number{display:block;width:auto;height:auto;margin:-3px 0 1px;padding:0;border:0;border-radius:0;background:none;color:#d7e8dc;font-size:clamp(17px,4vw,21px);font-weight:850;line-height:1.2;letter-spacing:.12em;box-shadow:none;animation:none}
+.goal-assist-line{width:auto;max-width:100%;margin-top:4px;padding:9px 15px;border:1px solid #ffffff20;border-radius:10px;background:rgba(255,255,255,.07);color:#d6e2d9;font-size:11px;font-weight:800;letter-spacing:.04em}
+.goal-assist-line b{color:#fff;font-size:13px}
+.goal-assist-boot{filter:none}
