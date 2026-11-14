@@ -101,7 +101,7 @@
         @for (slot of slots(); track slot.id) {
           @if (playerInSlot(slot.id); as player) {
             <div class="match-shirt-player pitch-player" [style.left.%]="slot.x" [style.top.%]="slot.y" [class.sent-off]="playerHasRedCard(player)" (pointerdown)="startShirtDrag($event, player.id)">
-              <span class="match-shirt pitch-shirt">{{ player.shirtNumber ?? '—' }}</span><span class="match-player-label pitch-player-name">{{ player.lastName }}</span>
+              <span class="match-shirt pitch-shirt">{{ player.shirtNumber ?? '—' }}</span><span class="match-player-label pitch-player-name">{{ player.lastName }}@if (player.id === captainId()) { <span class="match-leadership-mark captain" title="Capitano" aria-label="Capitano">C</span> } @else if (player.id === viceCaptainId()) { <span class="match-leadership-mark vice" title="Vicecapitano" aria-label="Vicecapitano">VC</span> }</span>
               @if (playerHasRedCard(player)) { <span class="sent-off-card" aria-label="Cartellino rosso">🟥 ROSSO</span> }
               @else if (yellowCardsFor(player)) { <span class="booked-card" aria-label="Cartellino giallo">🟨 GIALLO</span> }
               @if (goalsFor(player)) { <small class="goal-indicator">⚽ {{ goalsFor(player) }}</small> }
