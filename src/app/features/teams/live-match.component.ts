@@ -50,6 +50,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly pending = signal<PendingAction | null>(null);
   protected readonly events = signal<MatchEvent[]>([]);
   protected readonly goals = signal<Record<string, number>>({});
+  protected readonly opponentGoals = signal(0);
   protected readonly assists = signal<Record<string, number>>({});
   protected readonly keyPasses = signal<Record<string, number>>({});
   protected readonly yellowCards = signal<Record<string, number>>({});
@@ -133,7 +134,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
         const restoredElapsed = saved.running && !saved.finished ? saved.elapsedSeconds + Math.max(0, Math.floor((Date.now() - saved.savedAtMs) / 1000)) : saved.elapsedSeconds;
         this.elapsedSeconds.set(Math.max(0, Math.min(5400, restoredElapsed)));
         const restoredFinished = saved.finished || restoredElapsed >= 5400;
-        this.finished.set(restoredFinished); this.finishReportOpen.set(restoredFinished); this.events.set(saved.events); this.goals.set(saved.goals); this.assists.set(saved.assists);
+        this.finished.set(restoredFinished); this.finishReportOpen.set(restoredFinished); this.events.set(saved.events); this.goals.set(saved.goals); this.opponentGoals.set(Math.max(0, Number(saved.opponentGoals ?? 0))); this.assists.set(saved.assists);
         this.yellowCards.set(saved.yellowCards); this.keyPasses.set(this.countPlayerEvents(saved.events, 'key-pass')); this.redCards.set(saved.redCards); this.lineup.set(saved.lineup);
         this.matchFormation.set(this.formations[saved.formation] ? saved.formation : f); this.matchPositions.set(saved.positions);
         this.formationPlayerOrder = this.formations[this.matchFormation()].map(slot => saved.lineup[slot.id]).filter((id): id is string => !!id);
@@ -147,7 +148,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     if(this.exitingMatch) return;
     const snapshot = {
       elapsedSeconds:this.currentElapsedSeconds(), savedAtMs:Date.now(), running:this.running(), finished:this.finished(), events:this.events(), goals:this.goals(), assists:this.assists(),
-      yellowCards:this.yellowCards(), redCards:this.redCards(), lineup:this.lineup(), formation:this.matchFormation(), positions:this.matchPositions(), changesUsed:this.changesUsed()
+      yellowCards:this.yellowCards(), redCards:this.redCards(), opponentGoals:this.opponentGoals(), lineup:this.lineup(), formation:this.matchFormation(), positions:this.matchPositions(), changesUsed:this.changesUsed()
     };
     this.lastPersistedElapsed = snapshot.elapsedSeconds;
     this.persistQueue = this.persistQueue.then(async () => {
@@ -222,6 +223,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   private currentElapsedSeconds(): number { return this.running() && this.runStartedAtMs !== null ? Math.min(5400, this.runBaseSeconds + Math.floor((Date.now() - this.runStartedAtMs) / 1000)) : this.elapsedSeconds(); }
   private settleRunningClock(): void { const elapsed=this.currentElapsedSeconds(); this.elapsedSeconds.set(elapsed); this.runBaseSeconds=elapsed; this.runStartedAtMs=null; }
   protected get score(): string { return String(Object.values(this.goals()).reduce((a,b)=>a+b,0)); }
+  protected addOpponentGoal(): void { if(this.finished()) return; this.opponentGoals.update(value=>value+1); void this.persistMatchState(); }
+  protected removeOpponentGoal(): void { this.opponentGoals.update(value=>Math.max(0,value-1)); void this.persistMatchState(); }
   protected start(): void {
     if(this.finished()||this.running()) return;
     this.runBaseSeconds=this.elapsedSeconds(); this.runStartedAtMs=Date.now(); this.running.set(true); this.lastPersistedElapsed=this.runBaseSeconds;

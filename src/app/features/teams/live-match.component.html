@@ -1,13 +1,32 @@
 <main class="live-match" aria-label="Modalità partita in corso">
-  <header class="match-topbar">
+  <header class="match-topbar match-scoreboard-header">
     <button type="button" class="match-close" (click)="close()" aria-label="Esci dalla partita">‹</button>
-    <div class="match-team"><small><span class="live-dot"></span> MATCH CENTER · IN DIRETTA</small><strong>{{ teamName() }}</strong>@if (opponentName()) { <em>VS {{ opponentName() }}</em> }<em>FORMAZIONE {{ matchFormation() }}</em></div>
-    <div class="match-score"><span>{{ score }}</span><small>GOL</small></div>
+    <div class="match-team match-home-team">
+      <span class="match-team-badge" aria-hidden="true">{{ teamName().slice(0, 1).toUpperCase() }}</span>
+      <small><span class="live-dot"></span> CASA</small>
+      <strong>{{ teamName() }}</strong>
+      <em>FORMAZIONE {{ matchFormation() }}</em>
+    </div>
+    <div class="match-scoreboard" aria-label="Risultato e tempo di gioco">
+      <div class="scoreboard-clock">
+        <span class="clock-label">TEMPO DI GIOCO</span>
+        <strong>{{ clock }}</strong>
+        <span class="clock-state">{{ finished() ? 'FINITA' : running() ? 'IN CORSO' : elapsedSeconds() ? 'IN PAUSA' : 'PRE-PARTITA' }}</span>
+      </div>
+      <div class="match-score"><span>{{ score }}</span><b>–</b><span>{{ opponentGoals() }}</span></div>
+    </div>
+    <div class="match-team match-away-team">
+      <span class="match-team-badge" aria-hidden="true">{{ (opponentName() || 'Avversari').slice(0, 1).toUpperCase() }}</span>
+      <small>TRASFERTA</small>
+      <strong>{{ opponentName() || 'Avversari' }}</strong>
+      <div class="opponent-goal-controls" aria-label="Modifica gol avversari">
+        <button type="button" (click)="removeOpponentGoal()" [disabled]="opponentGoals() === 0" aria-label="Rimuovi un gol avversario">−</button>
+        <span>GOL</span>
+        <button type="button" (click)="addOpponentGoal()" [disabled]="finished()" aria-label="Aggiungi un gol avversario">+</button>
+      </div>
+    </div>
   </header>
-  <section class="match-clock">
-    <span class="clock-label">TEMPO DI GIOCO</span>
-    <strong>{{ clock }}</strong>
-    <span class="clock-state">{{ finished() ? 'PARTITA TERMINATA' : running() ? 'IN CORSO' : elapsedSeconds() ? 'IN PAUSA' : 'PRONTO AL VIA' }}</span>
+  <section class="match-clock match-controls-panel">
     <div class="clock-controls">
       @if (!running() && !finished()) { <button type="button" class="start-match" (click)="start()">{{ elapsedSeconds() ? '▶ Riprendi' : '▶ Avvia partita' }}</button> }
       @if (running()) { <button type="button" class="pause-match" (click)="pause()">Ⅱ Pausa</button> }
