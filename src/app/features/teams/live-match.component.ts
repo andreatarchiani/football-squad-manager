@@ -25,6 +25,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   readonly seasonId = input.required<string>();
   readonly initialPlayers = input.required<PlayerRecord[]>();
   protected readonly players = signal<PlayerRecord[]>([]);
+  protected readonly captainId = signal('');
+  protected readonly viceCaptainId = signal('');
   readonly initialLineup = input.required<Record<string, string>>();
   readonly formation = input.required<string>();
   readonly initialPositions = input.required<Record<string, { x: number; y: number }>>();
@@ -131,6 +133,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
         this.workspaceId(), this.teamId(), this.seasonId(), this.teamName()
       );
       this.players.set(completeRoster);
+      this.captainId.set(completeRoster.find(player => player.isCaptain)?.id ?? '');
+      this.viceCaptainId.set(completeRoster.find(player => player.isViceCaptain)?.id ?? '');
     } catch (error) {
       console.error('Unable to refresh the complete squad for the live match.', error);
       // Keep the supplied roster as a safe fallback if Firestore is unavailable.
