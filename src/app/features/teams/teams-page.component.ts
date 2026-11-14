@@ -15,7 +15,7 @@ import { LiveMatchComponent } from './live-match.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TeamsPageComponent implements OnChanges {
-  @Input() launchRequest: { team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; token: number } | null = null;
+  @Input() launchRequest: { team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; opponentName: string; token: number } | null = null;
   @Input() rosterRequest: { teamId: string; layoutSlot: 1 | 2; token: number } | null = null;
   @Input() resumeMatch = false;
   @Output() readonly matchClosed = new EventEmitter<void>();
@@ -38,6 +38,8 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly formationDropdownOpen = signal(false);
   protected readonly lineup = signal<Record<string, string>>({});
   protected readonly captainId = signal('');
+  protected readonly captainDropdownOpen = signal(false);
+  protected readonly viceCaptainDropdownOpen = signal(false);
   protected readonly viceCaptainId = signal('');
   protected readonly captaincySaving = signal(false);
   protected readonly captaincySaveStatus = signal('Ruoli salvati automaticamente');
@@ -46,6 +48,7 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly activeSlotId = signal<string | null>(null);
   protected readonly liveMatch = signal(false);
   protected readonly autoStartMatch = signal(false);
+  protected readonly matchOpponentName = signal('');
   protected readonly shirtPositions = signal<Record<string, { x: number; y: number }>>({});
   private dragSlotId: string | null = null;
   protected readonly formations = ['4-3-3', '4-4-2', '3-5-2'];
@@ -103,6 +106,9 @@ export class TeamsPageComponent implements OnChanges {
 
   protected slots() { return this.pitchSlots[this.formation()]; }
 
+  protected captainLabel(team: TeamRecord): string { const player = this.rosterFor(team).find(item => item.id === this.captainId()); return player ? `${player.shirtNumber ?? '—'} · ${player.firstName} ${player.lastName}` : 'Seleziona giocatore'; }
+  protected viceCaptainLabel(team: TeamRecord): string { const player = this.rosterFor(team).find(item => item.id === this.viceCaptainId()); return player ? `${player.shirtNumber ?? '—'} · ${player.firstName} ${player.lastName}` : 'Seleziona giocatore'; }
+
   protected expandedTeamName(): string { return this.teams().find(team => team.id === this.expandedRosterId())?.name || 'Partita'; }
   private async openRequestedRoster(request: NonNullable<TeamsPageComponent['rosterRequest']>): Promise<void> {
     await this.teamsLoadPromise;
@@ -122,6 +128,7 @@ export class TeamsPageComponent implements OnChanges {
     if (team.isArchived || !team.seasonId) { this.error.set('La squadra selezionata non è disponibile.'); return; }
     if (!this.teams().some(item => item.id === team.id)) this.teams.update(items => [...items, team]);
     this.players.set([...request.players]);
+    this.matchOpponentName.set(request.opponentName || '');
     this.expandedRosterId.set(team.id);
     this.layoutSlot.set(request.layoutSlot);
     this.activeSlotId.set(null);

@@ -1,7 +1,7 @@
 <main class="live-match" aria-label="Modalità partita in corso">
   <header class="match-topbar">
     <button type="button" class="match-close" (click)="close()" aria-label="Esci dalla partita">‹</button>
-    <div class="match-team"><small><span class="live-dot"></span> MATCH CENTER · IN DIRETTA</small><strong>{{ teamName() }}</strong><em>FORMAZIONE {{ matchFormation() }}</em></div>
+    <div class="match-team"><small><span class="live-dot"></span> MATCH CENTER · IN DIRETTA</small><strong>{{ teamName() }}</strong>@if (opponentName()) { <em>VS {{ opponentName() }}</em> }<em>FORMAZIONE {{ matchFormation() }}</em></div>
     <div class="match-score"><span>{{ score }}</span><small>GOL</small></div>
   </header>
   <section class="match-clock">
@@ -36,7 +36,7 @@
       @if (voiceHelpOpen()) {
         <div class="voice-command-list" id="voice-command-list">
           <article class="voice-command-item"><span class="voice-command-icon">⚽</span><div><strong>Segnalare un gol</strong><p>“Goal numero <b>9</b>”, “ha segnato il <b>9</b>” oppure “gol del <b>9</b> con assist del <b>10</b>”.</p></div></article>
-          <article class="voice-command-item"><span class="voice-command-icon">👟</span><div><strong>Passaggio chiave</strong><p>“Passaggio chiave numero <b>8</b>” oppure “chiave del numero <b>8</b>”.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🔑</span><div><strong>Passaggio chiave</strong><p>“Passaggio chiave numero <b>8</b>” oppure “chiave del numero <b>8</b>”.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🟨</span><div><strong>Ammonizione</strong><p>“Ammonito numero <b>5</b>” oppure “ammonizione del numero <b>5</b>”. Alla seconda ammonizione il giocatore viene espulso automaticamente.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🟥</span><div><strong>Segnalare un'espulsione</strong><p>“Espulsione numero <b>5</b>”, “espulso il <b>5</b>” oppure “cartellino rosso al <b>5</b>”.</p></div></article>
           <article class="voice-command-item"><span class="voice-command-icon">🔄</span><div><strong>Effettuare una sostituzione</strong><p>“Cambio numero <b>7</b> con numero <b>18</b>”, “cambio del numero <b>7</b> con il numero <b>18</b>” oppure “esce il <b>7</b>, entra il <b>18</b>”.</p><small>Prima indica chi esce, poi chi entra.</small></div></article>
