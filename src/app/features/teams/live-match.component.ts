@@ -215,6 +215,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.running.set(false);
     this.finished.set(true);
     this.finishReportOpen.set(true);
+    this.clearVoiceTranscriptBuffer();
     this.voice.stop();
     this.voiceListening.set(false);
     this.voiceMessage.set('');
@@ -449,6 +450,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.settleRunningClock();
     if(this.timer){clearInterval(this.timer);this.timer=null;}
     this.running.set(false);
+    this.clearVoiceTranscriptBuffer();
     this.voice.stop();
     this.voiceListening.set(false);
     this.exitingMatch = true;
@@ -626,6 +628,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
 
   protected dismissVoiceFeedback(): void {
+    this.clearVoiceTranscriptBuffer();
     this.voice.stop();
     this.voiceListening.set(false);
     this.voiceMessage.set('');
@@ -663,6 +666,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
   protected confirmAction(): void {
     const action=this.pending();if(!action)return;
+    this.clearVoiceTranscriptBuffer();
     this.voice.stop(); this.voiceListening.set(false);
     const minute=this.minute;
     if(action.type==='goal'&&action.playerId){
@@ -692,7 +696,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     }
     this.pending.set(null);this.voiceDraft.set('');this.voiceMessage.set(''); void this.persistMatchState();
   }
-  protected cancelAction(): void { this.voice.stop(); this.voiceListening.set(false); this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set(''); }
+  protected cancelAction(): void { this.clearVoiceTranscriptBuffer(); this.voice.stop(); this.voiceListening.set(false); this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set(''); }
   protected chooseOutgoing(player:PlayerRecord): void { if(this.playerHasRedCard(player)){this.voiceMessage.set('Un giocatore espulso non può essere sostituito. La squadra continua in inferiorità numerica.');return;} this.selectedOutgoingId.set(player.id);this.voiceMessage.set(`Selezionato ${player.lastName}. Ora scegli chi entra dalla panchina.`); }
   protected chooseIncoming(player:PlayerRecord): void {
     const outgoing=this.selectedOutgoingId();if(!outgoing)return;
