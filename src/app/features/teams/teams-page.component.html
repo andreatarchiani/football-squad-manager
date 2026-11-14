@@ -124,7 +124,7 @@
               <p class="roster-empty">La rosa è vuota. Aggiungi i giocatori dalla sezione Giocatori.</p>
             } @else {
               <div class="captaincy-picker" aria-label="Ruoli di squadra">
-                <label><span>👑 Capitano</span>
+                <label><span><span class="captain-armband-icon" aria-hidden="true">C</span> Capitano</span>
                   <select [value]="captainId()" (change)="setCaptaincy('captain', $any($event.target).value)">
                     <option value="">Non assegnato</option>
                     @for (player of rosterForExpanded(); track player.id) {
@@ -176,7 +176,7 @@
                     <button class="pitch-shirt" type="button" (click)="togglePlayerPicker(slot.id)"
                       [attr.aria-label]="'Assegna giocatore a ' + slot.label"
                       [attr.aria-expanded]="activeSlotId() === slot.id">{{ playerForSlot(slot.id)?.shirtNumber ?? '+' }}</button>
-                    <span class="pitch-player-name">{{ playerForSlot(slot.id) ? playerForSlot(slot.id)!.lastName : slot.label }}@if (playerForSlot(slot.id); as pitchPlayer) { @if (pitchPlayer.id === captainId()) { <span class="leadership-mark" title="Capitano" aria-label="Capitano">👑</span> } @else if (pitchPlayer.id === viceCaptainId()) { <span class="leadership-mark" title="Vicecapitano" aria-label="Vicecapitano">🛡️</span> } }</span>
+                    <span class="pitch-player-name">{{ playerForSlot(slot.id) ? playerForSlot(slot.id)!.lastName : slot.label }}@if (playerForSlot(slot.id); as pitchPlayer) { @if (pitchPlayer.id === captainId()) { <span class="leadership-mark" title="Capitano" aria-label="Capitano"><span class="captain-armband-mark" aria-hidden="true">C</span></span> } @else if (pitchPlayer.id === viceCaptainId()) { <span class="leadership-mark" title="Vicecapitano" aria-label="Vicecapitano">🛡️</span> } }</span>
                   </div>
                 }
                 </div>
