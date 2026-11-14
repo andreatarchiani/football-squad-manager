@@ -38,6 +38,8 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly formationDropdownOpen = signal(false);
   protected readonly lineup = signal<Record<string, string>>({});
   protected readonly captainId = signal('');
+  protected readonly captainDropdownOpen = signal(false);
+  protected readonly viceCaptainDropdownOpen = signal(false);
   protected readonly viceCaptainId = signal('');
   protected readonly captaincySaving = signal(false);
   protected readonly captaincySaveStatus = signal('Ruoli salvati automaticamente');
