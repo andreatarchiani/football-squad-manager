@@ -11,7 +11,24 @@
     <div class="clock-controls">
       @if (!running() && !finished()) { <button type="button" class="start-match" (click)="start()">{{ elapsedSeconds() ? '▶ Riprendi' : '▶ Avvia partita' }}</button> }
       @if (running()) { <button type="button" class="pause-match" (click)="pause()">Ⅱ Pausa</button> }
-      <button type="button" class="voice-match" [class.listening]="voiceListening()" (click)="startVoice()">{{ voiceListening() ? '● Ti ascolto…' : '🎙 Assistente vocale' }}</button>
+    </div>
+    <button
+      type="button"
+      class="voice-hold-button"
+      [class.is-listening]="voiceListening()"
+      [disabled]="finished()"
+      (pointerdown)="beginVoiceHold($event)"
+      (pointerup)="endVoiceHold($event)"
+      (pointercancel)="cancelVoiceHold()"
+      (lostpointercapture)="cancelVoiceHold()"
+      (keydown)="beginVoiceKeyboard($event)"
+      (keyup)="endVoiceKeyboard($event)"
+      (contextmenu)="$event.preventDefault()"
+      [attr.aria-pressed]="voiceListening()"
+      aria-label="Tocca e tieni premuto per eseguire un comando vocale">
+      <span class="voice-hold-icon" aria-hidden="true">🎙</span>
+      <span>{{ voiceListening() ? 'TI STO ASCOLTANDO · RILASCIA PER ESEGUIRE' : 'TOCCA E TIENI PREMUTO PER ESEGUIRE IL COMANDO' }}</span>
+    </button>
       @if (!finished()) { <button type="button" class="finish-match" (click)="finishMatch()">■ Fine partita</button> }
       @else { <button type="button" class="finish-match" (click)="finishReportOpen.set(true)">Riepilogo finale</button> }
     </div>
@@ -153,10 +170,7 @@
   @if (pending(); as action) {
     <div class="match-confirm-overlay">
       <section class="match-confirm" role="dialog" aria-modal="true" aria-labelledby="match-confirm-title">
-        <span class="confirm-eyebrow">CONFERMA EVENTO · {{ minute }}′</span><h2 id="match-confirm-title">Registrare questo evento?</h2><p>{{ action.description }}</p><p class="voice-confirm-instruction">Per confermare senza toccare lo schermo, pronuncia <strong>«Conferma»</strong>. Per annullare, pronuncia <strong>«Annulla»</strong>.</p>
-        <label class="confirm-edit-label" for="voice-correction">Correggi il comando se è stato capito male</label>
-        <textarea id="voice-correction" class="confirm-edit-input" rows="2" [value]="voiceDraft()" (input)="updateVoiceDraft($any($event.target).value)" placeholder="Es. Goal numero 8, assist di numero 10"></textarea>
-        <button type="button" class="confirm-correct" (click)="reinterpretDraft()">Correggi comando</button>
+        <span class="confirm-eyebrow">CONFERMA EVENTO · {{ minute }}′</span><h2 id="match-confirm-title">Registrare questo evento?</h2><p>{{ action.description }}</p>
         <div><button type="button" class="confirm-yes" (click)="confirmAction()">Conferma</button><button type="button" class="confirm-no" (click)="cancelAction()">Annulla</button></div>
       </section>
     </div>
