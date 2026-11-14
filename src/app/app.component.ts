@@ -60,6 +60,7 @@ export class AppComponent {
     if (!this.swUpdate.isEnabled || this.updating()) return;
     this.updating.set(true);
     try {
+      await this.swUpdate.checkForUpdate();
       await this.swUpdate.activateUpdate();
       localStorage.setItem(this.releaseChangelogStorageKey, this.releaseVersion);
       window.location.reload();
