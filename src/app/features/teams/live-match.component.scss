@@ -194,3 +194,11 @@
 @media (prefers-reduced-motion: reduce) {
   .voice-hold-button { transition: none; }
 }
+
+/* Goal celebration identifies the scorer by shirt number and credits the assister. */
+.goal-scorer-number{display:grid;place-items:center;width:76px;height:76px;margin:-2px 0 2px;border:3px solid #b9ffd0;border-radius:50%;background:linear-gradient(145deg,#f4fff7,#a8e9bd);color:#10351f;font-size:34px;font-weight:1000;line-height:1;box-shadow:0 0 0 7px #8dff9b24,0 0 28px #8dff9b66;animation:scorer-number-pop .42s cubic-bezier(.2,.9,.25,1.2)}
+.goal-assist-line{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:5px;padding:11px 12px;border:1px solid #a5c9ff55;border-radius:12px;background:linear-gradient(135deg,#18365c,#102747);color:#d9e9ff;font-size:11px;font-weight:850;letter-spacing:.045em;line-height:1.4}
+.goal-assist-line b{color:#fff;font-size:13px;letter-spacing:0}
+.goal-assist-boot{font-size:22px;filter:drop-shadow(0 0 7px #9bc7ff66)}
+@keyframes scorer-number-pop{0%{opacity:0;transform:scale(.55) rotate(-12deg)}75%{transform:scale(1.12) rotate(3deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+@media(prefers-reduced-motion:reduce){.goal-scorer-number{animation:none}}
