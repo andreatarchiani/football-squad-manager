@@ -78,7 +78,7 @@
 
     <nav class="mobile-bottom-nav" aria-label="Navigazione principale">
       <button type="button" class="mobile-nav-item" [class.active]="activePage() === 'overview'" [attr.aria-current]="activePage() === 'overview' ? 'page' : null" (click)="navigate(0)">
-        <span class="mobile-nav-icon">▦</span><span>Home</span>
+        <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" /></svg></span><span>Home</span>
       </button>
       <button type="button" class="mobile-nav-item" [class.active]="activePage() === 'teams'" [attr.aria-current]="activePage() === 'teams' ? 'page' : null" (click)="navigate(1)">
         <span class="mobile-nav-icon">⚑</span><span>Squadre</span>

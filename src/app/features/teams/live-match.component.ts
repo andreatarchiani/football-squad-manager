@@ -339,6 +339,10 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
         const delta = (newAssists[id] ?? 0) - (oldAssists[id] ?? 0);
         for (let i = 0; i < Math.abs(delta); i++) changes.push(delta > 0 ? this.playerService.recordAssist(workspaceId, id) : this.playerService.removeAssist(workspaceId, id));
       }
+      for (const id of new Set([...Object.keys(oldYellows), ...Object.keys(newYellows)])) {
+        const delta = (newYellows[id] ?? 0) - (oldYellows[id] ?? 0);
+        for (let i = 0; i < Math.abs(delta); i++) changes.push(delta > 0 ? this.playerService.recordYellowCard(workspaceId, id) : this.playerService.removeYellowCard(workspaceId, id));
+      }
       await Promise.all(changes);
     }
     this.events.set(next);
@@ -738,6 +742,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     if(type==='goal'&&workspaceId&&target.playerId)void this.playerService.removeGoal(workspaceId,target.playerId).catch(error=>{console.error('Unable to reverse player goal.',error);this.voiceMessage.set('Gol annullato nella partita, ma non nel totale giocatore.');});
     const targetAssistId=target.assistPlayerId??this.players().find(p=>p.shirtNumber===Number(target.description.match(/assist di #?(\d+)/i)?.[1]))?.id;
     if(type==='goal'&&workspaceId&&targetAssistId)void this.playerService.removeAssist(workspaceId,targetAssistId).catch(error=>{console.error('Unable to reverse player assist.',error);this.voiceMessage.set('Gol annullato, ma non è stato possibile aggiornare gli assist.');});
+    if(type==='yellow-card'&&workspaceId&&target.playerId)void this.playerService.removeYellowCard(workspaceId,target.playerId).catch(error=>{console.error('Unable to reverse player yellow card.',error);this.voiceMessage.set('Ammonizione annullata nella partita, ma non nel totale giocatore.');});
     this.voiceMessage.set((type==='goal'?'Gol':type==='yellow-card'?'Ammonizione':'Espulsione')+' del numero '+shirtNumber+' annullata.'); void this.persistMatchState();
   }
   protected confirmAction(): void {
@@ -754,6 +759,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       if(workspaceId&&action.assistPlayerId)void this.playerService.recordAssist(workspaceId,action.assistPlayerId).catch(error=>{console.error('Unable to save player assist.',error);this.voiceMessage.set('Gol registrato, ma non è stato possibile aggiornare il totale degli assist.');});
     }
     if(action.type==='yellow-card'&&action.playerId){
+      const workspaceId=this.auth.workspaceId();
+      if(workspaceId)void this.playerService.recordYellowCard(workspaceId,action.playerId).catch(error=>{console.error('Unable to save player yellow card.',error);this.voiceMessage.set('Ammonizione registrata nella partita, ma non è stato possibile aggiornare il totale del giocatore.');});
       const booked=this.player(action.playerId); const count=(this.yellowCards()[action.playerId]??0)+1;
       this.yellowCards.update(cards=>({...cards,[action.playerId!]:count}));
       this.showMatchAnimation({type:count>=2?'red-card':'yellow-card',title:count>=2?'SECONDO GIALLO · ROSSO':'AMMONIZIONE',detail:booked?`#${booked.shirtNumber} ${booked.lastName}`:'Cartellino'});
