@@ -23,7 +23,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   readonly workspaceId = input.required<string>();
   readonly teamId = input.required<string>();
   readonly seasonId = input.required<string>();
-  readonly players = input.required<PlayerRecord[]>();
+  readonly initialPlayers = input.required<PlayerRecord[]>();
+  protected readonly players = signal<PlayerRecord[]>([]);
   readonly initialLineup = input.required<Record<string, string>>();
   readonly formation = input.required<string>();
   readonly initialPositions = input.required<Record<string, { x: number; y: number }>>();
@@ -121,6 +122,18 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   };
 
   async ngOnInit(): Promise<void> {
+    // Do not rely on the Home preview or a previously mounted roster: refresh
+    // this team's complete squad whenever a live-match component is opened.
+    this.players.set(this.initialPlayers());
+    try {
+      const completeRoster = await this.playerService.listForTeam(
+        this.workspaceId(), this.teamId(), this.seasonId(), this.teamName()
+      );
+      this.players.set(completeRoster);
+    } catch (error) {
+      console.error('Unable to refresh the complete squad for the live match.', error);
+      // Keep the supplied roster as a safe fallback if Firestore is unavailable.
+    }
     this.lineup.set({...this.initialLineup()});
     const f = this.formations[this.formation()] ? this.formation() : '4-3-3'; this.matchFormation.set(f);
     this.formationPlayerOrder = this.formations[f].map(slot => this.initialLineup()[slot.id]).filter((id): id is string => !!id);

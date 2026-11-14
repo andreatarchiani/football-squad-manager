@@ -38,6 +38,13 @@ export class PlayerService {
     }).sort((a,b)=>Number(a.isArchived)-Number(b.isArchived)||a.lastName.localeCompare(b.lastName,'it')||a.firstName.localeCompare(b.firstName,'it'));
   }
 
+  async listForTeam(workspaceId: string, teamId: string, seasonId: string, teamName: string): Promise<PlayerRecord[]> {
+    const team: TeamRecord = { id: teamId, name: teamName, category: '', clubName: '', icon: '⚽', isArchived: false, seasonId, seasonLabel: '', seasonStatus: 'active' };
+    return (await this.list(workspaceId, [team])).filter(player =>
+      !player.isArchived && player.teamId === teamId && player.seasonId === seasonId
+    );
+  }
+
   async save(workspaceId: string, input: PlayerInput, teams: TeamRecord[], existing?: PlayerRecord): Promise<void> {
     const db = this.requireFirestore();
     const team = teams.find(t => t.id===input.teamId && t.seasonId && !t.isArchived);
