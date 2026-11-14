@@ -172,7 +172,7 @@ select optgroup {
 
 
 /* Football-style scoreboard: both teams flank the centered clock and score. */
-.match-topbar.match-scoreboard-header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(10px,2vw,24px);padding:17px 0 19px}
+.match-topbar.match-scoreboard-header{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(150px,auto) minmax(0,1fr);align-items:center;gap:clamp(10px,2vw,24px);padding:17px 0 19px}
 .match-scoreboard-header .match-team{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto auto;align-items:center;column-gap:11px;row-gap:3px}
 .match-scoreboard-header .match-team-badge{grid-column:1;grid-row:1/4;display:grid;place-items:center;width:clamp(42px,5vw,58px);aspect-ratio:1;border:1px solid #9bdab255;border-radius:15px;background:linear-gradient(145deg,#294b36,#14251b);color:#dff9e6;font-size:clamp(19px,3vw,26px);font-weight:950;box-shadow:inset 0 1px #ffffff18,0 7px 18px #0003}
 .match-scoreboard-header .match-team small{grid-column:2;grid-row:1}
@@ -183,7 +183,7 @@ select optgroup {
 .match-scoreboard-header .match-away-team small,.match-scoreboard-header .match-away-team strong{grid-column:1}
 .match-scoreboard-header .match-away-team small{justify-content:flex-end}
 .match-scoreboard{display:grid;justify-items:center;gap:7px;min-width:150px;padding:9px 17px;border:1px solid #ffffff20;border-radius:17px;background:linear-gradient(145deg,#233b2c,#14251b);box-shadow:0 9px 24px #0004,inset 0 1px #ffffff0b}
-.match-scoreboard{grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:clamp(14px,2vw,24px);width:clamp(230px,25vw,330px);min-width:230px;padding:12px 16px}.scoreboard-clock{display:grid;justify-items:center;align-content:center;gap:4px;width:100%;min-width:0;min-height:74px;padding:9px 12px;border:1px solid #9bdab244;border-radius:12px;background:linear-gradient(145deg,#1a3826,#102016);box-shadow:inset 0 1px #ffffff12,0 5px 14px #0003}
+.scoreboard-clock{display:grid;justify-items:center;gap:2px}
 .scoreboard-clock .clock-label{font-size:8px;letter-spacing:.18em}
 .scoreboard-clock>strong{color:#fff;font-size:clamp(19px,2.5vw,26px);font-weight:950;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.04em}
 .scoreboard-clock .clock-state{padding:3px 7px;font-size:7px;letter-spacing:.13em}
@@ -198,13 +198,13 @@ select optgroup {
 .match-controls-panel .voice-hold-button{margin-top:0}
 .match-controls-panel .voice-command-guide{margin-top:0}
 @media(max-width:760px){
- .match-topbar.match-scoreboard-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:7px;padding:11px 0 13px}
+ .match-topbar.match-scoreboard-header{grid-template-columns:auto minmax(0,1fr) minmax(112px,auto) minmax(0,1fr);gap:7px;padding:11px 0 13px}
  .match-scoreboard-header .match-team{column-gap:6px;row-gap:3px}
  .match-scoreboard-header .match-team-badge{width:34px;border-radius:10px;font-size:16px}
  .match-scoreboard-header .match-team strong{font-size:clamp(11px,2.8vw,14px);white-space:normal;line-height:1.15;overflow-wrap:anywhere}
  .match-scoreboard-header .match-team small{font-size:7px;letter-spacing:.1em}
  .match-scoreboard-header .match-team em{font-size:7px;letter-spacing:.04em}
- .match-scoreboard{grid-template-columns:minmax(0,1fr) auto;width:min(100%,330px);min-width:0;padding:8px 9px;gap:8px;border-radius:13px}.scoreboard-clock{min-height:62px;padding:7px 8px;border-radius:10px}
+ .match-scoreboard{min-width:0;padding:8px 9px;gap:6px;border-radius:13px}
  .scoreboard-clock .clock-label{font-size:6px;letter-spacing:.1em}
  .scoreboard-clock>strong{font-size:19px}
  .scoreboard-clock .clock-state{font-size:6px;padding:3px 5px}
@@ -238,7 +238,7 @@ select optgroup {
 /* Correct the live-match header: three visible blocks, three balanced columns. */
 .live-match .match-topbar.match-scoreboard-header{
   display:grid;
-  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  grid-template-columns:auto minmax(0,1fr) minmax(150px,auto) minmax(0,1fr);
   align-items:center;
   justify-items:stretch;
   width:100%;
@@ -246,9 +246,9 @@ select optgroup {
   margin-inline:auto;
   box-sizing:border-box;
 }
-.live-match .match-scoreboard-header>.match-home-team{grid-column:1;justify-self:start;width:100%;min-width:0}
-.live-match .match-scoreboard-header>.match-scoreboard{grid-column:2;justify-self:center}
-.live-match .match-scoreboard-header>.match-away-team{grid-column:3;justify-self:end;width:100%;min-width:0}
+.live-match .match-scoreboard-header>.match-home-team{grid-column:2;justify-self:start;width:100%;min-width:0}
+.live-match .match-scoreboard-header>.match-scoreboard{grid-column:3;justify-self:center}
+.live-match .match-scoreboard-header>.match-away-team{grid-column:4;justify-self:end;width:100%;min-width:0}
 .live-match .match-scoreboard-header .match-team strong{min-width:0;overflow-wrap:anywhere}
 .live-match .match-controls-panel{
   display:flex;
@@ -277,20 +277,20 @@ select optgroup {
 }
 @media(max-width:760px){
   .live-match .match-topbar.match-scoreboard-header{
-    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+    grid-template-columns:auto minmax(0,1fr) minmax(112px,auto) minmax(0,1fr);
     gap:7px;
     padding:11px 0 13px;
   }
-  .live-match .match-scoreboard-header>.match-home-team{grid-column:1}
-  .live-match .match-scoreboard-header>.match-scoreboard{grid-column:2}
-  .live-match .match-scoreboard-header>.match-away-team{grid-column:3}
+  .live-match .match-scoreboard-header>.match-home-team{grid-column:2}
+  .live-match .match-scoreboard-header>.match-scoreboard{grid-column:3}
+  .live-match .match-scoreboard-header>.match-away-team{grid-column:4}
   .live-match .match-controls-panel{gap:9px;padding:10px}
   .live-match .match-controls-panel>.clock-controls{width:100%}
   .live-match .match-controls-panel>.voice-hold-button,
   .live-match .match-controls-panel>.voice-command-guide{width:100%;max-width:620px}
 }
 @media(max-width:420px){
-  .live-match .match-topbar.match-scoreboard-header{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:5px}
+  .live-match .match-topbar.match-scoreboard-header{grid-template-columns:auto minmax(0,1fr) minmax(96px,auto) minmax(0,1fr);gap:5px}
   .live-match .match-scoreboard-header .match-team strong{font-size:10px}
   .live-match .match-scoreboard{min-width:0}
 }
