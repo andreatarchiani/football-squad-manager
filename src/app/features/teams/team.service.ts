@@ -38,6 +38,7 @@ export interface LiveMatchState {
   finished: boolean;
   events: { type: 'goal' | 'key-pass' | 'yellow-card' | 'red-card' | 'substitution' | 'formation'; minute: number; description: string; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string }[];
   goals: Record<string, number>;
+  opponentGoals?: number;
   assists: Record<string, number>;
   yellowCards: Record<string, number>;
   redCards: string[];
@@ -136,7 +137,7 @@ export class TeamService {
     return {
       elapsedSeconds: Number(data['elapsedSeconds'] ?? 0), savedAtMs: Number(data['savedAtMs'] ?? Date.now()), running: data['running'] === true,
       finished: data['finished'] === true, events: (data['events'] ?? []) as LiveMatchState['events'],
-      goals: (data['goals'] ?? {}) as Record<string, number>, assists: (data['assists'] ?? {}) as Record<string, number>,
+      goals: (data['goals'] ?? {}) as Record<string, number>, opponentGoals: Number(data['opponentGoals'] ?? 0), assists: (data['assists'] ?? {}) as Record<string, number>,
       yellowCards: (data['yellowCards'] ?? {}) as Record<string, number>, redCards: (data['redCards'] ?? []) as string[],
       lineup: (data['lineup'] ?? {}) as Record<string, string>, formation: String(data['formation'] ?? '4-3-3'),
       positions: (data['positions'] ?? {}) as Record<string, { x: number; y: number }>, changesUsed: Number(data['changesUsed'] ?? 0)
