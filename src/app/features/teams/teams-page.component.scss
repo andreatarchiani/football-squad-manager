@@ -110,3 +110,7 @@
 .leadership-mark{display:inline-grid;place-items:center;vertical-align:middle;margin-left:4px;font-size:11px;line-height:1}
 .pitch-player-name .leadership-mark{font-size:10px}
 @media(max-width:520px){.captaincy-picker{grid-template-columns:1fr}.captaincy-save-status{grid-column:1}}
+
+/* Fascia da capitano: classica fascia gialla con la C. */
+.captain-armband-icon{display:inline-grid;place-items:center;width:17px;height:13px;margin-right:4px;border:1px solid #f7dc65;border-radius:3px;color:#182016;background:linear-gradient(180deg,#ffe978,#e8bc37);font-size:9px;font-weight:1000;line-height:1;vertical-align:middle;box-shadow:0 1px 3px #0005}
+.captain-armband-mark{display:inline-grid;place-items:center;width:13px;height:11px;border:1px solid #f7dc65;border-radius:2px;color:#182016;background:linear-gradient(180deg,#ffe978,#e8bc37);font-size:8px;font-weight:1000;line-height:1;vertical-align:middle}
