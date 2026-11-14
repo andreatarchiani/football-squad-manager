@@ -45,7 +45,8 @@ export class AppComponent {
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe((event) => {
         if (event.type === 'VERSION_READY') {
-          void this.activateReadyVersion();
+          // Keep the update pending until the user explicitly taps “Aggiorna ora”.
+          this.updateAvailable.set(true);
         } else if (event.type === 'VERSION_INSTALLATION_FAILED') {
           console.error('Application update installation failed.', event.error);
           this.updateAvailable.set(true);
@@ -53,22 +54,6 @@ export class AppComponent {
       });
       void this.checkForUpdate();
       interval(5 * 60 * 1000).subscribe(() => void this.checkForUpdate());
-    }
-  }
-
-  private async activateReadyVersion(): Promise<void> {
-    if (!this.swUpdate.isEnabled || this.updating()) return;
-    this.updating.set(true);
-    try {
-      await this.swUpdate.checkForUpdate();
-      await this.swUpdate.activateUpdate();
-      localStorage.setItem(this.releaseChangelogStorageKey, this.releaseVersion);
-      window.location.reload();
-    } catch (error) {
-      console.error('Unable to activate application update.', error);
-      localStorage.removeItem(this.releaseChangelogStorageKey);
-      this.updating.set(false);
-      this.updateAvailable.set(true);
     }
   }
 
