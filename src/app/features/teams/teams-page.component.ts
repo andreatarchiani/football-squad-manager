@@ -106,6 +106,9 @@ export class TeamsPageComponent implements OnChanges {
 
   protected slots() { return this.pitchSlots[this.formation()]; }
 
+  protected captainLabel(team: TeamRecord): string { const player = this.rosterFor(team).find(item => item.id === this.captainId()); return player ? `${player.shirtNumber ?? '—'} · ${player.firstName} ${player.lastName}` : 'Seleziona giocatore'; }
+  protected viceCaptainLabel(team: TeamRecord): string { const player = this.rosterFor(team).find(item => item.id === this.viceCaptainId()); return player ? `${player.shirtNumber ?? '—'} · ${player.firstName} ${player.lastName}` : 'Seleziona giocatore'; }
+
   protected expandedTeamName(): string { return this.teams().find(team => team.id === this.expandedRosterId())?.name || 'Partita'; }
   private async openRequestedRoster(request: NonNullable<TeamsPageComponent['rosterRequest']>): Promise<void> {
     await this.teamsLoadPromise;
