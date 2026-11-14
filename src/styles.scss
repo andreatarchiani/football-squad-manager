@@ -183,7 +183,7 @@ select optgroup {
 .match-scoreboard-header .match-away-team small,.match-scoreboard-header .match-away-team strong{grid-column:1}
 .match-scoreboard-header .match-away-team small{justify-content:flex-end}
 .match-scoreboard{display:grid;justify-items:center;gap:7px;min-width:150px;padding:9px 17px;border:1px solid #ffffff20;border-radius:17px;background:linear-gradient(145deg,#233b2c,#14251b);box-shadow:0 9px 24px #0004,inset 0 1px #ffffff0b}
-.scoreboard-clock{display:grid;justify-items:center;gap:2px}
+.match-scoreboard{grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:clamp(14px,2vw,24px);width:clamp(230px,25vw,330px);min-width:230px;padding:12px 16px}.scoreboard-clock{display:grid;justify-items:center;align-content:center;gap:4px;width:100%;min-width:0;min-height:74px;padding:9px 12px;border:1px solid #9bdab244;border-radius:12px;background:linear-gradient(145deg,#1a3826,#102016);box-shadow:inset 0 1px #ffffff12,0 5px 14px #0003}
 .scoreboard-clock .clock-label{font-size:8px;letter-spacing:.18em}
 .scoreboard-clock>strong{color:#fff;font-size:clamp(19px,2.5vw,26px);font-weight:950;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.04em}
 .scoreboard-clock .clock-state{padding:3px 7px;font-size:7px;letter-spacing:.13em}
@@ -204,7 +204,7 @@ select optgroup {
  .match-scoreboard-header .match-team strong{font-size:clamp(11px,2.8vw,14px);white-space:normal;line-height:1.15;overflow-wrap:anywhere}
  .match-scoreboard-header .match-team small{font-size:7px;letter-spacing:.1em}
  .match-scoreboard-header .match-team em{font-size:7px;letter-spacing:.04em}
- .match-scoreboard{min-width:0;padding:8px 9px;gap:6px;border-radius:13px}
+ .match-scoreboard{grid-template-columns:minmax(0,1fr) auto;width:min(100%,330px);min-width:0;padding:8px 9px;gap:8px;border-radius:13px}.scoreboard-clock{min-height:62px;padding:7px 8px;border-radius:10px}
  .scoreboard-clock .clock-label{font-size:6px;letter-spacing:.1em}
  .scoreboard-clock>strong{font-size:19px}
  .scoreboard-clock .clock-state{font-size:6px;padding:3px 5px}
