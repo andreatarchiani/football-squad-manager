@@ -99,3 +99,23 @@
     grid-row: 1 / span 2;
   }
 }
+
+
+/* Captain and vice-captain selection in the roster */
+.captaincy-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;border:1px solid #344b3e;border-radius:11px;background:#17251e}
+.captaincy-picker label{display:grid;gap:6px;min-width:0}
+.captaincy-picker label>span{color:#dcebe0;font-size:11px;font-weight:800}
+.captaincy-picker select{width:100%;min-width:0;min-height:42px;padding:0 10px;border:1px solid #3c5547;border-radius:8px;color:#edf4f0;background:#101a15;font:inherit;font-size:11px}
+.captaincy-save-status{grid-column:1/-1;color:#91a99a;font-size:10px}
+.leadership-mark{display:inline-grid;place-items:center;vertical-align:middle;margin-left:4px;font-size:11px;line-height:1}
+.pitch-player-name .leadership-mark{font-size:10px}
+@media(max-width:520px){.captaincy-picker{grid-template-columns:1fr}.captaincy-save-status{grid-column:1}}
+
+/* Fascia da capitano: classica fascia gialla con la C. */
+.captain-armband-icon{display:inline-grid;place-items:center;width:17px;height:13px;margin-right:4px;border:1px solid #f7dc65;border-radius:3px;color:#182016;background:linear-gradient(180deg,#ffe978,#e8bc37);font-size:9px;font-weight:1000;line-height:1;vertical-align:middle;box-shadow:0 1px 3px #0005}
+.captain-armband-mark{display:inline-grid;place-items:center;width:13px;height:11px;border:1px solid #f7dc65;border-radius:2px;color:#182016;background:linear-gradient(180deg,#ffe978,#e8bc37);font-size:8px;font-weight:1000;line-height:1;vertical-align:middle}
+
+
+/* Fascia VC per identificare il vicecapitano. */
+.vice-armband-icon{display:inline-grid;place-items:center;min-width:22px;height:13px;padding:0 2px;margin-right:4px;border:1px solid #d9e5ec;border-radius:3px;color:#10202a;background:linear-gradient(180deg,#f4f8fb,#b9cbd6);font-size:7px;font-weight:1000;line-height:1;vertical-align:middle;box-shadow:0 1px 3px #0005}
+.vice-armband-mark{display:inline-grid;place-items:center;min-width:18px;height:11px;padding:0 1px;border:1px solid #d9e5ec;border-radius:2px;color:#10202a;background:linear-gradient(180deg,#f4f8fb,#b9cbd6);font-size:6px;font-weight:1000;line-height:1;vertical-align:middle}
