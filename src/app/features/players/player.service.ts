@@ -9,7 +9,7 @@ export type PlayerStatus = 'active' | 'injured' | 'suspended' | 'left';
 export interface PlayerRecord {
   id: string; firstName: string; lastName: string; dateOfBirth: string; preferredFoot: string;
   primaryRole: PlayerRole; notes: string; isArchived: boolean; teamId: string; seasonId: string;
-  teamName: string; seasonLabel: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus; goals?: number;
+  teamName: string; seasonLabel: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus; isCaptain: boolean; isViceCaptain: boolean; goals?: number;
 }
 export interface PlayerInput {
   firstName: string; lastName: string; dateOfBirth: string; preferredFoot: string; primaryRole: PlayerRole;
@@ -23,18 +23,18 @@ export class PlayerService {
   async list(workspaceId: string, teams: TeamRecord[]): Promise<PlayerRecord[]> {
     const db = this.requireFirestore();
     const snapshots = await getDocs(collection(db, 'workspaces', workspaceId, 'players'));
-    const assignments = new Map<string, { teamId: string; seasonId: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus }>();
+    const assignments = new Map<string, { teamId: string; seasonId: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus; isCaptain: boolean; isViceCaptain: boolean }>();
     await Promise.all(teams.filter(t => t.seasonId).map(async team => {
       const members = await getDocs(collection(db, 'workspaces', workspaceId, 'teams', team.id, 'seasons', team.seasonId!, 'squadMembers'));
       members.docs.forEach(member => {
         const d = member.data();
-        assignments.set(member.id, { teamId: team.id, seasonId: team.seasonId!, shirtNumber: typeof d['shirtNumber'] === 'number' ? d['shirtNumber'] : null, roles: Array.isArray(d['roles']) ? d['roles'] as PlayerRole[] : [], status: this.status(d['status']) });
+        assignments.set(member.id, { teamId: team.id, seasonId: team.seasonId!, shirtNumber: typeof d['shirtNumber'] === 'number' ? d['shirtNumber'] : null, roles: Array.isArray(d['roles']) ? d['roles'] as PlayerRole[] : [], status: this.status(d['status']), isCaptain: d['isCaptain'] === true, isViceCaptain: d['isViceCaptain'] === true });
       });
     }));
     const teamMap = new Map(teams.map(t => [t.id, t]));
     return snapshots.docs.map(s => {
       const d = s.data(); const a = assignments.get(s.id); const t = a ? teamMap.get(a.teamId) : undefined;
-      return { id:s.id, firstName:String(d['firstName']??''), lastName:String(d['lastName']??''), dateOfBirth:String(d['dateOfBirth']??''), preferredFoot:String(d['preferredFoot']??''), primaryRole:this.role(d['primaryRole']), notes:String(d['notes']??''), isArchived:d['isArchived']===true, teamId:a?.teamId??'', seasonId:a?.seasonId??'', teamName:t?.name??'', seasonLabel:t?.seasonLabel??'', shirtNumber:a?.shirtNumber??null, roles:a?.roles??[], status:a?.status??'active', goals: typeof d['goals']==='number' ? d['goals'] : 0 };
+      return { id:s.id, firstName:String(d['firstName']??''), lastName:String(d['lastName']??''), dateOfBirth:String(d['dateOfBirth']??''), preferredFoot:String(d['preferredFoot']??''), primaryRole:this.role(d['primaryRole']), notes:String(d['notes']??''), isArchived:d['isArchived']===true, teamId:a?.teamId??'', seasonId:a?.seasonId??'', teamName:t?.name??'', seasonLabel:t?.seasonLabel??'', shirtNumber:a?.shirtNumber??null, roles:a?.roles??[], status:a?.status??'active', isCaptain:a?.isCaptain??false, isViceCaptain:a?.isViceCaptain??false, goals: typeof d['goals']==='number' ? d['goals'] : 0 };
     }).sort((a,b)=>Number(a.isArchived)-Number(b.isArchived)||a.lastName.localeCompare(b.lastName,'it')||a.firstName.localeCompare(b.firstName,'it'));
   }
 
@@ -63,7 +63,7 @@ export class PlayerService {
       if (oldReservationRef && oldReservationRef.path!==reservationRef?.path && oldReservation?.exists() && oldReservation.data()['playerId']===playerRef.id) tx.delete(oldReservationRef);
       if (oldMemberRef && oldMemberRef.path!==memberRef.path) tx.delete(oldMemberRef);
       if (reservationRef) tx.set(reservationRef,{playerId:playerRef.id,createdAt:now,updatedAt:now});
-      tx.set(memberRef,{playerId:playerRef.id,shirtNumber:number,roles:input.roles.length?input.roles:[input.primaryRole],status:input.status,updatedAt:now,...(existing?.teamId===team.id&&existing.seasonId===team.seasonId?{}:{joinedAt:now,createdAt:now})});
+      tx.set(memberRef,{playerId:playerRef.id,shirtNumber:number,roles:input.roles.length?input.roles:[input.primaryRole],status:input.status,isCaptain:existing?.isCaptain??false,isViceCaptain:existing?.isViceCaptain??false,updatedAt:now,...(existing?.teamId===team.id&&existing.seasonId===team.seasonId?{}:{joinedAt:now,createdAt:now})});
       tx.set(playerRef,{firstName:input.firstName.trim(),lastName:input.lastName.trim(),dateOfBirth:input.dateOfBirth,preferredFoot:input.preferredFoot,primaryRole:input.primaryRole,notes:input.notes.trim(),isArchived:false,createdAt:oldPlayer?.data()?.['createdAt']??now,updatedAt:now},{merge:true});
     });
   }

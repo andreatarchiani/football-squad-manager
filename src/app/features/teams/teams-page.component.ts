@@ -43,21 +43,6 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly captaincySaveStatus = signal('Ruoli salvati automaticamente');
   private captaincySaveQueue: Promise<void> = Promise.resolve();
 
-  private captaincyCacheKey(workspaceId: string, teamId: string, seasonId: string): string {
-    return `fsm-captaincy:${workspaceId}:${teamId}:${seasonId}`;
-  }
-
-  private readCaptaincyCache(workspaceId: string, teamId: string, seasonId: string): { captainId: string; viceCaptainId: string; savedAtMs: number } | null {
-    try {
-      const raw = localStorage.getItem(this.captaincyCacheKey(workspaceId, teamId, seasonId));
-      if (!raw) return null;
-      const value = JSON.parse(raw) as { captainId?: unknown; viceCaptainId?: unknown; savedAtMs?: unknown };
-      if (typeof value.captainId !== 'string' || typeof value.viceCaptainId !== 'string' || typeof value.savedAtMs !== 'number') return null;
-      return { captainId: value.captainId, viceCaptainId: value.viceCaptainId, savedAtMs: value.savedAtMs };
-    } catch {
-      return null;
-    }
-  }
   protected readonly activeSlotId = signal<string | null>(null);
   protected readonly liveMatch = signal(false);
   protected readonly autoStartMatch = signal(false);
@@ -169,37 +154,34 @@ export class TeamsPageComponent implements OnChanges {
       if (role === 'captain') nextVice = '';
       else nextCaptain = '';
     }
-    this.captainId.set(nextCaptain);
-    this.viceCaptainId.set(nextVice);
     const team = this.teams().find(item => item.id === this.expandedRosterId());
     const workspaceId = this.auth.workspaceId();
-    if (!team?.seasonId || !workspaceId) {
-      this.captaincySaveStatus.set('Salvataggio non disponibile: squadra o account non pronti');
-      return;
-    }
+    if (!team?.seasonId || !workspaceId) return;
 
-    // Persist synchronously on this device first, so an immediate refresh cannot
-    // discard the selection while the remote Firestore write is still pending.
-    const savedAtMs = Date.now();
-    localStorage.setItem(this.captaincyCacheKey(workspaceId, team.id, team.seasonId), JSON.stringify({
-      captainId: nextCaptain, viceCaptainId: nextVice, savedAtMs
-    }));
-    this.captaincySaveStatus.set('Salvataggio…');
+    const previousCaptain = this.captainId();
+    const previousVice = this.viceCaptainId();
+    this.captainId.set(nextCaptain);
+    this.viceCaptainId.set(nextVice);
+    this.captaincySaveStatus.set('Salvataggio nella rosa…');
 
-    // Serialize writes so quick dropdown changes cannot finish out of order.
     const captainId = nextCaptain;
     const viceCaptainId = nextVice;
     this.captaincySaveQueue = this.captaincySaveQueue.catch(() => undefined).then(async () => {
       this.captaincySaving.set(true);
-      this.captaincySaveStatus.set('Salvataggio…');
       try {
         await this.teamsService.saveCaptaincy(workspaceId, team.id, team.seasonId!, captainId, viceCaptainId);
-        this.captaincySaveStatus.set('Capitano e vice salvati');
+        this.players.update(players => players.map(player =>
+          player.teamId === team.id && player.seasonId === team.seasonId
+            ? { ...player, isCaptain: player.id === captainId, isViceCaptain: player.id === viceCaptainId }
+            : player));
+        this.captaincySaveStatus.set('Ruoli salvati nella rosa');
         this.error.set('');
       } catch (error) {
-        console.error('Unable to save team captaincy to Firestore; local backup retained.', error);
-        this.captaincySaveStatus.set('Salvati su questo dispositivo · sincronizzazione cloud non riuscita');
-        this.error.set('Capitano e vice conservati su questo dispositivo, ma non sincronizzati online. Verifica la connessione o i permessi.');
+        console.error('Unable to save captaincy on squad members.', error);
+        this.captainId.set(previousCaptain);
+        this.viceCaptainId.set(previousVice);
+        this.captaincySaveStatus.set('Salvataggio non riuscito');
+        this.error.set('Non è stato possibile aggiornare i ruoli nella rosa. Riprova.');
       } finally {
         this.captaincySaving.set(false);
       }
@@ -381,36 +363,48 @@ export class TeamsPageComponent implements OnChanges {
     try {
       const seasonId = team.seasonId;
       this.layoutSlot.set(1);
-      const [players, saved, captaincy] = await Promise.all([
+      const [loadedPlayers, saved, legacyCaptaincy] = await Promise.all([
         this.playerService.list(workspaceId, this.teams()),
         seasonId ? this.teamsService.loadTacticalLayout(workspaceId, team.id, seasonId, 1) : Promise.resolve(null),
         seasonId ? this.teamsService.loadCaptaincy(workspaceId, team.id, seasonId) : Promise.resolve({ captainId: '', viceCaptainId: '', updatedAtMs: 0 })
       ]);
-      this.players.set(players);
-      // Keep assignments for players still in this team's season, even if injured/suspended.
-      const cached = this.readCaptaincyCache(workspaceId, team.id, seasonId!);
-      const useLocalBackup = !!cached && cached.savedAtMs > captaincy.updatedAtMs;
-      const restoredCaptain = useLocalBackup ? cached!.captainId : captaincy.captainId;
-      const restoredVice = useLocalBackup ? cached!.viceCaptainId : captaincy.viceCaptainId;
-      const validPlayerIds = new Set(this.rosterFor(team).map(player => player.id));
-      this.captainId.set(validPlayerIds.has(restoredCaptain) ? restoredCaptain : '');
-      this.viceCaptainId.set(validPlayerIds.has(restoredVice) && restoredVice !== restoredCaptain ? restoredVice : '');
-      if (useLocalBackup) {
-        this.captaincySaveStatus.set('Ripristinati i ruoli salvati su questo dispositivo · sincronizzazione…');
-        void this.teamsService.saveCaptaincy(workspaceId, team.id, seasonId!, restoredCaptain, restoredVice)
-          .then(() => this.captaincySaveStatus.set('Capitano e vice salvati'))
-          .catch(error => {
-            console.error('Unable to sync locally restored captaincy.', error);
-            this.captaincySaveStatus.set('Ruoli conservati su questo dispositivo · cloud non sincronizzato');
-          });
-      } else {
-        this.captaincySaveStatus.set('Ruoli caricati dal cloud');
-        if (captaincy.captainId || captaincy.viceCaptainId) {
-          localStorage.setItem(this.captaincyCacheKey(workspaceId, team.id, seasonId!), JSON.stringify({
-            captainId: captaincy.captainId, viceCaptainId: captaincy.viceCaptainId, savedAtMs: captaincy.updatedAtMs
-          }));
+      let players = loadedPlayers;
+      // One-time migration: if squad members have no leadership flags yet,
+      // copy the previous settings into the roster records.
+      const teamPlayers = players.filter(player => !player.isArchived
+        && player.teamId === team.id && player.seasonId === seasonId);
+      const hasRosterLeadership = teamPlayers.some(player => player.isCaptain || player.isViceCaptain);
+      if (!hasRosterLeadership) {
+        let legacyCaptainId = legacyCaptaincy.captainId;
+        let legacyViceCaptainId = legacyCaptaincy.viceCaptainId;
+        // Recover selections made by the previous version even if their cloud
+        // write did not complete: the old implementation kept a local backup.
+        try {
+          const cachedRaw = localStorage.getItem(`fsm-captaincy:${workspaceId}:${team.id}:${seasonId}`);
+          if (cachedRaw) {
+            const cached = JSON.parse(cachedRaw) as { captainId?: unknown; viceCaptainId?: unknown; savedAtMs?: unknown };
+            if (typeof cached.captainId === 'string' && typeof cached.viceCaptainId === 'string'
+              && typeof cached.savedAtMs === 'number' && cached.savedAtMs > legacyCaptaincy.updatedAtMs) {
+              legacyCaptainId = cached.captainId;
+              legacyViceCaptainId = cached.viceCaptainId;
+            }
+          }
+        } catch (error) {
+          console.warn('Unable to read previous local captaincy backup.', error);
+        }
+        if (legacyCaptainId || legacyViceCaptainId) {
+          await this.teamsService.saveCaptaincy(workspaceId, team.id, seasonId!, legacyCaptainId, legacyViceCaptainId);
+          players = await this.playerService.list(workspaceId, this.teams());
         }
       }
+      this.players.set(players);
+      const validPlayerIds = new Set(players.filter(player => !player.isArchived
+        && player.teamId === team.id && player.seasonId === seasonId).map(player => player.id));
+      const captain = players.find(player => player.teamId === team.id && player.seasonId === seasonId && player.isCaptain)?.id ?? '';
+      const vice = players.find(player => player.teamId === team.id && player.seasonId === seasonId && player.isViceCaptain)?.id ?? '';
+      this.captainId.set(validPlayerIds.has(captain) ? captain : '');
+      this.viceCaptainId.set(validPlayerIds.has(vice) && vice !== captain ? vice : '');
+      this.captaincySaveStatus.set('Ruoli letti dalla rosa');
       const formation = saved && this.formations.includes(saved.formation) ? saved.formation : '4-3-3';
       this.formation.set(formation);
       if (saved) {
