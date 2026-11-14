@@ -280,13 +280,15 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       updated.playerId = scorer.id;
       updated.assistPlayerId = assister?.id;
       updated.description = `Gol di #${scorer.shirtNumber} ${scorer.firstName} ${scorer.lastName}${assister ? ` · assist di #${assister.shirtNumber} ${assister.lastName}` : ''}`;
-    } else if (current.type === 'yellow-card' || current.type === 'red-card') {
+    } else if (current.type === 'key-pass' || current.type === 'yellow-card' || current.type === 'red-card') {
       const booked = this.player(this.editPlayerId());
       if (!booked) { this.voiceMessage.set('Seleziona il giocatore dell’evento.'); return; }
       updated.playerId = booked.id;
-      updated.description = current.type === 'yellow-card'
-        ? `Ammonizione a #${booked.shirtNumber} ${booked.firstName} ${booked.lastName}${/seconda ammonizione/i.test(current.description) ? ' (seconda ammonizione)' : ''}`
-        : `Espulsione di #${booked.shirtNumber} ${booked.firstName} ${booked.lastName}`;
+      updated.description = current.type === 'key-pass'
+        ? `Passaggio chiave di #${booked.shirtNumber} ${booked.firstName} ${booked.lastName}`
+        : current.type === 'yellow-card'
+          ? `Ammonizione a #${booked.shirtNumber} ${booked.firstName} ${booked.lastName}${/seconda ammonizione/i.test(current.description) ? ' (seconda ammonizione)' : ''}`
+          : `Espulsione di #${booked.shirtNumber} ${booked.firstName} ${booked.lastName}`;
     } else if (current.type === 'substitution') {
       const outgoing = this.player(this.editOutgoingId()), incoming = this.player(this.editIncomingId());
       if (!outgoing || !incoming || outgoing.id === incoming.id) { this.voiceMessage.set('Seleziona due giocatori diversi per la sostituzione.'); return; }
