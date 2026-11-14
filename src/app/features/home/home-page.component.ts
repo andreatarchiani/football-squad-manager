@@ -291,16 +291,18 @@ export class HomePageComponent {
     }
     this.previewLoading.set(true);
     try {
-      const [players, saved, captaincy] = await Promise.all([
+      const [players, saved] = await Promise.all([
         this.playerService.list(workspaceId, this.teams()),
-        this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, this.layoutSlot()),
-        this.teamsService.loadCaptaincy(workspaceId, team.id, team.seasonId)
+        this.teamsService.loadTacticalLayout(workspaceId, team.id, team.seasonId, this.layoutSlot())
       ]);
       if (request !== this.previewRequest || this.selectedTeamId() !== team.id) return;
       this.previewPlayers.set(players.filter(player => !player.isArchived && player.status === 'active' && player.teamId === team.id && player.seasonId === team.seasonId));
-      const validPlayerIds = new Set(this.previewPlayers().map(player => player.id));
-      this.captainId.set(validPlayerIds.has(captaincy.captainId) ? captaincy.captainId : '');
-      this.viceCaptainId.set(validPlayerIds.has(captaincy.viceCaptainId) && captaincy.viceCaptainId !== captaincy.captainId ? captaincy.viceCaptainId : '');
+      // The roster is the source of truth for captaincy; the legacy settings
+      // document is no longer updated by the Teams screen.
+      const captain = this.previewPlayers().find(player => player.isCaptain);
+      const viceCaptain = this.previewPlayers().find(player => player.isViceCaptain && player.id !== captain?.id);
+      this.captainId.set(captain?.id ?? '');
+      this.viceCaptainId.set(viceCaptain?.id ?? '');
       const formation = saved?.formation && ['4-3-3', '4-4-2', '3-5-2'].includes(saved.formation) ? saved.formation : '4-3-3';
       this.previewFormation.set(formation);
       const validSlots = new Set(this.pitchSlots[formation].map(slot => slot.id));
