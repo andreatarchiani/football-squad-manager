@@ -19,6 +19,7 @@ interface MatchAnimation { type: 'goal' | 'yellow-card' | 'red-card' | 'substitu
 })
 export class LiveMatchComponent implements OnDestroy, OnInit {
   readonly teamName = input.required<string>();
+  readonly opponentName = input('');
   readonly workspaceId = input.required<string>();
   readonly teamId = input.required<string>();
   readonly seasonId = input.required<string>();
