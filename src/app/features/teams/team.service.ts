@@ -7,6 +7,7 @@ import {
   getDocs,
   serverTimestamp,
   setDoc,
+  writeBatch,
   updateDoc,
   writeBatch,
   type Firestore
@@ -118,8 +119,15 @@ export class TeamService {
   }
 
   async saveCaptaincy(workspaceId: string, teamId: string, seasonId: string, captainId: string, viceCaptainId: string): Promise<void> {
-    const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId, 'seasons', seasonId, 'settings', 'captaincy');
-    await setDoc(ref, { captainId, viceCaptainId, updatedAt: serverTimestamp() });
+    const db = this.requireFirestore();
+    const members = await getDocs(collection(db, 'workspaces', workspaceId, 'teams', teamId, 'seasons', seasonId, 'squadMembers'));
+    const batch = writeBatch(db);
+    members.docs.forEach(member => batch.update(member.ref, {
+      isCaptain: member.id === captainId,
+      isViceCaptain: member.id === viceCaptainId,
+      updatedAt: serverTimestamp()
+    }));
+    await batch.commit();
   }
   async loadLiveMatch(workspaceId: string, teamId: string, seasonId: string): Promise<LiveMatchState | null> {
     const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId, 'seasons', seasonId, 'settings', 'live-match');
