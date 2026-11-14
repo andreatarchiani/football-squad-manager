@@ -229,9 +229,11 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     return this.sortByShirtNumber(Object.values(this.lineup()).filter(Boolean).map(id => this.player(id)).filter((p): p is PlayerRecord => !!p));
   }
   protected bench(): PlayerRecord[] {
-    const ids = new Set(Object.values(this.lineup()));
-    return this.sortByShirtNumber(this.players().filter(p => !ids.has(p.id) && !this.redCards().includes(p.id)));
+    const ids = new Set(Object.values(this.lineup()).filter(Boolean));
+    return this.sortByShirtNumber(this.players().filter(p => !ids.has(p.id)));
   }
+  protected completeRoster(): PlayerRecord[] { return this.sortByShirtNumber(this.players()); }
+  protected isOnField(playerId: string): boolean { return Object.values(this.lineup()).includes(playerId); }
   protected availabilityLabel(player: PlayerRecord): string {
     if (player.status === 'injured') return 'Infortunato';
     if (player.status === 'suspended') return 'Squalificato';
