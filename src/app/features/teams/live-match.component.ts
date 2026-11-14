@@ -218,6 +218,12 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     const ids = new Set(Object.values(this.lineup()));
     return this.sortByShirtNumber(this.players().filter(p => !ids.has(p.id) && !this.redCards().includes(p.id)));
   }
+  protected availabilityLabel(player: PlayerRecord): string {
+    if (player.status === 'injured') return 'Infortunato';
+    if (player.status === 'suspended') return 'Squalificato';
+    if (player.status === 'left') return 'Fuori rosa';
+    return '';
+  }
   protected get minute(): number { this.elapsedSeconds(); return Math.min(90, Math.floor(this.currentElapsedSeconds()/60)); }
   protected get clock(): string { this.elapsedSeconds(); const elapsed=this.currentElapsedSeconds(),m=Math.floor(elapsed/60),s=elapsed%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
   private currentElapsedSeconds(): number { return this.running() && this.runStartedAtMs !== null ? Math.min(5400, this.runBaseSeconds + Math.floor((Date.now() - this.runStartedAtMs) / 1000)) : this.elapsedSeconds(); }
