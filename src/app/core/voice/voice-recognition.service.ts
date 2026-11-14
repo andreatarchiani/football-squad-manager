@@ -59,8 +59,17 @@ export class VoiceRecognitionService {
     const finalSegments: string[] = [];
     const seenFinalSegments = new Set<string>();
     let finalTranscript = '';
+    let ended = false;
+
+    const normalize = (value: string): string => value.toLocaleLowerCase('it-IT')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
 
     recognition.onresult = (event) => {
+      if (ended || this.recognition !== recognition) return;
       const interimSegments: string[] = [];
       // Read the current result list as a snapshot. Do not concatenate event
       // deltas: some browser versions replay old final results on later events.
@@ -69,25 +78,29 @@ export class VoiceRecognitionService {
         const transcript = result?.[0]?.transcript?.trim();
         if (!transcript) continue;
         if (result.isFinal) {
-          const key = transcript.toLocaleLowerCase('it-IT')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^\p{L}\p{N}\s]/gu, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-          // Duplicate final segments are discarded even if a browser reports
-          // them at a different result index during the same button press.
-          if (key && !seenFinalSegments.has(key)) {
-            seenFinalSegments.add(key);
-            finalSegments.push(transcript);
+          const key = normalize(transcript);
+          if (!key || seenFinalSegments.has(key)) continue;
+
+          const currentWords = normalize(finalSegments.join(' ')).split(' ').filter(Boolean);
+          const nextWords = key.split(' ').filter(Boolean);
+          // Some engines replay a final phrase as a longer, slightly changed
+          // segment. Ignore contained repeats and remove any repeated boundary.
+          const currentText = currentWords.join(' ');
+          if (currentText && (currentText === key || currentText.includes(key))) continue;
+          let overlap = Math.min(currentWords.length, nextWords.length);
+          while (overlap > 0 && currentWords.slice(-overlap).join(' ') !== nextWords.slice(0, overlap).join(' ')) {
+            overlap -= 1;
           }
+          const remaining = nextWords.slice(overlap).join(' ');
+          seenFinalSegments.add(key);
+          if (remaining) finalSegments.push(remaining);
         } else {
           interimSegments.push(transcript);
         }
       }
       finalTranscript = finalSegments.join(' ').replace(/\s+/g, ' ').trim();
       const snapshot = [finalTranscript, interimSegments.join(' ')].filter(Boolean).join(' ').trim();
-      if (snapshot) onTranscript(snapshot, false);
+      if (snapshot) onTranscript(snapshot, interimSegments.length === 0 && Boolean(finalTranscript));
     };
 
     recognition.onerror = (event) => {
@@ -102,6 +115,8 @@ export class VoiceRecognitionService {
     };
 
     recognition.onend = () => {
+      if (ended) return;
+      ended = true;
       if (this.recognition === recognition) this.recognition = null;
       onEnd(finalTranscript);
     };
