@@ -32,7 +32,7 @@
       <nav>
         @for (item of navigation; track item; let index = $index) {
           <button class="nav-item" [class.active]="(index === 0 && activePage() === 'overview') || (index === 1 && activePage() === 'teams') || (index === 2 && activePage() === 'players')" [disabled]="index > 2" [attr.aria-current]="(index === 0 && activePage() === 'overview') || (index === 1 && activePage() === 'teams') || (index === 2 && activePage() === 'players') ? 'page' : null" (click)="navigate(index)" type="button">
-            <span class="nav-icon">{{ ['▦', '⚑', '♟', '◇', '◷'][index] }}</span><span>{{ item }}</span>
+            <span class="nav-icon" aria-hidden="true">@if (index === 0) { <svg viewBox="0 0 24 24" focusable="false"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"/></svg> } @else { {{ ['▦', '⚑', '♟', '◇', '◷'][index] }} }</span><span>{{ item }}</span>
           </button>
         }
       </nav>
