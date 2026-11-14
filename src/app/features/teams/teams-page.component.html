@@ -234,7 +234,7 @@
   }
   }
   @if (liveMatch() && expandedRosterId() && teams().find(item => item.id === expandedRosterId())?.seasonId && auth.workspaceId()) {
-    <fsm-live-match [teamName]="expandedTeamName()" [workspaceId]="auth.workspaceId()!" [teamId]="expandedRosterId()!" [seasonId]="teams().find(item => item.id === expandedRosterId())!.seasonId!" [initialPlayers]="rosterForExpanded()" [initialLineup]="lineup()" [formation]="formation()" [initialPositions]="shirtPositions()" [autoStart]="autoStartMatch()" [opponentName]="matchOpponentName()" (closematch)="closeMatch()" />
+    <fsm-live-match [teamName]="expandedTeamName()" [workspaceId]="auth.workspaceId()!" [teamId]="expandedRosterId()!" [seasonId]="teams().find(item => item.id === expandedRosterId())!.seasonId!" [initialPlayers]="rosterForExpanded()" [initialLineup]="lineup()" [formation]="formation()" [initialPositions]="shirtPositions()" [autoStart]="autoStartMatch()" [opponentName]="matchOpponentName()" (closematch)="closeMatch()" (editroster)="returnToRoster()" />
   }
 </section>
 }

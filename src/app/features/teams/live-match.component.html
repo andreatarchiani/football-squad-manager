@@ -118,8 +118,8 @@
       @if (selectedOutgoingId(); as outgoingId) { <div class="selected-outgoing">Esce: {{ player(outgoingId)?.lastName }} · scegli chi entra</div> }
       <div class="match-bench">
         @for (player of bench(); track player.id) {
-          <button type="button" class="bench-choice" [class.bench-choice-unavailable]="player.status !== 'active'" [disabled]="!selectedOutgoingId() || changesUsed() >= maxChanges || player.status !== 'active'" (click)="chooseIncoming(player)">
-            <span class="bench-choice-number">{{ player.shirtNumber ?? '—' }}</span><span><strong>{{ player.firstName }} {{ player.lastName }}</strong><small>{{ availabilityLabel(player) || (player.roles.join(' · ') || player.primaryRole) }}</small></span>@if (player.status === 'active') { <b>＋</b> }
+          <button type="button" class="bench-choice" [class.bench-choice-unavailable]="player.status !== 'active'" [disabled]="!selectedOutgoingId() || changesUsed() >= maxChanges || player.status !== 'active' || redCards().includes(player.id)" (click)="chooseIncoming(player)">
+            <span class="bench-choice-number">{{ player.shirtNumber ?? '—' }}</span><span><strong>{{ player.firstName }} {{ player.lastName }}</strong><small>{{ redCards().includes(player.id) ? 'Espulso' : (availabilityLabel(player) || (player.roles.join(' · ') || player.primaryRole)) }}</small></span>@if (player.status === 'active') { <b>＋</b> }
           </button>
         } @empty { <p class="bench-empty">Nessun giocatore disponibile in panchina.</p> }
       </div>
@@ -138,6 +138,22 @@
     @for (event of events(); track $index) { <div class="match-event"><b>{{ event.minute }}′</b><span>{{ event.description }}</span></div> }
     @empty { <p class="events-empty">Gli eventi registrati durante la partita compariranno qui.</p> }
   </section>
+  <details class="match-complete-roster">
+    <summary><span>Rosa completa</span><strong>{{ players().length }} giocatori</strong></summary>
+    <div class="match-complete-roster-list">
+      @for (player of completeRoster(); track player.id) {
+        <div class="match-complete-roster-player">
+          <b>#{{ player.shirtNumber ?? '—' }}</b>
+          <span>{{ player.firstName }} {{ player.lastName }}</span>
+          <small>{{ redCards().includes(player.id) ? 'Espulso' : availabilityLabel(player) || (player.roles.join(' · ') || player.primaryRole) }}</small>
+          @if (isOnField(player.id)) { <em>IN CAMPO</em> }
+        </div>
+      }
+    </div>
+  </details>
+  <footer class="match-bottom-actions">
+    <button type="button" class="edit-roster-button" (click)="editroster.emit()">✎ Modifica la rosa</button>
+  </footer>
   @if (finishConfirmationOpen()) {
     <div class="match-finish-confirm-backdrop">
       <section class="match-finish-confirm" role="dialog" aria-modal="true" aria-labelledby="finish-match-title">

@@ -30,6 +30,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   readonly initialPositions = input.required<Record<string, { x: number; y: number }>>();
   readonly autoStart = input(false);
   readonly closematch = output<void>();
+  readonly editroster = output<void>();
   private readonly voice = inject(VoiceRecognitionService);
   private readonly auth = inject(FirebaseAuthService);
   private readonly playerService = inject(PlayerService);
@@ -228,9 +229,11 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     return this.sortByShirtNumber(Object.values(this.lineup()).filter(Boolean).map(id => this.player(id)).filter((p): p is PlayerRecord => !!p));
   }
   protected bench(): PlayerRecord[] {
-    const ids = new Set(Object.values(this.lineup()));
-    return this.sortByShirtNumber(this.players().filter(p => !ids.has(p.id) && !this.redCards().includes(p.id)));
+    const ids = new Set(Object.values(this.lineup()).filter(Boolean));
+    return this.sortByShirtNumber(this.players().filter(p => !ids.has(p.id)));
   }
+  protected completeRoster(): PlayerRecord[] { return this.sortByShirtNumber(this.players()); }
+  protected isOnField(playerId: string): boolean { return Object.values(this.lineup()).includes(playerId); }
   protected availabilityLabel(player: PlayerRecord): string {
     if (player.status === 'injured') return 'Infortunato';
     if (player.status === 'suspended') return 'Squalificato';
@@ -685,7 +688,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       if (!player) { this.rejectVoiceCommand('Il numero '+numbers[0]+' non identifica un solo giocatore.'); return; }
       if (!onField(player.id)) { this.rejectVoiceCommand('#'+numbers[0]+' è in rosa ma non è attualmente in campo: non può essere registrato come autore del passaggio chiave.'); return; }
       this.pending.set({type:'key-pass',playerId:player.id,description:'Passaggio chiave di #'+player.shirtNumber+' '+player.firstName+' '+player.lastName});
-    } else if (/\b(?:(?:goal|gol|rete)\s+(?:pres[oaie]|subit[oaie]|incassat[oaie])|(?:abbiamo|abbiam|ci hanno|ci ha)\s+(?:preso|subito|incassato)\s+(?:un\s+)?(?:goal|gol|rete)|(?:ci hanno|ci ha)\s+fatto\s+(?:goal|gol)|(?:subiamo|abbiamo subito)\s+(?:un\s+)?(?:goal|gol|rete)|(?:goal|gol|rete)\s+(?:contro|dell?\s+avversario)|ci hanno segnato|ci ha segnato)\b/.test(text)) {
+    } else if (/\b(?:(?:goal|gol|rete)\s+(?:pres[oaie]|subit[oaie]|incassat[oaie])(?:\s+.*)?|(?:abbiamo|abbiam|ci hanno|ci ha)\s+(?:preso|subito|incassato)\s+(?:un\s+)?(?:goal|gol|rete)|(?:ci hanno|ci ha)\s+fatto\s+(?:goal|gol)|(?:subiamo|abbiamo subito)\s+(?:un\s+)?(?:goal|gol|rete)|(?:goal|gol|rete)\s+(?:a\s+causa|per\s+colpa)\s+(?:dell?\s+)?(?:errore|sbaglio)|(?:goal|gol|rete)\s+(?:contro|dell?\s+avversario)|ci hanno segnato|ci ha segnato)\b/.test(text)) {
       this.pending.set({ type: 'opponent-goal', description: raw.trim() });
     } else if (/\b(goal|gol|ha segnato|segnato|rete)\b/.test(text)) {
       const scorerNumber = numbers.find(number => number !== assistNumber);
