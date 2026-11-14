@@ -5,7 +5,7 @@ import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { PlayerService } from '../players/player.service';
 import { TeamService } from './team.service';
 
-type MatchEventType = 'goal' | 'yellow-card' | 'red-card' | 'substitution' | 'formation';
+type MatchEventType = 'goal' | 'key-pass' | 'yellow-card' | 'red-card' | 'substitution' | 'formation';
 interface MatchEvent { type: MatchEventType; minute: number; description: string; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string; }
 interface PendingAction { type: MatchEventType; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string; description: string; }
 interface MatchAnimation { type: 'goal' | 'yellow-card' | 'red-card' | 'substitution'; title: string; detail: string; outgoingNumber?: number | null; incomingNumber?: number | null; playerNumber?: number | null; assistDetail?: string | null; }
@@ -50,6 +50,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly events = signal<MatchEvent[]>([]);
   protected readonly goals = signal<Record<string, number>>({});
   protected readonly assists = signal<Record<string, number>>({});
+  protected readonly keyPasses = signal<Record<string, number>>({});
   protected readonly yellowCards = signal<Record<string, number>>({});
   protected readonly redCards = signal<string[]>([]);
   protected readonly lineup = signal<Record<string, string>>({});
@@ -132,7 +133,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
         this.elapsedSeconds.set(Math.max(0, Math.min(5400, restoredElapsed)));
         const restoredFinished = saved.finished || restoredElapsed >= 5400;
         this.finished.set(restoredFinished); this.finishReportOpen.set(restoredFinished); this.events.set(saved.events); this.goals.set(saved.goals); this.assists.set(saved.assists);
-        this.yellowCards.set(saved.yellowCards); this.redCards.set(saved.redCards); this.lineup.set(saved.lineup);
+        this.yellowCards.set(saved.yellowCards); this.keyPasses.set(this.countPlayerEvents(saved.events, 'key-pass')); this.redCards.set(saved.redCards); this.lineup.set(saved.lineup);
         this.matchFormation.set(this.formations[saved.formation] ? saved.formation : f); this.matchPositions.set(saved.positions);
         this.formationPlayerOrder = this.formations[this.matchFormation()].map(slot => saved.lineup[slot.id]).filter((id): id is string => !!id);
         this.changesUsed.set(Math.max(0, Math.min(this.maxChanges, saved.changesUsed)));
@@ -326,6 +327,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     const oldGoals = count(previous, 'goal', 'playerId'), newGoals = count(next, 'goal', 'playerId');
     const oldAssists = count(previous, 'goal', 'assistPlayerId'), newAssists = count(next, 'goal', 'assistPlayerId');
     const oldYellows = count(previous, 'yellow-card', 'playerId'), newYellows = count(next, 'yellow-card', 'playerId');
+    const oldKeyPasses = count(previous, 'key-pass', 'playerId'), newKeyPasses = count(next, 'key-pass', 'playerId');
     const oldReds = [...new Set(previous.filter(e => e.type === 'red-card' && e.playerId).map(e => e.playerId!))];
     const newReds = [...new Set(next.filter(e => e.type === 'red-card' && e.playerId).map(e => e.playerId!))];
     const workspaceId = this.auth.workspaceId();
@@ -343,10 +345,14 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
         const delta = (newYellows[id] ?? 0) - (oldYellows[id] ?? 0);
         for (let i = 0; i < Math.abs(delta); i++) changes.push(delta > 0 ? this.playerService.recordYellowCard(workspaceId, id) : this.playerService.removeYellowCard(workspaceId, id));
       }
+      for (const id of new Set([...Object.keys(oldKeyPasses), ...Object.keys(newKeyPasses)])) {
+        const delta = (newKeyPasses[id] ?? 0) - (oldKeyPasses[id] ?? 0);
+        for (let i = 0; i < Math.abs(delta); i++) changes.push(delta > 0 ? this.playerService.recordKeyPass(workspaceId, id) : this.playerService.removeKeyPass(workspaceId, id));
+      }
       await Promise.all(changes);
     }
     this.events.set(next);
-    this.goals.set(newGoals); this.assists.set(newAssists); this.yellowCards.set(newYellows); this.redCards.set(newReds);
+    this.goals.set(newGoals); this.assists.set(newAssists); this.yellowCards.set(newYellows); this.keyPasses.set(newKeyPasses); this.redCards.set(newReds);
     this.changesUsed.set(Math.min(this.maxChanges, next.filter(e => e.type === 'substitution').length));
     await this.persistMatchState();
   }
@@ -633,7 +639,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       this.rejectVoiceCommand('La partita è terminata: non puoi aggiungere o modificare eventi.');
       return;
     }
-    const undoMatch = text.match(/annulla\s+(?:(?:il|la|lo)\s+)?(goal|gol|ammonizione|giallo|espulsione|rosso)\s+(?:del\s+)?(?:numero\s*)?(\d{1,2})/);
+    const undoMatch = text.match(/annulla\s+(?:(?:il|la|lo)\s+)?(passaggio chiave|goal|gol|ammonizione|giallo|espulsione|rosso)\s+(?:del\s+)?(?:numero\s*)?(\d{1,2})/);
     if (undoMatch) { this.undoMatchEvent(undoMatch[1], Number(undoMatch[2])); return; }
     const numbers = [...text.matchAll(/\b(?:numero\s*)?(\d{1,2})\b/g)].map(match => Number(match[1]));
     const byNumber = (number: number) => this.players().filter(player => player.shirtNumber === number);
@@ -645,7 +651,14 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     const assistMatch = text.match(/assist(?:ito)?\s+(?:(?:di|del|della|da)\s+)?(?:numero\s*)?(\d{1,2})/);
     const assistNumber = assistMatch ? Number(assistMatch[1]) : undefined;
 
-    if (/\b(goal|gol|ha segnato|segnato|rete)\b/.test(text)) {
+    if (/\b(passaggio chiave|chiave)\b/.test(text)) {
+      if (!numbers.length) { this.rejectVoiceCommand('Dimmi il numero di maglia di chi ha effettuato il passaggio chiave.'); return; }
+      const player=findUnique(numbers[0]);
+      if (!byNumber(numbers[0]).length) { this.rejectVoiceCommand('Il numero '+numbers[0]+' non è presente nella rosa.'); return; }
+      if (!player) { this.rejectVoiceCommand('Il numero '+numbers[0]+' non identifica un solo giocatore.'); return; }
+      if (!onField(player.id)) { this.rejectVoiceCommand('#'+numbers[0]+' è in rosa ma non è attualmente in campo: non può essere registrato come autore del passaggio chiave.'); return; }
+      this.pending.set({type:'key-pass',playerId:player.id,description:'Passaggio chiave di #'+player.shirtNumber+' '+player.firstName+' '+player.lastName});
+    } else if (/\b(goal|gol|ha segnato|segnato|rete)\b/.test(text)) {
       const scorerNumber = numbers.find(number => number !== assistNumber);
       if (scorerNumber === undefined) {
         this.rejectVoiceCommand('Per registrare un gol devi indicare il numero di maglia del marcatore.');
@@ -708,7 +721,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
         description: 'Cambio: esce #' + outgoing.shirtNumber + ' ' + outgoing.lastName + ', entra #' + incoming.shirtNumber + ' ' + incoming.lastName
       });
     } else {
-      this.rejectVoiceCommand('Comando non riconosciuto. Puoi segnalare gol, ammonizioni, espulsioni e cambi.');
+      this.rejectVoiceCommand('Comando non riconosciuto. Puoi segnalare gol, passaggi chiave, ammonizioni, espulsioni e cambi.');
       return;
     }
     this.voiceMessage.set('Comando riconosciuto. Eseguo…');
@@ -724,26 +737,28 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   private undoMatchEvent(kind: string, shirtNumber: number): void {
     const player=this.players().find(p=>p.shirtNumber===shirtNumber);
     if(!player){this.voiceMessage.set('Non trovo il giocatore numero '+shirtNumber+'.');return;}
-    const type=/goal|gol/.test(kind)?'goal':/ammonizione|giallo/.test(kind)?'yellow-card':'red-card';
+    const type=/passaggio chiave/.test(kind)?'key-pass':/goal|gol/.test(kind)?'goal':/ammonizione|giallo/.test(kind)?'yellow-card':'red-card';
     const current=this.events(); const index=current.findIndex(event=>event.type===type&&event.playerId===player.id);
     if(index<0){this.voiceMessage.set('Non trovo un evento da annullare per il numero '+shirtNumber+'.');return;}
     const target=current[index]; let next=current.filter((_,i)=>i!==index);
     if(type==='yellow-card'&&/seconda ammonizione/i.test(target.description)) next=next.filter(event=>!(event.type==='red-card'&&event.playerId===player.id&&event.minute===target.minute));
     if(type==='red-card'&&/seconda ammonizione/i.test(target.description)) next=next.filter(event=>!(event.type==='yellow-card'&&event.playerId===player.id&&event.minute===target.minute&&/seconda ammonizione/i.test(event.description)));
     this.events.set(next);
-    const goals:Record<string,number>={}, assists:Record<string,number>={}, yellows:Record<string,number>={}, reds:string[]=[];
+    const goals:Record<string,number>={}, assists:Record<string,number>={}, yellows:Record<string,number>={}, keyPasses:Record<string,number>={}, reds:string[]=[];
     for(const event of next){
       if(event.type==='goal'&&event.playerId){goals[event.playerId]=(goals[event.playerId]??0)+1;const assistId=event.assistPlayerId??this.players().find(p=>p.shirtNumber===Number(event.description.match(/assist di #?(\d+)/i)?.[1]))?.id;if(assistId)assists[assistId]=(assists[assistId]??0)+1;}
       if(event.type==='yellow-card'&&event.playerId)yellows[event.playerId]=(yellows[event.playerId]??0)+1;
+      if(event.type==='key-pass'&&event.playerId)keyPasses[event.playerId]=(keyPasses[event.playerId]??0)+1;
       if(event.type==='red-card'&&event.playerId&&!reds.includes(event.playerId))reds.push(event.playerId);
     }
-    this.goals.set(goals);this.assists.set(assists);this.yellowCards.set(yellows);this.redCards.set(reds);
+    this.goals.set(goals);this.assists.set(assists);this.yellowCards.set(yellows);this.keyPasses.set(keyPasses);this.redCards.set(reds);
     const workspaceId=this.auth.workspaceId();
     if(type==='goal'&&workspaceId&&target.playerId)void this.playerService.removeGoal(workspaceId,target.playerId).catch(error=>{console.error('Unable to reverse player goal.',error);this.voiceMessage.set('Gol annullato nella partita, ma non nel totale giocatore.');});
     const targetAssistId=target.assistPlayerId??this.players().find(p=>p.shirtNumber===Number(target.description.match(/assist di #?(\d+)/i)?.[1]))?.id;
     if(type==='goal'&&workspaceId&&targetAssistId)void this.playerService.removeAssist(workspaceId,targetAssistId).catch(error=>{console.error('Unable to reverse player assist.',error);this.voiceMessage.set('Gol annullato, ma non è stato possibile aggiornare gli assist.');});
     if(type==='yellow-card'&&workspaceId&&target.playerId)void this.playerService.removeYellowCard(workspaceId,target.playerId).catch(error=>{console.error('Unable to reverse player yellow card.',error);this.voiceMessage.set('Ammonizione annullata nella partita, ma non nel totale giocatore.');});
-    this.voiceMessage.set((type==='goal'?'Gol':type==='yellow-card'?'Ammonizione':'Espulsione')+' del numero '+shirtNumber+' annullata.'); void this.persistMatchState();
+    if(type==='key-pass'&&workspaceId&&target.playerId)void this.playerService.removeKeyPass(workspaceId,target.playerId).catch(error=>{console.error('Unable to reverse player key pass.',error);this.voiceMessage.set('Passaggio chiave annullato nella partita, ma non nel totale giocatore.');});
+    this.voiceMessage.set((type==='goal'?'Gol':type==='key-pass'?'Passaggio chiave':type==='yellow-card'?'Ammonizione':'Espulsione')+' del numero '+shirtNumber+' annullato.'); void this.persistMatchState();
   }
   protected confirmAction(): void {
     const action=this.pending();if(!action)return;
@@ -757,6 +772,12 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       const workspaceId=this.auth.workspaceId();
       if(workspaceId)void this.playerService.recordGoal(workspaceId,action.playerId).catch(error=>{console.error('Unable to save player goal.',error);this.voiceMessage.set('Gol registrato nella partita, ma non è stato possibile aggiornare il totale del giocatore.');});
       if(workspaceId&&action.assistPlayerId)void this.playerService.recordAssist(workspaceId,action.assistPlayerId).catch(error=>{console.error('Unable to save player assist.',error);this.voiceMessage.set('Gol registrato, ma non è stato possibile aggiornare il totale degli assist.');});
+    }
+    if(action.type==='key-pass'&&action.playerId){
+      this.keyPasses.update(values=>({...values,[action.playerId!]: (values[action.playerId!]??0)+1}));
+      this.events.update(events=>[{type:'key-pass',minute,description:action.description,playerId:action.playerId},...events]);
+      const workspaceId=this.auth.workspaceId();
+      if(workspaceId)void this.playerService.recordKeyPass(workspaceId,action.playerId).catch(error=>{console.error('Unable to save player key pass.',error);this.voiceMessage.set('Passaggio chiave registrato nella partita, ma non è stato possibile aggiornare il totale del giocatore.');});
     }
     if(action.type==='yellow-card'&&action.playerId){
       const workspaceId=this.auth.workspaceId();
@@ -777,7 +798,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       else {this.voiceMessage.set(this.changesUsed()>=this.maxChanges?'Hai esaurito i cambi disponibili.':'Il giocatore da sostituire non è in campo.');this.pending.set(null);return;}
     }
     this.pending.set(null);
-    this.voiceMessage.set(action.type === 'goal' ? 'Gol registrato.' : action.type === 'yellow-card' ? 'Ammonizione registrata.' : action.type === 'red-card' ? 'Espulsione registrata.' : 'Sostituzione eseguita.');
+    this.voiceMessage.set(action.type === 'goal' ? 'Gol registrato.' : action.type === 'key-pass' ? 'Passaggio chiave registrato.' : action.type === 'yellow-card' ? 'Ammonizione registrata.' : action.type === 'red-card' ? 'Espulsione registrata.' : 'Sostituzione eseguita.');
     void this.persistMatchState();
   }
   protected cancelAction(): void { this.voice.cancel(); this.voiceListening.set(false); this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set('Evento annullato.'); }
@@ -789,6 +810,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
   protected goalsFor(player:PlayerRecord):number{return this.goals()[player.id]??0;}
   protected assistsFor(player:PlayerRecord):number{return this.assists()[player.id]??0;}
+  private countPlayerEvents(events: MatchEvent[], type: MatchEventType): Record<string, number> { const counts:Record<string,number>={}; for(const event of events) if(event.type===type&&event.playerId) counts[event.playerId]=(counts[event.playerId]??0)+1; return counts; }
   protected yellowCardsFor(player:PlayerRecord):number{return this.yellowCards()[player.id]??0;}
+  protected keyPassesFor(player:PlayerRecord):number{return this.keyPasses()[player.id]??0;}
   protected playerHasRedCard(player:PlayerRecord):boolean{return this.redCards().includes(player.id);}
 }
