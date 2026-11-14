@@ -624,7 +624,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       if (!onField(scorer.id)) { this.rejectVoiceCommand('#' + scorerNumber + ' è in rosa ma non è attualmente in campo: non può essere registrato come marcatore.'); return; }
       if (assister && !onField(assister.id)) { this.rejectVoiceCommand('#' + assistNumber + ' è in rosa ma non è attualmente in campo: non può essere registrato come autore dell’assist.'); return; }
       if (assister && scorer.id === assister.id) { this.rejectVoiceCommand('Il marcatore e l’autore dell’assist devono essere due giocatori diversi.'); return; }
-      const description = 'Gol di #' + scorer.shirtNumber + ' ' + scorer.firstName + ' ' + scorer.lastName + (assister ? ' · assist di #' + assister.shirtNumber + ' ' + assister.lastName : '');
+      // Keep the complete recognized voice command in the match report, including any extra details (e.g. da fuori area).
+      const description = raw.trim();
       this.pending.set({ type: 'goal', playerId: scorer.id, assistPlayerId: assister?.id, description });
     } else if (/\b(ammon|ammonito|ammonizione|cartellino giallo|giallo)\b/.test(text)) {
       if (!numbers.length) { this.rejectVoiceCommand('Dimmi il numero di maglia da ammonire, per esempio: ammonito numero 5.'); return; }
