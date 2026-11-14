@@ -224,3 +224,10 @@
 .finish-confirm-cancel{border:1px solid #ffffff30;background:#ffffff0b;color:#e8f5eb}
 .finish-confirm-yes{border:1px solid #ffb45a55;background:linear-gradient(135deg,#a84b20,#e07831);color:#fff}
 @media(max-width:420px){.match-finish-confirm-actions{flex-direction:column-reverse}}
+
+
+/* Keep captain and vice-captain armbands visible on the live-match pitch. */
+.match-pitch .pitch-player{position:absolute;}
+.match-pitch .match-captain-band{position:absolute;z-index:5;top:-13px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;justify-content:center;min-height:13px;padding:1px 5px;border:1px solid #ffe39a;border-radius:4px;background:linear-gradient(135deg,#f5d56c,#bd8b25);color:#352707;font-size:7px;font-weight:1000;line-height:1;letter-spacing:.06em;white-space:nowrap;box-shadow:0 2px 6px #0008;pointer-events:none}
+.match-pitch .match-captain-band.is-vice-captain{border-color:#d7e6ef;background:linear-gradient(135deg,#e7f1f7,#8ea8ba);color:#142b3a}
+@media(max-width:420px){.match-pitch .match-captain-band{top:-12px;min-height:12px;padding:1px 4px;font-size:6px}}
