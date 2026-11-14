@@ -553,13 +553,13 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       .replace(/\s+/g, ' ')
       .trim();
     const smallNumbers: Record<string, string> = {
-      zero: '0', uno: '1', una: '1', un: '1', due: '2', tre: '3', quattro: '4',
+      zero: '0', uno: '1', due: '2', tre: '3', quattro: '4',
       cinque: '5', sei: '6', sette: '7', otto: '8', nove: '9', dieci: '10',
       undici: '11', dodici: '12', tredici: '13', quattordici: '14', quindici: '15',
       sedici: '16', diciassette: '17', diciotto: '18', diciannove: '19', venti: '20'
     };
     const tens: Record<string, number> = {
-      trenta: 30, quaranta: 40, cinquanta: 50, sessanta: 60,
+      venti: 20, trenta: 30, quaranta: 40, cinquanta: 50, sessanta: 60,
       settanta: 70, ottanta: 80, novanta: 90
     };
     const units: Record<string, number> = {
@@ -592,7 +592,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       this.rejectVoiceCommand('La partita è terminata: non puoi aggiungere o modificare eventi.');
       return;
     }
-    const undoMatch = text.match(/annulla\s+(goal|gol|ammonizione|giallo|espulsione|rosso)\s+(?:del\s+)?(?:numero\s*)?(\d{1,2})/);
+    const undoMatch = text.match(/annulla\s+(?:(?:il|la|lo)\s+)?(goal|gol|ammonizione|giallo|espulsione|rosso)\s+(?:del\s+)?(?:numero\s*)?(\d{1,2})/);
     if (undoMatch) { this.undoMatchEvent(undoMatch[1], Number(undoMatch[2])); return; }
     const numbers = [...text.matchAll(/\b(?:numero\s*)?(\d{1,2})\b/g)].map(match => Number(match[1]));
     const byNumber = (number: number) => this.players().filter(player => player.shirtNumber === number);
@@ -635,14 +635,14 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
           ? 'Seconda ammonizione: #' + player.shirtNumber + ' ' + player.firstName + ' ' + player.lastName + ' · espulsione automatica'
           : 'Ammonizione a #' + player.shirtNumber + ' ' + player.firstName + ' ' + player.lastName + ' (prima ammonizione)'
       });
-    } else if (/\b(espuls|espulso|cartellino rosso|rosso)\b/.test(text)) {
+    } else if (/\b(espuls|espulso|espell|cartellino rosso|rosso)\b/.test(text)) {
       if (!numbers.length) { this.rejectVoiceCommand('Indica il numero di maglia del giocatore da espellere.'); return; }
       const player = findUnique(numbers[0]);
       if (!byNumber(numbers[0]).length) { this.rejectVoiceCommand('Il numero ' + numbers[0] + ' non è presente nella rosa.'); return; }
       if (!player) { this.rejectVoiceCommand('Il numero ' + numbers[0] + ' non identifica un solo giocatore.'); return; }
       if (this.redCards().includes(player.id)) { this.rejectVoiceCommand(player.firstName + ' ' + player.lastName + ' è già stato espulso.'); return; }
       this.pending.set({ type: 'red-card', playerId: player.id, description: 'Espulsione di #' + player.shirtNumber + ' ' + player.firstName + ' ' + player.lastName });
-    } else if (/\b(cambio|cambiare|sostituz|esce|entra)\b/.test(text)) {
+    } else if (/\b(cambio|cambiare|sostituz|sostituisc|esce|entra)\b/.test(text)) {
       if (numbers.length < 2) {
         this.rejectVoiceCommand('Indica chi esce e chi entra: «cambio del numero 7 con il numero 9».');
         return;
