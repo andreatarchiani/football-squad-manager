@@ -103,7 +103,7 @@
 
 /* Captain and vice-captain selection in the roster */
 .captaincy-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;border:1px solid #344b3e;border-radius:11px;background:#17251e}
-.captaincy-picker label{display:grid;gap:6px;min-width:0}
+.captaincy-field{display:grid;gap:7px;min-width:0}.captaincy-label{display:flex;align-items:center;gap:5px;color:#dcebe0;font-size:11px;font-weight:800}.captaincy-dropdown{width:100%;min-width:0}.captaincy-dropdown .formation-picker-trigger{min-height:42px;padding:0 10px;border-color:#3c5547;border-radius:8px;background:#101a15;font-size:11px}.captaincy-dropdown .formation-picker-trigger strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}.captaincy-dropdown .formation-picker-menu{max-height:240px;overflow-y:auto;z-index:150}.captaincy-dropdown .formation-picker-option{min-height:38px;font-size:11px}.captaincy-picker label>span{color:#dcebe0;font-size:11px;font-weight:800}
 .captaincy-picker label>span{color:#dcebe0;font-size:11px;font-weight:800}
 .captaincy-picker select{width:100%;min-width:0;min-height:42px;padding:0 10px;border:1px solid #3c5547;border-radius:8px;color:#edf4f0;background:#101a15;font:inherit;font-size:11px}
 .captaincy-save-status{grid-column:1/-1;color:#91a99a;font-size:10px}
