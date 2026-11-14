@@ -63,3 +63,20 @@
 .vice-armband-icon,.vice-armband-mark{color:#12344a;background:linear-gradient(135deg,#d9f2ff,#75b9dc);border:1px solid #d5f0ff}
 .home-leadership-mark{display:inline-grid;place-items:center;min-width:15px;height:15px;margin-left:3px;padding:0 2px;border-radius:4px;font-size:7px;font-weight:950;vertical-align:middle}
 @media(max-width:520px){.home-captaincy-picker{grid-template-columns:1fr}.home-captaincy-status{grid-column:auto}}
+
+
+/* Home essenziale: prossima partita e rosa in sola lettura. */
+.home-match-dashboard{display:grid;gap:18px;max-width:1120px;margin:0 auto}
+.next-match-panel,.home-roster-panel{padding:clamp(18px,3vw,28px);border:1px solid var(--border);border-radius:17px;background:linear-gradient(145deg,#17231d,#121a1c);box-shadow:0 12px 34px #0002}
+.next-match-heading h2,.home-roster-heading h2{margin:7px 0 5px;font-size:clamp(20px,3vw,27px);letter-spacing:-.035em}
+.next-match-heading p,.home-roster-heading p{margin:0;color:var(--text-muted);font-size:12px;line-height:1.5}
+.opponent-field{display:grid;gap:8px;margin-top:20px;color:#b9cbbf;font-size:10px;font-weight:850;letter-spacing:.12em}
+.opponent-field input{width:100%;box-sizing:border-box;min-height:48px;padding:0 14px;border:1px solid #3a5545;border-radius:10px;background:#0e1713;color:#f2fff5;font:inherit;font-size:14px;letter-spacing:0;outline:none}
+.opponent-field input:focus{border-color:#8fd6a7;box-shadow:0 0 0 3px #8fd6a71c}
+.home-roster-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+.home-pitch-shirt-static{display:grid;place-items:center;cursor:default!important;touch-action:auto!important;user-select:none}
+.home-match-dashboard .home-pitch-player{pointer-events:none}
+.home-match-dashboard .home-pitch-stage{margin-top:0}
+.home-match-dashboard .launch-actions{justify-content:flex-end;margin-top:18px}
+.home-match-dashboard .launch-button{min-width:190px}
+@media(max-width:560px){.home-roster-heading{align-items:flex-start;flex-direction:column}.home-roster-heading .customize-action{width:100%}.home-match-dashboard .launch-actions{justify-content:stretch}.home-match-dashboard .launch-button{width:100%}}
