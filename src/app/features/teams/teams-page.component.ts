@@ -158,6 +158,7 @@ export class TeamsPageComponent implements OnChanges {
     this.liveMatch.set(true);
   }
   protected closeMatch(): void { this.liveMatch.set(false); this.autoStartMatch.set(false); localStorage.removeItem('fsm-active-match-team'); this.matchClosed.emit(); }
+  protected returnToRoster(): void { this.liveMatch.set(false); this.autoStartMatch.set(false); this.activeSlotId.set(null); }
 
   protected playerForSlot(slotId: string): PlayerRecord | undefined {
     return this.rosterForExpanded().find(player => player.id === this.lineup()[slotId]);
@@ -216,7 +217,7 @@ export class TeamsPageComponent implements OnChanges {
 
   protected benchPlayers(): PlayerRecord[] {
     const starters = new Set(Object.values(this.lineup()).filter(Boolean));
-    return this.eligibleRosterForExpanded().filter(player => !starters.has(player.id));
+    return this.rosterForExpanded().filter(player => !starters.has(player.id));
   }
 
   protected async selectLayoutSlot(slot: 1 | 2): Promise<void> {
