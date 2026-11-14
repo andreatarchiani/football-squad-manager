@@ -107,6 +107,18 @@ export class TeamService {
     await setDoc(ref, { ...layout, updatedAt: serverTimestamp() });
   }
 
+  async loadCaptaincy(workspaceId: string, teamId: string, seasonId: string): Promise<{ captainId: string; viceCaptainId: string }> {
+    const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId, 'seasons', seasonId, 'settings', 'captaincy');
+    const snapshot = await getDoc(ref);
+    if (!snapshot.exists()) return { captainId: '', viceCaptainId: '' };
+    const data = snapshot.data();
+    return { captainId: String(data['captainId'] ?? ''), viceCaptainId: String(data['viceCaptainId'] ?? '') };
+  }
+
+  async saveCaptaincy(workspaceId: string, teamId: string, seasonId: string, captainId: string, viceCaptainId: string): Promise<void> {
+    const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId, 'seasons', seasonId, 'settings', 'captaincy');
+    await setDoc(ref, { captainId, viceCaptainId, updatedAt: serverTimestamp() });
+  }
   async loadLiveMatch(workspaceId: string, teamId: string, seasonId: string): Promise<LiveMatchState | null> {
     const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId, 'seasons', seasonId, 'settings', 'live-match');
     const snapshot = await getDoc(ref);
