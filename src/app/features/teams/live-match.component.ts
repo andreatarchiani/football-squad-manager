@@ -62,6 +62,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly voiceListening = signal(false);
   protected readonly voiceMessage = signal('');
   private voiceMessageTimer: ReturnType<typeof setTimeout> | null = null;
+  private voiceDraftTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly voiceMessageAutoDismiss = effect(() => {
     const message = this.voiceMessage();
     if (this.voiceMessageTimer) clearTimeout(this.voiceMessageTimer);
@@ -73,6 +74,17 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     }, 3000);
   });
   protected readonly voiceDraft = signal('');
+  private readonly voiceDraftAutoDismiss = effect(() => {
+    const draft = this.voiceDraft();
+    const listening = this.voiceListening();
+    if (this.voiceDraftTimer) clearTimeout(this.voiceDraftTimer);
+    this.voiceDraftTimer = null;
+    if (!draft || listening) return;
+    this.voiceDraftTimer = setTimeout(() => {
+      this.voiceDraft.set('');
+      this.voiceDraftTimer = null;
+    }, 3000);
+  });
   private readonly voiceHelpStorageKey = 'fsm-voice-command-guide-open';
   protected readonly voiceHelpOpen = signal(this.readVoiceHelpPreference());
   protected readonly matchAnimation = signal<MatchAnimation | null>(null);
@@ -127,7 +139,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       }
     } catch (error) { console.error('Unable to restore live match.', error); this.voiceMessage.set('Partita caricata, ma non è stato possibile recuperare gli ultimi dati salvati.'); }
   }
-  ngOnDestroy(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} if(this.voiceMessageTimer){clearTimeout(this.voiceMessageTimer);this.voiceMessageTimer=null;} this.settleRunningClock(); this.voice.cancel(); if(this.animationTimer) clearTimeout(this.animationTimer); if(!this.exitingMatch) void this.persistMatchState(); }
+  ngOnDestroy(): void { if(this.timer){clearInterval(this.timer);this.timer=null;} if(this.voiceMessageTimer){clearTimeout(this.voiceMessageTimer);this.voiceMessageTimer=null;} if(this.voiceDraftTimer){clearTimeout(this.voiceDraftTimer);this.voiceDraftTimer=null;} this.settleRunningClock(); this.voice.cancel(); if(this.animationTimer) clearTimeout(this.animationTimer); if(!this.exitingMatch) void this.persistMatchState(); }
   private async persistMatchState(): Promise<void> {
     if(this.exitingMatch) return;
     const snapshot = {
