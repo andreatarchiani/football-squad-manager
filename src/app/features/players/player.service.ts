@@ -9,7 +9,7 @@ export type PlayerStatus = 'active' | 'injured' | 'suspended' | 'left';
 export interface PlayerRecord {
   id: string; firstName: string; lastName: string; dateOfBirth: string; preferredFoot: string;
   primaryRole: PlayerRole; notes: string; isArchived: boolean; teamId: string; seasonId: string;
-  teamName: string; seasonLabel: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus; isCaptain: boolean; isViceCaptain: boolean; goals?: number; assists?: number; yellowCards?: number;
+  teamName: string; seasonLabel: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus; isCaptain: boolean; isViceCaptain: boolean; goals?: number; assists?: number; yellowCards?: number; keyPasses?: number;
 }
 export interface PlayerInput {
   firstName: string; lastName: string; dateOfBirth: string; preferredFoot: string; primaryRole: PlayerRole;
@@ -34,7 +34,7 @@ export class PlayerService {
     const teamMap = new Map(teams.map(t => [t.id, t]));
     return snapshots.docs.map(s => {
       const d = s.data(); const a = assignments.get(s.id); const t = a ? teamMap.get(a.teamId) : undefined;
-      return { id:s.id, firstName:String(d['firstName']??''), lastName:String(d['lastName']??''), dateOfBirth:String(d['dateOfBirth']??''), preferredFoot:String(d['preferredFoot']??''), primaryRole:this.role(d['primaryRole']), notes:String(d['notes']??''), isArchived:d['isArchived']===true, teamId:a?.teamId??'', seasonId:a?.seasonId??'', teamName:t?.name??'', seasonLabel:t?.seasonLabel??'', shirtNumber:a?.shirtNumber??null, roles:a?.roles??[], status:a?.status??'active', isCaptain:a?.isCaptain??false, isViceCaptain:a?.isViceCaptain??false, goals: typeof d['goals']==='number' ? d['goals'] : 0, assists: typeof d['assists']==='number' ? d['assists'] : 0, yellowCards: typeof d['yellowCards']==='number' ? d['yellowCards'] : 0 };
+      return { id:s.id, firstName:String(d['firstName']??''), lastName:String(d['lastName']??''), dateOfBirth:String(d['dateOfBirth']??''), preferredFoot:String(d['preferredFoot']??''), primaryRole:this.role(d['primaryRole']), notes:String(d['notes']??''), isArchived:d['isArchived']===true, teamId:a?.teamId??'', seasonId:a?.seasonId??'', teamName:t?.name??'', seasonLabel:t?.seasonLabel??'', shirtNumber:a?.shirtNumber??null, roles:a?.roles??[], status:a?.status??'active', isCaptain:a?.isCaptain??false, isViceCaptain:a?.isViceCaptain??false, goals: typeof d['goals']==='number' ? d['goals'] : 0, assists: typeof d['assists']==='number' ? d['assists'] : 0, yellowCards: typeof d['yellowCards']==='number' ? d['yellowCards'] : 0, keyPasses: typeof d['keyPasses']==='number' ? d['keyPasses'] : 0 };
     }).sort((a,b)=>Number(a.isArchived)-Number(b.isArchived)||a.lastName.localeCompare(b.lastName,'it')||a.firstName.localeCompare(b.firstName,'it'));
   }
 
@@ -81,6 +81,10 @@ export class PlayerService {
   async removeAssist(workspaceId: string, playerId: string): Promise<void> { await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { assists: increment(-1), updatedAt: serverTimestamp() }); }
 
   async recordYellowCard(workspaceId: string, playerId: string): Promise<void> { await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { yellowCards: increment(1), updatedAt: serverTimestamp() }); }
+
+  async recordKeyPass(workspaceId: string, playerId: string): Promise<void> { await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { keyPasses: increment(1), updatedAt: serverTimestamp() }); }
+
+  async removeKeyPass(workspaceId: string, playerId: string): Promise<void> { await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { keyPasses: increment(-1), updatedAt: serverTimestamp() }); }
 
   async removeYellowCard(workspaceId: string, playerId: string): Promise<void> { await updateDoc(doc(this.requireFirestore(), 'workspaces', workspaceId, 'players', playerId), { yellowCards: increment(-1), updatedAt: serverTimestamp() }); }
 
