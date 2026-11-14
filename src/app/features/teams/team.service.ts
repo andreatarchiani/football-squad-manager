@@ -107,12 +107,14 @@ export class TeamService {
     await setDoc(ref, { ...layout, updatedAt: serverTimestamp() });
   }
 
-  async loadCaptaincy(workspaceId: string, teamId: string, seasonId: string): Promise<{ captainId: string; viceCaptainId: string }> {
+  async loadCaptaincy(workspaceId: string, teamId: string, seasonId: string): Promise<{ captainId: string; viceCaptainId: string; updatedAtMs: number }> {
     const ref = doc(this.requireFirestore(), 'workspaces', workspaceId, 'teams', teamId, 'seasons', seasonId, 'settings', 'captaincy');
     const snapshot = await getDoc(ref);
-    if (!snapshot.exists()) return { captainId: '', viceCaptainId: '' };
+    if (!snapshot.exists()) return { captainId: '', viceCaptainId: '', updatedAtMs: 0 };
     const data = snapshot.data();
-    return { captainId: String(data['captainId'] ?? ''), viceCaptainId: String(data['viceCaptainId'] ?? '') };
+    const updatedAt = data['updatedAt'];
+    const updatedAtMs = updatedAt && typeof updatedAt.toMillis === 'function' ? updatedAt.toMillis() : 0;
+    return { captainId: String(data['captainId'] ?? ''), viceCaptainId: String(data['viceCaptainId'] ?? ''), updatedAtMs };
   }
 
   async saveCaptaincy(workspaceId: string, teamId: string, seasonId: string, captainId: string, viceCaptainId: string): Promise<void> {
