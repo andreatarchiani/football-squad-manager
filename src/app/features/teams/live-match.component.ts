@@ -8,7 +8,7 @@ import { TeamService } from './team.service';
 type MatchEventType = 'goal' | 'yellow-card' | 'red-card' | 'substitution' | 'formation';
 interface MatchEvent { type: MatchEventType; minute: number; description: string; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string; }
 interface PendingAction { type: MatchEventType; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string; description: string; }
-interface MatchAnimation { type: 'goal' | 'yellow-card' | 'red-card' | 'substitution'; title: string; detail: string; outgoingNumber?: number | null; incomingNumber?: number | null; playerNumber?: number | null; }
+interface MatchAnimation { type: 'goal' | 'yellow-card' | 'red-card' | 'substitution'; title: string; detail: string; outgoingNumber?: number | null; incomingNumber?: number | null; playerNumber?: number | null; assistDetail?: string | null; }
 
 @Component({
   selector: 'fsm-live-match',
@@ -712,7 +712,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.voice.cancel(); this.voiceListening.set(false);
     const minute=this.minute;
     if(action.type==='goal'&&action.playerId){
-      const scorer=this.player(action.playerId); this.showMatchAnimation({type:'goal',title:'GOOOL!',detail:scorer?`#${scorer.shirtNumber} ${scorer.lastName}`:'Rete della squadra'});
+      const scorer=this.player(action.playerId), assister=action.assistPlayerId ? this.player(action.assistPlayerId) : undefined; this.showMatchAnimation({type:'goal',title:'GOOOL!',detail:scorer?`${scorer.firstName} ${scorer.lastName}`:'Rete della squadra',playerNumber:scorer?.shirtNumber,assistDetail:assister?`#${assister.shirtNumber} · ${assister.firstName} ${assister.lastName}`:null});
       this.goals.update(g=>({...g,[action.playerId!]: (g[action.playerId!]??0)+1}));
       if(action.assistPlayerId)this.assists.update(v=>({...v,[action.assistPlayerId!]: (v[action.assistPlayerId!]??0)+1}));
       this.events.update(e=>[{type:'goal',minute,description:action.description,playerId:action.playerId,assistPlayerId:action.assistPlayerId},...e]);
