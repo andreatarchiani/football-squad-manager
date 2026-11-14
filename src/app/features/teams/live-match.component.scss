@@ -242,3 +242,10 @@
 .match-complete-roster-player>em{font-size:9px}
 .match-bottom-actions{display:flex;justify-content:center;padding:16px 0 calc(16px + env(safe-area-inset-bottom,0px))}
 .edit-roster-button{width:min(100%,420px);min-height:48px;border:1px solid #a5efba66;border-radius:12px;background:#17452b;color:#e4f7e9;font:inherit;font-weight:850}
+
+
+/* Leadership labels are inline with the name: they never participate in pitch positioning. */
+.match-player-label.pitch-player-name { display: inline-flex; align-items: center; gap: 4px; }
+.match-leadership-mark { display: inline-grid; place-items: center; min-width: 17px; height: 17px; padding: 0 3px; border-radius: 5px; box-sizing: border-box; font-size: 9px; line-height: 1; font-weight: 900; letter-spacing: -.02em; vertical-align: middle; box-shadow: 0 1px 4px #0008; }
+.match-leadership-mark.captain { color: #241900; background: linear-gradient(145deg,#ffe8a0,#d6a52d); border: 1px solid #fff0b2; }
+.match-leadership-mark.vice { color: #17212b; background: linear-gradient(145deg,#f1f5f8,#9daab6); border: 1px solid #fff; }
