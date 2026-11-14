@@ -157,9 +157,27 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
         this.elapsedSeconds.set(Math.max(0, Math.min(5400, restoredElapsed)));
         const restoredFinished = saved.finished || restoredElapsed >= 5400;
         this.finished.set(restoredFinished); this.finishReportOpen.set(restoredFinished); this.events.set(saved.events); this.goals.set(saved.goals); this.opponentGoals.set(Math.max(0, Number(saved.opponentGoals ?? 0))); this.assists.set(saved.assists);
-        this.yellowCards.set(saved.yellowCards); this.keyPasses.set(this.countPlayerEvents(saved.events, 'key-pass')); this.redCards.set(saved.redCards); this.lineup.set(saved.lineup);
-        this.matchFormation.set(this.formations[saved.formation] ? saved.formation : f); this.matchPositions.set(saved.positions);
-        this.formationPlayerOrder = this.formations[this.matchFormation()].map(slot => saved.lineup[slot.id]).filter((id): id is string => !!id);
+        this.yellowCards.set(saved.yellowCards); this.keyPasses.set(this.countPlayerEvents(saved.events, 'key-pass')); this.redCards.set(saved.redCards);
+        this.matchFormation.set(this.formations[saved.formation] ? saved.formation : f);
+        // A previously saved match can contain a partial lineup (for example, if it
+        // was created while the roster was still loading). Restore its valid choices,
+        // then refill every missing slot from the freshly loaded starting lineup.
+        const activeSlots = this.formations[this.matchFormation()];
+        const rosterIds = new Set(this.players().map(player => player.id));
+        const restoredLineup: Record<string, string> = {};
+        const usedPlayerIds = new Set<string>();
+        for (const slot of activeSlots) {
+          const id = saved.lineup?.[slot.id];
+          if (id && rosterIds.has(id) && !usedPlayerIds.has(id)) { restoredLineup[slot.id] = id; usedPlayerIds.add(id); }
+        }
+        for (const slot of activeSlots) {
+          if (restoredLineup[slot.id]) continue;
+          const fallbackId = this.initialLineup()[slot.id];
+          if (fallbackId && rosterIds.has(fallbackId) && !usedPlayerIds.has(fallbackId)) { restoredLineup[slot.id] = fallbackId; usedPlayerIds.add(fallbackId); }
+        }
+        this.lineup.set(restoredLineup);
+        this.matchPositions.set(saved.positions ?? {});
+        this.formationPlayerOrder = activeSlots.map(slot => restoredLineup[slot.id]).filter((id): id is string => !!id);
         this.changesUsed.set(Math.max(0, Math.min(this.maxChanges, saved.changesUsed)));
         if (saved.running && !this.finished()) this.start();
       }
