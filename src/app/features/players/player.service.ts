@@ -63,7 +63,7 @@ export class PlayerService {
       if (oldReservationRef && oldReservationRef.path!==reservationRef?.path && oldReservation?.exists() && oldReservation.data()['playerId']===playerRef.id) tx.delete(oldReservationRef);
       if (oldMemberRef && oldMemberRef.path!==memberRef.path) tx.delete(oldMemberRef);
       if (reservationRef) tx.set(reservationRef,{playerId:playerRef.id,createdAt:now,updatedAt:now});
-      tx.set(memberRef,{playerId:playerRef.id,shirtNumber:number,roles:input.roles.length?input.roles:[input.primaryRole],status:input.status,updatedAt:now,...(existing?.teamId===team.id&&existing.seasonId===team.seasonId?{}:{joinedAt:now,createdAt:now})});
+      tx.set(memberRef,{playerId:playerRef.id,shirtNumber:number,roles:input.roles.length?input.roles:[input.primaryRole],status:input.status,isCaptain:existing?.isCaptain??false,isViceCaptain:existing?.isViceCaptain??false,updatedAt:now,...(existing?.teamId===team.id&&existing.seasonId===team.seasonId?{}:{joinedAt:now,createdAt:now})});
       tx.set(playerRef,{firstName:input.firstName.trim(),lastName:input.lastName.trim(),dateOfBirth:input.dateOfBirth,preferredFoot:input.preferredFoot,primaryRole:input.primaryRole,notes:input.notes.trim(),isArchived:false,createdAt:oldPlayer?.data()?.['createdAt']??now,updatedAt:now},{merge:true});
     });
   }
