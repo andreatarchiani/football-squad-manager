@@ -514,7 +514,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
         this.voiceListening.set(false);
         this.voicePointerId = null;
         if (this.voiceStartFailed) return;
-        this.executeVoiceCommand(transcript || this.voiceDraft());
+        this.executeVoiceCommand(this.voiceDraft() || transcript);
       }
     );
   }
