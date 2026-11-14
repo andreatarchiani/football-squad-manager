@@ -231,3 +231,8 @@
 .match-leadership-badge{position:absolute;top:-10px;right:-12px;z-index:4;display:grid;place-items:center;min-width:19px;height:19px;padding:0 3px;border:2px solid #102318;border-radius:50%;box-sizing:border-box;font-size:9px;font-weight:1000;line-height:1;box-shadow:0 2px 7px #0009}
 .captain-badge{background:linear-gradient(145deg,#ffe9a0,#d59a28);color:#382507}
 .vice-captain-badge{background:linear-gradient(145deg,#f4f7f8,#9daab0);color:#263238}
+
+
+/* Keep unavailable squad members visible on the bench without allowing substitutions. */
+.bench-choice-unavailable{opacity:.58;cursor:not-allowed!important}
+.bench-choice-unavailable small{color:#e7b6a0!important}
