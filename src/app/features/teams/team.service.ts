@@ -36,7 +36,7 @@ export interface LiveMatchState {
   savedAtMs: number;
   running: boolean;
   finished: boolean;
-  events: { type: 'goal' | 'key-pass' | 'yellow-card' | 'red-card' | 'substitution' | 'formation'; minute: number; description: string; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string }[];
+  events: { type: 'goal' | 'opponent-goal' | 'key-pass' | 'yellow-card' | 'red-card' | 'substitution' | 'formation'; minute: number; description: string; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string }[];
   goals: Record<string, number>;
   opponentGoals?: number;
   assists: Record<string, number>;
