@@ -759,6 +759,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       if(workspaceId&&action.assistPlayerId)void this.playerService.recordAssist(workspaceId,action.assistPlayerId).catch(error=>{console.error('Unable to save player assist.',error);this.voiceMessage.set('Gol registrato, ma non è stato possibile aggiornare il totale degli assist.');});
     }
     if(action.type==='yellow-card'&&action.playerId){
+      const workspaceId=this.auth.workspaceId();
       if(workspaceId)void this.playerService.recordYellowCard(workspaceId,action.playerId).catch(error=>{console.error('Unable to save player yellow card.',error);this.voiceMessage.set('Ammonizione registrata nella partita, ma non è stato possibile aggiornare il totale del giocatore.');});
       const booked=this.player(action.playerId); const count=(this.yellowCards()[action.playerId]??0)+1;
       this.yellowCards.update(cards=>({...cards,[action.playerId!]:count}));
