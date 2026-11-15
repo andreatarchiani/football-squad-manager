@@ -500,13 +500,21 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       }
       chunk.forEach((event, index) => {
         const y = listTop + 28 + index * 75;
-        ctx.fillStyle = index % 2 === 0 ? '#ffffff' : '#e8eee9';
+        const opponentEvent = event.type === 'opponent-goal';
+        ctx.fillStyle = opponentEvent ? '#fff0ed' : (index % 2 === 0 ? '#ffffff' : '#e8eee9');
         ctx.beginPath(); ctx.roundRect(68, y, 1104, 62, 14); ctx.fill();
-        ctx.fillStyle = '#287447'; ctx.font = '800 23px Arial'; ctx.fillText(`${event.minute}′`, 98, y + 39);
-        ctx.fillStyle = '#24382b'; ctx.font = '600 21px Arial';
-        const lines = wrap(ctx, event.description, 930);
-        ctx.fillText(lines[0].slice(0, 105), 190, y + (lines.length > 1 ? 27 : 39));
-        if (lines.length > 1) { ctx.font = '18px Arial'; ctx.fillStyle = '#607267'; ctx.fillText(lines[1].slice(0, 110), 190, y + 49); }
+        ctx.font = '800 23px Arial';
+        ctx.fillStyle = opponentEvent ? '#b4493f' : '#287447';
+        ctx.textAlign = opponentEvent ? 'right' : 'left';
+        ctx.fillText(`${event.minute}′`, opponentEvent ? 1140 : 98, y + 39);
+        ctx.font = '600 21px Arial';
+        ctx.fillStyle = opponentEvent ? '#71352f' : '#24382b';
+        const lines = wrap(ctx, event.description, 850);
+        const textX = opponentEvent ? 1080 : 190;
+        ctx.textAlign = opponentEvent ? 'right' : 'left';
+        ctx.fillText(lines[0].slice(0, 105), textX, y + (lines.length > 1 ? 27 : 39));
+        if (lines.length > 1) { ctx.font = '18px Arial'; ctx.fillStyle = opponentEvent ? '#9b5a52' : '#607267'; ctx.fillText(lines[1].slice(0, 110), textX, y + 49); }
+        ctx.textAlign = 'left';
       });
       ctx.fillStyle = '#839187'; ctx.font = '18px Arial';
       ctx.fillText('Football Squad Manager · Report generato dall’app', 78, 1688);
