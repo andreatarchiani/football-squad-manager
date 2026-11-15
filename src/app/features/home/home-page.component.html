@@ -7,7 +7,7 @@
     </section>
     <section class="home-roster-panel">
       <div class="home-roster-heading"><div><span class="eyebrow">{{ selectedTeam.name }}</span><h2>La tua rosa</h2><p>{{ previewFormation() }} · {{ previewPlayers().length }} giocatori disponibili</p></div><button type="button" class="launch-button" (click)="start()" [disabled]="previewLoading() || !completeStartingLineup">▶ Inizia partita</button></div>
-      <div class="home-roster-actions"><button type="button" class="home-edit-roster-button" (click)="openTeams.emit({ teamId: selectedTeam.id, layoutSlot: layoutSlot() })">✎ Modifica la rosa</button></div>
+      <div class="home-roster-actions"><button type="button" class="home-edit-roster-button" (click)="openTeams.emit({ teamId: selectedTeam.id, layoutSlot: layoutSlot() })">✎ Modifica la formazione</button></div>
       @if (previewLoading()) { <div class="preview-placeholder">Caricamento formazione…</div> }
       @else {
         <div class="home-pitch-stage"><div class="home-football-pitch" aria-label="Anteprima non modificabile della formazione">
