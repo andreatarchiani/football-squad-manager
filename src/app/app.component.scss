@@ -120,9 +120,20 @@
 .bug-report-close { position:absolute; top:0; right:0; display:grid; place-items:center; width:34px; height:34px; border:1px solid #ffffff20; border-radius:50%; color:#d7e6dc; background:#ffffff08; font-size:22px; cursor:pointer; }
 .bug-report-textarea { width:100%; min-height:140px; resize:vertical; padding:13px 14px; border:1px solid #31463c; border-radius:11px; outline:none; color:#edf5ef; background:#0f1717; font:inherit; font-size:12px; line-height:1.55; }
 .bug-report-textarea:focus { border-color:#6ca883; box-shadow:0 0 0 3px #6ca88318; }
-.bug-report-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+.bug-report-actions { display:grid; grid-template-columns:1fr; gap:10px; margin-top:14px; }
 .bug-report-actions button { min-height:42px; border:1px solid #477b5b; border-radius:10px; color:#102018; background:#9bdab2; font-size:11px; font-weight:800; cursor:pointer; }
 .bug-report-actions button:disabled { cursor:not-allowed; opacity:.45; }
 .bug-report-note { margin:12px 0 0; color:#819288; font-size:10px; line-height:1.5; }
 @media (max-width:700px) { .bug-report-button { flex-basis:42px; width:42px; height:42px; } }
 @media (max-width:520px) { .bug-report-backdrop { align-items:end; padding:12px 12px max(12px,env(safe-area-inset-bottom)); } .bug-report-dialog { padding:20px 17px; border-radius:18px; } .bug-report-actions { grid-template-columns:1fr; } }
+
+.bug-report-attachments { margin-top:12px; }
+.bug-report-file-input { position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; }
+.bug-report-file-label { display:inline-flex; align-items:center; gap:7px; min-height:35px; padding:0 12px; border:1px solid #3a5b49; border-radius:9px; color:#b9e2c8; background:#1e3429; font-size:11px; font-weight:750; cursor:pointer; }
+.bug-report-file-label svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; }
+.bug-report-file-input:focus-visible + .bug-report-file-label { outline:2px solid #9bdab2; }
+.bug-report-file-list { display:grid; gap:6px; margin-top:10px; }
+.bug-report-file { display:flex; align-items:center; gap:9px; min-width:0; padding:8px 10px; border:1px solid #293d33; border-radius:8px; background:#101a17; color:#a5b8ad; font-size:10px; }
+.bug-report-file-name { min-width:0; flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:#e0eee4; }
+.bug-report-file button { border:0; background:transparent; color:#d8c2bf; font-size:18px; cursor:pointer; }
+.bug-report-file-error { margin:8px 0 0; color:#f2a8a8; font-size:11px; }
