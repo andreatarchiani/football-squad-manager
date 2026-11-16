@@ -152,7 +152,7 @@ export class AppComponent {
     for (let i = 0; i < bytes.length; i += chunkSize) {
       binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
     }
-    return btoa(binary).replace(/.{1,76}/g, '$&\\r\\n').trimEnd();
+    return btoa(binary).replace(/.{1,76}/g, '$&\r\n').trimEnd();
   }
 
   protected async sendBugReport(): Promise<void> {
@@ -228,7 +228,7 @@ export class AppComponent {
     const bytes = new TextEncoder().encode(value);
     let binary = '';
     for (const byte of bytes) binary += String.fromCharCode(byte);
-    return btoa(binary).replace(/.{1,76}/g, '$&\\r\\n').trimEnd();
+    return btoa(binary).replace(/.{1,76}/g, '$&\r\n').trimEnd();
   }
 
   protected closeReleaseChangelog(): void { this.releaseChangelogOpen.set(false); }
