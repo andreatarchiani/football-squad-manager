@@ -294,3 +294,20 @@ select optgroup {
   .live-match .match-scoreboard-header .match-team strong{font-size:10px}
   .live-match .match-scoreboard{min-width:0}
 }
+
+
+/* Keep the vice-captain badge fully visible beside the surname on the live pitch. */
+.live-match .match-pitch-wrap.pitch-stage .match-player-label.pitch-player-name{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  width:max-content;
+  max-width:none;
+  flex-wrap:nowrap;
+  overflow:visible;
+  overflow-wrap:normal;
+  text-overflow:clip;
+  white-space:nowrap;
+}
+.live-match .match-pitch-wrap.pitch-stage .match-leadership-mark{flex:0 0 auto;}
