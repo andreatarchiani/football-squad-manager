@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { SwUpdate } from '@angular/service-worker';
 import { interval } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,6 +23,19 @@ import type { PlayerRecord } from './features/players/player.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
+  // This gate changes presentation only. Future ticket APIs must validate the Firebase ID token server-side.
+  protected readonly isSupportAccount = computed(() =>
+    this.auth.user()?.email?.trim().toLowerCase() === 'squadmanagersupport@gmail.com'
+  );
+  protected readonly supportFilter = signal<'all' | 'new' | 'progress' | 'resolved'>('all');
+  protected readonly supportSearch = signal('');
+  protected updateSupportSearch(event: Event): void {
+    this.supportSearch.set((event.target as HTMLInputElement).value);
+  }
+  protected selectSupportFilter(value: 'all' | 'new' | 'progress' | 'resolved'): void {
+    this.supportFilter.set(value);
+  }
+
   protected readonly navigation = ['Home', 'Squadre', 'Giocatori', 'Formazioni', 'Partite'];
   protected readonly activePage = signal<'overview' | 'teams' | 'players' | 'match'>(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team') ? 'match' : 'overview');
   protected readonly matchLaunch = signal<{ team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; opponentName: string; token: number } | null>(null);
