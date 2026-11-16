@@ -424,7 +424,8 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   }
 
   protected async shareMatchReport(): Promise<void> {
-    const chronological = [...this.events()].sort((a, b) => a.minute - b.minute);
+    // Events are prepended as they are recorded, so reverse the stored list to preserve the dictated order (including events in the same minute).
+    const chronological = [...this.events()].reverse();
     try {
       const pdf = await this.createMatchReportPdf(chronological);
       const file = new File([pdf], `Report-partita-${this.teamName().replace(/[^a-z0-9-_]/gi, '-')}.pdf`, { type: 'application/pdf' });
@@ -559,7 +560,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected updateEditOutgoing(value: string): void { this.editOutgoingId.set(value); }
   protected updateEditIncoming(value: string): void { this.editIncomingId.set(value); }
   protected updateEditDescription(value: string): void { this.editDescription.set(value); }
-  protected chronologicalEvents(): MatchEvent[] { return [...this.events()].sort((a, b) => a.minute - b.minute); }
+  protected chronologicalEvents(): MatchEvent[] { return [...this.events()].reverse(); }
   protected async close(): Promise<void> {
     if(this.exitingMatch) return;
     this.settleRunningClock();
