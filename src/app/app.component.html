@@ -109,11 +109,35 @@
         <button type="button" class="bug-report-close" aria-label="Chiudi" (click)="closeBugReport()">×</button>
       </header>
       <textarea class="bug-report-textarea" rows="6" maxlength="2000" placeholder="Esempio: durante la partita il pulsante non risponde..." [value]="bugReportText()" (input)="updateBugReportText($event)"></textarea>
-      <div class="bug-report-actions">
-        <button type="button" (click)="sendBugReport('andrea46tarchiani@gmail.com')" [disabled]="!bugReportText().trim()">Invia ad Andrea</button>
-        <button type="button" (click)="sendBugReport('vitto228v@gmail.com')" [disabled]="!bugReportText().trim()">Invia a Vittorio</button>
+      <div class="bug-report-attachments">
+        <label for="bug-report-files" class="bug-report-file-label">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Aggiungi immagini o video
+        </label>
+        <input id="bug-report-files" class="bug-report-file-input" type="file" accept="image/*,video/*" multiple (change)="updateBugReportFiles($event)" />
+        @if (bugReportFiles().length) {
+          <div class="bug-report-file-list">
+            @for (file of bugReportFiles(); track file.name + file.size + $index; let index = $index) {
+              <div class="bug-report-file">
+                <span class="bug-report-file-name">{{ file.name }}</span>
+                <span>{{ formatBugReportFileSize(file.size) }}</span>
+                <button type="button" [attr.aria-label]="'Rimuovi ' + file.name" (click)="removeBugReportFile(index)">×</button>
+              </div>
+            }
+          </div>
+        }
+        @if (bugReportFileError()) { <p class="bug-report-file-error" role="alert">{{ bugReportFileError() }}</p> }
       </div>
-      <p class="bug-report-note">Si aprirà l'app email del dispositivo con il messaggio già compilato.</p>
+      <div class="bug-report-actions">
+        <button type="button" (click)="sendBugReport()" [disabled]="!bugReportText().trim() || bugReportSending()">{{ bugReportSending() ? 'Preparazione…' : 'Invia' }}</button>
+      </div>
+      <p class="bug-report-note">Destinatario: squadmanagersupport@gmail.com.
+      @if (bugReportFiles().length) {
+        Con allegati viene scaricata un'email completa (.eml): aprila nell'app email e premi Invia. Il download non invia automaticamente la segnalazione.
+      } @else {
+        Si aprirà la tua app email per confermare l'invio.
+      }
+      </p>
     </section>
   </div>
 }
