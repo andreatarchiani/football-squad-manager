@@ -28,6 +28,8 @@ export class AppComponent {
   protected readonly matchLaunch = signal<{ team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; opponentName: string; token: number } | null>(null);
   protected readonly rosterRequest = signal<{ teamId: string; layoutSlot: 1 | 2; token: number } | null>(null);
   protected readonly updateAvailable = signal(false);
+  protected readonly bugReportOpen = signal(false);
+  protected readonly bugReportText = signal('');
   protected readonly releaseChangelogOpen = signal(false);
   private readonly releaseChangelogStorageKey = 'fsm-pending-release-changelog';
   protected readonly releaseVersion = 'v0.10';
@@ -70,6 +72,42 @@ export class AppComponent {
       this.updating.set(false);
       this.updateAvailable.set(true);
     }
+  }
+
+  protected openBugReport(): void {
+    this.bugReportText.set('');
+    this.bugReportOpen.set(true);
+  }
+
+  protected closeBugReport(): void {
+    this.bugReportOpen.set(false);
+  }
+
+  protected updateBugReportText(event: Event): void {
+    this.bugReportText.set((event.target as HTMLTextAreaElement).value);
+  }
+
+  protected sendBugReport(recipient: string): void {
+    const description = this.bugReportText().trim();
+    if (!description) return;
+
+    const user = this.auth.user();
+    const subject = 'Segnalazione bug - Football Squad Manager';
+    const body = [
+      'Ciao,',
+      '',
+      'vorrei segnalare il seguente problema:',
+      description,
+      '',
+      '---',
+      `Account: ${user?.displayName || user?.email || 'non disponibile'}`,
+      `Pagina: ${this.activePage()}`,
+      `Data: ${new Date().toLocaleString('it-IT')}`,
+      `Browser: ${navigator.userAgent}`
+    ].join('\n');
+
+    window.location.href = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    this.bugReportOpen.set(false);
   }
 
   protected closeReleaseChangelog(): void { this.releaseChangelogOpen.set(false); }
