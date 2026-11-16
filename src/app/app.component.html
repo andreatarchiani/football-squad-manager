@@ -19,6 +19,32 @@
   <main class="loading-state"><div class="loading-emblem" role="img" aria-label="Caricamento in corso"><span class="loading-emblem-ball">⚽</span></div><div class="loading-progress" aria-hidden="true"><span></span><span></span><span></span></div><p>Preparazione del tuo spazio squadra…</p></main>
 } @else if (!auth.user()) {
   <fsm-auth-page />
+} @else if (isSupportAccount()) {
+  <div class="support-shell">
+    <header class="support-topbar">
+      <div class="support-brand"><span class="support-brand-mark">⚽</span><div><strong>FOOTBALL SQUAD MANAGER</strong><small>CENTRO ASSISTENZA</small></div></div>
+      <div class="support-account"><span class="support-account-name">{{ auth.user()?.email }}</span><span class="support-admin-label">Account supporto</span><button type="button" class="support-logout" (click)="signOut()" aria-label="Esci dall'account">Esci</button></div>
+    </header>
+    <main class="support-main">
+      <div class="support-heading"><div><span class="eyebrow">WORKSPACE ASSISTENZA</span><h1>Dashboard segnalazioni</h1><p>Gestisci da un unico spazio i problemi segnalati dagli allenatori.</p></div><span class="support-live-label"><span></span> Area riservata</span></div>
+      <section class="support-stats" aria-label="Riepilogo segnalazioni">
+        <article class="support-stat"><span>Tutte le segnalazioni</span><strong>0</strong><small>Segnalazioni collegate</small></article>
+        <article class="support-stat"><span>Da leggere</span><strong>0</strong><small>In attesa di gestione</small></article>
+        <article class="support-stat"><span>In lavorazione</span><strong>0</strong><small>Problemi aperti</small></article>
+        <article class="support-stat"><span>Risolte</span><strong>0</strong><small>Problemi chiusi</small></article>
+      </section>
+      <section class="support-panel">
+        <div class="support-panel-header"><div><h2>Segnalazioni ricevute</h2><p>Elenco dei ticket inviati dagli utilizzatori dell'app.</p></div><label class="support-search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Cerca segnalazioni" [value]="supportSearch()" (input)="updateSupportSearch($event)" aria-label="Cerca segnalazioni" /></label></div>
+        <div class="support-filters" aria-label="Filtra per stato">
+          <button type="button" [class.active]="supportFilter() === 'all'" (click)="selectSupportFilter('all')">Tutte</button>
+          <button type="button" [class.active]="supportFilter() === 'new'" (click)="selectSupportFilter('new')">Da leggere</button>
+          <button type="button" [class.active]="supportFilter() === 'progress'" (click)="selectSupportFilter('progress')">In lavorazione</button>
+          <button type="button" [class.active]="supportFilter() === 'resolved'" (click)="selectSupportFilter('resolved')">Risolte</button>
+        </div>
+        <div class="support-empty"><span class="support-empty-icon" aria-hidden="true">◎</span><h3>Nessuna segnalazione collegata</h3><p>Questa dashboard è riservata all'account di assistenza. Per ricevere e gestire realmente i ticket degli allenatori occorrerà collegare un archivio di segnalazioni separato, senza usare Firestore o Firebase per i bug.</p><span class="support-empty-note">Al momento le segnalazioni dell'app vengono ancora preparate come email e non vengono salvate qui.</span></div>
+      </section>
+    </main>
+  </div>
 } @else {
   <div class="app-shell">
     <aside class="sidebar" aria-label="Navigazione principale">
