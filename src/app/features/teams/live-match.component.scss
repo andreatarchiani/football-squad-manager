@@ -249,3 +249,8 @@
 .match-leadership-mark { display: inline-grid; place-items: center; min-width: 17px; height: 17px; padding: 0 3px; border-radius: 5px; box-sizing: border-box; font-size: 9px; line-height: 1; font-weight: 900; letter-spacing: -.02em; vertical-align: middle; box-shadow: 0 1px 4px #0008; }
 .match-leadership-mark.captain { color: #241900; background: linear-gradient(145deg,#ffe8a0,#d6a52d); border: 1px solid #fff0b2; }
 .match-leadership-mark.vice { color: #17212b; background: linear-gradient(145deg,#f1f5f8,#9daab6); border: 1px solid #fff; }
+
+
+/* Keep captain and vice-captain marks on the same line as the shirt name. */
+.match-player-label.pitch-player-name { flex-wrap: nowrap; width: max-content; max-width: none; white-space: nowrap; }
+.match-leadership-mark { flex: 0 0 auto; }
