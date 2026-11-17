@@ -169,6 +169,7 @@ export class AppComponent {
     }
   }
 
+  protected readonly supportApiConfigured = Boolean(environment.supportApiUrl.trim());
   protected readonly bugReportFiles = signal<File[]>([]);
   protected readonly bugReportFileError = signal('');
   protected readonly bugReportSending = signal(false);
