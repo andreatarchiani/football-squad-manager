@@ -7,6 +7,11 @@ import {
 import {
   doc,
   getDoc,
+  getDocs,
+  collection,
+  query,
+  orderBy,
+  updateDoc,
   serverTimestamp,
   setDoc,
   writeBatch
@@ -122,6 +127,41 @@ try {
     summary: 'Attempted edit',
     createdAt: timestamp()
   }));
+
+
+  // A coach can create a ticket, but cannot list others' tickets or change statuses.
+  const reporterDb = testEnv.authenticatedContext('reporter-1', { email: 'coach@example.test' }).firestore();
+  const supportDb = testEnv.authenticatedContext('support-1', { email: 'squadmanagersupport@gmail.com' }).firestore();
+  const impostorDb = testEnv.authenticatedContext('impostor-1', { email: 'impostor@example.test' }).firestore();
+  const ticketRef = doc(reporterDb, 'supportTickets', 'ticket-1');
+  const ticket = {
+    authorUid: 'reporter-1',
+    authorEmail: 'coach@example.test',
+    authorName: 'Coach',
+    description: 'Il timer non avanza',
+    page: 'match',
+    browser: 'Firefox',
+    status: 'new',
+    createdAt: timestamp(),
+    updatedAt: timestamp()
+  };
+  await assertSucceeds(setDoc(ticketRef, ticket));
+  await assertFails(setDoc(doc(impostorDb, 'supportTickets', 'spoofed'), {
+    ...ticket, authorUid: 'support-1'
+  }));
+  await assertFails(setDoc(doc(impostorDb, 'supportTickets', 'oversized'), {
+    ...ticket, authorUid: 'impostor-1', authorEmail: 'impostor@example.test',
+    description: 'x'.repeat(2001)
+  }));
+  await assertFails(getDocs(query(collection(reporterDb, 'supportTickets'), orderBy('createdAt', 'desc'))));
+  await assertFails(getDocs(query(collection(impostorDb, 'supportTickets'), orderBy('createdAt', 'desc'))));
+  await assertFails(getDoc(doc(impostorDb, 'supportTickets', 'ticket-1')));
+  await assertSucceeds(getDoc(ticketRef));
+  await assertSucceeds(getDocs(query(collection(supportDb, 'supportTickets'), orderBy('createdAt', 'desc'))));
+  await assertFails(updateDoc(ticketRef, { status: 'resolved', updatedAt: timestamp() }));
+  await assertSucceeds(updateDoc(doc(supportDb, 'supportTickets', 'ticket-1'), { status: 'progress', updatedAt: timestamp() }));
+  await assertFails(updateDoc(doc(supportDb, 'supportTickets', 'ticket-1'), { description: 'tampered', updatedAt: timestamp() }));
+  await assertFails(updateDoc(doc(supportDb, 'supportTickets', 'ticket-1'), { status: 'invalid', updatedAt: timestamp() }));
 
   process.stdout.write('Firestore Security Rules tests passed.\n');
 } finally {
