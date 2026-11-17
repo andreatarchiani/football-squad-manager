@@ -33,6 +33,48 @@ service cloud.firestore {
       return activeMember(workspaceId) && memberRole(workspaceId) in ['owner', 'admin'];
     }
 
+    // Support tickets live in Firestore Spark; no extra server, email or Storage.
+    // The account email is checked against the authenticated Firebase token,
+    // never against user-controlled document fields.
+    function supportAdmin() {
+      return signedIn() &&
+        request.auth.token.email == 'squadmanagersupport@gmail.com';
+    }
+
+    match /supportTickets/{ticketId} {
+      allow create: if signedIn() && !supportAdmin()
+        && request.resource.data.keys().hasOnly([
+          'authorUid', 'authorEmail', 'authorName', 'description',
+          'page', 'browser', 'status', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'authorUid', 'authorEmail', 'authorName', 'description',
+          'page', 'browser', 'status', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.authorEmail == request.auth.token.email
+        && request.resource.data.authorName is string
+        && request.resource.data.authorName.size() <= 120
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() <= 2000
+        && request.resource.data.page is string
+        && request.resource.data.page.size() <= 80
+        && request.resource.data.browser is string
+        && request.resource.data.browser.size() <= 500
+        && request.resource.data.status == 'new'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow get: if supportAdmin()
+        || (signedIn() && resource.data.authorUid == request.auth.uid);
+      allow list: if supportAdmin();
+      allow update: if supportAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.status in ['new', 'progress', 'resolved']
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
     match /userProfiles/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
       allow create: if signedIn()
