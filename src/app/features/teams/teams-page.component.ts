@@ -85,6 +85,7 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly formOpen = signal(false);
   protected form: TeamInput = this.emptyForm();
   protected readonly teamIcons = ['⚽', '🛡️', '🏆', '⭐', '👑', '🦅', '🦁', '🐺', '🐉', '🔥', '⚡', '💎', '🏟️', '🎯', '🔱', '🌟'];
+  protected readonly teamIconUploadStatus = signal('');
 
   protected isImageIcon(value: string | null | undefined): boolean {
     return typeof value === 'string' && value.startsWith('data:image/');
@@ -106,6 +107,7 @@ export class TeamsPageComponent implements OnChanges {
 
     try {
       this.form.icon = await this.prepareTeamIcon(file);
+      this.teamIconUploadStatus.set('Immagine caricata correttamente');
       this.error.set('');
     } catch (error) {
       console.error('Unable to prepare team icon.', error);
@@ -539,6 +541,7 @@ export class TeamsPageComponent implements OnChanges {
     this.editingId.set(null);
     this.formOpen.set(true);
     this.form = this.emptyForm();
+    this.teamIconUploadStatus.set('');
     this.error.set('');
     this.notice.set('');
   }
@@ -553,6 +556,7 @@ export class TeamsPageComponent implements OnChanges {
       icon: team.icon || '⚽',
       seasonLabel: team.seasonLabel || '2026/2027'
     };
+    this.teamIconUploadStatus.set('');
     this.error.set('');
     this.notice.set('');
   }
@@ -561,6 +565,7 @@ export class TeamsPageComponent implements OnChanges {
     this.editingId.set(null);
     this.formOpen.set(false);
     this.form = this.emptyForm();
+    this.teamIconUploadStatus.set('');
     this.error.set('');
   }
 
@@ -588,6 +593,7 @@ export class TeamsPageComponent implements OnChanges {
       this.editingId.set(null);
       this.formOpen.set(false);
       this.form = this.emptyForm();
+      this.teamIconUploadStatus.set('');
       await this.loadTeams();
     } catch (error) {
       console.error('Unable to save team.', error);
