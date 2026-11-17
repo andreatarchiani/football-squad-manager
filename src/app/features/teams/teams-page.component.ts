@@ -86,6 +86,63 @@ export class TeamsPageComponent implements OnChanges {
   protected form: TeamInput = this.emptyForm();
   protected readonly teamIcons = ['⚽', '🛡️', '🏆', '⭐', '👑', '🦅', '🦁', '🐺', '🐉', '🔥', '⚡', '💎', '🏟️', '🎯', '🔱', '🌟'];
 
+  protected isImageIcon(value: string | null | undefined): boolean {
+    return typeof value === 'string' && value.startsWith('data:image/');
+  }
+
+  protected async onTeamIconUpload(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      this.error.set('Seleziona un file immagine valido.');
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      this.error.set('L\'immagine è troppo grande. Scegli un file inferiore a 8 MB.');
+      return;
+    }
+
+    try {
+      this.form.icon = await this.prepareTeamIcon(file);
+      this.error.set('');
+    } catch (error) {
+      console.error('Unable to prepare team icon.', error);
+      this.error.set('Non è stato possibile caricare l\'immagine. Prova con PNG, JPG o WebP.');
+    }
+  }
+
+  private prepareTeamIcon(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(reader.error);
+      reader.onload = () => {
+        const image = new Image();
+        image.onerror = () => reject(new Error('Invalid image'));
+        image.onload = () => {
+          const size = 256;
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          const context = canvas.getContext('2d');
+          if (!context) { reject(new Error('Canvas unavailable')); return; }
+
+          context.clearRect(0, 0, size, size);
+          const scale = Math.max(size / image.width, size / image.height);
+          const width = image.width * scale;
+          const height = image.height * scale;
+          context.drawImage(image, (size - width) / 2, (size - height) / 2, width, height);
+
+          const dataUrl = canvas.toDataURL('image/webp', 0.82);
+          resolve(dataUrl.length < 700000 ? dataUrl : canvas.toDataURL('image/jpeg', 0.72));
+        };
+        image.src = String(reader.result ?? '');
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   constructor() {
     this.teamsLoadPromise = this.loadTeams();
   }
