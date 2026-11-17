@@ -3,8 +3,6 @@ import type { FirebaseOptions } from 'firebase/app';
 // Firebase web app configuration. These values identify the Firebase project;
 // they are public client configuration, not server credentials.
 export const environment = {
-  // Set this to the HTTPS URL of the separately hosted support API.
-  supportApiUrl: '',
   firebase: {
     apiKey: 'AIzaSyAbPI3Wx6ITIK3mxJs9krOx12oPEkJD1Do',
     authDomain: 'football-squad-manager-6fdaa.firebaseapp.com',
