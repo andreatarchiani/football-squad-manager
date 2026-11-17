@@ -6,12 +6,12 @@
       <label class="opponent-field"><span>AVVERSARIO</span><input type="text" maxlength="80" [value]="opponentName()" (input)="setOpponentName($any($event.target).value)" placeholder="Nome della squadra avversaria" autocomplete="off"></label>
     </section>
     <section class="home-roster-panel">
-      <div class="home-roster-heading"><div><span class="eyebrow">{{ selectedTeam.name }}</span><h2>La tua rosa</h2><p>{{ previewFormation() }} · {{ previewPlayers().length }} giocatori disponibili</p></div><button type="button" class="launch-button" (click)="start()" [disabled]="previewLoading() || !completeStartingLineup">▶ Inizia partita</button></div>
+      <div class="home-roster-heading"><div><span class="eyebrow">{{ selectedTeam.name }}</span><h2>La tua formazione</h2><p>{{ previewFormation() }} · {{ previewPlayers().length }} giocatori disponibili</p></div><button type="button" class="launch-button" (click)="start()" [disabled]="previewLoading() || !completeStartingLineup">▶ Inizia partita</button></div>
       <div class="home-roster-actions"><button type="button" class="home-edit-roster-button" (click)="openTeams.emit({ teamId: selectedTeam.id, layoutSlot: layoutSlot() })">✎ Modifica la formazione</button></div>
       @if (previewLoading()) { <div class="preview-placeholder">Caricamento formazione…</div> }
       @else {
         <div class="home-pitch-stage"><div class="home-football-pitch" aria-label="Anteprima non modificabile della formazione">
-          <div class="pitch-line halfway"></div><div class="pitch-circle"></div><div class="pitch-box top-box"></div><div class="pitch-box bottom-box"></div>
+          <div class="home-pitch-boundary"></div><div class="pitch-line halfway"></div><div class="pitch-circle"></div><div class="pitch-center-dot"></div><div class="pitch-box top-box"><span class="home-six-yard-box"></span></div><div class="pitch-box bottom-box"><span class="home-six-yard-box"></span></div><div class="home-penalty-spot top-spot"></div><div class="home-penalty-spot bottom-spot"></div><div class="home-penalty-arc top-arc"></div><div class="home-penalty-arc bottom-arc"></div><div class="home-corner top-left"></div><div class="home-corner top-right"></div><div class="home-corner bottom-left"></div><div class="home-corner bottom-right"></div>
           @for (slot of pitchSlots[previewFormation()]; track slot.id) {
             <div class="home-pitch-player" [style.left.%]="previewPosition(slot).x" [style.top.%]="previewPosition(slot).y">
               <span class="home-pitch-shirt home-pitch-shirt-static">{{ previewPlayer(slot.id)?.shirtNumber ?? '—' }}</span>
