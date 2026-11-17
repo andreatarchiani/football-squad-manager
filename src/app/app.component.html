@@ -189,9 +189,9 @@
         @if (bugReportFileError()) { <p class="bug-report-file-error" role="alert">{{ bugReportFileError() }}</p> }
       </div>
       <div class="bug-report-actions">
-        <button type="button" (click)="sendBugReport()" [disabled]="!bugReportText().trim() || bugReportSending()">{{ bugReportSending() ? 'Invio…' : 'Invia' }}</button>
+        <button type="button" (click)="sendBugReport()" [disabled]="!supportApiConfigured || !bugReportText().trim() || bugReportSending()">{{ bugReportSending() ? 'Invio…' : 'Invia' }}</button>
       </div>
-      <p class="bug-report-note">La segnalazione viene inviata direttamente al Centro Assistenza, senza email e senza download.</p>
+      <p class="bug-report-note">@if (supportApiConfigured) { La segnalazione viene inviata direttamente al Centro Assistenza, senza email e senza download. } @else { Invio temporaneamente non disponibile: il server del Centro Assistenza deve essere ancora configurato. }</p>
     </section>
   </div>
 }
