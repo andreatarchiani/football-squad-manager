@@ -111,7 +111,7 @@
 .home-penalty-arc{position:absolute;left:50%;width:24%;height:8%;border:1.5px solid #e2f3e5d9;border-radius:50%;transform:translateX(-50%)}
 .home-penalty-arc.top-arc{top:12%;clip-path:inset(50% 0 0)}
 .home-penalty-arc.bottom-arc{bottom:12%;clip-path:inset(0 0 50%)}
-.home-corner{position:absolute;width:3.5%;height:1.8%;border:1px solid #e2f3e5b8}
+.home-corner{position:absolute;width:3.5%;aspect-ratio:1;height:auto;border:1px solid #e2f3e5b8}
 .home-corner.top-left{top:2.2%;left:2.2%;border-top:0;border-left:0;border-radius:0 0 100% 0}
 .home-corner.top-right{top:2.2%;right:2.2%;border-top:0;border-right:0;border-radius:0 0 0 100%}
 .home-corner.bottom-left{bottom:2.2%;left:2.2%;border-bottom:0;border-left:0;border-radius:0 100% 0 0}
