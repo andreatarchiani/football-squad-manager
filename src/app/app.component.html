@@ -28,20 +28,54 @@
     <main class="support-main">
       <div class="support-heading"><div><span class="eyebrow">WORKSPACE ASSISTENZA</span><h1>Dashboard segnalazioni</h1><p>Gestisci da un unico spazio i problemi segnalati dagli allenatori.</p></div><span class="support-live-label"><span></span> Area riservata</span></div>
       <section class="support-stats" aria-label="Riepilogo segnalazioni">
-        <article class="support-stat"><span>Tutte le segnalazioni</span><strong>0</strong><small>Segnalazioni collegate</small></article>
-        <article class="support-stat"><span>Da leggere</span><strong>0</strong><small>In attesa di gestione</small></article>
-        <article class="support-stat"><span>In lavorazione</span><strong>0</strong><small>Problemi aperti</small></article>
-        <article class="support-stat"><span>Risolte</span><strong>0</strong><small>Problemi chiusi</small></article>
+        <article class="support-stat"><span>Tutte le segnalazioni</span><strong>{{ supportCounters().all }}</strong><small>Segnalazioni collegate</small></article>
+        <article class="support-stat"><span>Da leggere</span><strong>{{ supportCounters().new }}</strong><small>In attesa di gestione</small></article>
+        <article class="support-stat"><span>In lavorazione</span><strong>{{ supportCounters().progress }}</strong><small>Problemi aperti</small></article>
+        <article class="support-stat"><span>Risolte</span><strong>{{ supportCounters().resolved }}</strong><small>Problemi chiusi</small></article>
       </section>
       <section class="support-panel">
-        <div class="support-panel-header"><div><h2>Segnalazioni ricevute</h2><p>Elenco dei ticket inviati dagli utilizzatori dell'app.</p></div><label class="support-search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Cerca segnalazioni" [value]="supportSearch()" (input)="updateSupportSearch($event)" aria-label="Cerca segnalazioni" /></label></div>
+        <div class="support-panel-header"><div><h2>Segnalazioni ricevute</h2><p>Elenco dei ticket inviati dagli utilizzatori dell'app.</p><button type="button" class="support-retry" (click)="loadSupportTickets()">Aggiorna</button></div><label class="support-search"><span aria-hidden="true">⌕</span><input type="search" placeholder="Cerca segnalazioni" [value]="supportSearch()" (input)="updateSupportSearch($event)" aria-label="Cerca segnalazioni" /></label></div>
         <div class="support-filters" aria-label="Filtra per stato">
           <button type="button" [class.active]="supportFilter() === 'all'" (click)="selectSupportFilter('all')">Tutte</button>
           <button type="button" [class.active]="supportFilter() === 'new'" (click)="selectSupportFilter('new')">Da leggere</button>
           <button type="button" [class.active]="supportFilter() === 'progress'" (click)="selectSupportFilter('progress')">In lavorazione</button>
           <button type="button" [class.active]="supportFilter() === 'resolved'" (click)="selectSupportFilter('resolved')">Risolte</button>
         </div>
-        <div class="support-empty"><span class="support-empty-icon" aria-hidden="true">◎</span><h3>Nessuna segnalazione collegata</h3><p>Questa dashboard è riservata all'account di assistenza. Per ricevere e gestire realmente i ticket degli allenatori occorrerà collegare un archivio di segnalazioni separato, senza usare Firestore o Firebase per i bug.</p><span class="support-empty-note">Al momento le segnalazioni dell'app vengono ancora preparate come email e non vengono salvate qui.</span></div>
+        @if (supportError()) {
+          <div class="support-empty" role="alert"><h3>Impossibile caricare i ticket</h3><p>{{ supportError() }}</p><button type="button" class="support-retry" (click)="loadSupportTickets()">Riprova</button></div>
+        } @else if (supportLoading() && supportTickets().length === 0) {
+          <div class="support-empty"><p>Caricamento delle segnalazioni…</p></div>
+        } @else if (filteredTickets().length === 0) {
+          <div class="support-empty"><span class="support-empty-icon" aria-hidden="true">◎</span><h3>Nessuna segnalazione</h3><p>Non ci sono segnalazioni per il filtro selezionato.</p></div>
+        } @else {
+          <div class="support-ticket-list">
+            @for (ticket of filteredTickets(); track ticket.id) {
+              <button type="button" class="support-ticket-row" (click)="selectSupportTicket(ticket.id)">
+                <div class="support-ticket-summary"><strong>Ticket #{{ ticket.id }} · {{ ticket.authorName || ticket.authorEmail }}</strong><span>{{ ticket.description }}</span><small>{{ ticket.createdAt | date:'dd/MM/yyyy HH:mm' }} · {{ ticket.attachments.length }} allegati</small></div>
+                <span class="support-ticket-state" [class.new]="ticket.status === 'new'" [class.progress]="ticket.status === 'progress'" [class.resolved]="ticket.status === 'resolved'">{{ ticket.status === 'new' ? 'Da leggere' : ticket.status === 'progress' ? 'In lavorazione' : 'Risolto' }}</span>
+              </button>
+            }
+          </div>
+        }
+        @if (selectedTicket(); as ticket) {
+          <div class="support-detail-backdrop" (click)="closeSupportTicket()">
+            <section class="support-detail" role="dialog" aria-modal="true" aria-label="Dettaglio ticket" (click)="$event.stopPropagation()">
+              <header><div><small>SEGNALAZIONE #{{ ticket.id }}</small><h2>Dettagli del problema</h2></div><button type="button" (click)="closeSupportTicket()" aria-label="Chiudi dettaglio">×</button></header>
+              <div class="support-detail-content"><p><strong>Segnalato da:</strong> {{ ticket.authorName || ticket.authorEmail }}</p><p><strong>Email:</strong> {{ ticket.authorEmail }}</p><p><strong>Data:</strong> {{ ticket.createdAt | date:'dd/MM/yyyy HH:mm' }}</p><p><strong>Pagina:</strong> {{ ticket.page }}</p><h3>Descrizione</h3><p class="support-description">{{ ticket.description }}</p>
+              @if (ticket.attachments.length) {
+                <h3>Allegati</h3>
+                @for (attachment of ticket.attachments; track attachment.id) {
+                  <button type="button" class="support-attachment" (click)="downloadSupportAttachment(ticket.id, attachment)">{{ attachment.name }} · {{ formatBugReportFileSize(attachment.size) }} · Scarica</button>
+                }
+              }
+              <h3>Stato della segnalazione</h3><div class="support-status-actions">
+                <button type="button" [class.active]="ticket.status === 'new'" (click)="updateSupportTicketStatus(ticket, 'new')">Da leggere</button>
+                <button type="button" [class.active]="ticket.status === 'progress'" (click)="updateSupportTicketStatus(ticket, 'progress')">In lavorazione</button>
+                <button type="button" [class.active]="ticket.status === 'resolved'" (click)="updateSupportTicketStatus(ticket, 'resolved')">Risolto</button>
+              </div></div>
+            </section>
+          </div>
+        }
       </section>
     </main>
   </div>
@@ -130,7 +164,7 @@
         <div>
           <span class="eyebrow">ASSISTENZA</span>
           <h2 id="bug-report-title">Segnala un bug</h2>
-          <p>Descrivi brevemente cosa non funziona. Prepareremo automaticamente l'email.</p>
+          <p>Descrivi brevemente cosa non funziona. La segnalazione arriverà direttamente al Centro Assistenza.</p>
         </div>
         <button type="button" class="bug-report-close" aria-label="Chiudi" (click)="closeBugReport()">×</button>
       </header>
@@ -155,15 +189,9 @@
         @if (bugReportFileError()) { <p class="bug-report-file-error" role="alert">{{ bugReportFileError() }}</p> }
       </div>
       <div class="bug-report-actions">
-        <button type="button" (click)="sendBugReport()" [disabled]="!bugReportText().trim() || bugReportSending()">{{ bugReportSending() ? 'Preparazione…' : 'Invia' }}</button>
+        <button type="button" (click)="sendBugReport()" [disabled]="!bugReportText().trim() || bugReportSending()">{{ bugReportSending() ? 'Invio…' : 'Invia' }}</button>
       </div>
-      <p class="bug-report-note">Destinatario: squadmanagersupport@gmail.com.
-      @if (bugReportFiles().length) {
-        Con allegati viene scaricata un'email completa (.eml): aprila nell'app email e premi Invia. Il download non invia automaticamente la segnalazione.
-      } @else {
-        Si aprirà la tua app email per confermare l'invio.
-      }
-      </p>
+      <p class="bug-report-note">La segnalazione viene inviata direttamente al Centro Assistenza, senza email e senza download.</p>
     </section>
   </div>
 }
