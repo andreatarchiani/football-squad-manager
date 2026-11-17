@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { SwUpdate } from '@angular/service-worker';
 import { interval } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +13,12 @@ import { VoiceAssistantComponent } from './features/voice-assistant/voice-assist
 import { HomePageComponent } from './features/home/home-page.component';
 import type { TeamRecord } from './features/teams/team.service';
 import type { PlayerRecord } from './features/players/player.service';
+import { environment } from '../environments/environment';
+
+type SupportStatus = 'new' | 'progress' | 'resolved';
+interface SupportAttachment { id: number; name: string; type: string; size: number; }
+interface SupportTicket { id: number; authorEmail: string; authorName: string; description: string; page: string; browser: string; status: SupportStatus; createdAt: string; updatedAt: string; attachments: SupportAttachment[]; }
+
 
 @Component({
   selector: 'fsm-root',
@@ -27,13 +33,86 @@ export class AppComponent {
   protected readonly isSupportAccount = computed(() =>
     this.auth.user()?.email?.trim().toLowerCase() === 'squadmanagersupport@gmail.com'
   );
-  protected readonly supportFilter = signal<'all' | 'new' | 'progress' | 'resolved'>('all');
+  protected readonly supportFilter = signal<'all' | SupportStatus>('all');
   protected readonly supportSearch = signal('');
+  protected readonly supportTickets = signal<SupportTicket[]>([]);
+  protected readonly supportLoading = signal(false);
+  protected readonly supportError = signal('');
+  protected readonly supportSelectedTicket = signal<number | null>(null);
+  protected readonly selectedTicket = computed(() => this.supportTickets().find(ticket => ticket.id === this.supportSelectedTicket()) ?? null);
+  protected readonly supportCounters = computed(() => ({
+    all: this.supportTickets().length,
+    new: this.supportTickets().filter(ticket => ticket.status === 'new').length,
+    progress: this.supportTickets().filter(ticket => ticket.status === 'progress').length,
+    resolved: this.supportTickets().filter(ticket => ticket.status === 'resolved').length
+  }));
+  protected readonly filteredTickets = computed(() => {
+    const search = this.supportSearch().trim().toLowerCase();
+    return this.supportTickets().filter(ticket =>
+      (this.supportFilter() === 'all' || ticket.status === this.supportFilter())
+      && (!search || [ticket.description, ticket.authorEmail, ticket.authorName, String(ticket.id)].some(part => part.toLowerCase().includes(search)))
+    );
+  });
   protected updateSupportSearch(event: Event): void {
     this.supportSearch.set((event.target as HTMLInputElement).value);
   }
-  protected selectSupportFilter(value: 'all' | 'new' | 'progress' | 'resolved'): void {
-    this.supportFilter.set(value);
+  protected selectSupportFilter(value: 'all' | SupportStatus): void { this.supportFilter.set(value); }
+  protected selectSupportTicket(id: number): void { this.supportSelectedTicket.set(id); }
+  protected closeSupportTicket(): void { this.supportSelectedTicket.set(null); }
+
+  private supportApiEndpoint(path: string): string {
+    const base = environment.supportApiUrl.trim().replace(/\\/$/, '');
+    if (!base) throw new Error('Il server delle segnalazioni non è ancora configurato.');
+    return `${base}/api/support/${path}`;
+  }
+  private async supportRequest(path: string, method = 'GET', body?: unknown): Promise<Response> {
+    const user = this.auth.user();
+    if (!user) throw new Error('Devi accedere per continuare.');
+    const token = await user.getIdToken();
+    const response = await fetch(this.supportApiEndpoint(path), {
+      method,
+      headers: { Authorization: `Bearer ${token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+      cache: 'no-store'
+    });
+    if (!response.ok) {
+      let message = 'Impossibile contattare il servizio segnalazioni.';
+      try { const detail = await response.json(); if (typeof detail.error === 'string') message = detail.error; } catch {}
+      throw new Error(message);
+    }
+    return response;
+  }
+  protected async loadSupportTickets(): Promise<void> {
+    if (!this.isSupportAccount() || this.supportLoading()) return;
+    this.supportLoading.set(true);
+    this.supportError.set('');
+    try {
+      const response = await this.supportRequest('tickets');
+      const data = await response.json() as { tickets: SupportTicket[] };
+      this.supportTickets.set(data.tickets);
+    } catch (error) {
+      this.supportError.set(error instanceof Error ? error.message : 'Impossibile caricare le segnalazioni.');
+    } finally { this.supportLoading.set(false); }
+  }
+  protected async updateSupportTicketStatus(ticket: SupportTicket, status: SupportStatus): Promise<void> {
+    try {
+      await this.supportRequest(`tickets/${ticket.id}/status`, 'PATCH', { status });
+      this.supportTickets.update(tickets => tickets.map(item => item.id === ticket.id ? { ...item, status } : item));
+    } catch (error) {
+      this.notifications.notify({ title: 'Aggiornamento non riuscito', message: error instanceof Error ? error.message : 'Riprova.', type: 'error' });
+    }
+  }
+  protected async downloadSupportAttachment(ticketId: number, attachment: SupportAttachment): Promise<void> {
+    try {
+      const response = await this.supportRequest(`tickets/${ticketId}/attachments/${attachment.id}`);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url; link.download = attachment.name; link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch (error) {
+      this.notifications.notify({ title: 'Download non riuscito', message: error instanceof Error ? error.message : 'Riprova.', type: 'error' });
+    }
   }
 
   protected readonly navigation = ['Home', 'Squadre', 'Giocatori', 'Formazioni', 'Partite'];
@@ -52,6 +131,8 @@ export class AppComponent {
   private readonly notifications = inject(NotificationService);
 
   constructor() {
+    effect(() => { if (this.isSupportAccount()) void this.loadSupportTickets(); });
+    interval(30 * 1000).subscribe(() => { if (this.isSupportAccount()) void this.loadSupportTickets(); });
     if (localStorage.getItem(this.releaseChangelogStorageKey) === this.releaseVersion) {
       localStorage.removeItem(this.releaseChangelogStorageKey);
       this.releaseChangelogOpen.set(true);
@@ -142,106 +223,42 @@ export class AppComponent {
     this.bugReportFileError.set('');
   }
 
-  private getBugReportBody(description: string): string {
-    const user = this.auth.user();
-    return [
-      'Ciao,',
-      '',
-      'vorrei segnalare il seguente problema:',
-      description,
-      '',
-      '---',
-      `Account: ${user?.displayName || user?.email || 'non disponibile'}`,
-      `Pagina: ${this.activePage()}`,
-      `Data: ${new Date().toLocaleString('it-IT')}`,
-      `Browser: ${navigator.userAgent}`
-    ].join('\n');
-  }
-
   private async fileAsBase64(file: File): Promise<string> {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const chunkSize = 8192;
     let binary = '';
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-    }
-    return btoa(binary).replace(/.{1,76}/g, '$&\r\n').trimEnd();
+    for (let i = 0; i < bytes.length; i += chunkSize) binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    return btoa(binary);
   }
 
   protected async sendBugReport(): Promise<void> {
     const description = this.bugReportText().trim();
     if (!description || this.bugReportSending()) return;
-
-    const subject = 'Segnalazione bug - Football Squad Manager';
-    const body = this.getBugReportBody(description);
-    const files = this.bugReportFiles();
-
-    if (!files.length) {
-      window.location.href = `mailto:${this.bugReportRecipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      return;
-    }
-
     this.bugReportSending.set(true);
     this.bugReportFileError.set('');
     try {
-      // mailto: cannot attach files. An RFC 822 email draft preserves the actual
-      // attachments and recipient without requiring an email backend.
-      const boundary = `fsm-bug-${Date.now()}`;
-      const lines = [
-        `To: ${this.bugReportRecipient}`,
-        `Subject: ${subject}`,
-        'MIME-Version: 1.0',
-        `Content-Type: multipart/mixed; boundary="${boundary}"`,
-        '',
-        `--${boundary}`,
-        'Content-Type: text/plain; charset=UTF-8',
-        'Content-Transfer-Encoding: base64',
-        '',
-        this.encodeBugReportText(body),
-        ''
-      ];
-      for (const file of files) {
-        const safeName = file.name.replace(/[\r\n"\\]/g, '_');
-        const asciiName = safeName.replace(/[^\x20-\x7E]/g, '_');
-        lines.push(
-          `--${boundary}`,
-          `Content-Type: ${file.type}; name="${asciiName}"`,
-          `Content-Disposition: attachment; filename="${asciiName}"`,
-          'Content-Transfer-Encoding: base64',
-          '',
-          await this.fileAsBase64(file),
-          ''
-        );
-      }
-      lines.push(`--${boundary}--`, '');
-      const draft = new Blob([lines.join('\r\n')], { type: 'message/rfc822' });
-      const url = URL.createObjectURL(draft);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'segnalazione-bug.eml';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.setTimeout(() => URL.revokeObjectURL(url), 30000);
+      const attachments = await Promise.all(this.bugReportFiles().map(async file => ({
+        name: file.name, type: file.type, base64: await this.fileAsBase64(file)
+      })));
+      const response = await this.supportRequest('tickets', 'POST', {
+        description,
+        page: this.activePage(),
+        browser: navigator.userAgent,
+        attachments
+      });
+      const result = await response.json() as { id: number };
+      this.bugReportOpen.set(false);
+      this.bugReportText.set('');
+      this.bugReportFiles.set([]);
       this.notifications.notify({
-        title: 'Email con allegati preparata',
-        message: 'Apri il file .eml scaricato nell’app email e premi Invia.',
+        title: 'Segnalazione inviata',
+        message: `Ticket #${result.id} ricevuto dal Centro Assistenza.`,
         type: 'success',
-        durationMs: 8000
+        durationMs: 5500
       });
     } catch (error) {
-      console.error('Unable to prepare bug report attachments', error);
-      this.bugReportFileError.set('Impossibile preparare gli allegati. Riprova.');
-    } finally {
-      this.bugReportSending.set(false);
-    }
-  }
-
-  private encodeBugReportText(value: string): string {
-    const bytes = new TextEncoder().encode(value);
-    let binary = '';
-    for (const byte of bytes) binary += String.fromCharCode(byte);
-    return btoa(binary).replace(/.{1,76}/g, '$&\r\n').trimEnd();
+      this.bugReportFileError.set(error instanceof Error ? error.message : 'Invio non riuscito. Riprova.');
+    } finally { this.bugReportSending.set(false); }
   }
 
   protected closeReleaseChangelog(): void { this.releaseChangelogOpen.set(false); }
