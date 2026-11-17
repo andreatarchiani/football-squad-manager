@@ -122,11 +122,8 @@
 
 
 
-/* Custom team image upload */
-.team-icon-upload{position:relative;overflow:hidden;cursor:pointer;}
-.team-icon-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}
-.team-icon-upload-plus{font-size:28px;font-weight:400;line-height:1;color:#a9e7c2;}
-.team-icon-option img,.team-emblem img{width:100%;height:100%;object-fit:cover;display:block;}
-.team-icon-option img{border-radius:9px;}
-.team-emblem{overflow:hidden;}
-.team-emblem img{border-radius:11px;}
+.team-icon-upload{position:relative;overflow:hidden}
+.team-icon-upload input{display:none}
+.team-icon-upload-plus{font-size:28px;color:#a9e7c2}
+.team-icon-option img,.team-emblem img{width:100%;height:100%;object-fit:cover}
+.team-emblem{overflow:hidden}
