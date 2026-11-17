@@ -6,6 +6,7 @@
 - **Ottimizzazione automatica:** l'immagine viene adattata a 256×256 prima del salvataggio per ridurre dimensioni e peso.
 - **Pubblicazione corretta:** alleggeriti gli stili della schermata Squadre per consentire alla build di produzione di includere il nuovo caricamento immagine.
 - **Anteprima immediata:** dopo il caricamento l'immagine viene mostrata subito nel riquadro e compare la conferma “Immagine caricata correttamente”, prima di premere Salva.
+- **Aggiornamento istantaneo della preview:** il riquadro ora mostra sempre l'ultima immagine appena selezionata, senza restare sulla precedente.
 
 ## 2026-11-14 — Aggiornamenti Football Squad Manager
 
