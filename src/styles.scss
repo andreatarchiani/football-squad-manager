@@ -382,7 +382,7 @@ select optgroup {
 .live-match .match-pitch-wrap.pitch-stage .match-penalty-arc-top{top:12%;clip-path:inset(50% 0 0)}
 .live-match .match-pitch-wrap.pitch-stage .match-penalty-arc-bottom{bottom:12%;clip-path:inset(0 0 50%)}
 .live-match .match-pitch-wrap.pitch-stage .match-corner{
-  position:absolute;width:3.5%;height:1.8%;border:1px solid #e2f3e5b8;z-index:1
+  position:absolute;width:3.5%;height:auto;aspect-ratio:1;border:1px solid #e2f3e5b8;z-index:1
 }
 .live-match .match-pitch-wrap.pitch-stage .match-corner-tl{top:2.2%;left:2.2%;border-top:0;border-left:0;border-radius:0 0 100% 0}
 .live-match .match-pitch-wrap.pitch-stage .match-corner-tr{top:2.2%;right:2.2%;border-top:0;border-right:0;border-radius:0 0 0 100%}
