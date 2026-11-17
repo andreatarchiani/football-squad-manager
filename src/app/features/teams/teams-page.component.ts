@@ -86,6 +86,7 @@ export class TeamsPageComponent implements OnChanges {
   protected form: TeamInput = this.emptyForm();
   protected readonly teamIcons = ['⚽', '🛡️', '🏆', '⭐', '👑', '🦅', '🦁', '🐺', '🐉', '🔥', '⚡', '💎', '🏟️', '🎯', '🔱', '🌟'];
   protected readonly teamIconUploadStatus = signal('');
+  protected readonly teamIconPreview = signal('');
 
   protected isImageIcon(value: string | null | undefined): boolean {
     return typeof value === 'string' && value.startsWith('data:image/');
@@ -106,7 +107,9 @@ export class TeamsPageComponent implements OnChanges {
     }
 
     try {
-      this.form.icon = await this.prepareTeamIcon(file);
+      const preparedIcon = await this.prepareTeamIcon(file);
+      this.teamIconPreview.set(preparedIcon);
+      this.form.icon = preparedIcon;
       this.teamIconUploadStatus.set('Immagine caricata correttamente');
       this.error.set('');
     } catch (error) {
@@ -541,6 +544,7 @@ export class TeamsPageComponent implements OnChanges {
     this.editingId.set(null);
     this.formOpen.set(true);
     this.form = this.emptyForm();
+    this.teamIconPreview.set('');
     this.teamIconUploadStatus.set('');
     this.error.set('');
     this.notice.set('');
@@ -549,6 +553,7 @@ export class TeamsPageComponent implements OnChanges {
   protected openEdit(team: TeamRecord): void {
     this.editingId.set(team.id);
     this.formOpen.set(true);
+    this.teamIconPreview.set('');
     this.form = {
       name: team.name,
       category: team.category,
@@ -565,6 +570,7 @@ export class TeamsPageComponent implements OnChanges {
     this.editingId.set(null);
     this.formOpen.set(false);
     this.form = this.emptyForm();
+    this.teamIconPreview.set('');
     this.teamIconUploadStatus.set('');
     this.error.set('');
   }
@@ -593,6 +599,7 @@ export class TeamsPageComponent implements OnChanges {
       this.editingId.set(null);
       this.formOpen.set(false);
       this.form = this.emptyForm();
+      this.teamIconPreview.set('');
       this.teamIconUploadStatus.set('');
       await this.loadTeams();
     } catch (error) {
