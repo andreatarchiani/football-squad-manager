@@ -62,6 +62,9 @@
           </label>
         </div>
         <span class="team-icon-caption">L'icona scelta apparirà nelle squadre e nella Home.</span>
+        @if (teamIconUploadStatus()) {
+          <span class="team-icon-upload-status" role="status">{{ teamIconUploadStatus() }}</span>
+        }
       </fieldset>
       <p class="form-hint">La stagione viene creata insieme alla squadra e impostata come attiva.</p>
       <div class="form-actions">
