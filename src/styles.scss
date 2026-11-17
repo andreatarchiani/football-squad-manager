@@ -334,3 +334,57 @@ select optgroup {
 .support-empty h3{margin:19px 0 8px;font-size:18px;}.support-empty p{max-width:610px;margin:0;color:#aebfb4;font-size:13px;line-height:1.75;}.support-empty-note{max-width:620px;margin-top:24px;padding:12px 16px;border:1px solid #4f5241;border-radius:10px;color:#dccb9a;background:#343123;font-size:11px;line-height:1.6;}
 @media(max-width:850px){.support-stats{grid-template-columns:repeat(2,minmax(0,1fr));}.support-account-name{display:none;}}
 @media(max-width:600px){.support-topbar{padding:14px 16px;}.support-brand strong{font-size:10px;}.support-brand small{font-size:9px;}.support-brand-mark{width:37px;height:37px;}.support-admin-label{display:none;}.support-main{padding:28px 16px 80px;}.support-heading{display:block;}.support-live-label{margin-top:17px;}.support-stats{gap:9px;}.support-stat{padding:15px;}.support-stat strong{font-size:29px;}.support-stat>span{font-size:11px;}.support-panel-header{display:grid;padding:22px 18px 16px;}.support-search input{width:100%;}.support-filters{padding:0 18px 18px;gap:6px;}.support-filters button{padding:8px 10px;}.support-empty{padding:47px 16px 55px;}}
+
+
+/* Accurate pitch markings: all playing lines stay inside the inner touchline. */
+.home-football-pitch .pitch-line{left:2.2%;right:2.2%}
+.live-match .match-pitch-wrap.pitch-stage .match-pitch.football-pitch{
+  overflow:hidden;
+  border:0;
+  border-radius:4px;
+  background:repeating-linear-gradient(0deg,#286b43 0 9%,#245f3b 9% 18%);
+  box-shadow:0 20px 0 -4px #142b20,0 27px 0 -4px #0b1913,0 36px 28px #000a,inset 0 0 35px #03150c;
+}
+.live-match .match-pitch-wrap.pitch-stage .match-pitch.football-pitch::before{
+  inset:0;
+  border:0;
+  background:linear-gradient(90deg,#ffffff08,transparent 50%,#001b0b12);
+}
+.live-match .match-pitch-wrap.pitch-stage .match-pitch.football-pitch::after{
+  inset:2.2%;
+  border:1.5px solid #e2f3e5d9;
+  box-shadow:none;
+  transform:translateZ(2px);
+}
+.live-match .match-pitch-wrap.pitch-stage .match-halfway{
+  left:2.2%;width:95.6%;height:1px;background:#e2f3e5d9;
+}
+.live-match .match-pitch-wrap.pitch-stage .match-center-circle{border-color:#e2f3e5d9;box-shadow:none}
+.live-match .match-pitch-wrap.pitch-stage .match-center-dot{z-index:1}
+.live-match .match-pitch-wrap.pitch-stage .match-box{
+  left:19%;width:62%;height:17%;border:1.5px solid #e2f3e5d9;
+}
+.live-match .match-pitch-wrap.pitch-stage .match-box-top{top:2.2%;border-top:0}
+.live-match .match-pitch-wrap.pitch-stage .match-box-bottom{bottom:2.2%;border-bottom:0}
+.live-match .match-pitch-wrap.pitch-stage .match-six-yard-box{
+  position:absolute;left:22%;width:56%;height:36%;border:1.5px solid #e2f3e5c9;
+}
+.live-match .match-pitch-wrap.pitch-stage .match-box-top .match-six-yard-box{top:0;border-top:0}
+.live-match .match-pitch-wrap.pitch-stage .match-box-bottom .match-six-yard-box{bottom:0;border-bottom:0}
+.live-match .match-pitch-wrap.pitch-stage .match-penalty-spot{
+  position:absolute;left:50%;width:5px;height:5px;border-radius:50%;background:#effff2;transform:translateX(-50%);z-index:1
+}
+.live-match .match-pitch-wrap.pitch-stage .match-penalty-spot-top{top:15%}
+.live-match .match-pitch-wrap.pitch-stage .match-penalty-spot-bottom{bottom:15%}
+.live-match .match-pitch-wrap.pitch-stage .match-penalty-arc{
+  position:absolute;left:50%;width:24%;height:8%;border:1.5px solid #e2f3e5d9;border-radius:50%;transform:translateX(-50%)
+}
+.live-match .match-pitch-wrap.pitch-stage .match-penalty-arc-top{top:12%;clip-path:inset(50% 0 0)}
+.live-match .match-pitch-wrap.pitch-stage .match-penalty-arc-bottom{bottom:12%;clip-path:inset(0 0 50%)}
+.live-match .match-pitch-wrap.pitch-stage .match-corner{
+  position:absolute;width:3.5%;height:1.8%;border:1px solid #e2f3e5b8;z-index:1
+}
+.live-match .match-pitch-wrap.pitch-stage .match-corner-tl{top:2.2%;left:2.2%;border-top:0;border-left:0;border-radius:0 0 100% 0}
+.live-match .match-pitch-wrap.pitch-stage .match-corner-tr{top:2.2%;right:2.2%;border-top:0;border-right:0;border-radius:0 0 0 100%}
+.live-match .match-pitch-wrap.pitch-stage .match-corner-bl{bottom:2.2%;left:2.2%;border-bottom:0;border-left:0;border-radius:0 100% 0 0}
+.live-match .match-pitch-wrap.pitch-stage .match-corner-br{bottom:2.2%;right:2.2%;border-bottom:0;border-right:0;border-radius:100% 0 0 0}
