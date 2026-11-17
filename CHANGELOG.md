@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-17 — Centro Assistenza integrato
+
+- **Nuova funzionalità:** le segnalazioni bug testuali vengono inviate direttamente dall'app a Firestore sul piano Spark, senza email, file `.eml` o backend esterno.
+- **Miglioramento:** l'account `squadmanagersupport@gmail.com` visualizza le segnalazioni in una dashboard riservata con ricerca, filtri e aggiornamento degli stati (Da leggere, In lavorazione, Risolto).
+- **Modifica:** gli allegati sono temporaneamente disabilitati nel modulo segnalazioni per mantenere la gestione semplice e compatibile con il piano gratuito.
+
 ## 2026-11-17 — Icona squadra personalizzata
 
 - **Caricamento immagine squadra:** aggiunto un pulsante tra le icone predefinite per scegliere un'immagine dal dispositivo e usarla come icona della squadra.
