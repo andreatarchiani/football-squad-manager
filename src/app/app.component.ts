@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { SwUpdate } from '@angular/service-worker';
 import { interval } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,7 +24,7 @@ interface SupportTicket { id: number; authorEmail: string; authorName: string; d
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, VoiceAssistantComponent, HomePageComponent, NotificationHostComponent],
+  imports: [DatePipe, MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, VoiceAssistantComponent, HomePageComponent, NotificationHostComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -131,7 +132,7 @@ export class AppComponent {
   private readonly notifications = inject(NotificationService);
 
   constructor() {
-    effect(() => { if (this.isSupportAccount()) void this.loadSupportTickets(); });
+    effect(() => { if (this.isSupportAccount()) untracked(() => void this.loadSupportTickets()); });
     interval(30 * 1000).subscribe(() => { if (this.isSupportAccount()) void this.loadSupportTickets(); });
     if (localStorage.getItem(this.releaseChangelogStorageKey) === this.releaseVersion) {
       localStorage.removeItem(this.releaseChangelogStorageKey);
