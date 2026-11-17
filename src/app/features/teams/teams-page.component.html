@@ -51,6 +51,15 @@
               [attr.aria-label]="'Seleziona icona ' + icon" [attr.aria-pressed]="form.icon === icon"
               (click)="form.icon = icon">{{ icon }}</button>
           }
+          <label class="team-icon-option team-icon-upload" [class.is-selected]="isImageIcon(form.icon)"
+            title="Carica un'immagine" aria-label="Carica un'immagine personalizzata">
+            @if (isImageIcon(form.icon)) {
+              <img [src]="form.icon" alt="" />
+            } @else {
+              <span class="team-icon-upload-plus" aria-hidden="true">＋</span>
+            }
+            <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" (change)="onTeamIconUpload($event)" />
+          </label>
         </div>
         <span class="team-icon-caption">L'icona scelta apparirà nelle squadre e nella Home.</span>
       </fieldset>
@@ -91,7 +100,9 @@
     <div class="team-list">
       @for (team of visibleTeams; track team.id) {
         <article class="team-card" [class.archived]="team.isArchived">
-          <div class="team-emblem" aria-hidden="true">{{ team.icon || '⚽' }}</div>
+          <div class="team-emblem" aria-hidden="true">
+            @if (isImageIcon(team.icon)) { <img [src]="team.icon" alt="" /> } @else { {{ team.icon || '⚽' }} }
+          </div>
           <div class="record-icon-actions" aria-label="Azioni squadra">
             <button class="icon-action archive-action" type="button" (click)="toggleArchive(team)" [attr.aria-label]="team.isArchived ? 'Ripristina squadra' : 'Archivia squadra'" [title]="team.isArchived ? 'Ripristina squadra' : 'Archivia squadra'">
               @if (team.isArchived) { <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v4H3zM5 8v12h14V8M9 12h6M12 10v4"/></svg> } @else { <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h18v4H3zM5 8v12h14V8M9 12h6"/></svg> }
