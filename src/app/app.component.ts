@@ -14,11 +14,11 @@ import { VoiceAssistantComponent } from './features/voice-assistant/voice-assist
 import { HomePageComponent } from './features/home/home-page.component';
 import type { TeamRecord } from './features/teams/team.service';
 import type { PlayerRecord } from './features/players/player.service';
-import { environment } from '../environments/environment';
+import { FIRESTORE_DB } from './core/firebase.tokens';
+import { addDoc, collection, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore';
 
 type SupportStatus = 'new' | 'progress' | 'resolved';
-interface SupportAttachment { id: number; name: string; type: string; size: number; }
-interface SupportTicket { id: number; authorEmail: string; authorName: string; description: string; page: string; browser: string; status: SupportStatus; createdAt: string; updatedAt: string; attachments: SupportAttachment[]; }
+interface SupportTicket { id: string; authorEmail: string; authorName: string; description: string; page: string; browser: string; status: SupportStatus; createdAt: Date; updatedAt: Date; }
 
 
 @Component({
@@ -30,7 +30,7 @@ interface SupportTicket { id: number; authorEmail: string; authorName: string; d
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
-  // This gate changes presentation only. Future ticket APIs must validate the Firebase ID token server-side.
+  // Firestore Security Rules independently enforce access to support tickets.
   protected readonly isSupportAccount = computed(() =>
     this.auth.user()?.email?.trim().toLowerCase() === 'squadmanagersupport@gmail.com'
   );
@@ -39,7 +39,7 @@ export class AppComponent {
   protected readonly supportTickets = signal<SupportTicket[]>([]);
   protected readonly supportLoading = signal(false);
   protected readonly supportError = signal('');
-  protected readonly supportSelectedTicket = signal<number | null>(null);
+  protected readonly supportSelectedTicket = signal<string | null>(null);
   protected readonly selectedTicket = computed(() => this.supportTickets().find(ticket => ticket.id === this.supportSelectedTicket()) ?? null);
   protected readonly supportCounters = computed(() => ({
     all: this.supportTickets().length,
@@ -58,61 +58,46 @@ export class AppComponent {
     this.supportSearch.set((event.target as HTMLInputElement).value);
   }
   protected selectSupportFilter(value: 'all' | SupportStatus): void { this.supportFilter.set(value); }
-  protected selectSupportTicket(id: number): void { this.supportSelectedTicket.set(id); }
+  protected selectSupportTicket(id: string): void { this.supportSelectedTicket.set(id); }
   protected closeSupportTicket(): void { this.supportSelectedTicket.set(null); }
 
-  private supportApiEndpoint(path: string): string {
-    const base = environment.supportApiUrl.trim().replace(/\\/$/, '');
-    if (!base) throw new Error('Il server delle segnalazioni non è ancora configurato.');
-    return `${base}/api/support/${path}`;
-  }
-  private async supportRequest(path: string, method = 'GET', body?: unknown): Promise<Response> {
-    const user = this.auth.user();
-    if (!user) throw new Error('Devi accedere per continuare.');
-    const token = await user.getIdToken();
-    const response = await fetch(this.supportApiEndpoint(path), {
-      method,
-      headers: { Authorization: `Bearer ${token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
-      ...(body ? { body: JSON.stringify(body) } : {}),
-      cache: 'no-store'
-    });
-    if (!response.ok) {
-      let message = 'Impossibile contattare il servizio segnalazioni.';
-      try { const detail = await response.json(); if (typeof detail.error === 'string') message = detail.error; } catch {}
-      throw new Error(message);
-    }
-    return response;
-  }
+  private readonly supportDb = inject(FIRESTORE_DB, { optional: true });
+
   protected async loadSupportTickets(): Promise<void> {
     if (!this.isSupportAccount() || this.supportLoading()) return;
     this.supportLoading.set(true);
     this.supportError.set('');
     try {
-      const response = await this.supportRequest('tickets');
-      const data = await response.json() as { tickets: SupportTicket[] };
-      this.supportTickets.set(data.tickets);
+      if (!this.supportDb) throw new Error('Database non disponibile.');
+      const result = await getDocs(query(collection(this.supportDb, 'supportTickets'), orderBy('createdAt', 'desc'), limit(300)));
+      this.supportTickets.set(result.docs.map(snapshot => {
+        const data = snapshot.data();
+        return {
+          id: snapshot.id,
+          authorEmail: String(data['authorEmail'] ?? ''),
+          authorName: String(data['authorName'] ?? ''),
+          description: String(data['description'] ?? ''),
+          page: String(data['page'] ?? ''),
+          browser: String(data['browser'] ?? ''),
+          status: (data['status'] as SupportStatus) || 'new',
+          createdAt: data['createdAt']?.toDate?.() ?? new Date(),
+          updatedAt: data['updatedAt']?.toDate?.() ?? new Date()
+        };
+      }));
     } catch (error) {
-      this.supportError.set(error instanceof Error ? error.message : 'Impossibile caricare le segnalazioni.');
+      console.error('Unable to load support tickets', error);
+      this.supportError.set('Impossibile caricare le segnalazioni. Verifica che le regole Firestore siano state pubblicate.');
     } finally { this.supportLoading.set(false); }
   }
+
   protected async updateSupportTicketStatus(ticket: SupportTicket, status: SupportStatus): Promise<void> {
     try {
-      await this.supportRequest(`tickets/${ticket.id}/status`, 'PATCH', { status });
+      if (!this.supportDb || !this.isSupportAccount()) throw new Error('Accesso non autorizzato.');
+      await updateDoc(doc(this.supportDb, 'supportTickets', ticket.id), { status, updatedAt: serverTimestamp() });
       this.supportTickets.update(tickets => tickets.map(item => item.id === ticket.id ? { ...item, status } : item));
     } catch (error) {
-      this.notifications.notify({ title: 'Aggiornamento non riuscito', message: error instanceof Error ? error.message : 'Riprova.', type: 'error' });
-    }
-  }
-  protected async downloadSupportAttachment(ticketId: number, attachment: SupportAttachment): Promise<void> {
-    try {
-      const response = await this.supportRequest(`tickets/${ticketId}/attachments/${attachment.id}`);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url; link.download = attachment.name; link.click();
-      window.setTimeout(() => URL.revokeObjectURL(url), 30000);
-    } catch (error) {
-      this.notifications.notify({ title: 'Download non riuscito', message: error instanceof Error ? error.message : 'Riprova.', type: 'error' });
+      console.error('Unable to update support ticket status', error);
+      this.notifications.notify({ title: 'Aggiornamento non riuscito', message: 'Non è stato possibile aggiornare la segnalazione. Riprova.', type: 'error' });
     }
   }
 
@@ -169,16 +154,11 @@ export class AppComponent {
     }
   }
 
-  protected readonly supportApiConfigured = Boolean(environment.supportApiUrl.trim());
-  protected readonly bugReportFiles = signal<File[]>([]);
   protected readonly bugReportFileError = signal('');
   protected readonly bugReportSending = signal(false);
-  private readonly bugReportRecipient = 'squadmanagersupport@gmail.com';
-  private readonly bugReportMaxBytes = 15 * 1024 * 1024;
 
   protected openBugReport(): void {
     this.bugReportText.set('');
-    this.bugReportFiles.set([]);
     this.bugReportFileError.set('');
     this.bugReportOpen.set(true);
   }
@@ -192,74 +172,36 @@ export class AppComponent {
     this.bugReportText.set((event.target as HTMLTextAreaElement).value);
   }
 
-  protected formatBugReportFileSize(bytes: number): string {
-    return bytes >= 1024 * 1024
-      ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-      : `${Math.max(1, Math.ceil(bytes / 1024))} KB`;
-  }
-
-  protected updateBugReportFiles(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const incoming = Array.from(input.files ?? []);
-    input.value = '';
-    if (!incoming.length) return;
-
-    const current = this.bugReportFiles();
-    const allowed = incoming.filter(file => file.type.startsWith('image/') || file.type.startsWith('video/'));
-    if (allowed.length !== incoming.length) {
-      this.bugReportFileError.set('Puoi allegare solamente immagini o video.');
-      return;
-    }
-    const selected = [...current, ...allowed];
-    const total = selected.reduce((sum, file) => sum + file.size, 0);
-    if (total > this.bugReportMaxBytes) {
-      this.bugReportFileError.set('Gli allegati non possono superare 15 MB complessivi.');
-      return;
-    }
-    this.bugReportFiles.set(selected);
-    this.bugReportFileError.set('');
-  }
-
-  protected removeBugReportFile(index: number): void {
-    this.bugReportFiles.update(files => files.filter((_, position) => position !== index));
-    this.bugReportFileError.set('');
-  }
-
-  private async fileAsBase64(file: File): Promise<string> {
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const chunkSize = 8192;
-    let binary = '';
-    for (let i = 0; i < bytes.length; i += chunkSize) binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-    return btoa(binary);
-  }
-
   protected async sendBugReport(): Promise<void> {
     const description = this.bugReportText().trim();
-    if (!description || this.bugReportSending()) return;
+    const user = this.auth.user();
+    if (!description || !user || this.bugReportSending()) return;
     this.bugReportSending.set(true);
     this.bugReportFileError.set('');
     try {
-      const attachments = await Promise.all(this.bugReportFiles().map(async file => ({
-        name: file.name, type: file.type, base64: await this.fileAsBase64(file)
-      })));
-      const response = await this.supportRequest('tickets', 'POST', {
+      if (!this.supportDb) throw new Error('Database non disponibile.');
+      const ticket = await addDoc(collection(this.supportDb, 'supportTickets'), {
+        authorUid: user.uid,
+        authorEmail: user.email || '',
+        authorName: (user.displayName || '').slice(0, 120),
         description,
         page: this.activePage(),
-        browser: navigator.userAgent,
-        attachments
+        browser: navigator.userAgent.slice(0, 500),
+        status: 'new',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       });
-      const result = await response.json() as { id: number };
       this.bugReportOpen.set(false);
       this.bugReportText.set('');
-      this.bugReportFiles.set([]);
       this.notifications.notify({
         title: 'Segnalazione inviata',
-        message: `Ticket #${result.id} ricevuto dal Centro Assistenza.`,
+        message: `Ticket ${ticket.id.slice(0, 8).toUpperCase()} ricevuto dal Centro Assistenza.`,
         type: 'success',
         durationMs: 5500
       });
     } catch (error) {
-      this.bugReportFileError.set(error instanceof Error ? error.message : 'Invio non riuscito. Riprova.');
+      console.error('Unable to submit support ticket', error);
+      this.bugReportFileError.set('Invio non riuscito. Verifica la connessione e riprova.');
     } finally { this.bugReportSending.set(false); }
   }
 
