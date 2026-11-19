@@ -25,22 +25,4 @@
   } @else {
     <section class="home-roster-panel"><div class="next-match-heading"><span class="eyebrow">FOOTBALL SQUAD MANAGER</span><h2>Nessuna squadra attiva</h2><p>Crea una squadra per visualizzare la rosa e preparare la prossima partita.</p></div><button type="button" class="customize-action" (click)="openTeams.emit({ teamId: '', layoutSlot: layoutSlot() })">Vai a Squadre</button></section>
   }
-
-    <section class="home-championship-panel" aria-labelledby="home-championship-title">
-      <div class="home-championship-heading">
-        <div><span class="eyebrow">STAGIONE 2026/2027</span><h2 id="home-championship-title">Juniores U19 · Arezzo</h2><p>Girone A <span class="home-championship-season-dot">•</span> Classifica e calendario del campionato</p></div>
-        <span class="home-championship-badge">CAMPIONATO</span>
-      </div>
-      <div class="home-championship-grid">
-        <article class="home-championship-card">
-          <div class="home-championship-card-heading"><span class="home-championship-icon">▤</span><div><h3>Classifica</h3><p>Situazione del girone</p></div><span class="home-championship-live">AGGIORNABILE</span></div>
-          <iframe title="Classifica Juniores U19 Provinciali Arezzo 2026/2027" src="https://www.toscanagol.it/classifica/mobile/toscana/juniores-u19-provinciali-arezzo-girone-a-058721002026/2027/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-        </article>
-        <article class="home-championship-card">
-          <div class="home-championship-card-heading"><span class="home-championship-icon">▦</span><div><h3>Calendario</h3><p>Risultati e prossime partite</p></div><span class="home-championship-live">AGGIORNABILE</span></div>
-          <iframe title="Calendario Juniores U19 Provinciali Arezzo 2026/2027" src="https://www.toscanagol.it/calendario-campionato/mobile/toscana/juniores-u19-provinciali-arezzo-girone-a-058721002026/2027/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-        </article>
-      </div>
-      <p class="home-championship-source">Dati forniti da Toscanagol e visualizzati direttamente dalla fonte originale.</p>
-    </section>
 </section>

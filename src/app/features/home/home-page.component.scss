@@ -118,37 +118,3 @@
 .home-corner.bottom-right{bottom:2.2%;right:2.2%;border-bottom:0;border-right:0;border-radius:100% 0 0 0}
 .home-pitch-player-name{max-width:78px;background:#081b12ed;border:1px solid #d8f2df55;box-shadow:0 3px 7px #0009}
 @media(max-width:650px){.home-football-pitch{width:min(100%,370px)}}
-
-
-.home-championship-panel{display:grid;gap:15px;margin-top:4px;padding:20px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(145deg,#17231f,#151b26)}
-.home-championship-heading h2{margin:6px 0 5px;font-size:19px;letter-spacing:-.035em}
-.home-championship-heading p,.home-championship-source{margin:0;color:var(--text-muted);font-size:10px;line-height:1.6}
-.home-championship-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;align-items:start}
-.home-championship-card{min-width:0;overflow:hidden;border:1px solid var(--border);border-radius:12px;background:#101820}
-.home-championship-card-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border-bottom:1px solid var(--border)}
-.home-championship-card-heading h3{margin:0;font-size:13px}
-.home-championship-card-heading a,.home-championship-source a{color:#9bdab2;font-size:10px;font-weight:700;text-decoration:none}
-.home-championship-card iframe{display:block;width:100%;height:570px;border:0;background:#fff}
-.home-championship-source{padding-top:2px}
-@media(max-width:760px){.home-championship-panel{padding:15px}.home-championship-grid{grid-template-columns:1fr}.home-championship-card iframe{height:540px}.home-championship-heading h2{font-size:16px}}
-
-
-/* Campionato: pannelli coordinati con il tema Football Squad Manager. */
-.home-championship-panel{gap:18px;padding:clamp(17px,2.5vw,25px);border-color:#385342;background:linear-gradient(145deg,#182720 0%,#151d22 72%);box-shadow:0 14px 36px #0003}
-.home-championship-heading{display:flex;align-items:center;justify-content:space-between;gap:14px}
-.home-championship-heading h2{font-size:clamp(18px,2.2vw,22px)}
-.home-championship-heading p{display:flex;align-items:center;gap:7px}
-.home-championship-season-dot{color:#91d8aa}
-.home-championship-badge{flex:0 0 auto;padding:7px 10px;border:1px solid #547b60;border-radius:7px;color:#a9e8b9;background:#1d3828;font-size:8px;font-weight:900;letter-spacing:.12em}
-.home-championship-grid{gap:15px}
-.home-championship-card{border-color:#354b3d;border-radius:13px;background:#101916;box-shadow:0 8px 22px #0002}
-.home-championship-card-heading{justify-content:flex-start;min-height:62px;padding:12px 14px;border-color:#2d4035;background:linear-gradient(100deg,#1b2d23,#17221f)}
-.home-championship-icon{display:grid;place-items:center;width:34px;height:34px;flex:0 0 auto;border:1px solid #45664e;border-radius:9px;color:#a7e7b7;background:#244331;font-size:18px}
-.home-championship-card-heading>div{display:grid;gap:3px;min-width:0;flex:1}
-.home-championship-card-heading h3{font-size:12px;font-weight:900}
-.home-championship-card-heading p{margin:0;color:#93a399;font-size:9px}
-.home-championship-live{padding:5px 7px;border:1px solid #42614a;border-radius:6px;color:#a6d9b2;background:#1a3022;font-size:7px;font-weight:900;letter-spacing:.08em;white-space:nowrap}
-.home-championship-card iframe{height:570px;border:0;background:#fff}
-.home-championship-source{padding:9px 11px;border:1px solid #2d4035;border-radius:8px;color:#93a399;background:#101916;font-size:9px}
-@media(max-width:760px){.home-championship-heading{align-items:flex-start}.home-championship-badge{margin-top:3px}.home-championship-card iframe{height:540px}}
-@media(max-width:420px){.home-championship-badge{display:none}.home-championship-live{font-size:6px;padding:4px 5px}}
