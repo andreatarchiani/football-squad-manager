@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-19 — Campionato Juniores Arezzo in Home
+
+- **Nuova funzionalità:** aggiunta nella Home una sezione dedicata al campionato Juniores U19 Provinciali Arezzo – Girone A, stagione 2026/2027, con classifica e calendario incorporati dalle pagine pubbliche di Toscanagol e collegamenti alla fonte originale.
+
 ## 2026-11-17 — Centro Assistenza integrato
 
 - **Nuova funzionalità:** le segnalazioni bug testuali vengono inviate direttamente dall'app a Firestore sul piano Spark, senza email, file `.eml` o backend esterno.
