@@ -1,131 +1,131 @@
-/* STADIUM NEON — UI system inspired by the user's reference dashboard.
+/* STADIUM SLATE — muted UI system inspired by the user's reference dashboard.
    Presentation only: no match logic, saved squad data or tactical player placement changed. */
 :root {
-  --page-bg: #030c20;
-  --surface: #071c38;
-  --border: #2376b5;
-  --text-primary: #f8fbff;
-  --text-muted: #a8c5de;
-  --accent: #2bcfff;
-  --stadium-cyan: #31d8ff;
-  --stadium-blue: #087ff7;
-  --stadium-red: #ff506b;
+  --page-bg: #0b1318;
+  --surface: #14212b;
+  --border: #417092;
+  --text-primary: #f0f5f8;
+  --text-muted: #a9c5d8;
+  --accent: #5e92b7;
+  --stadium-cyan: #6194b8;
+  --stadium-blue: #4b81a7;
+  --stadium-red: #bf737c;
   --stadium-glass: linear-gradient(146deg,rgba(10,37,72,.97),rgba(3,14,34,.98));
-  --stadium-glow: 0 0 0 1px #4acaff52, 0 0 20px #078cff28, inset 0 1px 20px #00aaff13;
+  --stadium-glow: 0 0 0 3px #6f9dbe2b, 0 0 10px #4d84ab15, inset 0 1px 20px #4b81a70a;
 }
-html,body { background-color:#030a1b; }
+html,body { background-color:#0a1014; }
 body {
   background-image:
-    radial-gradient(ellipse 48% 26% at 49% 1%,#1464b755,transparent 79%),
-    radial-gradient(ellipse 28% 50% at 100% 33%,#10498136,transparent 85%),
-    linear-gradient(158deg,#03091b 0%,#041732 60%,#020817 100%);
+    radial-gradient(ellipse 48% 26% at 49% 1%,#3e6b8a2c,transparent 79%),
+    radial-gradient(ellipse 28% 50% at 100% 33%,#2f4d621c,transparent 85%),
+    linear-gradient(158deg,#0a1014 0%,#121d24 60%,#080d11 100%);
   background-attachment:fixed;
 }
 .app-shell {isolation:isolate;}
 .app-shell::before {
   content:"";z-index:-1;position:fixed;inset:0;pointer-events:none;
   background:
-    radial-gradient(ellipse 23% 8% at 22% 0%,#c9f7ff45 0%,transparent 86%),
-    radial-gradient(ellipse 23% 8% at 89% 0%,#d4f8ff4b 0%,transparent 86%),
-    repeating-linear-gradient(106deg,transparent 0 127px,#2eb1f904 129px 131px,transparent 133px 235px),
-    radial-gradient(ellipse 100% 20% at 60% 106%,#0f653b2b,transparent 75%);
+    radial-gradient(ellipse 23% 8% at 22% 0%,#d3e1eb24 0%,transparent 86%),
+    radial-gradient(ellipse 23% 8% at 89% 0%,#d9e6ee27 0%,transparent 86%),
+    repeating-linear-gradient(106deg,transparent 0 127px,#5c91b602 129px 131px,transparent 133px 235px),
+    radial-gradient(ellipse 100% 20% at 60% 106%,#264e3a16,transparent 75%);
 }
 
 /* Sidebar: illuminated identity, separators and large neon selected state. */
 .app-shell .sidebar {
   width:248px;
   padding:25px 13px 18px;
-  background:linear-gradient(180deg,#041128 0%,#081e3b 52%,#021027 100%);
-  border-right:1px solid #22adf3b3;
-  box-shadow:inset -1px 0 #7beeff1e,4px 0 28px #007dff22;
+  background:linear-gradient(180deg,#0e171e 0%,#16232d 52%,#0d161c 100%);
+  border-right:1px solid #528ab15d;
+  box-shadow:inset -1px 0 #a2c0d510,4px 0 28px #4b81a712;
 }
 .app-shell .sidebar .brand {
   display:flex;align-items:center;justify-content:center;flex-direction:column;
   gap:10px;text-align:center;padding:4px 10px 25px;
-  border-bottom:1px solid #2285c353;
+  border-bottom:1px solid #4576992b;
 }
 .app-shell .sidebar .brand-mark {
   width:62px;height:62px;border-radius:50%;font-size:32px;
-  border:2px solid #9eeeff;
-  background:radial-gradient(circle at 36% 22%,#1663b6,#062250 72%);
-  box-shadow:0 0 0 3px #066bef33,0 0 21px #20baff7c,inset 0 0 15px #4ad5ff35;
-  text-shadow:0 0 12px #e4fbff;
+  border:2px solid #b8cedf;
+  background:radial-gradient(circle at 36% 22%,#3e6b8b,#1c2e3a 72%);
+  box-shadow:0 0 0 3px #497da21b,0 0 10px #588eb440,inset 0 0 7px #6f9dbe1c;
+  text-shadow:0 0 6px #e3ecf3;
 }
 .app-shell .sidebar .brand-copy {display:flex;flex-direction:column;gap:0;letter-spacing:-.03em;font-size:17px;line-height:1.15;}
-.app-shell .sidebar .brand-copy strong {font-weight:950;color:#fff;}
-.app-shell .sidebar .brand-copy small {color:#27d1ff;font-size:11px;letter-spacing:.12em;font-weight:900;margin-top:4px;}
+.app-shell .sidebar .brand-copy strong {font-weight:950;color:#ffffff;}
+.app-shell .sidebar .brand-copy small {color:#5c90b6;font-size:11px;letter-spacing:.12em;font-weight:900;margin-top:4px;}
 .app-shell .sidebar .workspace-label {margin-top:17px;}
 .app-shell .sidebar .workspace-label,.app-shell .sidebar .nav-label {
-  color:#7ccfff;font-size:10px;font-weight:850;letter-spacing:.17em;padding:0 12px 10px;
+  color:#a2c0d5;font-size:10px;font-weight:850;letter-spacing:.17em;padding:0 12px 10px;
 }
 .app-shell .sidebar .workspace-switcher {
   width:100%;border-radius:13px;min-height:61px;padding:9px;
-  background:linear-gradient(125deg,#0b3465,#061b38);
-  border:1px solid #277db8;box-shadow:inset 0 1px #a2ebff2e;
+  background:linear-gradient(125deg,#243b4c,#14212a);
+  border:1px solid #437395;box-shadow:inset 0 1px #bad0e018;
 }
 .app-shell .sidebar .workspace-avatar {
-  flex:0 0 37px;width:37px;height:37px;border:1px solid #62d9ff;border-radius:10px;
-  color:#fff;background:linear-gradient(145deg,#1286e6,#063b83);
-  box-shadow:0 0 12px #0a9dff4e;
+  flex:0 0 18px;width:37px;height:37px;border:1px solid #7ca6c4;border-radius:10px;
+  color:#ffffff;background:linear-gradient(145deg,#497ea3,#2d485c);
+  box-shadow:0 0 6px #4e85ad29;
 }
-.app-shell .sidebar .workspace-switcher strong {color:#fff;font-size:12px;}
-.app-shell .sidebar .workspace-switcher small {color:#92cce9;}
+.app-shell .sidebar .workspace-switcher strong {color:#ffffff;font-size:12px;}
+.app-shell .sidebar .workspace-switcher small {color:#a2c0d5;}
 .app-shell .sidebar .nav-label {margin:23px 0 1px;}
 .app-shell .sidebar nav:not(.mobile-bottom-nav) {display:grid;gap:0;}
 .app-shell .sidebar .nav-item {
   display:flex;align-items:center;gap:14px;width:100%;min-height:64px;
   padding:12px 12px;margin:0;border:1px solid transparent;
-  border-bottom-color:#2e7da149;border-radius:0;
-  background:transparent;box-shadow:none;color:#e0ecfa;
+  border-bottom-color:#3f6c8d26;border-radius:0;
+  background:transparent;box-shadow:none;color:#dee8f0;
   text-align:left;font-size:13px;font-weight:700;
   transition:background .2s,color .2s,box-shadow .2s,transform .2s;
 }
 .app-shell .sidebar .nav-item .nav-icon {
-  flex:0 0 29px;display:grid;place-items:center;width:29px;height:29px;font-size:23px;
-  color:#aedbfb;filter:drop-shadow(0 0 4px #21a3ff3b);
+  flex:0 0 14px;display:grid;place-items:center;width:29px;height:29px;font-size:23px;
+  color:#bfd4e2;filter:drop-shadow(0 0 3px #588eb41f);
 }
 .app-shell .sidebar .nav-item .nav-icon svg {width:25px;height:25px;}
 .app-shell .sidebar .nav-item:not(:disabled):hover {
-  color:#fff;background:#1165a944;border-radius:12px;border-color:#2689b958;
+  color:#ffffff;background:#3a638123;border-radius:12px;border-color:#4373952e;
 }
 .app-shell .sidebar .nav-item.active {
   min-height:67px;padding:12px;margin:5px 0 8px;
-  color:#fff;font-weight:900;font-size:13px;line-height:1.25;
-  border:1px solid #72e8ff;border-radius:15px;
-  background:linear-gradient(105deg,#006ce8 0%,#03b9ff 100%);
-  box-shadow:0 0 0 1px #008aff8c,0 0 17px #08b4ffb0,inset 0 1px 10px #c5faff61;
-  text-shadow:0 1px 6px #04519b;
+  color:#ffffff;font-weight:900;font-size:13px;line-height:1.25;
+  border:1px solid #85acc8;border-radius:15px;
+  background:linear-gradient(105deg,#45779a 0%,#4c82a9 100%);
+  box-shadow:0 0 0 3px #4b81a749,0 0 8px #4d84ac5c,inset 0 1px 10px #d0dfea32;
+  text-shadow:0 1px 6px #34546b;
 }
-.app-shell .sidebar .nav-item.active .nav-icon {color:#fff;filter:drop-shadow(0 0 5px #d2f8ff);}
+.app-shell .sidebar .nav-item.active .nav-icon {color:#ffffff;filter:drop-shadow(0 0 3px #d8e5ee);}
 .app-shell .sidebar .nav-item:disabled:not(.active) {opacity:.46;}
-.app-shell .sidebar .sidebar-footer {margin-top:auto;border-top:1px solid #2082ad53;padding:15px 8px 4px;color:#8fbbd6;}
-.app-shell .sidebar .status-dot {background:#23ecb4;box-shadow:0 0 9px #21f6bb;}
+.app-shell .sidebar .sidebar-footer {margin-top:auto;border-top:1px solid #3f6c8c2b;padding:15px 8px 4px;color:#7fa8c5;}
+.app-shell .sidebar .status-dot {background:#4fb095;box-shadow:0 0 4px #54b298;}
 
 /* Floodlit page header: keeps existing controls and app navigation. */
 .app-shell .main-content {max-width:none;padding-top:29px;}
 .app-shell .main-content .topbar {
   position:relative;min-height:100px;gap:15px;align-items:center;
-  margin:0 0 26px;padding:12px 2px 24px;border-bottom:1px solid #118bd788;
+  margin:0 0 12px;padding:12px 2px 24px;border-bottom:1px solid #45779a47;
 }
 .app-shell .main-content .topbar::after {
   content:"";position:absolute;bottom:-2px;left:27%;width:46%;height:3px;border-radius:9px;
-  background:linear-gradient(90deg,transparent,#25c7ff,transparent);
-  box-shadow:0 0 13px #12baff91;pointer-events:none;
+  background:linear-gradient(90deg,transparent,#5b8fb5,transparent);
+  box-shadow:0 0 6px #5088b04b;pointer-events:none;
 }
-.app-shell .main-content .topbar .eyebrow {color:#40d2ff;font-size:10px;letter-spacing:.2em;}
+.app-shell .main-content .topbar .eyebrow {color:#6a9abc;font-size:10px;letter-spacing:.2em;}
 .app-shell .main-content .topbar h1 {
-  color:#fff;font-size:clamp(28px,3.4vw,42px);font-weight:950;letter-spacing:-.045em;
-  line-height:1.1;text-shadow:0 0 18px #198eff5b;
+  color:#ffffff;font-size:clamp(28px,3.4vw,42px);font-weight:950;letter-spacing:-.045em;
+  line-height:1.1;text-shadow:0 0 9px #548bb22f;
 }
 .app-shell .main-content .topbar-actions {flex-wrap:wrap;justify-content:flex-end;gap:9px;}
-.app-shell .main-content .today-label {color:#b5d8f0;}
+.app-shell .main-content .today-label {color:#bdd2e1;}
 .app-shell .main-content .logout-button,.app-shell .main-content .bug-report-button {
-  border:1px solid #4fbdeb;border-radius:12px;
-  background:linear-gradient(160deg,#124776,#062a51);
-  box-shadow:0 0 12px #0589ff39,inset 0 1px #b3eaff24;color:#e4f8ff;
+  border:1px solid #6798bb;border-radius:12px;
+  background:linear-gradient(160deg,#2c485c,#1c2e3b);
+  box-shadow:0 0 6px #4c83aa1e,inset 0 1px #c5d7e513;color:#e3ecf3;
 }
 .app-shell .main-content .logout-button:hover,.app-shell .main-content .bug-report-button:hover {
-  border-color:#a1efff;box-shadow:0 0 18px #1bb7ff69;color:#fff;
+  border-color:#b9d0e0;box-shadow:0 0 9px #558cb337;color:#ffffff;
 }
 
 /* Core panels — bevelled edge, luminous accent and deep navy texture. */
@@ -133,185 +133,185 @@ body {
   .match-launch-panel,.team-reference,.account-links,.lineup-choice,.player-form,.team-form,
   .team-card,.player-card,.roster-panel,.tactical-panel,.lineup-editor,.bench-section,
   .match-controls-panel,.match-pitch-wrap,.match-side,.match-events) {
-  border:1px solid #289ee0;
+  border:1px solid #4d85ac;
   border-radius:19px;
-  background:radial-gradient(ellipse at 10% 0%,#164b7c51,transparent 61%),var(--stadium-glass);
-  box-shadow:var(--stadium-glow),0 20px 40px #0007;
-  color:#f4fbff;
+  background:radial-gradient(ellipse at 10% 0%,#2f4d632a,transparent 61%),var(--stadium-glass);
+  box-shadow:var(--stadium-glow),0 20px 40px #00000077;
+  color:#eef3f7;
 }
 .app-shell .main-content :is(.next-match-panel,.home-roster-panel,.match-controls-panel,.roster-panel) {
-  border-color:#32c5ff;
-  box-shadow:0 0 0 1px #1599f96c,0 0 24px #078dff3b,inset 0 0 20px #1594ff13,0 18px 36px #0007;
+  border-color:#6294b8;
+  box-shadow:0 0 0 3px #4f87af38,0 0 12px #4d84ab1f,inset 0 0 10px #5289b10a,0 18px 36px #00000077;
 }
 .app-shell .main-content :is(.next-match-panel,.home-roster-panel,.team-card,.player-card) {
   position:relative;
 }
 .app-shell .main-content :is(.next-match-panel,.home-roster-panel,.team-card,.player-card)::before {
   content:"";position:absolute;top:0;left:15%;right:15%;height:2px;border-radius:99px;
-  background:linear-gradient(90deg,transparent,#35c7ffb5,transparent);pointer-events:none;
+  background:linear-gradient(90deg,transparent,#6495b95e,transparent);pointer-events:none;
 }
 .app-shell .main-content :is(.next-match-heading h2,.home-roster-heading h2,.page-heading h2,.roster-heading h3,
-  .match-side h3,.match-events h3) {color:#fff;text-shadow:0 0 12px #1b9aff45;font-weight:900;}
+  .match-side h3,.match-events h3) {color:#ffffff;text-shadow:0 0 6px #558cb324;font-weight:900;}
 .app-shell .main-content :is(.page-heading,.next-match-heading,.home-roster-heading) .eyebrow {
-  color:#47d8ff;letter-spacing:.16em;
+  color:#6d9cbe;letter-spacing:.16em;
 }
-.app-shell .main-content :is(.next-match-heading p,.home-roster-heading p,.page-heading p,.form-hint) {color:#acc9e1;}
-.app-shell .main-content .opponent-field {color:#ffc0ca;}
+.app-shell .main-content :is(.next-match-heading p,.home-roster-heading p,.page-heading p,.form-hint) {color:#adc8da;}
+.app-shell .main-content .opponent-field {color:#e8cdd0;}
 .app-shell .main-content .opponent-field input {
-  min-height:52px;border:1px solid #ff627b;border-radius:13px;
-  color:#fff;background:linear-gradient(135deg,#4b122b,#1b1026);
-  box-shadow:0 0 15px #ff34583d,inset 0 1px 10px #ff4e6616;font-size:14px;
+  min-height:52px;border:1px solid #c37d85;border-radius:13px;
+  color:#ffffff;background:linear-gradient(135deg,#3f1e22,#121d24);
+  box-shadow:0 0 7px #b8646e20,inset 0 1px 10px #be727b0b;font-size:14px;
 }
-.app-shell .main-content .opponent-field input:focus {border-color:#ffa5b5;box-shadow:0 0 0 3px #ff41602e,0 0 18px #ff3a6073;}
+.app-shell .main-content .opponent-field input:focus {border-color:#e0bcc1;box-shadow:0 0 0 3px #bb6b7518,0 0 9px #b967713c;}
 .app-shell .main-content .home-pitch-stage {
-  border:1px solid #187bb5;background:radial-gradient(ellipse at 50% 28%,#14456b,#051429 80%);
-  box-shadow:inset 0 0 30px #0ab7ff16,0 0 18px #009cff1c;
+  border:1px solid #3f6c8c;background:radial-gradient(ellipse at 50% 28%,#294356,#0f181f 80%);
+  box-shadow:inset 0 0 14px #4e85ad0b,0 0 9px #4b81a70f;
 }
 .app-shell .main-content .team-emblem,.app-shell .main-content .player-number {
-  border:1px solid #5acfff;color:#fff;
-  background:linear-gradient(150deg,#126dc1,#06346f);
-  box-shadow:0 0 15px #059dff55,inset 0 0 10px #7eddff22;
+  border:1px solid #78a3c2;color:#ffffff;
+  background:linear-gradient(150deg,#406e8f,#263e4f);
+  box-shadow:0 0 7px #4c83aa2c,inset 0 0 5px #a3c1d612;
 }
 .app-shell .main-content .season-chip,
 .app-shell .main-content .player-meta span,
 .app-shell .main-content .player-statistics span,
 .app-shell .main-content .roster-count {
-  border:1px solid #256b9c;background:#103459;color:#c7eaff;
+  border:1px solid #3c6685;background:#223847;color:#d1e0ea;
 }
-.app-shell .main-content .player-statistics strong {color:#56dcff;font-size:1.15em;}
-.app-shell .main-content :is(.team-card,.player-card):hover {border-color:#85e9ff;box-shadow:0 0 0 1px #23b9ff77,0 0 28px #0db0ff48,0 16px 35px #0008;}
+.app-shell .main-content .player-statistics strong {color:#76a2c1;font-size:1.15em;}
+.app-shell .main-content :is(.team-card,.player-card):hover {border-color:#a8c4d8;box-shadow:0 0 0 3px #5a8fb53e,0 0 13px #4e86ae25,0 16px 35px #00000088;}
 
 /* Controls: screenshot-inspired glassy cyan, green field buttons and red danger. */
 .app-shell .main-content :is(.primary-button,.roster-primary-button,.launch-button,.primary-action,
   .start-match,.home-start-match-button,.home-edit-roster-button,.update-button) {
-  border:1px solid #9af4ff;border-radius:12px;
-  color:#fff;background:linear-gradient(180deg,#24c8ff 0%,#0772eb 85%,#0951b2 100%);
-  box-shadow:inset 0 1px 9px #e3fcff73,0 0 0 1px #0c94ff89,0 0 18px #087ffa84;
-  text-shadow:0 1px 6px #00387c;font-weight:900;
+  border:1px solid #b5cdde;border-radius:12px;
+  color:#ffffff;background:linear-gradient(180deg,#5a8fb5 0%,#487ba0 85%,#3a6482 100%);
+  box-shadow:inset 0 1px 9px #e3ecf23c,0 0 0 3px #4e86ae47,0 0 9px #4c82a945;
+  text-shadow:0 1px 6px #284254;font-weight:900;
 }
 .app-shell .main-content :is(.primary-button,.roster-primary-button,.launch-button,.primary-action,
   .start-match,.home-edit-roster-button,.update-button):hover:not(:disabled) {
-  filter:brightness(1.12);box-shadow:inset 0 1px 12px #eaffff8a,0 0 25px #06b9ff9c;
+  filter:brightness(1.12);box-shadow:inset 0 1px 12px #e7eff448,0 0 12px #4d83aa51;
 }
 .app-shell .main-content :is(.secondary-button,.customize-action,.outline-action,.edit-roster-button,
   .pause-match,.finish-confirm-cancel) {
-  border:1px solid #379ed4;border-radius:11px;
-  background:linear-gradient(170deg,#104675,#06284b);color:#e0f7ff;
-  box-shadow:inset 0 1px #9eeaff2b,0 0 12px #0989ff29;
+  border:1px solid #4e86ae;border-radius:11px;
+  background:linear-gradient(170deg,#2b465a,#1a2b37);color:#e1ebf2;
+  box-shadow:inset 0 1px #b8cedf16,0 0 6px #4d85ac15;
 }
-.app-shell .main-content :is(.text-button,.selected-mark,.lineup-number) {color:#47d7ff;}
+.app-shell .main-content :is(.text-button,.selected-mark,.lineup-number) {color:#6d9cbe;}
 .app-shell .main-content :is(.finish-match,.finish-confirm-yes,.confirm-yes) {
-  border:1px solid #ff9aaa;color:#fff;
-  background:linear-gradient(160deg,#ff526a,#a61335);
-  box-shadow:0 0 18px #ff315c63,inset 0 1px 8px #ffd0dc41;
+  border:1px solid #ddb6ba;color:#ffffff;
+  background:linear-gradient(160deg,#bf757d,#803b43);
+  box-shadow:0 0 9px #b7626c33,inset 0 1px 8px #edd7da22;
 }
 .app-shell .main-content :is(.team-icon-option,.layout-slot-switch,.icon-action) {
-  border-color:#2c82b8;color:#c9eaff;background:linear-gradient(145deg,#123f69,#071e3c);
+  border-color:#447598;color:#d3e1eb;background:linear-gradient(145deg,#284153,#16232d);
 }
 .app-shell .main-content :is(.team-icon-option,.layout-slot-switch,.icon-action):hover {
-  border-color:#50d4ff;box-shadow:0 0 11px #0caaff51;
+  border-color:#72a0c0;box-shadow:0 0 5px #4e86ae2a;
 }
 .app-shell .main-content :is(.team-icon-option.is-selected,.layout-slot-switch.active) {
-  border-color:#70e8ff;box-shadow:0 0 15px #07b8ff6f;background:#0b629f;color:#fff;
+  border-color:#84acc8;box-shadow:0 0 7px #4d84ab3a;background:#395c76;color:#ffffff;
 }
-.app-shell .main-content :is(.role-options label,.archive-toggle,.team-icon-caption) {color:#b9d6ee;}
-.app-shell .main-content :is(.player-form,.team-form) :is(label,legend) {color:#c4e2f7;}
+.app-shell .main-content :is(.role-options label,.archive-toggle,.team-icon-caption) {color:#bed3e2;}
+.app-shell .main-content :is(.player-form,.team-form) :is(label,legend) {color:#cadbe7;}
 .app-shell .main-content :is(.player-form,.team-form) :is(input:not([type="checkbox"]),select,textarea) {
-  border:1px solid #2b7da9;border-radius:10px;background:#051b38;color:#f5faff;min-height:42px;
-  box-shadow:inset 0 1px 6px #0005;
+  border:1px solid #406f8f;border-radius:10px;background:#142029;color:#eef4f7;min-height:42px;
+  box-shadow:inset 0 1px 6px #00000055;
 }
 .app-shell .main-content :is(.player-form,.team-form) :is(input,select,textarea):focus {
-  border-color:#5de1ff;outline:2px solid #46d4ff5c;outline-offset:1px;
-  box-shadow:0 0 15px #0999ff48;
+  border-color:#7aa4c3;outline:2px solid #6d9cbd30;outline-offset:1px;
+  box-shadow:0 0 7px #4d85ac25;
 }
 .app-shell .main-content :is(.player-form,.team-form) :is(select,option) {color-scheme:dark;}
 .app-shell .main-content :is(.list-toolbar,.form-heading,.roster-heading,.editor-heading) {
-  border-color:#1e77b17c;color:#eaf7ff;
+  border-color:#3f6c8d40;color:#e7eff4;
 }
 
 /* ALL popover menus and custom dropdowns: opaque, floating, blue neon. */
 .app-shell .main-content :is(.sort-picker,.team-picker,.formation-picker,.captaincy-picker) {isolation:isolate;}
 .app-shell .main-content :is(.sort-picker-trigger,.formation-picker-trigger,.team-picker-trigger,
   .captaincy-dropdown,.captaincy-picker-trigger) {
-  color:#e5f8ff;border:1px solid #57cfff;border-radius:11px;
-  background:linear-gradient(165deg,#0d538c,#062448);
-  box-shadow:0 0 12px #069bff54,inset 0 1px 8px #9ceaff26;
+  color:#e4edf3;border:1px solid #76a2c2;border-radius:11px;
+  background:linear-gradient(165deg,#325167,#192935);
+  box-shadow:0 0 6px #4d83aa2c,inset 0 1px 8px #b6cede14;
 }
 .app-shell .main-content :is(.sort-picker-trigger,.formation-picker-trigger,.team-picker-trigger,
   .captaincy-dropdown,.captaincy-picker-trigger):hover {
-  border-color:#b2f8ff;box-shadow:0 0 18px #0db8ff8a;
+  border-color:#c4d7e5;box-shadow:0 0 9px #4e86ae48;
 }
 .app-shell .main-content :is(.sort-picker-menu,.formation-picker-menu,.team-picker-menu,
   .team-picker-options,.captaincy-dropdown-menu,.captaincy-menu,.player-picker-dialog) {
-  background:linear-gradient(165deg,#0c315c,#03142d);
-  color:#f3fbff;border:1px solid #56c8ff;border-radius:13px;
-  box-shadow:0 0 18px #0596ff65,0 22px 45px #000b;
+  background:linear-gradient(165deg,#223746,#101920);
+  color:#edf3f7;border:1px solid #76a2c1;border-radius:13px;
+  box-shadow:0 0 9px #4c83aa35,0 22px 45px #000000bb;
 }
 .app-shell .main-content :is(.sort-picker-option,.formation-picker-option,.team-picker-option,
   .captaincy-option,.picker-player-option) {
-  color:#e1f3ff;border-color:#236ca5;background:transparent;
+  color:#e2ebf2;border-color:#3d6989;background:transparent;
 }
 .app-shell .main-content :is(.sort-picker-option,.formation-picker-option,.team-picker-option,
   .captaincy-option,.picker-player-option):hover {
-  background:#12629b;color:#fff;
+  background:#395d77;color:#ffffff;
 }
 .app-shell .main-content :is(.sort-picker-option.is-selected,.formation-picker-option.is-selected,
   .team-picker-option.is-selected,.captaincy-option.is-selected,.picker-selected) {
-  color:#fff;background:linear-gradient(100deg,#1167aa,#0882bb);
+  color:#ffffff;background:linear-gradient(100deg,#3a6482,#3c6786);
 }
-.app-shell .main-content :is(.sort-picker-check,.formation-picker-check) {color:#6bf1ff;}
+.app-shell .main-content :is(.sort-picker-check,.formation-picker-check) {color:#81aac7;}
 .app-shell .main-content :is(.bench-choice,.roster-player,.bench-player,.lineup-slot,
   .on-field-list,.match-event,.match-report-event) {
-  border-color:#266c9d;background:linear-gradient(135deg,#0c3051,#061a33);color:#eefaff;
+  border-color:#3c6786;background:linear-gradient(135deg,#1e313f,#131e26);color:#eaf1f5;
 }
 .app-shell .main-content :is(.bench-choice,.picker-player-option):hover {
-  border-color:#59d7ff;background:#115384;box-shadow:0 0 12px #029bff30;
+  border-color:#77a3c2;background:#304f65;box-shadow:0 0 6px #4c82a819;
 }
 
 /* Match: distinct blue home / red away, with scoreboard like broadcast graphics. */
 .app-shell .main-content .live-match .match-topbar {
-  border:1px solid #37bbf0;border-radius:18px;
-  background:linear-gradient(110deg,#092e60,#06182e 48%,#471224);
-  box-shadow:0 0 20px #048bff50,0 12px 36px #0008;
+  border:1px solid #5c91b6;border-radius:18px;
+  background:linear-gradient(110deg,#223847,#111c23 48%,#3c1d21);
+  box-shadow:0 0 10px #4c82a92a,0 12px 36px #00000088;
 }
-.app-shell .main-content .live-match .match-home-team {color:#d3f4ff;text-shadow:0 0 12px #16b8ffb0;}
-.app-shell .main-content .live-match .match-away-team {color:#ffb5bf;text-shadow:0 0 12px #ff355eb0;}
+.app-shell .main-content .live-match .match-home-team {color:#d9e5ee;text-shadow:0 0 6px #528ab15c;}
+.app-shell .main-content .live-match .match-away-team {color:#e5c6ca;text-shadow:0 0 6px #b8656e5c;}
 .app-shell .main-content .live-match :is(.match-scoreboard,.match-score,.scoreboard-clock) {
-  color:#fff;text-shadow:0 0 14px #0cbfff7f;
+  color:#ffffff;text-shadow:0 0 7px #4e86ae42;
 }
 .app-shell .main-content .live-match .match-controls-panel {
-  background:linear-gradient(155deg,#09284e,#03142b);
-  border:1px solid #38bfff;box-shadow:0 0 20px #06a9ff4a;
+  background:linear-gradient(155deg,#1c2e3b,#0f181f);
+  border:1px solid #6597ba;box-shadow:0 0 10px #4d83aa26;
 }
 .app-shell .main-content .live-match .match-pitch-wrap {
-  background:radial-gradient(ellipse at 50% 15%,#144d7c88,transparent 65%),#06162d;
-  border:1px solid #209be0;
+  background:radial-gradient(ellipse at 50% 15%,#2f4c6147,transparent 65%),#111b22;
+  border:1px solid #4b81a8;
 }
 .app-shell .main-content .live-match :is(.match-side,.match-events) {
-  border:1px solid #2f8fcc;background:linear-gradient(155deg,#09284d,#041227);
+  border:1px solid #4a7fa5;background:linear-gradient(155deg,#1c2e3a,#0e171d);
 }
 .app-shell .main-content .live-match .voice-hold-button {
-  color:#fff;border-color:#79dfff;background:linear-gradient(160deg,#148ee7,#064a9b);
-  box-shadow:0 0 17px #03aaff5b,inset 0 1px 9px #e0faff45;
+  color:#ffffff;border-color:#a0bfd4;background:linear-gradient(160deg,#4a7fa5,#34556d);
+  box-shadow:0 0 8px #4c82a92f,inset 0 1px 9px #e1ebf224;
 }
 .app-shell .main-content .live-match .voice-hold-button.is-listening {
-  border-color:#ff8fa3;background:linear-gradient(165deg,#f34260,#7c1230);
-  box-shadow:0 0 19px #ff426b7c;
+  border-color:#daafb4;background:linear-gradient(165deg,#b8656f,#602e34);
+  box-shadow:0 0 9px #bb6c7540;
 }
 .app-shell .main-content .live-match .voice-command-guide {
-  border:1px solid #238ed0;background:linear-gradient(150deg,#0b345e,#06172e);color:#eefaff;
-  box-shadow:0 0 16px #008eff2a;
+  border:1px solid #487ca1;background:linear-gradient(150deg,#223847,#111c23);color:#eaf1f5;
+  box-shadow:0 0 8px #4b81a716;
 }
 .app-shell .main-content .live-match .voice-guide-toggle {
-  border:1px solid #59d9ff;color:#e3faff;background:linear-gradient(150deg,#096ca9,#06376b);
+  border:1px solid #77a3c2;color:#e3ecf2;background:linear-gradient(150deg,#38607d,#253c4c);
 }
-.app-shell .main-content .live-match .voice-guide-heading strong {color:#5edbff;}
+.app-shell .main-content .live-match .voice-guide-heading strong {color:#7aa5c3;}
 
 /* Notifications, support dashboard, login and dialogs belong to the same design. */
 body .auth-page,body .setup-required,body .loading-state {
   background:
-    radial-gradient(ellipse at 50% -10%,#116bb46f,transparent 61%),
-    linear-gradient(150deg,#030b1d,#07274b 62%,#030915);
+    radial-gradient(ellipse at 50% -10%,#3d68873a,transparent 61%),
+    linear-gradient(150deg,#0a1116,#1b2b37 62%,#080d10);
 }
 body .auth-page .auth-card,body .setup-required .setup-card,
 body .bug-report-backdrop .bug-report-dialog,body .release-changelog-backdrop .release-changelog,
@@ -319,61 +319,61 @@ body .support-shell .support-panel,body .support-shell .support-stat,
 body .support-detail-backdrop .support-detail,
 body .match-report-backdrop .match-report-panel,body .match-edit-backdrop .match-edit-panel,
 body .player-picker-overlay .player-picker-dialog {
-  border:1px solid #3bb8f7;border-radius:18px;
-  background:radial-gradient(ellipse at 0 0,#13568b55,transparent 60%),linear-gradient(155deg,#0b305b,#04152d);
-  box-shadow:0 0 0 1px #157df84b,0 0 23px #057fff37,0 24px 65px #000a;
-  color:#f2fbff;
+  border:1px solid #6295b9;border-radius:18px;
+  background:radial-gradient(ellipse at 0 0,#33546b2c,transparent 60%),linear-gradient(155deg,#213645,#101a21);
+  box-shadow:0 0 0 3px #4f87af27,0 0 11px #4c83aa1d,0 24px 65px #000000aa;
+  color:#ecf2f7;
 }
 body .auth-page .brand-mark,body .support-shell .support-brand-mark {
-  border:1px solid #6ce3ff;color:#fff;background:linear-gradient(150deg,#1275c3,#073a85);
-  box-shadow:0 0 17px #08adff6b;
+  border:1px solid #82aac7;color:#ffffff;background:linear-gradient(150deg,#416f90,#2e4a5f);
+  box-shadow:0 0 8px #4d84ac38;
 }
 body .auth-page :is(.primary-button,.google-button),
 body .support-shell :is(.support-retry,.support-filters button.active,.support-logout),
 body .release-changelog :is(.release-changelog-footer button),
 body .match-report-panel :is(.share-match-report,.exit-match-report),
 body .bug-report-dialog .bug-report-actions button {
-  border:1px solid #7deaff;color:#fff;border-radius:11px;
-  background:linear-gradient(175deg,#15b1f7,#0863d6);
-  box-shadow:0 0 16px #069bff69,inset 0 1px 10px #d4faff4b;font-weight:850;
+  border:1px solid #a3c0d6;color:#ffffff;border-radius:11px;
+  background:linear-gradient(175deg,#4e86ae,#437395);
+  box-shadow:0 0 8px #4d83aa37,inset 0 1px 10px #d9e6ee27;font-weight:850;
 }
 body .support-shell {
-  background:linear-gradient(145deg,#04112b,#071e3c);color:#f0faff;
+  background:linear-gradient(145deg,#0f1920,#16232d);color:#ebf1f6;
 }
 body .support-shell .support-topbar {
-  border-bottom:1px solid #209cdd;background:linear-gradient(105deg,#04132c,#07264a);
+  border-bottom:1px solid #4b80a6;background:linear-gradient(105deg,#101920,#1a2b37);
 }
 body .support-shell .support-ticket-row {
-  border-color:#276c9d;background:#0a2444;color:#f0faff;
+  border-color:#3c6887;background:#192935;color:#ebf1f6;
 }
-body .support-shell .support-ticket-row:hover {background:#0e3a68;}
+body .support-shell .support-ticket-row:hover {background:#263e50;}
 body .support-shell .support-filters button:not(.active),
 body .support-shell .support-status-actions button {
-  border:1px solid #317caa;background:#082344;color:#cfeaff;
+  border:1px solid #427193;background:#192833;color:#d6e3ed;
 }
 body .support-shell .support-status-actions button.active {
-  border-color:#73dfff;background:#0d679f;color:#fff;
+  border-color:#86adc9;background:#395d77;color:#ffffff;
 }
 body .bug-report-backdrop,body .release-changelog-backdrop,
-body .support-detail-backdrop {background:#020917e8;backdrop-filter:blur(8px);}
+body .support-detail-backdrop {background:#080d1179;backdrop-filter:blur(8px);}
 body .voice-assistant .voice-trigger {
-  border:1px solid #50cbff;color:#e3faff;
-  background:linear-gradient(155deg,#1169af,#063f7a);
-  box-shadow:0 0 13px #089dff48;
+  border:1px solid #72a0c0;color:#e3ecf2;
+  background:linear-gradient(155deg,#3b6684,#2a4456);
+  box-shadow:0 0 6px #4d84ac25;
 }
 body .voice-assistant .voice-trigger.is-listening {
-  border-color:#ff869a;background:linear-gradient(145deg,#ae2544,#62172c);box-shadow:0 0 17px #ff36685b;
+  border-color:#d7a9af;background:linear-gradient(145deg,#8e414a,#52272c);box-shadow:0 0 8px #b8656f2f;
 }
 body .voice-assistant .voice-panel,
 body .voice-feedback,body .match-confirm,body .match-finish-confirm {
-  border:1px solid #3ebcf3;background:linear-gradient(155deg,#0b315d,#031329);
-  box-shadow:0 0 23px #068fff57,0 20px 50px #000b;color:#fff;
+  border:1px solid #6294b8;background:linear-gradient(155deg,#223746,#0e171e);
+  box-shadow:0 0 11px #4d83aa2d,0 20px 50px #000000bb;color:#ffffff;
 }
-body .voice-feedback strong,body .voice-panel-heading strong {color:#65dfff;}
+body .voice-feedback strong,body .voice-panel-heading strong {color:#7ea7c5;}
 body :is(input,textarea,select):not([type="checkbox"]):not([type="radio"]):focus-visible {
-  outline:2px solid #42d6ff;outline-offset:2px;box-shadow:0 0 0 3px #08bcff29;
+  outline:2px solid #6b9abc;outline-offset:2px;box-shadow:0 0 0 3px #4d84ac15;
 }
-body :is(button,a,[role="button"]):focus-visible {outline:2px solid #a3f2ff;outline-offset:3px;}
+body :is(button,a,[role="button"]):focus-visible {outline:2px solid #bbd1e0;outline-offset:3px;}
 
 /* Mobile: a neon tab bar rather than a miniature desktop sidebar. */
 @media(max-width:900px) {
@@ -384,23 +384,23 @@ body :is(button,a,[role="button"]):focus-visible {outline:2px solid #a3f2ff;outl
   .app-shell .main-content .topbar {min-height:81px;align-items:flex-start;padding-bottom:17px;}
   .app-shell .main-content .topbar::after {left:21%;width:58%;}
   .app-shell .mobile-bottom-nav {
-    background:linear-gradient(180deg,#071d3af7,#020b22fc);
-    border-top:1px solid #30baff;
-    box-shadow:0 -5px 23px #078aff46;
+    background:linear-gradient(180deg,#15222c80,#0c131883);
+    border-top:1px solid #6194b8;
+    box-shadow:0 -5px 23px #4d84ab24;
     backdrop-filter:blur(14px);
   }
   .app-shell .mobile-bottom-nav .mobile-nav-item {
-    color:#a9c9e2;border:1px solid transparent;border-radius:12px;
+    color:#acc7da;border:1px solid transparent;border-radius:12px;
     background:transparent;font-weight:750;transition:color .15s,background .15s;
   }
   .app-shell .mobile-bottom-nav .mobile-nav-item.active {
-    color:#fff;background:linear-gradient(180deg,#0b92ea,#0754ae);
-    border:1px solid #62d6ff;
-    box-shadow:0 0 13px #068fff82,inset 0 1px 6px #caf5ff5b;
+    color:#ffffff;background:linear-gradient(180deg,#497da2,#39617e);
+    border:1px solid #7ca6c4;
+    box-shadow:0 0 6px #4d83aa44,inset 0 1px 6px #d3e1eb2f;
   }
   .app-shell .mobile-bottom-nav .mobile-nav-icon {color:inherit;}
   .app-shell .main-content :is(.next-match-panel,.home-roster-panel,.team-card,.player-card,.player-form,.team-form) {
-    border-radius:15px;box-shadow:0 0 0 1px #159aff46,0 8px 23px #0008;
+    border-radius:15px;box-shadow:0 0 0 3px #5289b124,0 8px 23px #00000088;
   }
 }
 @media(max-width:420px) {
@@ -410,4 +410,88 @@ body :is(button,a,[role="button"]):focus-visible {outline:2px solid #a3f2ff;outl
 }
 @media(prefers-reduced-motion:reduce) {
   .app-shell .sidebar .nav-item,.app-shell .mobile-bottom-nav .mobile-nav-item {transition:none;}
+}
+
+/* Calmer finish: smaller highlights, matte surfaces and legible contrast. */
+
+:root {
+  --accent:#8db1c5;
+  --stadium-cyan:#8eb6c9;
+  --stadium-blue:#416b86;
+  --stadium-red:#b87482;
+  --stadium-glow:0 0 0 1px #6c93ad3d,0 9px 24px #0005,inset 0 1px 0 #d5e8f60d;
+}
+body {background-image:linear-gradient(145deg,#07111d 0%,#0b1c2c 56%,#09111d 100%);}
+.app-shell::before {opacity:.38;}
+.app-shell .sidebar .brand-mark {box-shadow:0 0 0 1px #709db15c,inset 0 1px 8px #b0d4df17;text-shadow:none;}
+.app-shell .sidebar .nav-item.active {
+  border-color:#7195ac;background:linear-gradient(110deg,#335c78,#3c7189);
+  box-shadow:inset 0 1px 0 #cde4f127,0 4px 11px #0004;text-shadow:none;
+}
+.app-shell .sidebar .nav-item.active .nav-icon {filter:none;}
+.app-shell .main-content .topbar h1,
+.app-shell .main-content :is(.next-match-heading h2,.home-roster-heading h2,.page-heading h2) {text-shadow:none;}
+.app-shell .main-content .topbar::after {height:2px;background:linear-gradient(90deg,transparent,#5989a3,transparent);box-shadow:none;}
+.app-shell .main-content :is(.next-match-panel,.home-roster-panel,.match-controls-panel,.roster-panel) {
+  border-color:#56809a;box-shadow:0 0 0 1px #6c95a52b,0 12px 28px #0005,inset 0 1px 0 #bfdbed0e;
+}
+.app-shell .main-content :is(.next-match-panel,.home-roster-panel,.team-card,.player-card)::before {opacity:.38;height:1px;}
+.app-shell .main-content :is(.primary-button,.roster-primary-button,.launch-button,.primary-action,
+.start-match,.home-start-match-button,.home-edit-roster-button,.update-button) {
+  border-color:#83a7bb;background:linear-gradient(180deg,#4c819a,#345c79);
+  box-shadow:inset 0 1px 0 #d8eafb33,0 5px 14px #0004;text-shadow:none;
+}
+.app-shell .main-content :is(.primary-button,.roster-primary-button,.launch-button,.primary-action,
+.start-match,.home-edit-roster-button,.update-button):hover:not(:disabled) {
+  filter:brightness(1.09);box-shadow:inset 0 1px 0 #d8eafb44,0 6px 17px #0005;
+}
+.app-shell .main-content .opponent-field {color:#c6a5b0;}
+.app-shell .main-content .opponent-field input {
+  border-color:#8e626f;background:linear-gradient(135deg,#382832,#1a1e2c);
+  box-shadow:inset 0 1px 8px #0004;color:#f5edf1;
+}
+.app-shell .main-content .opponent-field input:focus {border-color:#bd8394;box-shadow:0 0 0 2px #bc78863a;}
+.app-shell .main-content :is(.finish-match,.finish-confirm-yes,.confirm-yes) {
+  border-color:#b97d8b;background:linear-gradient(150deg,#a96575,#824252);
+  box-shadow:inset 0 1px 0 #ffd6de24,0 5px 14px #0005;
+}
+.app-shell .main-content .live-match .match-topbar {border-color:#5c88a0;box-shadow:0 9px 25px #0007;}
+.app-shell .main-content .live-match .match-home-team {color:#bfd8e5;text-shadow:none;}
+.app-shell .main-content .live-match .match-away-team {color:#deb3be;text-shadow:none;}
+.app-shell .main-content .live-match .match-controls-panel {border-color:#517b94;box-shadow:0 10px 28px #0005;}
+.app-shell .main-content .live-match .voice-hold-button {
+  border-color:#82adc0;background:linear-gradient(160deg,#457b98,#2f5874);
+  box-shadow:0 6px 16px #0005,inset 0 1px 0 #f0fbff26;
+}
+.app-shell .main-content .live-match .voice-hold-button.is-listening {
+  border-color:#c28c99;background:linear-gradient(160deg,#a46878,#714553);
+  box-shadow:0 6px 16px #0005;
+}
+.app-shell .main-content :is(.sort-picker-trigger,.formation-picker-trigger,.team-picker-trigger,
+.captaincy-dropdown,.captaincy-picker-trigger) {
+  border-color:#648ba2;background:linear-gradient(160deg,#284b63,#142e43);
+  box-shadow:inset 0 1px 0 #dcebf121,0 5px 12px #0004;
+}
+.app-shell .main-content :is(.sort-picker-menu,.formation-picker-menu,.team-picker-menu,
+.team-picker-options,.captaincy-dropdown-menu,.captaincy-menu,.player-picker-dialog) {
+  border-color:#557c96;box-shadow:0 12px 28px #0009;background:linear-gradient(150deg,#172f46,#0d1c30);
+}
+body .voice-assistant .voice-trigger {
+  border-color:#648fa7;background:linear-gradient(155deg,#365f79,#234660);
+  box-shadow:0 5px 13px #0004;
+}
+body .auth-page :is(.primary-button,.google-button),
+body .support-shell :is(.support-retry,.support-filters button.active,.support-logout),
+body .release-changelog .release-changelog-footer button,
+body .match-report-panel :is(.share-match-report,.exit-match-report),
+body .bug-report-dialog .bug-report-actions button {
+  border-color:#84acbd;background:linear-gradient(170deg,#4b8198,#315a77);
+  box-shadow:0 5px 14px #0005,inset 0 1px 0 #d0e6ef27;
+}
+@media(max-width:700px) {
+  .app-shell .mobile-bottom-nav {border-top-color:#507c97;box-shadow:0 -4px 14px #0004;}
+  .app-shell .mobile-bottom-nav .mobile-nav-item.active {
+    background:linear-gradient(180deg,#456f8b,#315571);border-color:#83acbf;
+    box-shadow:inset 0 1px 0 #ffffff29,0 3px 9px #0005;
+  }
 }
