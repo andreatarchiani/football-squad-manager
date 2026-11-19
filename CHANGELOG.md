@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-19 — Interfaccia Stadium Neon
+
+- **Modifica:** rinnovata l'interfaccia di Football Squad Manager ispirandosi al dashboard calcistico di riferimento: navigazione laterale e mobile, icone, intestazioni, pulsanti, menu a tendina, schede Squadre/Giocatori, Home, schermata partita, accesso e Centro Assistenza condividono ora pannelli blu notte, bordi luminosi azzurri e accenti rossi per gli avversari e le azioni critiche. Conservate le funzionalità e la disposizione della formazione.
+
 ## 2026-11-17 — Centro Assistenza integrato
 
 - **Nuova funzionalità:** le segnalazioni bug testuali vengono inviate direttamente dall'app a Firestore sul piano Spark, senza email, file `.eml` o backend esterno.
