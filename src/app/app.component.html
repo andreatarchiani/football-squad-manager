@@ -86,7 +86,7 @@
       <nav>
         @for (item of navigation; track item; let index = $index) {
           <button class="nav-item" [class.active]="(index === 0 && activePage() === 'overview') || (index === 1 && activePage() === 'teams') || (index === 2 && activePage() === 'players')" [disabled]="index > 2" [attr.aria-current]="(index === 0 && activePage() === 'overview') || (index === 1 && activePage() === 'teams') || (index === 2 && activePage() === 'players') ? 'page' : null" (click)="navigate(index)" type="button">
-            <span class="nav-icon" aria-hidden="true">@if (index === 0) { <svg viewBox="0 0 24 24" focusable="false"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"/></svg> } @else { {{ ['▦', '⚑', '♟', '◇', '◷'][index] }} }</span><span>{{ item }}</span>
+            <span class="nav-icon" aria-hidden="true">@if (index === 0) { <svg viewBox="0 0 24 24" focusable="false"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"/></svg> } @else if (index === 1) { <svg viewBox="0 0 24 24" focusable="false"><path d="M3 5h18v14H3zM3 12h18M9 5v14M15 5v14"/><circle cx="12" cy="12" r="2"/></svg> } @else if (index === 2) { <svg viewBox="0 0 24 24" focusable="false"><circle cx="9" cy="7" r="3"/><path d="M3 20v-2c0-3 2.5-5 6-5s6 2 6 5v2M16 5c3 0 4.5 5 1 6m1 2c2.5 1 3.5 3 3.5 5v2"/></svg> } @else { {{ ['▦', '⚑', '♟', '◇', '◷'][index] }} }</span><span>{{ item }}</span>
           </button>
         }
       </nav>
@@ -142,10 +142,10 @@
         <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" /></svg></span><span>Home</span>
       </button>
       <button type="button" class="mobile-nav-item" [class.active]="activePage() === 'teams'" [attr.aria-current]="activePage() === 'teams' ? 'page' : null" (click)="navigate(1)">
-        <span class="mobile-nav-icon">⚑</span><span>Squadre</span>
+        <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3zM3 12h18M9 5v14M15 5v14"/><circle cx="12" cy="12" r="2"/></svg></span><span>Squadre</span>
       </button>
       <button type="button" class="mobile-nav-item" [class.active]="activePage() === 'players'" [attr.aria-current]="activePage() === 'players' ? 'page' : null" (click)="navigate(2)">
-        <span class="mobile-nav-icon">♟</span><span>Giocatori</span>
+        <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><path d="M3 20v-2c0-3 2.5-5 6-5s6 2 6 5v2M16 5c3 0 4.5 5 1 6m1 2c2.5 1 3.5 3 3.5 5v2"/></svg></span><span>Giocatori</span>
       </button>
     </nav>
   </div>

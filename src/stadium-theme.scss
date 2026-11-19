@@ -1,0 +1,413 @@
+/* STADIUM NEON — UI system inspired by the user's reference dashboard.
+   Presentation only: no match logic, saved squad data or tactical player placement changed. */
+:root {
+  --page-bg: #030c20;
+  --surface: #071c38;
+  --border: #2376b5;
+  --text-primary: #f8fbff;
+  --text-muted: #a8c5de;
+  --accent: #2bcfff;
+  --stadium-cyan: #31d8ff;
+  --stadium-blue: #087ff7;
+  --stadium-red: #ff506b;
+  --stadium-glass: linear-gradient(146deg,rgba(10,37,72,.97),rgba(3,14,34,.98));
+  --stadium-glow: 0 0 0 1px #4acaff52, 0 0 20px #078cff28, inset 0 1px 20px #00aaff13;
+}
+html,body { background-color:#030a1b; }
+body {
+  background-image:
+    radial-gradient(ellipse 48% 26% at 49% 1%,#1464b755,transparent 79%),
+    radial-gradient(ellipse 28% 50% at 100% 33%,#10498136,transparent 85%),
+    linear-gradient(158deg,#03091b 0%,#041732 60%,#020817 100%);
+  background-attachment:fixed;
+}
+.app-shell {isolation:isolate;}
+.app-shell::before {
+  content:"";z-index:-1;position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 23% 8% at 22% 0%,#c9f7ff45 0%,transparent 86%),
+    radial-gradient(ellipse 23% 8% at 89% 0%,#d4f8ff4b 0%,transparent 86%),
+    repeating-linear-gradient(106deg,transparent 0 127px,#2eb1f904 129px 131px,transparent 133px 235px),
+    radial-gradient(ellipse 100% 20% at 60% 106%,#0f653b2b,transparent 75%);
+}
+
+/* Sidebar: illuminated identity, separators and large neon selected state. */
+.app-shell .sidebar {
+  width:248px;
+  padding:25px 13px 18px;
+  background:linear-gradient(180deg,#041128 0%,#081e3b 52%,#021027 100%);
+  border-right:1px solid #22adf3b3;
+  box-shadow:inset -1px 0 #7beeff1e,4px 0 28px #007dff22;
+}
+.app-shell .sidebar .brand {
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  gap:10px;text-align:center;padding:4px 10px 25px;
+  border-bottom:1px solid #2285c353;
+}
+.app-shell .sidebar .brand-mark {
+  width:62px;height:62px;border-radius:50%;font-size:32px;
+  border:2px solid #9eeeff;
+  background:radial-gradient(circle at 36% 22%,#1663b6,#062250 72%);
+  box-shadow:0 0 0 3px #066bef33,0 0 21px #20baff7c,inset 0 0 15px #4ad5ff35;
+  text-shadow:0 0 12px #e4fbff;
+}
+.app-shell .sidebar .brand-copy {display:flex;flex-direction:column;gap:0;letter-spacing:-.03em;font-size:17px;line-height:1.15;}
+.app-shell .sidebar .brand-copy strong {font-weight:950;color:#fff;}
+.app-shell .sidebar .brand-copy small {color:#27d1ff;font-size:11px;letter-spacing:.12em;font-weight:900;margin-top:4px;}
+.app-shell .sidebar .workspace-label {margin-top:17px;}
+.app-shell .sidebar .workspace-label,.app-shell .sidebar .nav-label {
+  color:#7ccfff;font-size:10px;font-weight:850;letter-spacing:.17em;padding:0 12px 10px;
+}
+.app-shell .sidebar .workspace-switcher {
+  width:100%;border-radius:13px;min-height:61px;padding:9px;
+  background:linear-gradient(125deg,#0b3465,#061b38);
+  border:1px solid #277db8;box-shadow:inset 0 1px #a2ebff2e;
+}
+.app-shell .sidebar .workspace-avatar {
+  flex:0 0 37px;width:37px;height:37px;border:1px solid #62d9ff;border-radius:10px;
+  color:#fff;background:linear-gradient(145deg,#1286e6,#063b83);
+  box-shadow:0 0 12px #0a9dff4e;
+}
+.app-shell .sidebar .workspace-switcher strong {color:#fff;font-size:12px;}
+.app-shell .sidebar .workspace-switcher small {color:#92cce9;}
+.app-shell .sidebar .nav-label {margin:23px 0 1px;}
+.app-shell .sidebar nav:not(.mobile-bottom-nav) {display:grid;gap:0;}
+.app-shell .sidebar .nav-item {
+  display:flex;align-items:center;gap:14px;width:100%;min-height:64px;
+  padding:12px 12px;margin:0;border:1px solid transparent;
+  border-bottom-color:#2e7da149;border-radius:0;
+  background:transparent;box-shadow:none;color:#e0ecfa;
+  text-align:left;font-size:13px;font-weight:700;
+  transition:background .2s,color .2s,box-shadow .2s,transform .2s;
+}
+.app-shell .sidebar .nav-item .nav-icon {
+  flex:0 0 29px;display:grid;place-items:center;width:29px;height:29px;font-size:23px;
+  color:#aedbfb;filter:drop-shadow(0 0 4px #21a3ff3b);
+}
+.app-shell .sidebar .nav-item .nav-icon svg {width:25px;height:25px;}
+.app-shell .sidebar .nav-item:not(:disabled):hover {
+  color:#fff;background:#1165a944;border-radius:12px;border-color:#2689b958;
+}
+.app-shell .sidebar .nav-item.active {
+  min-height:67px;padding:12px;margin:5px 0 8px;
+  color:#fff;font-weight:900;font-size:13px;line-height:1.25;
+  border:1px solid #72e8ff;border-radius:15px;
+  background:linear-gradient(105deg,#006ce8 0%,#03b9ff 100%);
+  box-shadow:0 0 0 1px #008aff8c,0 0 17px #08b4ffb0,inset 0 1px 10px #c5faff61;
+  text-shadow:0 1px 6px #04519b;
+}
+.app-shell .sidebar .nav-item.active .nav-icon {color:#fff;filter:drop-shadow(0 0 5px #d2f8ff);}
+.app-shell .sidebar .nav-item:disabled:not(.active) {opacity:.46;}
+.app-shell .sidebar .sidebar-footer {margin-top:auto;border-top:1px solid #2082ad53;padding:15px 8px 4px;color:#8fbbd6;}
+.app-shell .sidebar .status-dot {background:#23ecb4;box-shadow:0 0 9px #21f6bb;}
+
+/* Floodlit page header: keeps existing controls and app navigation. */
+.app-shell .main-content {max-width:none;padding-top:29px;}
+.app-shell .main-content .topbar {
+  position:relative;min-height:100px;gap:15px;align-items:center;
+  margin:0 0 26px;padding:12px 2px 24px;border-bottom:1px solid #118bd788;
+}
+.app-shell .main-content .topbar::after {
+  content:"";position:absolute;bottom:-2px;left:27%;width:46%;height:3px;border-radius:9px;
+  background:linear-gradient(90deg,transparent,#25c7ff,transparent);
+  box-shadow:0 0 13px #12baff91;pointer-events:none;
+}
+.app-shell .main-content .topbar .eyebrow {color:#40d2ff;font-size:10px;letter-spacing:.2em;}
+.app-shell .main-content .topbar h1 {
+  color:#fff;font-size:clamp(28px,3.4vw,42px);font-weight:950;letter-spacing:-.045em;
+  line-height:1.1;text-shadow:0 0 18px #198eff5b;
+}
+.app-shell .main-content .topbar-actions {flex-wrap:wrap;justify-content:flex-end;gap:9px;}
+.app-shell .main-content .today-label {color:#b5d8f0;}
+.app-shell .main-content .logout-button,.app-shell .main-content .bug-report-button {
+  border:1px solid #4fbdeb;border-radius:12px;
+  background:linear-gradient(160deg,#124776,#062a51);
+  box-shadow:0 0 12px #0589ff39,inset 0 1px #b3eaff24;color:#e4f8ff;
+}
+.app-shell .main-content .logout-button:hover,.app-shell .main-content .bug-report-button:hover {
+  border-color:#a1efff;box-shadow:0 0 18px #1bb7ff69;color:#fff;
+}
+
+/* Core panels — bevelled edge, luminous accent and deep navy texture. */
+.app-shell .main-content :is(.next-match-panel,.home-roster-panel,.home-preview-panel,.profile-hero,
+  .match-launch-panel,.team-reference,.account-links,.lineup-choice,.player-form,.team-form,
+  .team-card,.player-card,.roster-panel,.tactical-panel,.lineup-editor,.bench-section,
+  .match-controls-panel,.match-pitch-wrap,.match-side,.match-events) {
+  border:1px solid #289ee0;
+  border-radius:19px;
+  background:radial-gradient(ellipse at 10% 0%,#164b7c51,transparent 61%),var(--stadium-glass);
+  box-shadow:var(--stadium-glow),0 20px 40px #0007;
+  color:#f4fbff;
+}
+.app-shell .main-content :is(.next-match-panel,.home-roster-panel,.match-controls-panel,.roster-panel) {
+  border-color:#32c5ff;
+  box-shadow:0 0 0 1px #1599f96c,0 0 24px #078dff3b,inset 0 0 20px #1594ff13,0 18px 36px #0007;
+}
+.app-shell .main-content :is(.next-match-panel,.home-roster-panel,.team-card,.player-card) {
+  position:relative;
+}
+.app-shell .main-content :is(.next-match-panel,.home-roster-panel,.team-card,.player-card)::before {
+  content:"";position:absolute;top:0;left:15%;right:15%;height:2px;border-radius:99px;
+  background:linear-gradient(90deg,transparent,#35c7ffb5,transparent);pointer-events:none;
+}
+.app-shell .main-content :is(.next-match-heading h2,.home-roster-heading h2,.page-heading h2,.roster-heading h3,
+  .match-side h3,.match-events h3) {color:#fff;text-shadow:0 0 12px #1b9aff45;font-weight:900;}
+.app-shell .main-content :is(.page-heading,.next-match-heading,.home-roster-heading) .eyebrow {
+  color:#47d8ff;letter-spacing:.16em;
+}
+.app-shell .main-content :is(.next-match-heading p,.home-roster-heading p,.page-heading p,.form-hint) {color:#acc9e1;}
+.app-shell .main-content .opponent-field {color:#ffc0ca;}
+.app-shell .main-content .opponent-field input {
+  min-height:52px;border:1px solid #ff627b;border-radius:13px;
+  color:#fff;background:linear-gradient(135deg,#4b122b,#1b1026);
+  box-shadow:0 0 15px #ff34583d,inset 0 1px 10px #ff4e6616;font-size:14px;
+}
+.app-shell .main-content .opponent-field input:focus {border-color:#ffa5b5;box-shadow:0 0 0 3px #ff41602e,0 0 18px #ff3a6073;}
+.app-shell .main-content .home-pitch-stage {
+  border:1px solid #187bb5;background:radial-gradient(ellipse at 50% 28%,#14456b,#051429 80%);
+  box-shadow:inset 0 0 30px #0ab7ff16,0 0 18px #009cff1c;
+}
+.app-shell .main-content .team-emblem,.app-shell .main-content .player-number {
+  border:1px solid #5acfff;color:#fff;
+  background:linear-gradient(150deg,#126dc1,#06346f);
+  box-shadow:0 0 15px #059dff55,inset 0 0 10px #7eddff22;
+}
+.app-shell .main-content .season-chip,
+.app-shell .main-content .player-meta span,
+.app-shell .main-content .player-statistics span,
+.app-shell .main-content .roster-count {
+  border:1px solid #256b9c;background:#103459;color:#c7eaff;
+}
+.app-shell .main-content .player-statistics strong {color:#56dcff;font-size:1.15em;}
+.app-shell .main-content :is(.team-card,.player-card):hover {border-color:#85e9ff;box-shadow:0 0 0 1px #23b9ff77,0 0 28px #0db0ff48,0 16px 35px #0008;}
+
+/* Controls: screenshot-inspired glassy cyan, green field buttons and red danger. */
+.app-shell .main-content :is(.primary-button,.roster-primary-button,.launch-button,.primary-action,
+  .start-match,.home-start-match-button,.home-edit-roster-button,.update-button) {
+  border:1px solid #9af4ff;border-radius:12px;
+  color:#fff;background:linear-gradient(180deg,#24c8ff 0%,#0772eb 85%,#0951b2 100%);
+  box-shadow:inset 0 1px 9px #e3fcff73,0 0 0 1px #0c94ff89,0 0 18px #087ffa84;
+  text-shadow:0 1px 6px #00387c;font-weight:900;
+}
+.app-shell .main-content :is(.primary-button,.roster-primary-button,.launch-button,.primary-action,
+  .start-match,.home-edit-roster-button,.update-button):hover:not(:disabled) {
+  filter:brightness(1.12);box-shadow:inset 0 1px 12px #eaffff8a,0 0 25px #06b9ff9c;
+}
+.app-shell .main-content :is(.secondary-button,.customize-action,.outline-action,.edit-roster-button,
+  .pause-match,.finish-confirm-cancel) {
+  border:1px solid #379ed4;border-radius:11px;
+  background:linear-gradient(170deg,#104675,#06284b);color:#e0f7ff;
+  box-shadow:inset 0 1px #9eeaff2b,0 0 12px #0989ff29;
+}
+.app-shell .main-content :is(.text-button,.selected-mark,.lineup-number) {color:#47d7ff;}
+.app-shell .main-content :is(.finish-match,.finish-confirm-yes,.confirm-yes) {
+  border:1px solid #ff9aaa;color:#fff;
+  background:linear-gradient(160deg,#ff526a,#a61335);
+  box-shadow:0 0 18px #ff315c63,inset 0 1px 8px #ffd0dc41;
+}
+.app-shell .main-content :is(.team-icon-option,.layout-slot-switch,.icon-action) {
+  border-color:#2c82b8;color:#c9eaff;background:linear-gradient(145deg,#123f69,#071e3c);
+}
+.app-shell .main-content :is(.team-icon-option,.layout-slot-switch,.icon-action):hover {
+  border-color:#50d4ff;box-shadow:0 0 11px #0caaff51;
+}
+.app-shell .main-content :is(.team-icon-option.is-selected,.layout-slot-switch.active) {
+  border-color:#70e8ff;box-shadow:0 0 15px #07b8ff6f;background:#0b629f;color:#fff;
+}
+.app-shell .main-content :is(.role-options label,.archive-toggle,.team-icon-caption) {color:#b9d6ee;}
+.app-shell .main-content :is(.player-form,.team-form) :is(label,legend) {color:#c4e2f7;}
+.app-shell .main-content :is(.player-form,.team-form) :is(input:not([type="checkbox"]),select,textarea) {
+  border:1px solid #2b7da9;border-radius:10px;background:#051b38;color:#f5faff;min-height:42px;
+  box-shadow:inset 0 1px 6px #0005;
+}
+.app-shell .main-content :is(.player-form,.team-form) :is(input,select,textarea):focus {
+  border-color:#5de1ff;outline:2px solid #46d4ff5c;outline-offset:1px;
+  box-shadow:0 0 15px #0999ff48;
+}
+.app-shell .main-content :is(.player-form,.team-form) :is(select,option) {color-scheme:dark;}
+.app-shell .main-content :is(.list-toolbar,.form-heading,.roster-heading,.editor-heading) {
+  border-color:#1e77b17c;color:#eaf7ff;
+}
+
+/* ALL popover menus and custom dropdowns: opaque, floating, blue neon. */
+.app-shell .main-content :is(.sort-picker,.team-picker,.formation-picker,.captaincy-picker) {isolation:isolate;}
+.app-shell .main-content :is(.sort-picker-trigger,.formation-picker-trigger,.team-picker-trigger,
+  .captaincy-dropdown,.captaincy-picker-trigger) {
+  color:#e5f8ff;border:1px solid #57cfff;border-radius:11px;
+  background:linear-gradient(165deg,#0d538c,#062448);
+  box-shadow:0 0 12px #069bff54,inset 0 1px 8px #9ceaff26;
+}
+.app-shell .main-content :is(.sort-picker-trigger,.formation-picker-trigger,.team-picker-trigger,
+  .captaincy-dropdown,.captaincy-picker-trigger):hover {
+  border-color:#b2f8ff;box-shadow:0 0 18px #0db8ff8a;
+}
+.app-shell .main-content :is(.sort-picker-menu,.formation-picker-menu,.team-picker-menu,
+  .team-picker-options,.captaincy-dropdown-menu,.captaincy-menu,.player-picker-dialog) {
+  background:linear-gradient(165deg,#0c315c,#03142d);
+  color:#f3fbff;border:1px solid #56c8ff;border-radius:13px;
+  box-shadow:0 0 18px #0596ff65,0 22px 45px #000b;
+}
+.app-shell .main-content :is(.sort-picker-option,.formation-picker-option,.team-picker-option,
+  .captaincy-option,.picker-player-option) {
+  color:#e1f3ff;border-color:#236ca5;background:transparent;
+}
+.app-shell .main-content :is(.sort-picker-option,.formation-picker-option,.team-picker-option,
+  .captaincy-option,.picker-player-option):hover {
+  background:#12629b;color:#fff;
+}
+.app-shell .main-content :is(.sort-picker-option.is-selected,.formation-picker-option.is-selected,
+  .team-picker-option.is-selected,.captaincy-option.is-selected,.picker-selected) {
+  color:#fff;background:linear-gradient(100deg,#1167aa,#0882bb);
+}
+.app-shell .main-content :is(.sort-picker-check,.formation-picker-check) {color:#6bf1ff;}
+.app-shell .main-content :is(.bench-choice,.roster-player,.bench-player,.lineup-slot,
+  .on-field-list,.match-event,.match-report-event) {
+  border-color:#266c9d;background:linear-gradient(135deg,#0c3051,#061a33);color:#eefaff;
+}
+.app-shell .main-content :is(.bench-choice,.picker-player-option):hover {
+  border-color:#59d7ff;background:#115384;box-shadow:0 0 12px #029bff30;
+}
+
+/* Match: distinct blue home / red away, with scoreboard like broadcast graphics. */
+.app-shell .main-content .live-match .match-topbar {
+  border:1px solid #37bbf0;border-radius:18px;
+  background:linear-gradient(110deg,#092e60,#06182e 48%,#471224);
+  box-shadow:0 0 20px #048bff50,0 12px 36px #0008;
+}
+.app-shell .main-content .live-match .match-home-team {color:#d3f4ff;text-shadow:0 0 12px #16b8ffb0;}
+.app-shell .main-content .live-match .match-away-team {color:#ffb5bf;text-shadow:0 0 12px #ff355eb0;}
+.app-shell .main-content .live-match :is(.match-scoreboard,.match-score,.scoreboard-clock) {
+  color:#fff;text-shadow:0 0 14px #0cbfff7f;
+}
+.app-shell .main-content .live-match .match-controls-panel {
+  background:linear-gradient(155deg,#09284e,#03142b);
+  border:1px solid #38bfff;box-shadow:0 0 20px #06a9ff4a;
+}
+.app-shell .main-content .live-match .match-pitch-wrap {
+  background:radial-gradient(ellipse at 50% 15%,#144d7c88,transparent 65%),#06162d;
+  border:1px solid #209be0;
+}
+.app-shell .main-content .live-match :is(.match-side,.match-events) {
+  border:1px solid #2f8fcc;background:linear-gradient(155deg,#09284d,#041227);
+}
+.app-shell .main-content .live-match .voice-hold-button {
+  color:#fff;border-color:#79dfff;background:linear-gradient(160deg,#148ee7,#064a9b);
+  box-shadow:0 0 17px #03aaff5b,inset 0 1px 9px #e0faff45;
+}
+.app-shell .main-content .live-match .voice-hold-button.is-listening {
+  border-color:#ff8fa3;background:linear-gradient(165deg,#f34260,#7c1230);
+  box-shadow:0 0 19px #ff426b7c;
+}
+.app-shell .main-content .live-match .voice-command-guide {
+  border:1px solid #238ed0;background:linear-gradient(150deg,#0b345e,#06172e);color:#eefaff;
+  box-shadow:0 0 16px #008eff2a;
+}
+.app-shell .main-content .live-match .voice-guide-toggle {
+  border:1px solid #59d9ff;color:#e3faff;background:linear-gradient(150deg,#096ca9,#06376b);
+}
+.app-shell .main-content .live-match .voice-guide-heading strong {color:#5edbff;}
+
+/* Notifications, support dashboard, login and dialogs belong to the same design. */
+body .auth-page,body .setup-required,body .loading-state {
+  background:
+    radial-gradient(ellipse at 50% -10%,#116bb46f,transparent 61%),
+    linear-gradient(150deg,#030b1d,#07274b 62%,#030915);
+}
+body .auth-page .auth-card,body .setup-required .setup-card,
+body .bug-report-backdrop .bug-report-dialog,body .release-changelog-backdrop .release-changelog,
+body .support-shell .support-panel,body .support-shell .support-stat,
+body .support-detail-backdrop .support-detail,
+body .match-report-backdrop .match-report-panel,body .match-edit-backdrop .match-edit-panel,
+body .player-picker-overlay .player-picker-dialog {
+  border:1px solid #3bb8f7;border-radius:18px;
+  background:radial-gradient(ellipse at 0 0,#13568b55,transparent 60%),linear-gradient(155deg,#0b305b,#04152d);
+  box-shadow:0 0 0 1px #157df84b,0 0 23px #057fff37,0 24px 65px #000a;
+  color:#f2fbff;
+}
+body .auth-page .brand-mark,body .support-shell .support-brand-mark {
+  border:1px solid #6ce3ff;color:#fff;background:linear-gradient(150deg,#1275c3,#073a85);
+  box-shadow:0 0 17px #08adff6b;
+}
+body .auth-page :is(.primary-button,.google-button),
+body .support-shell :is(.support-retry,.support-filters button.active,.support-logout),
+body .release-changelog :is(.release-changelog-footer button),
+body .match-report-panel :is(.share-match-report,.exit-match-report),
+body .bug-report-dialog .bug-report-actions button {
+  border:1px solid #7deaff;color:#fff;border-radius:11px;
+  background:linear-gradient(175deg,#15b1f7,#0863d6);
+  box-shadow:0 0 16px #069bff69,inset 0 1px 10px #d4faff4b;font-weight:850;
+}
+body .support-shell {
+  background:linear-gradient(145deg,#04112b,#071e3c);color:#f0faff;
+}
+body .support-shell .support-topbar {
+  border-bottom:1px solid #209cdd;background:linear-gradient(105deg,#04132c,#07264a);
+}
+body .support-shell .support-ticket-row {
+  border-color:#276c9d;background:#0a2444;color:#f0faff;
+}
+body .support-shell .support-ticket-row:hover {background:#0e3a68;}
+body .support-shell .support-filters button:not(.active),
+body .support-shell .support-status-actions button {
+  border:1px solid #317caa;background:#082344;color:#cfeaff;
+}
+body .support-shell .support-status-actions button.active {
+  border-color:#73dfff;background:#0d679f;color:#fff;
+}
+body .bug-report-backdrop,body .release-changelog-backdrop,
+body .support-detail-backdrop {background:#020917e8;backdrop-filter:blur(8px);}
+body .voice-assistant .voice-trigger {
+  border:1px solid #50cbff;color:#e3faff;
+  background:linear-gradient(155deg,#1169af,#063f7a);
+  box-shadow:0 0 13px #089dff48;
+}
+body .voice-assistant .voice-trigger.is-listening {
+  border-color:#ff869a;background:linear-gradient(145deg,#ae2544,#62172c);box-shadow:0 0 17px #ff36685b;
+}
+body .voice-assistant .voice-panel,
+body .voice-feedback,body .match-confirm,body .match-finish-confirm {
+  border:1px solid #3ebcf3;background:linear-gradient(155deg,#0b315d,#031329);
+  box-shadow:0 0 23px #068fff57,0 20px 50px #000b;color:#fff;
+}
+body .voice-feedback strong,body .voice-panel-heading strong {color:#65dfff;}
+body :is(input,textarea,select):not([type="checkbox"]):not([type="radio"]):focus-visible {
+  outline:2px solid #42d6ff;outline-offset:2px;box-shadow:0 0 0 3px #08bcff29;
+}
+body :is(button,a,[role="button"]):focus-visible {outline:2px solid #a3f2ff;outline-offset:3px;}
+
+/* Mobile: a neon tab bar rather than a miniature desktop sidebar. */
+@media(max-width:900px) {
+  .app-shell .main-content .topbar h1 {font-size:clamp(25px,5vw,33px);}
+}
+@media(max-width:700px) {
+  .app-shell .main-content {padding-top:15px;}
+  .app-shell .main-content .topbar {min-height:81px;align-items:flex-start;padding-bottom:17px;}
+  .app-shell .main-content .topbar::after {left:21%;width:58%;}
+  .app-shell .mobile-bottom-nav {
+    background:linear-gradient(180deg,#071d3af7,#020b22fc);
+    border-top:1px solid #30baff;
+    box-shadow:0 -5px 23px #078aff46;
+    backdrop-filter:blur(14px);
+  }
+  .app-shell .mobile-bottom-nav .mobile-nav-item {
+    color:#a9c9e2;border:1px solid transparent;border-radius:12px;
+    background:transparent;font-weight:750;transition:color .15s,background .15s;
+  }
+  .app-shell .mobile-bottom-nav .mobile-nav-item.active {
+    color:#fff;background:linear-gradient(180deg,#0b92ea,#0754ae);
+    border:1px solid #62d6ff;
+    box-shadow:0 0 13px #068fff82,inset 0 1px 6px #caf5ff5b;
+  }
+  .app-shell .mobile-bottom-nav .mobile-nav-icon {color:inherit;}
+  .app-shell .main-content :is(.next-match-panel,.home-roster-panel,.team-card,.player-card,.player-form,.team-form) {
+    border-radius:15px;box-shadow:0 0 0 1px #159aff46,0 8px 23px #0008;
+  }
+}
+@media(max-width:420px) {
+  .app-shell .main-content .topbar-actions {gap:6px;}
+  .app-shell .main-content .topbar h1 {font-size:27px;}
+  .app-shell .main-content :is(.next-match-panel,.home-roster-panel) {padding:17px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .app-shell .sidebar .nav-item,.app-shell .mobile-bottom-nav .mobile-nav-item {transition:none;}
+}
