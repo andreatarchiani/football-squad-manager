@@ -399,3 +399,175 @@ select optgroup {
 .support-detail-content{padding:24px 26px 30px}.support-detail-content>p{color:#b4c7bb;font-size:12px;line-height:1.6}.support-detail-content strong{color:#eaf5ed}.support-detail-content h3{margin:24px 0 10px;font-size:13px}.support-description{padding:15px;border:1px solid #395043;border-radius:10px;white-space:pre-wrap;background:#101e18;color:#edf4ee!important;font-size:13px!important}
 .support-attachment{display:block;width:100%;margin:7px 0;padding:12px;border:1px solid #476954;border-radius:9px;color:#b8e5c5;background:#22392b;text-align:left;cursor:pointer}.support-status-actions{display:flex;flex-wrap:wrap;gap:9px}.support-status-actions button{border:1px solid #45604e;border-radius:9px;padding:11px;color:#c4d4cb;background:#26362c;cursor:pointer}.support-status-actions button.active{border-color:#89d4a2;color:#173a24;background:#a0deb6}
 @media(max-width:600px){.support-ticket-row{padding:16px;align-items:flex-start;flex-direction:column}.support-ticket-summary span{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.support-detail-backdrop{padding:10px}.support-detail>header,.support-detail-content{padding:19px}}
+
+
+/* Stadium Neon UI — visual-only skin inspired by the possession dashboard.
+   Kept global so Home, Teams, Players, Live Match, Auth and overlays share it.
+   No layout positioning or match-event behavior is altered. */
+:root {
+  color-scheme: dark;
+  --page-bg: #030b1b;
+  --surface: #081b35;
+  --border: #194c7d;
+  --text-primary: #f5faff;
+  --text-muted: #a4bdd7;
+  --accent: #22c9ff;
+  --neon-blue: #16baff;
+  --neon-cyan: #37e4ff;
+  --neon-red: #ff4963;
+  --neon-panel: linear-gradient(155deg,rgba(7,31,62,.97),rgba(3,13,31,.97));
+  --neon-edge: 0 0 0 1px #13aaff52, 0 0 18px #028dff28, inset 0 1px 14px #1bbdff0b;
+}
+html,body {background:#030b1b;}
+body {
+  background:
+    radial-gradient(ellipse at 52% -9%,#1463a46b 0,transparent 46%),
+    radial-gradient(ellipse at 100% 52%,#07386c54,transparent 48%),
+    linear-gradient(155deg,#020814 5%,#07172e 58%,#020916);
+  background-attachment:fixed;
+  color:var(--text-primary);
+}
+::selection {color:#001426;background:#35d8ff;}
+/* Soft floodlights and pitch atmosphere, behind all interactive surfaces. */
+.app-shell {position:relative;isolation:isolate;background:transparent;}
+.app-shell::before {
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(ellipse 33% 6% at 22% 0%,#c6edff55,transparent 80%),
+    radial-gradient(ellipse 30% 7% at 85% 0%,#b8e6ff4a,transparent 80%),
+    repeating-linear-gradient(113deg,transparent 0 105px,#7fc8ff04 107px 109px,transparent 111px 205px),
+    linear-gradient(180deg,transparent 72%,#06482d28 100%);
+}
+.sidebar {
+  background:linear-gradient(180deg,#05112aeF,#061a38f5 72%,#030f24fa);
+  border-right:1px solid #1688dc99;
+  box-shadow:4px 0 28px #007bff16,inset -1px 0 #4cd5ff1c;
+}
+.brand-mark,.workspace-avatar {
+  color:#e7f9ff;background:linear-gradient(150deg,#0d4c94,#061a4a);
+  border:1px solid #34bfff88;
+  box-shadow:0 0 15px #008cff4a,inset 0 0 15px #38c4ff18;
+}
+.brand-copy strong,.topbar h1,.page-heading h2 {color:#fff;text-shadow:0 1px 16px #0f8eff36;}
+.brand-copy small,.eyebrow,.workspace-label,.nav-label {color:#70cfff;}
+.workspace-switcher,.logout-button {
+  border:1px solid #2678b2;
+  background:linear-gradient(145deg,#102c51,#07162d);
+  color:#d8f4ff;
+  box-shadow:inset 0 1px #72ddff19;
+}
+.nav-item {color:#abc5e0;transition:background .2s,box-shadow .2s,color .2s,border-color .2s;}
+.nav-item:not(:disabled):hover {color:#f9fdff;background:#123d6f;}
+.nav-item.active {
+  color:#fff;background:linear-gradient(115deg,#0378ec,#08baff);
+  border:1px solid #64d9ff;
+  box-shadow:0 0 15px #00aaff88,inset 0 1px 8px #abecff5c;
+  text-shadow:0 1px 6px #003972;
+}
+.nav-item.active .nav-icon {color:#fff;}
+.status-dot {background:#26e8ad;box-shadow:0 0 10px #20e7a6;}
+.main-content {position:relative;}
+.main-content .topbar {border-bottom:1px solid #2b80b849;padding-bottom:20px;}
+.accent,.welcome-copy h2 span,.profile-name-button span,.section-note {color:#32ceff;}
+.welcome-panel,.stat-card,.player-form,.team-form,.player-card,.team-card,
+.roster-panel,.tactical-panel,.lineup-editor,.bench-section,
+.home-preview-panel,.home-roster-panel,.home-match-panel,
+.auth-card,.setup-card,.voice-panel,.support-detail,.match-report-panel {
+  border:1px solid #168fe0a8;
+  background:var(--neon-panel);
+  box-shadow:var(--neon-edge),0 16px 35px #0006;
+  color:var(--text-primary);
+}
+.welcome-panel {
+  background:radial-gradient(ellipse at 85% 25%,#1262a26a,transparent 55%),var(--neon-panel);
+  border-color:#24baff;
+  box-shadow:0 0 24px #078dff33,inset 0 0 30px #0488ff16;
+}
+.stat-card,.player-card,.team-card {transition:border-color .2s,box-shadow .2s;}
+.stat-card:hover,.player-card:hover,.team-card:hover {border-color:#54cfff;box-shadow:0 0 19px #00aaff34,inset 0 0 12px #168eff11;}
+.section-heading h2,.form-heading h3,.roster-heading h3,.home-preview-heading strong {color:#f7fbff;}
+.player-number,.roster-number,.bench-number {box-shadow:0 0 12px #068fff36;}
+.primary-action,.primary-button,.roster-primary-button,
+.home-start-match-button,.profile-name-save,.bug-report-actions button,
+.voice-confirm,.voice-record:not(.is-listening) {
+  border:1px solid #72e8ff;
+  background:linear-gradient(180deg,#12b9ff 0%,#0763e2 100%);
+  color:#fff;
+  box-shadow:0 0 0 1px #0d6ffc55,0 0 18px #028fff65,inset 0 1px 8px #cdf6ff52;
+  text-shadow:0 1px 6px #003c87;
+  font-weight:800;
+}
+.primary-button:hover:not(:disabled),.roster-primary-button:hover:not(:disabled),
+.primary-action:hover,.bug-report-actions button:hover:not(:disabled) {
+  filter:brightness(1.13);
+  box-shadow:0 0 24px #06b6ff8a,inset 0 1px 10px #d9f8ff72;
+}
+.secondary-button,.profile-name-cancel,.customize-action,.edit-roster-button {
+  border:1px solid #318ccc;
+  background:linear-gradient(165deg,#103e72,#08234b);
+  color:#dff7ff;
+  box-shadow:inset 0 1px #7fdaff25,0 0 9px #068fff22;
+}
+.text-button,.text-action,.profile-name-button span {color:#48d5ff;}
+:is(input,textarea,select):not([type="checkbox"]):not([type="radio"]) {
+  border-color:#3175a6;
+  background-color:#061b35;
+  color:#f3faff;
+}
+:is(input,textarea,select):focus-visible {
+  outline:2px solid #39d5ff;
+  outline-offset:2px;
+  box-shadow:0 0 0 3px #0bbcff24;
+}
+:where(button,a,[role="button"]):focus-visible {outline:2px solid #5be5ff;outline-offset:3px;}
+:where(.player-form,.team-form,.auth-card,.voice-panel,.support-detail,.match-report-panel) :is(h2,h3,strong) {text-shadow:0 0 10px #0589ff1b;}
+/* Inputs, selectors, and auxiliary panels across team and home screens. */
+.team-picker,.formation-picker,.captaincy-picker {color:var(--text-primary);}
+.team-picker-trigger,.formation-picker-trigger,.captaincy-dropdown,
+.team-picker-menu,.formation-picker-menu,.player-picker-dialog,
+.support-description,.support-ticket-row,.voice-command-guide,
+.voice-command-item,.match-complete-roster {
+  border-color:#227dbb;
+  background:linear-gradient(145deg,#09284b,#05152d);
+  box-shadow:0 0 13px #008fff1c,inset 0 1px #68c9ff14;
+  color:#ecf9ff;
+}
+.voice-trigger,.voice-guide-toggle {
+  color:#bcecff;border:1px solid #26b5ef;
+  background:linear-gradient(155deg,#0b508d,#062e60);
+  box-shadow:0 0 14px #029fff3d;
+}
+.voice-trigger.is-listening,.voice-record.is-listening {
+  border-color:#ff647b;background:linear-gradient(150deg,#a2183a,#4f1027);color:#fff;
+  box-shadow:0 0 20px #ff375e6e;
+}
+.voice-feedback,.match-moment-card {
+  background:linear-gradient(155deg,#0d3159f5,#03152af7);
+  border-color:#3bc9ff;
+  box-shadow:0 0 22px #00aaff4d,0 16px 45px #000a;
+  color:#fff;
+}
+.voice-feedback strong,.voice-guide-heading strong {color:#63dcff;}
+.match-report-backdrop,.match-edit-backdrop,.support-detail-backdrop {background:#020b20df;}
+.finish-match {border-color:#ff8b9d;background:linear-gradient(150deg,#fb4860,#a70d38);box-shadow:0 0 18px #ff496345;}
+/* Keep the football pitch green and the jersey positioning untouched. */
+.pitch-stage {
+  border-color:#1e9bdc;
+  background:radial-gradient(ellipse at 50% 40%,#144e6688,transparent 65%),linear-gradient(145deg,#071d39,#041326);
+  box-shadow:0 0 22px #028fff2a,0 24px 48px #0006;
+}
+.home-football-pitch {box-shadow:0 0 20px #03b1ff2e,0 22px 30px #0008;}
+/* Shared badges/states; destructive actions retain red semantics. */
+.feedback.success,.support-ticket-state.resolved {border-color:#2cbbd0;color:#b9f8ff;background:#083a50;}
+.feedback.error,.danger-text {color:#ff9cae;}
+/* Small screens: same look, less glow and no extra horizontal overflow. */
+@media(max-width:700px) {
+  .sidebar {box-shadow:0 0 12px #078dff15;}
+  .mobile-bottom-nav {background:linear-gradient(180deg,#071b38f5,#03102afc);border-top:1px solid #168ee5;box-shadow:0 -6px 22px #0275d52b;}
+  .main-content {min-width:0;}
+  .welcome-panel,.stat-card,.player-card,.team-card,.player-form,.team-form,
+  .roster-panel,.tactical-panel,.auth-card {box-shadow:0 0 0 1px #168fe033,0 10px 22px #0005;}
+}
+@media(prefers-reduced-motion:reduce){
+  .nav-item,.stat-card,.player-card,.team-card {transition:none;}
+}
