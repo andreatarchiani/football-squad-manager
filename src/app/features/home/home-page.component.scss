@@ -118,3 +118,16 @@
 .home-corner.bottom-right{bottom:2.2%;right:2.2%;border-bottom:0;border-right:0;border-radius:100% 0 0 0}
 .home-pitch-player-name{max-width:78px;background:#081b12ed;border:1px solid #d8f2df55;box-shadow:0 3px 7px #0009}
 @media(max-width:650px){.home-football-pitch{width:min(100%,370px)}}
+
+
+.home-championship-panel{display:grid;gap:15px;margin-top:4px;padding:20px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(145deg,#17231f,#151b26)}
+.home-championship-heading h2{margin:6px 0 5px;font-size:19px;letter-spacing:-.035em}
+.home-championship-heading p,.home-championship-source{margin:0;color:var(--text-muted);font-size:10px;line-height:1.6}
+.home-championship-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;align-items:start}
+.home-championship-card{min-width:0;overflow:hidden;border:1px solid var(--border);border-radius:12px;background:#101820}
+.home-championship-card-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;border-bottom:1px solid var(--border)}
+.home-championship-card-heading h3{margin:0;font-size:13px}
+.home-championship-card-heading a,.home-championship-source a{color:#9bdab2;font-size:10px;font-weight:700;text-decoration:none}
+.home-championship-card iframe{display:block;width:100%;height:570px;border:0;background:#fff}
+.home-championship-source{padding-top:2px}
+@media(max-width:760px){.home-championship-panel{padding:15px}.home-championship-grid{grid-template-columns:1fr}.home-championship-card iframe{height:540px}.home-championship-heading h2{font-size:16px}}
