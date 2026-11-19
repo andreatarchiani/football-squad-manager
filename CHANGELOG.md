@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-20 — Colori più equilibrati
+
+- **Miglioramento:** ridotta la saturazione della grafica Stadium in tutta l'app, con blu notte e blu petrolio più morbidi, rossi meno intensi, bordi discreti e ombre più leggere per menu, pulsanti, pannelli, selettori e schermata partita, mantenendo invariata la struttura e le funzionalità.
+
 ## 2026-11-19 — Interfaccia Stadium Neon
 
 - **Modifica:** rinnovata l'interfaccia di Football Squad Manager ispirandosi al dashboard calcistico di riferimento: navigazione laterale e mobile, icone, intestazioni, pulsanti, menu a tendina, schede Squadre/Giocatori, Home, schermata partita, accesso e Centro Assistenza condividono ora pannelli blu notte, bordi luminosi azzurri e accenti rossi per gli avversari e le azioni critiche. Conservate le funzionalità e la disposizione della formazione.
