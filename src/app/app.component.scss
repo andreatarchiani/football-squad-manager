@@ -137,3 +137,28 @@
 .bug-report-file-name { min-width:0; flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:#e0eee4; }
 .bug-report-file button { border:0; background:transparent; color:#d8c2bf; font-size:18px; cursor:pointer; }
 .bug-report-file-error { margin:8px 0 0; color:#f2a8a8; font-size:11px; }
+
+
+/* Allineamento visuale dei pannelli Changelog e Segnala un bug al tema Stadium LED dell'app. */
+.release-changelog-backdrop,.bug-report-backdrop{background:radial-gradient(ellipse at 50% 0%,#193b2d55 0,transparent 55%),rgba(5,10,16,.86);backdrop-filter:blur(12px)}
+.release-changelog,.bug-report-dialog{color:#edf4f0;border:1px solid #385342;border-radius:18px;background:linear-gradient(145deg,#19251f 0%,#151d22 58%,#111923 100%);box-shadow:0 24px 70px #000a,0 0 28px #65cb9110}
+.release-changelog-header,.bug-report-header{background:radial-gradient(ellipse at 0 0,#315c4030,transparent 72%)}
+.release-changelog-mark,.release-note-icon{border:1px solid #477b5b66;background:linear-gradient(145deg,#254333,#17271f);box-shadow:inset 0 1px #ffffff12}
+.release-changelog-header h2,.bug-report-header h2{color:#f0f6f2}
+.release-changelog-header p,.bug-report-header p{color:#a6b4ac}
+.release-changelog-close,.bug-report-close{border-color:#405449;color:#dce9e0;background:#17231dcc}
+.release-changelog-close:hover,.bug-report-close:hover{border-color:#83c99a;color:#b9edc8;background:#20372a}
+.release-changelog-list article{border-color:#ffffff12}
+.release-changelog-list strong{color:#e8f4eb}
+.release-changelog-list p{color:#aab8b0}
+.release-changelog-footer{border-color:#ffffff14}
+.release-changelog-footer>span{color:#9bdab2}
+.release-changelog-footer button,.bug-report-actions button{border:1px solid #9bdab2;color:#102018;background:linear-gradient(135deg,#b6edc5,#83cb9b);box-shadow:0 5px 18px #78c68a20}
+.release-changelog-footer button:hover,.bug-report-actions button:not(:disabled):hover{filter:brightness(1.07);transform:translateY(-1px)}
+.bug-report-textarea{border-color:#3b5546;color:#edf5ef;background:linear-gradient(145deg,#0e1714,#111a20)}
+.bug-report-textarea::placeholder{color:#718278}
+.bug-report-textarea:focus{border-color:#91d8aa;box-shadow:0 0 0 3px #91d8aa20}
+.bug-report-note{color:#91a197}
+.bug-report-file-error{color:#ffb9c1}
+.release-changelog-close:focus-visible,.bug-report-close:focus-visible,.release-changelog-footer button:focus-visible,.bug-report-actions button:focus-visible{outline:2px solid #9bdab2;outline-offset:3px}
+@media(max-width:520px){.release-changelog,.bug-report-dialog{border-color:#45634e;box-shadow:0 18px 55px #000b,0 0 22px #65cb910c}}
