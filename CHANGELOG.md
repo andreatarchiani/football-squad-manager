@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-20 — Anagrafica giocatori ampliata
+
+- **Nuova funzionalità:** estesa l’anagrafica dei giocatori con luogo di nascita, residenza, CAP, documento d’identità, categoria di appartenenza, matricola federale e tessera federale. I nuovi dati vengono salvati e recuperati da Firestore, mantenendo la compatibilità con le schede già esistenti.
+
 ## 2026-11-20 — Match Center e interfaccia più accattivante
 
 - **Miglioramento:** trasformata la Home in un pannello prepartita con stemma della squadra selezionata, avversario modificabile, confronto VS e riepilogo di modulo, giocatori e stato della formazione. Rifiniti anche navigazione, profondità dei pannelli, intestazioni, pulsanti e riflessi LED, mantenendo invariati dati e funzioni sportive.
