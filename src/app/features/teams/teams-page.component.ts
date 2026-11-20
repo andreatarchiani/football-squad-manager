@@ -557,7 +557,10 @@ export class TeamsPageComponent implements OnChanges {
     this.form = {
       name: team.name,
       category: team.category,
-      clubName: team.clubName,
+      facilityName: team.facilityName || '',
+      facilityAddress: team.facilityAddress || '',
+      headquartersAddress: team.headquartersAddress || '',
+      federationNumber: team.federationNumber || '',
       icon: team.icon || '⚽',
       seasonLabel: team.seasonLabel || '2026/2027'
     };
@@ -705,6 +708,6 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   private emptyForm(): TeamInput {
-    return { name: '', category: '', clubName: '', icon: '⚽', seasonLabel: '2026/2027' };
+    return { name: '', category: '', facilityName: '', facilityAddress: '', headquartersAddress: '', federationNumber: '', icon: '⚽', seasonLabel: '2026/2027' };
   }
 }
