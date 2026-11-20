@@ -25,7 +25,48 @@ export class PlayersPageComponent {
  private applyTeamDefaults(teamId:string){const team=this.activeTeams.find(t=>t.id===teamId);if(team?.category&&!this.form.affiliationCategory.trim())this.form.affiliationCategory=team.category;}
  private nextAvailableShirtNumber(teamId:string):string{const occupied=new Set(this.players().filter(p=>p.teamId===teamId&&p.id!==this.editingId()&&!p.isArchived).map(p=>p.shirtNumber).filter((n):n is number=>n!==null));const next=Array.from({length:99},(_,i)=>i+1).find(n=>!occupied.has(n));return next?String(next):'';}
  private schedulePlaceSearch(query:string,kind:'residence'|'birth'){const isResidence=kind==='residence';const timer=isResidence?this.residenceTimer:this.birthPlaceTimer;if(timer)clearTimeout(timer);const abort=isResidence?this.residenceAbort:this.birthPlaceAbort;abort?.abort();if(query.trim().length<3){if(isResidence)this.residenceSuggestions.set([]);else this.birthPlaceSuggestions.set([]);return;}const next=setTimeout(()=>void this.searchPlaces(query.trim(),kind),350);if(isResidence)this.residenceTimer=next;else this.birthPlaceTimer=next;}
- private async searchPlaces(query:string,kind:'residence'|'birth'){const controller=new AbortController();if(kind==='residence')this.residenceAbort=controller;else this.birthPlaceAbort=controller;try{const params=new URLSearchParams({q:query,limit:'6',lang:'it',countrycode:'IT'});const response=await fetch('https://photon.komoot.io/api?'+params.toString(),{signal:controller.signal,headers:{Accept:'application/geo+json'}});if(!response.ok)throw new Error('Geocoding service unavailable');const data=await response.json() as {features?:Array<{properties?:Record<string,unknown>}>};const suggestions=(data.features??[]).map(feature=>{const p=feature.properties??{};const get=(key:string)=>typeof p[key]==='string'?String(p[key]).trim():'';const city=get('city')||get('district')||get('locality')||get('name');const county=get('county');const street=get('street')||get('name');const house=get('housenumber');const postcode=get('postcode');const province=county&&city&&county.toLocaleLowerCase('it')!==city.toLocaleLowerCase('it')?county:'';const cityValue=city+(province?' ('+province+')':'');const streetLine=street?(house&&street!==get('name')?street+', '+house:street):'';const address=[streetLine,cityValue].filter(Boolean).join(', ');const birthValue=cityValue||get('name');const value=kind==='residence'?(address||birthValue):birthValue;return {label:[value,postcode].filter(Boolean).join(' · '),value,postalCode:postcode};}).filter(item=>item.value).filter((item,index,all)=>all.findIndex(other=>other.value===item.value&&other.postalCode===item.postalCode)===index).slice(0,6);if(kind==='residence')this.residenceSuggestions.set(suggestions);else this.birthPlaceSuggestions.set(suggestions);}catch(error){if(!(error instanceof DOMException&&error.name==='AbortError')){if(kind==='residence')this.residenceSuggestions.set([]);else this.birthPlaceSuggestions.set([]);}}}
+ private async searchPlaces(query:string,kind:'residence'|'birth'){
+  const controller=new AbortController();
+  if(kind==='residence')this.residenceAbort=controller;else this.birthPlaceAbort=controller;
+  const publish=(items:PlaceSuggestion[])=>{if(kind==='residence')this.residenceSuggestions.set(items);else this.birthPlaceSuggestions.set(items);};
+  try{
+   const params=new URLSearchParams({q:query,limit:'6',lang:'it'});
+   const response=await fetch('https://photon.komoot.io/api?'+params.toString(),{signal:controller.signal,headers:{Accept:'application/geo+json'}});
+   if(!response.ok)throw new Error('Photon geocoding unavailable');
+   const data=await response.json() as {features?:Array<{properties?:Record<string,unknown>}>};
+   const suggestions=(data.features??[]).map(feature=>{
+    const p=feature.properties??{};
+    const get=(key:string)=>typeof p[key]==='string'?String(p[key]).trim():'';
+    const city=get('city')||get('district')||get('locality')||get('name');
+    const county=get('county');const street=get('street')||get('name');const house=get('housenumber');const postcode=get('postcode');
+    const province=county&&city&&county.toLocaleLowerCase('it')!==city.toLocaleLowerCase('it')?county:'';
+    const cityValue=city+(province?' ('+province+')':'');
+    const streetLine=get('street')?(house?street+', '+house:street):'';
+    const address=[streetLine,cityValue].filter(Boolean).join(', ');
+    const value=kind==='residence'?(address||cityValue):cityValue;
+    return {label:[value,postcode].filter(Boolean).join(' · '),value,postalCode:postcode};
+   }).filter(item=>item.value).filter((item,index,all)=>all.findIndex(other=>other.value===item.value&&other.postalCode===item.postalCode)===index).slice(0,6);
+   if(suggestions.length){publish(suggestions);return;}
+  }catch(error){if(error instanceof DOMException&&error.name==='AbortError')return;}
+  // Photon è utile per vie e indirizzi completi, ma non sempre trova prefissi
+  // parziali di comuni (ad esempio "Fire" per "Firenze"). In quel caso
+  // usiamo la ricerca per prefisso di Open-Meteo/GeoNames.
+  try{
+   const params=new URLSearchParams({name:query,count:'8',language:'it',format:'json',countryCode:'IT'});
+   const response=await fetch('https://geocoding-api.open-meteo.com/v1/search?'+params.toString(),{signal:controller.signal,headers:{Accept:'application/json'}});
+   if(!response.ok)throw new Error('Place search unavailable');
+   const data=await response.json() as {results?:Array<{name?:string;admin2?:string;admin1?:string;country_code?:string;postcodes?:string[]}>};
+   const suggestions=(data.results??[]).filter(place=>place.country_code==='IT').map(place=>{
+    const name=String(place.name??'').trim();
+    const area=String(place.admin2??place.admin1??'').trim();
+    const value=name+(area&&area.toLocaleLowerCase('it')!==name.toLocaleLowerCase('it')?' ('+area+')':'');
+    const postalCodes=Array.isArray(place.postcodes)?place.postcodes:[];
+    const postalCode=postalCodes.length===1?postalCodes[0]:'';
+    return {label:[value,postalCode].filter(Boolean).join(' · '),value,postalCode};
+   }).filter(item=>item.value).filter((item,index,all)=>all.findIndex(other=>other.value===item.value&&other.postalCode===item.postalCode)===index).slice(0,6);
+   publish(suggestions);
+  }catch(error){if(!(error instanceof DOMException&&error.name==='AbortError'))publish([]);}
+ }
  private clearPlaceSearches(){if(this.residenceTimer)clearTimeout(this.residenceTimer);if(this.birthPlaceTimer)clearTimeout(this.birthPlaceTimer);this.residenceAbort?.abort();this.birthPlaceAbort?.abort();this.residenceSuggestions.set([]);this.birthPlaceSuggestions.set([]);}
  protected toggleRole(role:PlayerRole,checked:boolean){this.form.roles=checked?[...new Set([...this.form.roles,role])]:this.form.roles.filter(r=>r!==role);if(!this.form.roles.length)this.form.roles=[this.form.primaryRole];}
  protected async save(){const id=this.auth.workspaceId();if(!id||!this.form.firstName.trim()||!this.form.lastName.trim()||!this.form.teamId||!String(this.form.shirtNumber??'').trim()){this.error.set('Inserisci nome, cognome, squadra e numero di maglia.');return;}this.saving.set(true);this.error.set('');this.notice.set('');try{const old=this.players().find(p=>p.id===this.editingId());await this.service.save(id,this.form,this.teams(),old);this.notice.set(old?'Giocatore aggiornato.':'Giocatore inserito nella rosa.');this.formOpen.set(false);this.editingId.set(null);await this.load();}catch(e){console.error('Unable to save player.',e);this.error.set(e instanceof Error?e.message:'Non è stato possibile salvare il giocatore. Verifica i permessi Firestore.');}finally{this.saving.set(false);}}
