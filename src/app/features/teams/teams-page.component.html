@@ -24,9 +24,9 @@
   }
 
   @if (formOpen()) {
-    <form class="team-form" (ngSubmit)="save()">
+    <div class="fsm-form-overlay" role="presentation" (click)="cancelEdit()"><form class="team-form fsm-form-dialog" role="dialog" aria-modal="true" aria-labelledby="team-form-title" (click)="$event.stopPropagation()" (ngSubmit)="save()">
       <div class="form-heading">
-        <div><span class="eyebrow">DATI PRINCIPALI</span><h3>{{ editingId() ? 'Modifica squadra' : 'Crea una squadra' }}</h3></div>
+        <div><span class="eyebrow">DATI PRINCIPALI</span><h3 id="team-form-title">{{ editingId() ? 'Modifica squadra' : 'Crea una squadra' }}</h3></div>
         <button class="text-button" type="button" (click)="cancelEdit()">Annulla</button>
       </div>
       <div class="form-grid">
@@ -70,7 +70,7 @@
       <div class="form-actions">
         <button class="primary-button" type="submit" [disabled]="saving()">{{ saving() ? 'Salvataggio…' : (editingId() ? 'Salva modifiche' : 'Crea squadra') }}</button>
       </div>
-    </form>
+    </form></div>
   }
 
   <div class="list-toolbar">
