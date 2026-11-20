@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-20 — Match Center e interfaccia più accattivante
+
+- **Miglioramento:** trasformata la Home in un pannello prepartita con stemma della squadra selezionata, avversario modificabile, confronto VS e riepilogo di modulo, giocatori e stato della formazione. Rifiniti anche navigazione, profondità dei pannelli, intestazioni, pulsanti e riflessi LED, mantenendo invariati dati e funzioni sportive.
+
 ## 2026-11-20 — Restyling completo stile stadio LED
 
 - **Modifica:** rinnovata l'interfaccia di tutto Football Squad Manager seguendo il riferimento visivo fornito: barra superiore con logo e titolo, menu laterale con sfondo stadio, fari e pallone, cornice centrale doppia con LED azzurri, pannelli blu notte, pulsanti e menu coordinati su Home, Squadre, Giocatori e partita. Mantenute le funzionalità esistenti e la disposizione della formazione.
