@@ -162,13 +162,3 @@
 .bug-report-file-error{color:#ffb9c1}
 .release-changelog-close:focus-visible,.bug-report-close:focus-visible,.release-changelog-footer button:focus-visible,.bug-report-actions button:focus-visible{outline:2px solid #9bdab2;outline-offset:3px}
 @media(max-width:520px){.release-changelog,.bug-report-dialog{border-color:#45634e;box-shadow:0 18px 55px #000b,0 0 22px #65cb910c}}
-
-.update-banner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 18px;padding:16px 18px;border:1px solid #267db7;border-radius:14px;color:#eaf8ff;background:radial-gradient(ellipse at 0 0,#087fc044,transparent 65%),linear-gradient(125deg,#0b2b50,#061a35 72%);box-shadow:inset 0 1px #8bdfff20,0 0 22px #008fff18,0 12px 28px #0004}
-.update-banner:before{content:"";position:absolute;left:0;top:13px;bottom:13px;width:3px;border-radius:0 4px 4px 0;background:#53dcff;box-shadow:0 0 12px #53dcff}
-.update-copy{display:grid;gap:5px;min-width:0;padding-left:5px}
-.update-copy strong{color:#fff;font-size:13px;letter-spacing:.01em}
-.update-copy span{color:#a9cde4;font-size:11px;line-height:1.5}
-.update-button{min-height:40px;padding:0 16px;border:1px solid #53caff;border-radius:9px;color:#041a2d;background:linear-gradient(135deg,#9beaff,#45bff4);font:inherit;font-size:11px;font-weight:950;white-space:nowrap;cursor:pointer;box-shadow:0 0 16px #22aaff30}
-.update-button:hover:not(:disabled){filter:brightness(1.08);box-shadow:0 0 22px #22aaff50}
-.update-button:disabled{opacity:.6;cursor:wait}
-@media(max-width:560px){.update-banner{align-items:stretch;flex-direction:column;gap:12px;padding:15px}.update-button{width:100%;min-height:44px}}
