@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-20 — Ruoli automatici e restyling della gestione squadra e partita
+
+- **Miglioramento:** il ruolo principale viene aggiunto automaticamente ai ruoli in cui il giocatore può giocare; aggiornati in stile LED i selettori di capitano e vice, i moduli, le novità e il pulsante di aggiornamento, la panchina, i tempi di gioco, la conferma di fine partita e il riepilogo finale.
+- **Miglioramento:** i moduli e il conteggio della panchina sono disposti sopra le rispettive righe; i moduli di creazione di un nuovo giocatore o di una nuova squadra si aprono in finestre sovrapposte alla pagina.
+
 ## 2026-11-20 — Rifiniture dell'anagrafica e dell'interfaccia partita
 
 - **Miglioramento:** uniformata l'estetica LED del riepilogo e della conferma di fine partita e del banner di nuova versione disponibile; riordinato il campo “Ruoli in cui può giocare” sotto il ruolo principale e migliorati stile e sovrapposizione dei menu a tendina di ruolo, piede preferito e squadra nell'anagrafica giocatore.
