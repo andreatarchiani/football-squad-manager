@@ -12,7 +12,7 @@ export interface PlayerRecord {
   teamName: string; seasonLabel: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus; isCaptain: boolean; isViceCaptain: boolean; goals?: number; assists?: number; yellowCards?: number; keyPasses?: number;
 }
 export interface PlayerInput {
-  firstName: string; lastName: string; dateOfBirth: string; placeOfBirth: string; residence: string; postalCode: string; identityDocument: string; affiliationCategory: string; federationNumber: string; federationCard: string; preferredFoot: string; primaryRole: PlayerRole;
+  firstName: string; lastName: string; dateOfBirth: string; placeOfBirth: string; residence: string; postalCode: string; identityDocument: string; affiliationCategory: string; federationNumber: string; federationCard: string; keyContactPhone: string; keyContactEmail: string; preferredFoot: string; primaryRole: PlayerRole;
   notes: string; teamId: string; shirtNumber: string; roles: PlayerRole[]; status: PlayerStatus;
 }
 
