@@ -51,3 +51,17 @@
 .form-dropdown-option:hover,.form-dropdown-option.is-selected{color:#fff;background:#105184}
 .form-dropdown-option span{color:#53dcff;font-size:14px;font-weight:900}
 .form-dropdown-option:focus-visible,.form-dropdown-trigger:focus-visible{outline:2px solid #53dcff;outline-offset:2px}
+
+.player-form,.form-grid{overflow:visible}
+.form-grid{position:relative;isolation:isolate}
+.form-dropdown-field{z-index:1;min-width:0}
+.form-dropdown-field.dropdown-open{z-index:1500}
+.form-dropdown{z-index:inherit}
+.form-dropdown-menu{z-index:1600;isolation:isolate}
+.role-field{grid-column:1/-1;position:relative;z-index:0;padding:15px;border:1px solid #247db5;border-radius:12px;background:linear-gradient(145deg,#0b2038,#101b29);box-shadow:inset 0 1px #8bdfff12,0 0 14px #008fff12}
+.role-field legend{padding:0 9px;color:#8bdfff;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.role-options{display:flex;flex-wrap:wrap;gap:9px}
+.role-options label{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:0 12px;border:1px solid #285a7a;border-radius:9px;color:#d9edff;background:linear-gradient(145deg,#102b48,#0b1d34);font-size:11px;font-weight:750;cursor:pointer;transition:border-color .18s,background .18s,box-shadow .18s}
+.role-options label:has(input:checked){border-color:#35bdf2;color:#fff;background:linear-gradient(145deg,#124b70,#0d3154);box-shadow:0 0 12px #008fff26}
+.role-options input{width:16px;height:16px;margin:0;accent-color:#36c5f5}
+@media(max-width:650px){.form-grid{isolation:auto}.form-dropdown-field.dropdown-open{z-index:1500}.role-field{padding:13px}.role-options{gap:7px}.role-options label{min-height:40px}}
