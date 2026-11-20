@@ -782,3 +782,16 @@ body :is(button,a,[role="button"]):focus-visible {outline:2px solid #b9f6ff;outl
   white-space:normal;text-align:center;overflow-wrap:anywhere;
   font-size:clamp(6px,1.7vw,9px);letter-spacing:.02em;line-height:1.2;
 }
+
+
+/* Give the Home preparation badge enough width to stay on one line on mobile. */
+@media(max-width:700px) {
+  .app-shell .main-content .matchday-scoreboard {
+    grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr);
+  }
+  .app-shell .main-content .matchday-versus small {
+    width:max-content;min-width:82px;max-width:none;
+    white-space:nowrap;padding:5px 6px;
+    font-size:6.5px;letter-spacing:0;
+  }
+}
