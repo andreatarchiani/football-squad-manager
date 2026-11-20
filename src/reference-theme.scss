@@ -764,8 +764,8 @@ body :is(button,a,[role="button"]):focus-visible {outline:2px solid #b9f6ff;outl
     .release-changelog-backdrop, .bug-report-backdrop, .support-detail-backdrop,
     .match-moment-backdrop, .match-confirm-overlay
   ) {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
     background-color: #010d20f2;
   }
 }
