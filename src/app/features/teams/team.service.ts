@@ -17,7 +17,10 @@ export interface TeamRecord {
   id: string;
   name: string;
   category: string;
-  clubName: string;
+  facilityName: string;
+  facilityAddress: string;
+  headquartersAddress: string;
+  federationNumber: string;
   icon: string;
   isArchived: boolean;
   seasonId: string | null;
@@ -51,7 +54,10 @@ export interface LiveMatchState {
 export interface TeamInput {
   name: string;
   category: string;
-  clubName: string;
+  facilityName: string;
+  facilityAddress: string;
+  headquartersAddress: string;
+  federationNumber: string;
   icon: string;
   seasonLabel: string;
 }
@@ -76,7 +82,10 @@ export class TeamService {
         id: teamSnapshot.id,
         name: String(data['name'] ?? ''),
         category: String(data['category'] ?? ''),
-        clubName: String(data['clubName'] ?? ''),
+        facilityName: String(data['facilityName'] ?? ''),
+        facilityAddress: String(data['facilityAddress'] ?? ''),
+        headquartersAddress: String(data['headquartersAddress'] ?? ''),
+        federationNumber: String(data['federationNumber'] ?? ''),
         icon: String(data['icon'] ?? '⚽'),
         isArchived: data['isArchived'] === true,
         seasonId: season?.id ?? null,
@@ -164,7 +173,10 @@ export class TeamService {
     batch.set(teamRef, {
       name: input.name.trim(),
       category: input.category.trim(),
-      clubName: input.clubName.trim(),
+      facilityName: input.facilityName.trim(),
+      facilityAddress: input.facilityAddress.trim(),
+      headquartersAddress: input.headquartersAddress.trim(),
+      federationNumber: input.federationNumber.trim(),
       icon: input.icon,
       isArchived: false,
       createdAt: now,
@@ -188,7 +200,10 @@ export class TeamService {
     batch.update(teamRef, {
       name: input.name.trim(),
       category: input.category.trim(),
-      clubName: input.clubName.trim(),
+      facilityName: input.facilityName.trim(),
+      facilityAddress: input.facilityAddress.trim(),
+      headquartersAddress: input.headquartersAddress.trim(),
+      federationNumber: input.federationNumber.trim(),
       icon: input.icon,
       updatedAt: serverTimestamp()
     });
