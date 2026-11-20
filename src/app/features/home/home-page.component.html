@@ -1,12 +1,50 @@
 <section class="home-dashboard home-match-dashboard">
   @if (error()) { <p class="home-error" role="alert">{{ error() }}</p> }
   @if (loading()) { <div class="home-loading">Caricamento della rosa…</div> } @else if (selectedTeam) {
-    <section class="next-match-panel">
-      <div class="next-match-heading"><span class="eyebrow">PROSSIMA PARTITA</span><h2>La prossima sfida</h2><p>Prepara la partita indicando il nome dell’avversario.</p></div>
-      <label class="opponent-field"><span>AVVERSARIO</span><input type="text" maxlength="80" [value]="opponentName()" (input)="setOpponentName($any($event.target).value)" placeholder="Nome della squadra avversaria" autocomplete="off"></label>
+    <section class="next-match-panel matchday-hero" aria-label="Anteprima della prossima partita">
+      <div class="matchday-overline">
+        <span class="matchday-signal" aria-hidden="true"></span>
+        <span>MATCH CENTER</span>
+        <span class="matchday-season">STAGIONE {{ selectedTeam.seasonLabel || 'IN CORSO' }}</span>
+      </div>
+      <div class="next-match-heading">
+        <span class="eyebrow">PROSSIMA PARTITA</span>
+        <h2>{{ selectedTeam.category || 'La prossima sfida' }}</h2>
+        <p>Una nuova sfida da preparare.</p>
+      </div>
+      <div class="matchday-scoreboard">
+        <div class="matchday-club matchday-club-home">
+          <div class="matchday-crest">
+            @if (selectedTeam.icon.startsWith('data:image/')) {
+              <img [src]="selectedTeam.icon" alt="" />
+            } @else {
+              <span aria-hidden="true">{{ selectedTeam.icon || '⚽' }}</span>
+            }
+          </div>
+          <strong>{{ selectedTeam.name }}</strong>
+          <small>LA MIA SQUADRA</small>
+        </div>
+        <div class="matchday-versus" aria-hidden="true"><span>VS</span><small>IN PREPARAZIONE</small></div>
+        <div class="matchday-club matchday-club-away">
+          <div class="matchday-crest matchday-crest-away">
+            <svg viewBox="0 0 54 64" fill="none" aria-hidden="true" focusable="false"><path d="M27 3 49 10v20c0 14-8 24-22 31C13 54 5 44 5 30V10L27 3Z" stroke="currentColor" stroke-width="2.8"/><path d="m17 19 20 24M37 19 17 43" stroke="currentColor" stroke-width="1.5" opacity=".45"/></svg>
+          </div>
+          <strong>{{ opponentName().trim() || 'Avversario da definire' }}</strong>
+          <small>SQUADRA AVVERSARIA</small>
+        </div>
+      </div>
+      <label class="opponent-field">
+        <span>INSERISCI L’AVVERSARIO</span>
+        <input type="text" maxlength="80" [value]="opponentName()" (input)="setOpponentName($any($event.target).value)" placeholder="Nome della squadra avversaria" autocomplete="off">
+      </label>
     </section>
     <section class="home-roster-panel">
-      <div class="home-roster-heading"><div><span class="eyebrow">{{ selectedTeam.name }}</span><h2>La tua formazione</h2><p>{{ previewFormation() }} · {{ previewPlayers().length }} giocatori disponibili</p></div><button type="button" class="launch-button" (click)="start()" [disabled]="previewLoading() || !completeStartingLineup">▶ Inizia partita</button></div>
+      <div class="home-roster-heading"><div><span class="eyebrow">{{ selectedTeam.name }}</span><h2>La tua formazione</h2><p>Disposizione tattica della squadra</p></div><button type="button" class="launch-button" (click)="start()" [disabled]="previewLoading() || !completeStartingLineup">▶ Inizia partita</button></div>
+      <div class="formation-data-strip" aria-label="Riepilogo formazione">
+        <div><small>MODULO</small><strong>{{ previewFormation() }}</strong></div>
+        <div><small>GIOCATORI IN ROSA</small><strong>{{ previewPlayers().length }}</strong></div>
+        <div><small>FORMAZIONE</small><strong [class.is-ready]="completeStartingLineup">{{ completeStartingLineup ? 'PRONTA' : 'DA COMPLETARE' }}</strong></div>
+      </div>
       <div class="home-roster-actions"><button type="button" class="home-edit-roster-button" (click)="openTeams.emit({ teamId: selectedTeam.id, layoutSlot: layoutSlot() })">✎ Modifica la formazione</button></div>
       @if (previewLoading()) { <div class="preview-placeholder">Caricamento formazione…</div> }
       @else {

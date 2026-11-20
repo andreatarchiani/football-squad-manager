@@ -452,3 +452,282 @@ body :is(button,a,[role="button"]):focus-visible {outline:2px solid #b9f6ff;outl
 @media(prefers-reduced-motion:reduce) {
   .app-shell .sidebar .nav-item {transition:none!important;}
 }
+
+
+/* MATCHDAY SIGNATURE — editorial hierarchy, glass depth and controlled LED
+   accents across the shell. Gameplay and squad positioning are untouched. */
+:root {
+  --matchday-ice:#e9f8ff;
+  --matchday-blue:#21c6f5;
+  --matchday-night:#051a34;
+  --matchday-line:rgba(78,204,246,.50);
+}
+.app-shell .main-content .topbar {
+  background:
+    radial-gradient(ellipse at 81% 0%,#1165a35b,transparent 48%),
+    linear-gradient(175deg,#051d38,#020f23);
+  box-shadow:0 2px 14px #02adf847,0 16px 30px #0002;
+}
+.app-shell .main-content .topbar h1 {
+  font-weight:950;letter-spacing:-.055em;
+  text-shadow:0 2px 20px #0aa9ff4b;
+}
+.app-shell .sidebar nav:not(.mobile-bottom-nav) {gap:8px;}
+.app-shell .sidebar .nav-item {border-radius:12px;}
+.app-shell .sidebar .nav-item.active {
+  border-color:#62dfff;
+  background:
+    linear-gradient(95deg,#06395fa8 0%,#0a5b95b8 56%,#1175b9a6 100%);
+  box-shadow:inset 3px 0 #8cefff,0 0 0 1px #02a5e746,0 0 16px #02b4f770;
+}
+.app-shell .sidebar .nav-item.active::before {
+  content:"";position:absolute;top:7px;bottom:7px;left:0;width:3px;border-radius:0 6px 6px 0;
+  background:#b3f7ff;box-shadow:0 0 12px #2fdcff;pointer-events:none;
+}
+.app-shell .sidebar .nav-icon {transition:transform .18s ease;}
+.app-shell .sidebar .nav-item:not(:disabled):hover .nav-icon {transform:translateX(2px);}
+.app-shell .main-content .stadium-frame {
+  background:
+    radial-gradient(ellipse 75% 34% at 50% 0%,#0a569161,transparent 81%),
+    linear-gradient(165deg,#02152b82,#031125e0 58%,#031125f4),
+    url('/stadium-backdrop.svg') center / cover no-repeat,
+    #061a35;
+}
+.app-shell .main-content .stadium-frame::before {
+  border-color:#2dd2fb;
+  box-shadow:0 0 8px #0ed5ffb8,inset 0 0 12px #0d81d656;
+}
+.app-shell .main-content .stadium-frame :is(.next-match-panel,.home-roster-panel,.team-card,.player-card) {
+  transition:border-color .2s ease,box-shadow .2s ease;
+}
+.app-shell .main-content .stadium-frame :is(.team-card,.player-card):hover {
+  border-color:#75dcfa;
+  box-shadow:0 0 0 1px #28bbf45b,0 0 20px #079df252,0 18px 30px #0009;
+}
+.app-shell .main-content .stadium-frame .page-heading {
+  position:relative;min-height:85px;padding-bottom:20px;margin-bottom:8px;
+  border-bottom:1px solid #39b8ee60;
+}
+.app-shell .main-content .stadium-frame .page-heading h2 {
+  font-size:clamp(25px,3vw,35px);letter-spacing:-.045em;
+}
+.app-shell .main-content .stadium-frame .page-heading p {font-size:13px;}
+.app-shell .main-content .stadium-frame .page-heading::after {
+  content:"";position:absolute;bottom:0;left:0;width:120px;height:2px;
+  background:linear-gradient(90deg,#31d8ff,transparent);
+  box-shadow:0 0 9px #13baff90;pointer-events:none;
+}
+.app-shell .main-content .stadium-frame .team-emblem {
+  border-radius:15px;box-shadow:0 0 19px #0a9eff48,inset 0 0 12px #90edff1c;
+}
+.app-shell .main-content .stadium-frame :is(.team-card,.player-card) .team-details h3,
+.app-shell .main-content .stadium-frame :is(.team-card,.player-card) .player-details h3 {
+  color:#fff;text-shadow:0 0 8px #0c85dd42;font-weight:900;
+}
+.app-shell .main-content .stadium-frame .player-statistics {
+  gap:7px;
+}
+.app-shell .main-content .stadium-frame .player-statistics span {
+  border-radius:9px;box-shadow:inset 0 1px #b7f5ff16;
+}
+.app-shell .main-content .stadium-frame .list-toolbar {
+  padding:13px 16px;border:1px solid #1468978c;border-radius:12px;
+  background:#051d39b8;
+}
+
+/* Home hero: authentic match-programme treatment instead of a plain input card. */
+.app-shell .main-content .home-match-dashboard {gap:22px;}
+.app-shell .main-content .stadium-frame .matchday-hero {
+  overflow:hidden;position:relative;
+  padding:24px clamp(17px,3vw,36px) 28px;
+  background:
+    radial-gradient(ellipse 53% 95% at 50% 7%,#0e6cab68,transparent 84%),
+    linear-gradient(160deg,#092f55f5,#03142df8 65%,#051e3af2);
+}
+.app-shell .main-content .matchday-hero::after {
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(115deg,transparent 17%,#62e9ff08 50%,transparent 84%);
+}
+.app-shell .main-content .matchday-hero > * {position:relative;z-index:1;}
+.app-shell .main-content .matchday-overline {
+  display:flex;align-items:center;gap:8px;min-height:25px;
+  color:#9fddf5;font-size:10px;font-weight:900;letter-spacing:.19em;
+}
+.app-shell .main-content .matchday-signal {
+  flex:0 0 8px;width:8px;height:8px;border-radius:50%;
+  background:#55d9ff;box-shadow:0 0 0 4px #03affc25,0 0 10px #00c6ffbd;
+}
+.app-shell .main-content .matchday-season {
+  margin-left:auto;font-size:10px;letter-spacing:.13em;
+  color:#c5e9f7;background:#082a4a;border:1px solid #2d80ad9c;
+  border-radius:999px;padding:6px 12px;
+}
+.app-shell .main-content .matchday-hero .next-match-heading {
+  padding:8px 0 17px;margin:0;text-align:center;border-bottom:0;
+}
+.app-shell .main-content .matchday-hero .next-match-heading .eyebrow {
+  justify-content:center;color:#6fe5ff;font-size:11px;
+}
+.app-shell .main-content .matchday-hero .next-match-heading h2 {
+  margin:8px 0 4px;font-size:clamp(23px,3.4vw,38px);
+  line-height:1.12;text-transform:uppercase;letter-spacing:.015em;
+  text-shadow:0 0 18px #15a6ef6b;
+}
+.app-shell .main-content .matchday-hero .next-match-heading p {
+  font-size:12px;color:#8eb9d4;
+}
+.app-shell .main-content .matchday-scoreboard {
+  display:grid;grid-template-columns:minmax(0,1fr) 115px minmax(0,1fr);
+  align-items:center;gap:12px;max-width:930px;margin:1px auto 0;padding:24px 20px;
+  border-top:1px solid #0e82b65c;border-bottom:1px solid #0e82b65c;
+  background:linear-gradient(90deg,#041b36b5,#0c3e5b34 50%,#041b36b5);
+}
+.app-shell .main-content .matchday-club {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;min-width:0;text-align:center;
+}
+.app-shell .main-content .matchday-crest {
+  width:85px;height:92px;display:grid;place-items:center;overflow:hidden;
+  border:1px solid #74d9fd;border-radius:22px 22px 29px 29px;
+  background:radial-gradient(circle at 50% 20%,#145a9a,#062447 75%);
+  box-shadow:inset 0 1px 12px #c6f9ff34,0 0 16px #019aff77;
+  font-size:43px;line-height:1;
+}
+.app-shell .main-content .matchday-crest img {
+  width:100%;height:100%;display:block;object-fit:cover;
+}
+.app-shell .main-content .matchday-crest-away {
+  border-color:#b77c9c;background:radial-gradient(circle at 50% 20%,#662a54,#271c39 78%);
+  color:#efb3c4;box-shadow:inset 0 1px 10px #ffc9e727,0 0 13px #b054824a;
+}
+.app-shell .main-content .matchday-crest-away svg {width:52px;height:60px;}
+.app-shell .main-content .matchday-club strong {
+  font-size:clamp(14px,1.7vw,21px);font-weight:950;
+  text-transform:uppercase;letter-spacing:-.018em;line-height:1.2;
+  overflow-wrap:anywhere;text-wrap:balance;color:#f9fbff;
+}
+.app-shell .main-content .matchday-club small {
+  font-size:9px;color:#8ebcda;letter-spacing:.14em;font-weight:800;
+}
+.app-shell .main-content .matchday-versus {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  color:#fff;align-self:stretch;
+}
+.app-shell .main-content .matchday-versus span {
+  font-size:clamp(32px,4.3vw,56px);font-weight:1000;
+  font-style:italic;letter-spacing:-.07em;
+  text-shadow:0 0 20px #18a8f6a5;
+}
+.app-shell .main-content .matchday-versus small {
+  display:inline-block;white-space:nowrap;
+  padding:6px 8px;border:1px solid #227aa2;border-radius:6px;
+  font-size:9px;letter-spacing:.08em;color:#b5d9e8;
+  background:#062744b8;font-weight:850;
+}
+.app-shell .main-content .matchday-hero .opponent-field {
+  max-width:660px;margin:18px auto 0;gap:9px;
+  text-align:center;
+}
+.app-shell .main-content .matchday-hero .opponent-field span {
+  color:#96cbe1;font-size:10px;font-weight:900;
+}
+.app-shell .main-content .matchday-hero .opponent-field input {
+  min-height:48px;text-align:center;font-size:14px;
+  border-color:#277fa8;background:#03182fe5;box-shadow:inset 0 1px 7px #0007;
+}
+.app-shell .main-content .matchday-hero .opponent-field input:focus {
+  border-color:#63d8fc;box-shadow:0 0 0 3px #19abef32;
+}
+.app-shell .main-content .stadium-frame .home-roster-panel {
+  background:linear-gradient(165deg,#082b4af0,#04162af7 65%,#061e39f2);
+}
+.app-shell .main-content .stadium-frame .home-roster-heading {margin-bottom:14px;}
+.app-shell .main-content .stadium-frame .home-roster-heading h2 {font-size:clamp(22px,3vw,32px);}
+.app-shell .main-content .formation-data-strip {
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;margin:0 0 18px;
+}
+.app-shell .main-content .formation-data-strip > div {
+  display:flex;flex-direction:column;justify-content:center;gap:4px;
+  min-height:72px;min-width:0;padding:11px 15px;
+  border:1px solid #126899;border-radius:11px;
+  background:linear-gradient(145deg,#0b3d65,#051e3b);
+  box-shadow:inset 0 1px #b9efff19;
+}
+.app-shell .main-content .formation-data-strip small {
+  color:#93c0d8;font-size:9px;font-weight:850;letter-spacing:.08em;
+}
+.app-shell .main-content .formation-data-strip strong {
+  color:#e1f8ff;font-size:clamp(13px,1.7vw,22px);font-weight:950;
+  overflow-wrap:anywhere;line-height:1.15;
+}
+.app-shell .main-content .formation-data-strip strong.is-ready {
+  color:#83e7c5;text-shadow:0 0 9px #2eeac054;
+}
+.app-shell .main-content .home-roster-actions {
+  margin:3px auto 20px;padding:0;
+}
+.app-shell .main-content .home-pitch-stage {
+  position:relative;overflow:hidden;
+  padding:26px 12px 34px;
+  background:
+    radial-gradient(ellipse at 50% 16%,#0d62923f,transparent 67%),
+    linear-gradient(145deg,#051c3a,#03172e);
+}
+.app-shell .main-content .home-pitch-stage::before {
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(110deg,transparent 0 70px,#d2faff07 71px,transparent 73px);
+}
+.app-shell .main-content .home-football-pitch {
+  position:relative;box-shadow:0 24px 45px #000b,0 0 24px #03b5ff3a,inset 0 0 32px #07271d;
+}
+.app-shell .main-content .home-edit-roster-button,
+.app-shell .main-content .launch-button {
+  min-height:48px;transition:filter .2s,box-shadow .2s,transform .2s;
+}
+.app-shell .main-content .launch-button:not(:disabled):hover,
+.app-shell .main-content .home-edit-roster-button:hover {
+  transform:translateY(-1px);
+}
+
+/* Voice, live match and manager pages gain the same restrained broadcast finish. */
+.app-shell .main-content .stadium-frame :is(.roster-panel,.tactical-panel,.match-pitch-wrap,.match-controls-panel) {
+  background:
+    radial-gradient(ellipse at 50% 0,#0c5d9340,transparent 78%),
+    linear-gradient(145deg,#082e51,#04182f 75%);
+}
+.app-shell .main-content .stadium-frame .live-match .match-topbar {
+  border-width:1px;box-shadow:0 0 0 1px #17b4f54d,0 0 20px #0199e866,0 16px 30px #0008;
+}
+.app-shell .main-content .stadium-frame :is(.sort-picker-trigger,.formation-picker-trigger,.captaincy-dropdown) {
+  transition:border-color .18s ease,box-shadow .18s ease;
+}
+@media(max-width:850px) {
+  .app-shell .main-content .matchday-scoreboard {grid-template-columns:minmax(0,1fr) 82px minmax(0,1fr);padding:18px 10px;}
+  .app-shell .main-content .matchday-crest {width:72px;height:78px;font-size:36px;}
+  .app-shell .main-content .matchday-versus small {font-size:8px;}
+}
+@media(max-width:700px) {
+  .app-shell .main-content .matchday-hero {padding:17px 13px 21px;}
+  .app-shell .main-content .matchday-overline {font-size:9px;letter-spacing:.08em;}
+  .app-shell .main-content .matchday-season {font-size:8px;padding:5px 8px;}
+  .app-shell .main-content .matchday-scoreboard {grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr);gap:5px;padding:19px 2px;}
+  .app-shell .main-content .matchday-crest {width:59px;height:64px;border-radius:14px 14px 20px 20px;font-size:28px;}
+  .app-shell .main-content .matchday-crest-away svg {width:40px;height:46px;}
+  .app-shell .main-content .matchday-versus span {font-size:34px;}
+  .app-shell .main-content .matchday-versus small {font-size:7px;white-space:normal;max-width:58px;line-height:1.2;}
+  .app-shell .main-content .matchday-club strong {font-size:clamp(11px,3.2vw,15px);}
+  .app-shell .main-content .matchday-club small {font-size:8px;letter-spacing:0;}
+  .app-shell .main-content .formation-data-strip {gap:6px;}
+  .app-shell .main-content .formation-data-strip > div {min-height:63px;padding:8px;}
+  .app-shell .main-content .formation-data-strip small {font-size:8px;}
+  .app-shell .main-content .formation-data-strip strong {font-size:clamp(10px,3vw,14px);}
+  .app-shell .main-content .stadium-frame .page-heading {align-items:flex-start;}
+  .app-shell .main-content .stadium-frame .page-heading h2 {font-size:25px;}
+  .app-shell .main-content .stadium-frame .page-heading::after {width:77px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .app-shell .sidebar .nav-icon,
+  .app-shell .main-content .stadium-frame :is(.next-match-panel,.home-roster-panel,.team-card,.player-card),
+  .app-shell .main-content :is(.launch-button,.home-edit-roster-button) {transition:none!important;}
+}
