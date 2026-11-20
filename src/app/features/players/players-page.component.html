@@ -3,14 +3,14 @@
  @if(error()){<div class="feedback error" role="alert">{{error()}}</div>} @if(notice()){<div class="feedback success" role="status">{{notice()}}</div>}
  @if(activeTeams.length===0&&!loading()){<div class="empty-state"><div class="empty-icon">⚑</div><h3>Prima crea una squadra</h3><p>Per inserire un giocatore serve una squadra con una stagione attiva. Vai in Squadre e crea la tua prima squadra.</p></div>}
  @if(formOpen()){
- <form class="player-form" (ngSubmit)="save()"><div class="form-heading"><div><span class="eyebrow">ANAGRAFICA</span><h3>{{editingId()?'Modifica giocatore':'Nuovo giocatore'}}</h3></div><button class="text-button" type="button" (click)="cancel()">Annulla</button></div>
+ <form class="player-form" autocomplete="off" (ngSubmit)="save()"><div class="form-heading"><div><span class="eyebrow">ANAGRAFICA</span><h3>{{editingId()?'Modifica giocatore':'Nuovo giocatore'}}</h3></div><button class="text-button" type="button" (click)="cancel()">Annulla</button></div>
  <div class="form-grid">
- <label>Nome *<input name="firstName" [(ngModel)]="form.firstName" required maxlength="50" autocomplete="given-name" placeholder="Nome"></label>
- <label>Cognome *<input name="lastName" [(ngModel)]="form.lastName" required maxlength="50" autocomplete="family-name" placeholder="Cognome"></label>
+ <label>Nome *<input name="firstName" [(ngModel)]="form.firstName" required maxlength="50" placeholder="Nome"></label>
+ <label>Cognome *<input name="lastName" [(ngModel)]="form.lastName" required maxlength="50" placeholder="Cognome"></label>
  <label>Data di nascita<input name="dateOfBirth" type="date" [(ngModel)]="form.dateOfBirth"></label>
- <label class="autocomplete-field">Luogo di nascita<input name="placeOfBirth" [ngModel]="form.placeOfBirth" (ngModelChange)="onBirthPlaceInput($event)" (blur)="birthPlaceSuggestions.set([])" maxlength="100" autocomplete="off" placeholder="Inizia a scrivere il comune">@if(birthPlaceSuggestions().length){<div class="autocomplete-options">@for(item of birthPlaceSuggestions();track item.label){<button type="button" (mousedown)="$event.preventDefault()" (click)="selectPlace(item,'birth')">{{item.label}}</button>}</div>}</label>
- <label class="autocomplete-field">Residenza<input name="residence" [ngModel]="form.residence" (ngModelChange)="onResidenceInput($event)" (blur)="residenceSuggestions.set([])" maxlength="160" autocomplete="street-address" placeholder="Cerca via o comune">@if(residenceSuggestions().length){<div class="autocomplete-options">@for(item of residenceSuggestions();track item.label){<button type="button" (mousedown)="$event.preventDefault()" (click)="selectPlace(item,'residence')">{{item.label}}</button>}</div>}</label>
- <label>CAP<input name="postalCode" [(ngModel)]="form.postalCode" maxlength="10" inputmode="numeric" autocomplete="postal-code" placeholder="CAP"></label>
+ <label>Luogo di nascita<input name="placeOfBirth" [(ngModel)]="form.placeOfBirth" maxlength="100" placeholder="Comune di nascita"></label>
+ <label>Residenza<input name="residence" [(ngModel)]="form.residence" maxlength="160" placeholder="Indirizzo di residenza"></label>
+ <label>CAP<input name="postalCode" [(ngModel)]="form.postalCode" maxlength="10" inputmode="numeric" placeholder="CAP"></label>
  <label>Documento d'identità<input name="identityDocument" [(ngModel)]="form.identityDocument" maxlength="80" placeholder="Tipo e numero documento"></label>
  <label>Categoria di appartenenza<input name="affiliationCategory" [(ngModel)]="form.affiliationCategory" maxlength="80" placeholder="Es. Juniores U19"></label>
  <label>Ruolo principale<select name="primaryRole" [(ngModel)]="form.primaryRole"><option>Portiere</option><option>Difensore</option><option>Centrocampista</option><option>Attaccante</option></select></label>
@@ -18,8 +18,8 @@
  <label>Matricola federale<input name="federationNumber" [(ngModel)]="form.federationNumber" maxlength="50" placeholder="Matricola FIGC"></label>
  <label>Tessera federale<input name="federationCard" [(ngModel)]="form.federationCard" maxlength="80" placeholder="Numero tessera"></label>
  <div class="wide"><strong>Contatti chiave</strong></div>
- <label>Numero di telefono<input name="keyContactPhone" type="tel" [(ngModel)]="form.keyContactPhone" maxlength="30" autocomplete="tel" placeholder="Telefono del contatto di riferimento"></label>
- <label>Email<input name="keyContactEmail" type="email" [(ngModel)]="form.keyContactEmail" maxlength="120" autocomplete="email" placeholder="Email del contatto di riferimento"></label>
+ <label>Numero di telefono<input name="keyContactPhone" type="tel" [(ngModel)]="form.keyContactPhone" maxlength="30" placeholder="Telefono del contatto di riferimento"></label>
+ <label>Email<input name="keyContactEmail" type="email" [(ngModel)]="form.keyContactEmail" maxlength="120" placeholder="Email del contatto di riferimento"></label>
  <label>Piede preferito<select name="preferredFoot" [(ngModel)]="form.preferredFoot"><option value="">Non specificato</option><option>Destro</option><option>Sinistro</option><option>Ambidestro</option></select></label>
  <label>Squadra *<select name="teamId" [ngModel]="form.teamId" (ngModelChange)="onTeamChange($event)" required>@for(team of activeTeams;track team.id){<option [value]="team.id">{{team.name}} · {{team.seasonLabel}}</option>}</select></label>
  <label>Stato<select name="status" [(ngModel)]="form.status"><option value="active">In rosa</option><option value="injured">Infortunato</option><option value="suspended">Squalificato</option><option value="left">Fuori rosa</option></select></label>
