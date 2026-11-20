@@ -254,3 +254,26 @@
 /* Keep captain and vice-captain marks on the same line as the shirt name. */
 .match-player-label.pitch-player-name { flex-wrap: nowrap; width: max-content; max-width: none; white-space: nowrap; }
 .match-leadership-mark { flex: 0 0 auto; }
+
+.match-report-backdrop,.match-finish-confirm-backdrop{background:radial-gradient(ellipse at 50% 0%,#087fc033,transparent 60%),#030b16e8;backdrop-filter:blur(12px)}
+.match-report-panel{border:1px solid #267db7;border-radius:20px;background:linear-gradient(150deg,#0b2b4e 0%,#071a31 48%,#07111f 100%);box-shadow:0 24px 85px #000c,0 0 30px #008fff20}
+.match-report-header{border-bottom-color:#2588c544;background:radial-gradient(ellipse at 0 0,#087fc033,transparent 72%)}
+.match-report-header span,.match-report-event time{color:#53dcff}
+.match-report-header h2,.match-report-events-heading strong{color:#f0f9ff}
+.match-report-header p,.match-report-stats span{color:#9ebbd0}
+.match-report-header>button{border-color:#267db766;background:#0b2743;color:#dff6ff}
+.match-report-stats article{border-color:#267db755;background:linear-gradient(145deg,#0c2a48,#091b31)}
+.match-report-stats strong{color:#69d8ff;text-shadow:0 0 12px #008fff35}
+.match-report-event{border-bottom-color:#267db733}
+.match-report-event p{color:#e1f0fa}
+.match-report-event button{border-color:#2588c5;background:#10456d;color:#eaf8ff}
+.match-report-event button.delete-event{border-color:#9c5363;background:#402536;color:#ffe8ee}
+.match-report-actions{border-top-color:#267db744}
+.share-match-report{border:1px solid #53caff;background:linear-gradient(135deg,#1b83bd,#10517f);color:#fff;box-shadow:0 0 16px #008fff20}
+.exit-match-report{border:1px solid #267db7;background:#0b2743;color:#dff3ff}
+.match-finish-confirm{border:1px solid #267db7;border-radius:18px;background:linear-gradient(150deg,#0b2b4e,#07172b 72%);box-shadow:0 24px 85px #000c,0 0 28px #008fff20}
+.finish-confirm-eyebrow{color:#53dcff}
+.match-finish-confirm h2{color:#f0f9ff}
+.match-finish-confirm p{color:#a9cde4}
+.finish-confirm-cancel{border:1px solid #267db7;background:#0b2743;color:#dff3ff}
+.finish-confirm-yes{border:1px solid #53caff;background:linear-gradient(135deg,#1686c2,#075080);color:#fff;box-shadow:0 0 16px #008fff25}
