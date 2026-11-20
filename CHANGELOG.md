@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-20 — Restyling completo stile stadio LED
+
+- **Modifica:** rinnovata l'interfaccia di tutto Football Squad Manager seguendo il riferimento visivo fornito: barra superiore con logo e titolo, menu laterale con sfondo stadio, fari e pallone, cornice centrale doppia con LED azzurri, pannelli blu notte, pulsanti e menu coordinati su Home, Squadre, Giocatori e partita. Mantenute le funzionalità esistenti e la disposizione della formazione.
+
 ## 2026-11-20 — Interfaccia futuristica con LED
 
 - **Miglioramento:** aggiunti sottili effetti LED ai bordi dei pannelli, ai menu desktop e mobile, ai pulsanti, ai selettori e al tabellone della partita; introdotte superfici vetro scuro e animazioni lente con rispetto della preferenza di movimento ridotto, mantenendo la palette sobria e senza modificare le funzionalità.
