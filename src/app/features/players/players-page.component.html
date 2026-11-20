@@ -8,8 +8,8 @@
  <label>Nome *<input name="firstName" [(ngModel)]="form.firstName" required maxlength="50" autocomplete="given-name" placeholder="Nome"></label>
  <label>Cognome *<input name="lastName" [(ngModel)]="form.lastName" required maxlength="50" autocomplete="family-name" placeholder="Cognome"></label>
  <label>Data di nascita<input name="dateOfBirth" type="date" [(ngModel)]="form.dateOfBirth"></label>
- <label>Luogo di nascita<input name="placeOfBirth" [(ngModel)]="form.placeOfBirth" maxlength="100" placeholder="Comune di nascita"></label>
- <label>Residenza<input name="residence" [(ngModel)]="form.residence" maxlength="120" placeholder="Comune e indirizzo"></label>
+ <label class="autocomplete-field">Luogo di nascita<input name="placeOfBirth" [ngModel]="form.placeOfBirth" (ngModelChange)="onBirthPlaceInput($event)" (blur)="birthPlaceSuggestions.set([])" maxlength="100" autocomplete="off" placeholder="Inizia a scrivere il comune">@if(birthPlaceSuggestions().length){<div class="autocomplete-options">@for(item of birthPlaceSuggestions();track item.label){<button type="button" (mousedown)="$event.preventDefault()" (click)="selectPlace(item,'birth')">{{item.label}}</button>}</div>}</label>
+ <label class="autocomplete-field">Residenza<input name="residence" [ngModel]="form.residence" (ngModelChange)="onResidenceInput($event)" (blur)="residenceSuggestions.set([])" maxlength="160" autocomplete="street-address" placeholder="Cerca via o comune">@if(residenceSuggestions().length){<div class="autocomplete-options">@for(item of residenceSuggestions();track item.label){<button type="button" (mousedown)="$event.preventDefault()" (click)="selectPlace(item,'residence')">{{item.label}}</button>}</div>}</label>
  <label>CAP<input name="postalCode" [(ngModel)]="form.postalCode" maxlength="10" inputmode="numeric" autocomplete="postal-code" placeholder="CAP"></label>
  <label>Documento d'identità<input name="identityDocument" [(ngModel)]="form.identityDocument" maxlength="80" placeholder="Tipo e numero documento"></label>
  <label>Categoria di appartenenza<input name="affiliationCategory" [(ngModel)]="form.affiliationCategory" maxlength="80" placeholder="Es. Juniores U19"></label>
@@ -21,7 +21,7 @@
  <label>Numero di telefono<input name="keyContactPhone" type="tel" [(ngModel)]="form.keyContactPhone" maxlength="30" autocomplete="tel" placeholder="Telefono del contatto di riferimento"></label>
  <label>Email<input name="keyContactEmail" type="email" [(ngModel)]="form.keyContactEmail" maxlength="120" autocomplete="email" placeholder="Email del contatto di riferimento"></label>
  <label>Piede preferito<select name="preferredFoot" [(ngModel)]="form.preferredFoot"><option value="">Non specificato</option><option>Destro</option><option>Sinistro</option><option>Ambidestro</option></select></label>
- <label>Squadra *<select name="teamId" [(ngModel)]="form.teamId" required>@for(team of activeTeams;track team.id){<option [value]="team.id">{{team.name}} · {{team.seasonLabel}}</option>}</select></label>
+ <label>Squadra *<select name="teamId" [ngModel]="form.teamId" (ngModelChange)="onTeamChange($event)" required>@for(team of activeTeams;track team.id){<option [value]="team.id">{{team.name}} · {{team.seasonLabel}}</option>}</select></label>
  <label>Stato<select name="status" [(ngModel)]="form.status"><option value="active">In rosa</option><option value="injured">Infortunato</option><option value="suspended">Squalificato</option><option value="left">Fuori rosa</option></select></label>
  <fieldset class="role-field wide"><legend>Ruoli in cui può giocare</legend><div class="role-options">@for(role of roles;track role){<label><input type="checkbox" [checked]="form.roles.includes(role)" (change)="toggleRole(role,$any($event.target).checked)"> {{role}}</label>}</div></fieldset>
  <label class="wide">Note<textarea name="notes" [(ngModel)]="form.notes" maxlength="500" rows="3" placeholder="Informazioni utili (facoltative)"></textarea></label>
