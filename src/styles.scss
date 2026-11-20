@@ -571,3 +571,38 @@ body {
 @media(prefers-reduced-motion:reduce){
   .nav-item,.stat-card,.player-card,.team-card {transition:none;}
 }
+
+/* Shared LED styling kept global to stay within component stylesheet budgets. */
+
+.update-banner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 18px;padding:16px 18px;border:1px solid #267db7;border-radius:14px;color:#eaf8ff;background:radial-gradient(ellipse at 0 0,#087fc044,transparent 65%),linear-gradient(125deg,#0b2b50,#061a35 72%);box-shadow:inset 0 1px #8bdfff20,0 0 22px #008fff18,0 12px 28px #0004}
+.update-banner:before{content:"";position:absolute;left:0;top:13px;bottom:13px;width:3px;border-radius:0 4px 4px 0;background:#53dcff;box-shadow:0 0 12px #53dcff}
+.update-copy{display:grid;gap:5px;min-width:0;padding-left:5px}
+.update-copy strong{color:#fff;font-size:13px;letter-spacing:.01em}
+.update-copy span{color:#a9cde4;font-size:11px;line-height:1.5}
+.update-button{min-height:40px;padding:0 16px;border:1px solid #53caff;border-radius:9px;color:#041a2d;background:linear-gradient(135deg,#9beaff,#45bff4);font:inherit;font-size:11px;font-weight:950;white-space:nowrap;cursor:pointer;box-shadow:0 0 16px #22aaff30}
+.update-button:hover:not(:disabled){filter:brightness(1.08);box-shadow:0 0 22px #22aaff50}
+.update-button:disabled{opacity:.6;cursor:wait}
+@media(max-width:560px){.update-banner{align-items:stretch;flex-direction:column;gap:12px;padding:15px}.update-button{width:100%;min-height:44px}}
+
+.match-report-backdrop,.match-finish-confirm-backdrop{background:radial-gradient(ellipse at 50% 0%,#087fc033,transparent 60%),#030b16e8;backdrop-filter:blur(12px)}
+.match-report-panel{border:1px solid #267db7;border-radius:20px;background:linear-gradient(150deg,#0b2b4e 0%,#071a31 48%,#07111f 100%);box-shadow:0 24px 85px #000c,0 0 30px #008fff20}
+.match-report-header{border-bottom-color:#2588c544;background:radial-gradient(ellipse at 0 0,#087fc033,transparent 72%)}
+.match-report-header span,.match-report-event time{color:#53dcff}
+.match-report-header h2,.match-report-events-heading strong{color:#f0f9ff}
+.match-report-header p,.match-report-stats span{color:#9ebbd0}
+.match-report-header>button{border-color:#267db766;background:#0b2743;color:#dff6ff}
+.match-report-stats article{border-color:#267db755;background:linear-gradient(145deg,#0c2a48,#091b31)}
+.match-report-stats strong{color:#69d8ff;text-shadow:0 0 12px #008fff35}
+.match-report-event{border-bottom-color:#267db733}
+.match-report-event p{color:#e1f0fa}
+.match-report-event button{border-color:#2588c5;background:#10456d;color:#eaf8ff}
+.match-report-event button.delete-event{border-color:#9c5363;background:#402536;color:#ffe8ee}
+.match-report-actions{border-top-color:#267db744}
+.share-match-report{border:1px solid #53caff;background:linear-gradient(135deg,#1b83bd,#10517f);color:#fff;box-shadow:0 0 16px #008fff20}
+.exit-match-report{border:1px solid #267db7;background:#0b2743;color:#dff3ff}
+.match-finish-confirm{border:1px solid #267db7;border-radius:18px;background:linear-gradient(150deg,#0b2b4e,#07172b 72%);box-shadow:0 24px 85px #000c,0 0 28px #008fff20}
+.finish-confirm-eyebrow{color:#53dcff}
+.match-finish-confirm h2{color:#f0f9ff}
+.match-finish-confirm p{color:#a9cde4}
+.finish-confirm-cancel{border:1px solid #267db7;background:#0b2743;color:#dff3ff}
+.finish-confirm-yes{border:1px solid #53caff;background:linear-gradient(135deg,#1686c2,#075080);color:#fff;box-shadow:0 0 16px #008fff25}
