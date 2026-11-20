@@ -10,7 +10,6 @@ import { NotificationHostComponent } from './core/notifications/notification-hos
 import { AuthPageComponent } from './features/auth/auth-page.component';
 import { TeamsPageComponent } from './features/teams/teams-page.component';
 import { PlayersPageComponent } from './features/players/players-page.component';
-import { VoiceAssistantComponent } from './features/voice-assistant/voice-assistant.component';
 import { HomePageComponent } from './features/home/home-page.component';
 import type { TeamRecord } from './features/teams/team.service';
 import type { PlayerRecord } from './features/players/player.service';
@@ -24,7 +23,7 @@ interface SupportTicket { id: string; authorEmail: string; authorName: string; d
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [DatePipe, MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, VoiceAssistantComponent, HomePageComponent, NotificationHostComponent],
+  imports: [DatePipe, MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, NotificationHostComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
