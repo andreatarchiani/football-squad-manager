@@ -773,3 +773,12 @@ body :is(button,a,[role="button"]):focus-visible {outline:2px solid #b9f6ff;outl
 @media (hover: none) and (pointer: coarse) {
   body { background-attachment: scroll; }
 }
+
+
+/* Keep the Home match status badge inside the narrow VS column on phones. */
+.app-shell .main-content .matchday-versus{min-width:0;max-width:100%}
+.app-shell .main-content .matchday-versus small{
+  box-sizing:border-box;max-width:100%;padding:5px 3px;
+  white-space:normal;text-align:center;overflow-wrap:anywhere;
+  font-size:clamp(6px,1.7vw,9px);letter-spacing:.02em;line-height:1.2;
+}
