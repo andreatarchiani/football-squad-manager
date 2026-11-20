@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-20 — Interfaccia futuristica con LED
+
+- **Miglioramento:** aggiunti sottili effetti LED ai bordi dei pannelli, ai menu desktop e mobile, ai pulsanti, ai selettori e al tabellone della partita; introdotte superfici vetro scuro e animazioni lente con rispetto della preferenza di movimento ridotto, mantenendo la palette sobria e senza modificare le funzionalità.
+
 ## 2026-11-20 — Colori più equilibrati
 
 - **Miglioramento:** ridotta la saturazione della grafica Stadium in tutta l'app, con blu notte e blu petrolio più morbidi, rossi meno intensi, bordi discreti e ombre più leggere per menu, pulsanti, pannelli, selettori e schermata partita, mantenendo invariata la struttura e le funzionalità.
