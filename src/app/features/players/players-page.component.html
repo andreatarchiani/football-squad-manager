@@ -17,6 +17,9 @@
  <label>Numero maglia * (1–99)<input name="shirtNumber" type="number" [(ngModel)]="form.shirtNumber" min="1" max="99" inputmode="numeric" required placeholder="Es. 10"></label>
  <label>Matricola federale<input name="federationNumber" [(ngModel)]="form.federationNumber" maxlength="50" placeholder="Matricola FIGC"></label>
  <label>Tessera federale<input name="federationCard" [(ngModel)]="form.federationCard" maxlength="80" placeholder="Numero tessera"></label>
+ <div class="wide"><strong>Contatti chiave</strong></div>
+ <label>Numero di telefono<input name="keyContactPhone" type="tel" [(ngModel)]="form.keyContactPhone" maxlength="30" autocomplete="tel" placeholder="Telefono del contatto di riferimento"></label>
+ <label>Email<input name="keyContactEmail" type="email" [(ngModel)]="form.keyContactEmail" maxlength="120" autocomplete="email" placeholder="Email del contatto di riferimento"></label>
  <label>Piede preferito<select name="preferredFoot" [(ngModel)]="form.preferredFoot"><option value="">Non specificato</option><option>Destro</option><option>Sinistro</option><option>Ambidestro</option></select></label>
  <label>Squadra *<select name="teamId" [(ngModel)]="form.teamId" required>@for(team of activeTeams;track team.id){<option [value]="team.id">{{team.name}} · {{team.seasonLabel}}</option>}</select></label>
  <label>Stato<select name="status" [(ngModel)]="form.status"><option value="active">In rosa</option><option value="injured">Infortunato</option><option value="suspended">Squalificato</option><option value="left">Fuori rosa</option></select></label>
