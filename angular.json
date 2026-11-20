@@ -22,7 +22,8 @@
             "styles": [
               "node_modules/@angular/material/prebuilt-themes/purple-green.css",
               "src/styles.scss",
-              "src/stadium-theme.scss"
+              "src/stadium-theme.scss",
+              "src/reference-theme.scss"
             ],
             "serviceWorker": "ngsw-config.json"
           },
