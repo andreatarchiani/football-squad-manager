@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-20 — Anagrafica squadre e moduli di modifica
+
+- **Miglioramento:** spostati i Contatti chiave subito sotto il Documento d’identità nell’anagrafica giocatore; le finestre sovrapposte sono ora utilizzate anche per modificare giocatori e squadre.
+- **Miglioramento:** ampliata la scheda squadra con categoria, nome squadra, nome e indirizzo dell’impianto, indirizzo della sede, matricola federale e logo, mantenendo la stagione sportiva.
+
 ## 2026-11-20 — Ruoli automatici e restyling della gestione squadra e partita
 
 - **Miglioramento:** il ruolo principale viene aggiunto automaticamente ai ruoli in cui il giocatore può giocare; aggiornati in stile LED i selettori di capitano e vice, i moduli, le novità e il pulsante di aggiornamento, la panchina, i tempi di gioco, la conferma di fine partita e il riepilogo finale.
