@@ -18,3 +18,19 @@
 
 .player-statistics{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}.player-statistics span{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border:1px solid #34433d;border-radius:7px;color:#b8c8c0;background:#192720;font-size:10px}.player-statistics strong{color:#a9e7c2;font-size:13px;font-weight:800}
 .mobile-nav-icon svg{display:block;width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+
+/* Dropdown "Ordina per": mantiene le opzioni sopra il contenuto della lista. */
+.list-toolbar{position:relative;z-index:5;min-width:0}
+.list-toolbar-actions{position:relative;z-index:6;min-width:0}
+.sort-picker{position:relative;display:grid;gap:5px;min-width:150px}
+.sort-picker-label{color:var(--text-muted);font-size:10px;font-weight:700;letter-spacing:.04em}
+.sort-picker-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:38px;padding:0 11px;border:1px solid #267db7;border-radius:9px;color:#eaf8ff;background:linear-gradient(145deg,#0b2b50,#061a35);font:inherit;font-size:11px;text-align:left;cursor:pointer;box-shadow:inset 0 1px #8bdfff18,0 0 10px #008fff18}
+.sort-picker-trigger strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sort-picker-chevron{width:8px;height:8px;flex:0 0 auto;border-right:1.5px solid #8bdfff;border-bottom:1.5px solid #8bdfff;transform:rotate(45deg) translateY(-2px);transition:transform .18s}
+.sort-picker-trigger.is-open .sort-picker-chevron{transform:rotate(225deg) translate(-1px,-1px)}
+.sort-picker-menu{position:absolute;top:calc(100% + 6px);right:0;z-index:1000;display:grid;gap:3px;width:max-content;min-width:100%;max-width:min(260px,calc(100vw - 32px));padding:6px;border:1px solid #2588c5;border-radius:11px;background:linear-gradient(155deg,#0b2b4e,#04152c);box-shadow:0 12px 30px #000b,0 0 16px #008fff30}
+.sort-picker-option{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:39px;padding:0 10px;border:0;border-radius:7px;color:#d9edff;background:transparent;font:inherit;font-size:11px;text-align:left;white-space:nowrap;cursor:pointer}
+.sort-picker-option:hover,.sort-picker-option.is-selected{color:#fff;background:#105184}
+.sort-picker-check{color:#53dcff;font-size:14px;font-weight:900}
+@media(max-width:650px){.list-toolbar{align-items:flex-start}.list-toolbar-actions{align-items:flex-end;flex-direction:column;gap:8px}.sort-picker{width:190px;max-width:calc(100vw - 40px)}.sort-picker-menu{right:0}.archive-toggle{min-height:34px}}
