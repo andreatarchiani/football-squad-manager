@@ -30,22 +30,31 @@
         <button class="text-button" type="button" (click)="cancelEdit()">Annulla</button>
       </div>
       <div class="form-grid">
-        <label class="wide">Nome squadra *
+        <label>Categoria *
+          <input name="category" [(ngModel)]="form.category" required maxlength="50" placeholder="Es. Juniores U19">
+        </label>
+        <label>Nome squadra *
           <input name="name" [(ngModel)]="form.name" required maxlength="80" placeholder="Es. Prima squadra">
         </label>
-        <label>Società / Club
-          <input name="clubName" [(ngModel)]="form.clubName" maxlength="80" placeholder="Es. ASD Football Club">
+        <label>Nome impianto
+          <input name="facilityName" [(ngModel)]="form.facilityName" maxlength="100" placeholder="Nome del campo sportivo">
         </label>
-        <label>Categoria
-          <input name="category" [(ngModel)]="form.category" maxlength="50" placeholder="Es. Juniores, Allievi, Prima categoria">
+        <label>Indirizzo impianto
+          <input name="facilityAddress" [(ngModel)]="form.facilityAddress" maxlength="180" placeholder="Via, numero civico, comune">
+        </label>
+        <label>Indirizzo sede
+          <input name="headquartersAddress" [(ngModel)]="form.headquartersAddress" maxlength="180" placeholder="Indirizzo della sede sociale">
+        </label>
+        <label>Matricola federale
+          <input name="federationNumber" [(ngModel)]="form.federationNumber" maxlength="60" placeholder="Matricola FIGC">
         </label>
         <label>Stagione sportiva *
           <input name="seasonLabel" [(ngModel)]="form.seasonLabel" required maxlength="9" placeholder="2026/2027">
         </label>
       </div>
       <fieldset class="team-icon-fieldset">
-        <legend>Icona della squadra</legend>
-        <div class="team-icon-picker" role="group" aria-label="Seleziona l'icona della squadra">
+        <legend>Logo</legend>
+        <div class="team-icon-picker" role="group" aria-label="Seleziona il logo della squadra">
           @for (icon of teamIcons; track icon) {
             <button type="button" class="team-icon-option" [class.is-selected]="form.icon === icon"
               [attr.aria-label]="'Seleziona icona ' + icon" [attr.aria-pressed]="form.icon === icon"
@@ -61,7 +70,7 @@
             <input hidden type="file" accept="image/png,image/jpeg,image/webp,image/gif" (change)="onTeamIconUpload($event)" />
           </label>
         </div>
-        <span class="team-icon-caption">L'icona scelta apparirà nelle squadre e nella Home.</span>
+        <span class="team-icon-caption">Il logo scelto apparirà nelle squadre e nella Home.</span>
         @if (teamIconUploadStatus()) {
           <span role="status" style="display:block;margin-top:8px;color:#a9e7c2;font-size:11px;font-weight:700">{{ teamIconUploadStatus() }}</span>
         }
@@ -115,7 +124,7 @@
           </div>
           <div class="team-details">
             <h3>{{ team.name }} @if (team.isArchived) { <span class="archived-label">ARCHIVIATA</span> }</h3>
-            <p>{{ team.clubName || 'Società non indicata' }}<span>•</span>{{ team.category || 'Categoria non indicata' }}</p>
+            <p>{{ team.category || 'Categoria non indicata' }}@if (team.facilityName) { <span>•</span>{{ team.facilityName }} }</p>
             <div class="season-chip">STAGIONE {{ team.seasonLabel || 'Non definita' }}</div>
           </div>
           <div class="team-actions">
