@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-20 — Rifiniture dell'anagrafica e dell'interfaccia partita
+
+- **Miglioramento:** uniformata l'estetica LED del riepilogo e della conferma di fine partita e del banner di nuova versione disponibile; riordinato il campo “Ruoli in cui può giocare” sotto il ruolo principale e migliorati stile e sovrapposizione dei menu a tendina di ruolo, piede preferito e squadra nell'anagrafica giocatore.
+
 ## 2026-11-20 — Anagrafica giocatori ampliata
 
 - **Nuova funzionalità:** estesa l’anagrafica dei giocatori con luogo di nascita, residenza, CAP, documento d’identità, categoria di appartenenza, matricola federale e tessera federale. I nuovi dati vengono salvati e recuperati da Firestore, mantenendo la compatibilità con le schede già esistenti.
