@@ -101,7 +101,6 @@
         </div>
         <div class="topbar-actions">
           <span class="today-label">{{ auth.user()?.displayName || auth.user()?.email }}</span>
-          <fsm-voice-assistant />
           <button type="button" aria-label="Segnala un bug" title="Segnala un bug" class="bug-report-button" (click)="openBugReport()">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M8 9h8M9 5l-1.5-2M15 5l1.5-2M5 10H3M21 10h-2M5 15H3M21 15h-2" />
