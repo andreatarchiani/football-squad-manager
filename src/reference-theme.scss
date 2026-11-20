@@ -731,3 +731,45 @@ body :is(button,a,[role="button"]):focus-visible {outline:2px solid #b9f6ff;outl
   .app-shell .main-content .stadium-frame :is(.next-match-panel,.home-roster-panel,.team-card,.player-card),
   .app-shell .main-content :is(.launch-button,.home-edit-roster-button) {transition:none!important;}
 }
+
+/* Mobile paint path: keep the stadium/LED identity without costly scroll repainting. */
+@media (max-width: 700px) {
+  body { background-attachment: scroll; }
+
+  /* Opaque navigation avoids compositing the scrolling page through a live blur. */
+  .app-shell .mobile-bottom-nav {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: #03172e;
+  }
+
+  /* Retain bright borders, but avoid several full-panel blurred shadow layers. */
+  .app-shell .main-content .stadium-frame {
+    box-shadow: 0 0 0 1px #0889bd5c, 0 8px 18px #0006;
+  }
+  .app-shell .main-content .stadium-frame::before { box-shadow: none; }
+  .app-shell .main-content .stadium-frame :is(
+    .next-match-panel, .home-roster-panel, .team-card, .player-card,
+    .team-form, .player-form, .roster-panel
+  ) {
+    box-shadow: 0 6px 12px #0006, inset 0 1px #5de5ff18;
+  }
+  .app-shell .main-content .home-football-pitch {
+    box-shadow: 0 10px 18px #0009, inset 0 0 12px #07271d;
+  }
+  .app-shell .main-content .home-pitch-stage::before { display: none; }
+
+  /* Modal overlays remain legible without a GPU-intensive backdrop blur. */
+  body :is(
+    .release-changelog-backdrop, .bug-report-backdrop, .support-detail-backdrop,
+    .match-moment-backdrop, .match-confirm-overlay
+  ) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: #010d20f2;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  body { background-attachment: scroll; }
+}
