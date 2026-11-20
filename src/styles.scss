@@ -606,3 +606,66 @@ body {
 .match-finish-confirm p{color:#a9cde4}
 .finish-confirm-cancel{border:1px solid #267db7;background:#0b2743;color:#dff3ff}
 .finish-confirm-yes{border:1px solid #53caff;background:linear-gradient(135deg,#1686c2,#075080);color:#fff;box-shadow:0 0 16px #008fff25}
+
+
+/* Unified LED modal surfaces for create/edit player and team forms. */
+.fsm-form-overlay{position:fixed;inset:0;z-index:30000;display:grid;place-items:center;overflow:auto;padding:clamp(12px,3vw,28px);background:radial-gradient(ellipse at 50% 0%,#087fc044,transparent 58%),#020b20e8;backdrop-filter:blur(12px);overscroll-behavior:contain}
+.fsm-form-dialog{position:relative;width:min(100%,780px);max-height:calc(100dvh - 32px);overflow:auto;margin:auto;border:1px solid #299fe4!important;border-radius:18px!important;background:linear-gradient(150deg,#0b2b4e 0%,#071a31 55%,#061326 100%)!important;box-shadow:0 24px 85px #000d,0 0 32px #008fff38,inset 0 1px #8bdfff24!important;color:#eaf8ff}
+.fsm-form-dialog .form-heading{position:sticky;top:-1px;z-index:5;margin:-2px -2px 18px;padding:5px 2px 12px;background:linear-gradient(180deg,#0b2b4e 80%,#0b2b4e00)}
+.fsm-form-dialog .form-heading h3{color:#f4fbff;text-shadow:0 0 14px #078fff40}
+.fsm-form-dialog .form-grid>label,.fsm-form-dialog .form-grid legend{color:#b9d9ef}
+.fsm-form-dialog .form-actions{position:sticky;bottom:-22px;z-index:4;margin:17px -2px -2px;padding:12px 2px 2px;background:linear-gradient(0deg,#071a31 76%,#071a3100)}
+.fsm-form-dialog .text-button{color:#55d8ff}
+.fsm-form-dialog .team-icon-fieldset{border-color:#267db7;background:linear-gradient(145deg,#09284b,#05152d)}
+@media(max-width:650px){.fsm-form-overlay{align-items:start;padding:10px}.fsm-form-dialog{max-height:calc(100dvh - 20px);padding:16px!important;border-radius:15px!important}.fsm-form-dialog .form-heading{top:-16px;margin:-4px -2px 14px;padding:12px 2px 10px}.fsm-form-dialog .form-actions{bottom:-16px;margin-top:14px;padding-bottom:8px}}
+/* Captain and vice-captain selectors share the app's blue LED dropdown language. */
+.captaincy-picker{position:relative;z-index:12;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:14px;border:1px solid #218acb;border-radius:14px;background:linear-gradient(145deg,#0b2747,#06172d);box-shadow:inset 0 1px #8bdfff18,0 0 18px #008fff18}
+.captaincy-field{position:relative;display:grid;align-content:start;gap:7px;min-width:0}
+.captaincy-field.dropdown-open{z-index:30}
+.captaincy-label{display:flex;align-items:center;gap:8px;color:#a9d8f2;font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
+.captain-armband-icon,.vice-armband-icon{display:grid;place-items:center;width:25px;height:25px;border:1px solid #39bdf2;border-radius:7px;color:#72ddff;background:#0c4268;box-shadow:0 0 10px #008fff30}
+.vice-armband-icon{border-color:#a0b8ff;color:#c5d3ff;background:#1a3263}
+.captaincy-dropdown{width:100%;min-width:0}
+.captaincy-dropdown .formation-picker-trigger{min-width:0;border-color:#267db7;background:linear-gradient(145deg,#0b2b50,#061a35);box-shadow:inset 0 1px #8bdfff18,0 0 10px #008fff18}
+.captaincy-dropdown .formation-picker-trigger strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.captaincy-dropdown .formation-picker-menu{z-index:80;border-color:#2588c5;background:linear-gradient(155deg,#0b2b4e,#04152c);box-shadow:0 18px 36px #000c,0 0 18px #008fff35}
+.captaincy-dropdown .formation-picker-option{min-height:42px;color:#d9edff;font-size:11px}
+.captaincy-dropdown .formation-picker-option:hover,.captaincy-dropdown .formation-picker-option.is-selected{background:#105184;color:#fff}
+.layout-slot-switch{display:flex;align-items:center;gap:7px;position:relative;z-index:3;padding:5px;border:1px solid #267db7;border-radius:12px;background:linear-gradient(145deg,#082747,#04162e);box-shadow:inset 0 1px #8bdfff15,0 0 14px #008fff20}
+.layout-slot-switch button{flex:1;min-height:38px;padding:0 13px;border:1px solid transparent;border-radius:8px;color:#a9cde4;background:transparent;font:inherit;font-size:11px;font-weight:900;cursor:pointer;transition:background .16s,border-color .16s,box-shadow .16s}
+.layout-slot-switch button.active{border-color:#36bdf2;color:#fff;background:linear-gradient(135deg,#087bb8,#07508a);box-shadow:0 0 14px #008fff45,inset 0 1px #c8f4ff40}
+.layout-save-status{color:#8fb9d5!important;font-size:10px}
+.bench-section,.match-side{border-color:#267db7!important;background:linear-gradient(145deg,#09284b,#06172d)!important;box-shadow:0 0 18px #008fff20,inset 0 1px #8bdfff12}
+.bench-section .editor-heading,.bench-heading{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:5px;margin-bottom:10px}
+.bench-section .editor-heading strong,.bench-heading strong{color:#eaf8ff;font-size:14px;font-weight:950}
+.bench-section .editor-heading span,.bench-heading span{display:inline-flex;align-items:center;width:max-content;padding:4px 8px;border:1px solid #267db7;border-radius:7px;color:#70d9ff;background:#082b4b;font-size:10px;font-weight:850}
+.bench-list,.match-bench{position:relative;z-index:1}
+.bench-player,.bench-choice{border-color:#1f6598!important;background:linear-gradient(110deg,#0d3155,#092342)!important;color:#eaf8ff!important;box-shadow:inset 0 1px #8bdfff0d}
+.bench-number,.bench-choice-number{border-color:#278bc3!important;color:#70dcff!important;background:#07375b!important;box-shadow:0 0 10px #008fff25}
+.bench-player small,.bench-choice small{color:#91bad6!important}
+.change-counter{border-color:#267db7!important;background:linear-gradient(145deg,#0a3155,#071b33)!important;color:#a9cde4}
+.change-counter strong{color:#63d8ff!important}
+.match-scoreboard-header{border-bottom-color:#2588c555!important}
+.scoreboard-clock{display:grid;justify-items:center;gap:5px;padding:12px 18px;border:1px solid #2588c5;border-radius:14px;background:radial-gradient(ellipse at 50% 0%,#087fc044,transparent 75%),linear-gradient(145deg,#0b2b50,#061a35);box-shadow:inset 0 1px #8bdfff25,0 0 18px #008fff30,0 10px 25px #0005}
+.scoreboard-clock strong{color:#f3fbff!important;text-shadow:0 0 16px #16aaff65}
+.scoreboard-clock .clock-label{color:#70d9ff!important}
+.scoreboard-clock .clock-state{border:1px solid #267db7;color:#a9dfff;background:#082746}
+.match-controls-panel{border-color:#267db7!important;background:linear-gradient(115deg,#0b2b50eF,#061a35f5)!important;box-shadow:inset 0 1px #8bdfff1c,0 0 20px #008fff22,0 12px 30px #0005!important}
+.match-controls-panel .clock-controls button{border:1px solid #278bc5;box-shadow:0 0 12px #008fff24,inset 0 1px #8bdfff18}
+.match-controls-panel .pause-match{color:#eaf8ff;background:linear-gradient(145deg,#164c76,#0a2b4c)}
+.match-controls-panel .finish-match{border-color:#e36b8b;color:#fff;background:linear-gradient(145deg,#b32e59,#6e1739);box-shadow:0 0 16px #ff477b35}
+.match-events{border:1px solid #267db7;border-radius:16px;background:linear-gradient(145deg,#09284b,#06172d);box-shadow:0 0 18px #008fff18}
+.match-events .events-heading strong{color:#eaf8ff}
+.match-events .events-heading span{border:1px solid #267db7;color:#70d9ff;background:#082b4b}
+.match-event{border-color:#267db733!important;background:#ffffff04}
+.match-event b{color:#63d8ff}
+.match-report-panel,.match-finish-confirm,.match-edit-panel,.match-confirm{border-color:#267db7!important;background:linear-gradient(150deg,#0b2b4e,#07172b 72%)!important;box-shadow:0 24px 85px #000c,0 0 28px #008fff25!important;color:#eaf8ff}
+.match-report-panel :is(h2,h3,strong),.match-finish-confirm h2,.match-edit-panel h2,.match-confirm h2{color:#f0f9ff}
+.match-report-panel :is(p,label),.match-finish-confirm p,.match-edit-panel label,.match-confirm p{color:#a9cde4}
+.match-report-panel button,.match-edit-panel button,.match-confirm button{border-color:#267db7;background:linear-gradient(145deg,#10456d,#082747);color:#eaf8ff}
+.match-report-panel button.delete-event{border-color:#9c5363;background:linear-gradient(145deg,#633049,#351a2a);color:#ffe8ee}
+.match-report-panel .exit-match-report{border-color:#e36b8b;background:linear-gradient(145deg,#a92e56,#681b39)}
+.match-report-panel .share-match-report{border-color:#53caff;background:linear-gradient(135deg,#1686c2,#075080)}
+.match-finish-confirm-actions .finish-confirm-yes,.match-confirm .confirm-yes{border-color:#53caff;background:linear-gradient(135deg,#1686c2,#075080);box-shadow:0 0 16px #008fff35}
+.match-finish-confirm-actions .finish-confirm-cancel,.match-confirm .confirm-no{border-color:#267db7;background:#0b2743;color:#dff3ff}
+@media(max-width:650px){.captaincy-picker{grid-template-columns:1fr;gap:10px;padding:12px}.match-scoreboard-header{flex-wrap:wrap}.scoreboard-clock{min-width:140px;padding:10px}.match-events{padding:12px}.bench-heading{margin-bottom:8px}}
