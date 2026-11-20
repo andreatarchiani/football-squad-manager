@@ -17,7 +17,7 @@ export class PlayersPageComponent {
  protected cancel(){this.formOpen.set(false);this.editingId.set(null);this.form=this.emptyForm();this.error.set('');}
  
  protected toggleFormDropdown(name:string){this.formDropdownOpen.update(open=>open===name?null:name);}
- protected setPrimaryRole(value:PlayerRole){this.form.primaryRole=value;this.formDropdownOpen.set(null);}
+ protected setPrimaryRole(value:PlayerRole){this.form.primaryRole=value;this.form.roles=[...new Set([...this.form.roles,value])];this.formDropdownOpen.set(null);}
  protected setPreferredFoot(value:string){this.form.preferredFoot=value;this.formDropdownOpen.set(null);}
  protected setTeam(teamId:string){this.form.teamId=teamId;this.formDropdownOpen.set(null);}
  protected setStatus(value:PlayerStatus){this.form.status=value;this.formDropdownOpen.set(null);}
