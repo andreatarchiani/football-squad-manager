@@ -540,6 +540,27 @@ export class TeamsPageComponent implements OnChanges {
     return this.layoutSaveQueue;
   }
 
+  protected onCategoryChange(category: string): void {
+    this.form.category = category;
+    const rules: Record<string, Partial<TeamInput>> = {
+      'Juniores Under 19': { periodCount: 2, periodMinutes: 45, playersOnRoster: 20, federationReportRequired: false, playersOnField: 11, outfieldPlayersCount: 10, goalkeeperCount: 1, maxSubstitutions: 5, reentryAllowed: false, fixedPlayerCount: 11, allPlayersMustPlay: false },
+      'Under 18': { periodCount: 2, periodMinutes: 45, playersOnRoster: 20, federationReportRequired: false, playersOnField: 11, outfieldPlayersCount: 10, goalkeeperCount: 1, maxSubstitutions: 5, reentryAllowed: false, fixedPlayerCount: 11, allPlayersMustPlay: false },
+      'Allievi Under 17': { periodCount: 2, periodMinutes: 45, playersOnRoster: 20, federationReportRequired: false, playersOnField: 11, outfieldPlayersCount: 10, goalkeeperCount: 1, maxSubstitutions: 7, reentryAllowed: false, fixedPlayerCount: 11, allPlayersMustPlay: false },
+      'Allievi B Under 16': { periodCount: 2, periodMinutes: 40, playersOnRoster: 20, federationReportRequired: false, playersOnField: 11, outfieldPlayersCount: 10, goalkeeperCount: 1, maxSubstitutions: 7, reentryAllowed: false, fixedPlayerCount: 11, allPlayersMustPlay: false },
+      'Giovanissimi Under 15': { periodCount: 2, periodMinutes: 35, playersOnRoster: 20, federationReportRequired: false, playersOnField: 11, outfieldPlayersCount: 10, goalkeeperCount: 1, maxSubstitutions: 7, reentryAllowed: false, fixedPlayerCount: 11, allPlayersMustPlay: false },
+      'Giovanissimi B Under 14': { periodCount: 2, periodMinutes: 35, playersOnRoster: 20, federationReportRequired: false, playersOnField: 11, outfieldPlayersCount: 10, goalkeeperCount: 1, maxSubstitutions: 7, reentryAllowed: false, fixedPlayerCount: 11, allPlayersMustPlay: false },
+      'Esordienti II anno Under 13': { periodCount: 3, periodMinutes: 20, playersOnRoster: 18, federationReportRequired: true, playersOnField: 9, outfieldPlayersCount: 8, goalkeeperCount: 1, maxSubstitutions: null, reentryAllowed: true, fixedPlayerCount: 9, allPlayersMustPlay: true },
+      'Esordienti I anno Under 12': { periodCount: 3, periodMinutes: 20, playersOnRoster: 18, federationReportRequired: true, playersOnField: 9, outfieldPlayersCount: 8, goalkeeperCount: 1, maxSubstitutions: null, reentryAllowed: true, fixedPlayerCount: 9, allPlayersMustPlay: true },
+      'Pulcini II anno Under 11': { periodCount: 3, periodMinutes: 20, playersOnRoster: 14, federationReportRequired: false, playersOnField: 7, outfieldPlayersCount: 6, goalkeeperCount: 1, maxSubstitutions: null, reentryAllowed: true, fixedPlayerCount: 7, allPlayersMustPlay: true },
+      'Pulcini I anno Under 10': { periodCount: 3, periodMinutes: 20, playersOnRoster: 14, federationReportRequired: false, playersOnField: 7, outfieldPlayersCount: 6, goalkeeperCount: 1, maxSubstitutions: null, reentryAllowed: true, fixedPlayerCount: 7, allPlayersMustPlay: true },
+      'Primi Calci II anno Under 9': { periodCount: 3, periodMinutes: 20, playersOnRoster: 14, federationReportRequired: false, playersOnField: 7, outfieldPlayersCount: 6, goalkeeperCount: 1, maxSubstitutions: null, reentryAllowed: true, fixedPlayerCount: 7, allPlayersMustPlay: true },
+      'Primi Calci I anno Under 8': { periodCount: 3, periodMinutes: 20, playersOnRoster: 14, federationReportRequired: false, playersOnField: 7, outfieldPlayersCount: 6, goalkeeperCount: 1, maxSubstitutions: null, reentryAllowed: true, fixedPlayerCount: 7, allPlayersMustPlay: true },
+      'Piccoli Amici II anno Under 7': { periodCount: 3, periodMinutes: 20, playersOnRoster: 14, federationReportRequired: false, playersOnField: 7, outfieldPlayersCount: 6, goalkeeperCount: 1, maxSubstitutions: null, reentryAllowed: true, fixedPlayerCount: 7, allPlayersMustPlay: true },
+      'Piccoli Amici I anno Under 6': { periodCount: 3, periodMinutes: 20, playersOnRoster: 14, federationReportRequired: false, playersOnField: 7, outfieldPlayersCount: 6, goalkeeperCount: 1, maxSubstitutions: null, reentryAllowed: true, fixedPlayerCount: 7, allPlayersMustPlay: true }
+    };
+    Object.assign(this.form, rules[category] ?? {});
+  }
+
   protected openCreate(): void {
     this.editingId.set(null);
     this.formOpen.set(true);
@@ -571,6 +592,7 @@ export class TeamsPageComponent implements OnChanges {
       reentryAllowed: team.reentryAllowed ?? false,
       federationReportRequired: team.federationReportRequired ?? false,
       fixedPlayerCount: team.fixedPlayerCount ?? null,
+      allPlayersMustPlay: team.allPlayersMustPlay ?? false,
       icon: team.icon || '⚽',
       seasonLabel: team.seasonLabel || '2026/2027'
     };
@@ -718,6 +740,6 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   private emptyForm(): TeamInput {
-    return { name: '', category: '', facilityName: '', facilityAddress: '', headquartersAddress: '', federationNumber: '', outfieldPlayersCount: null, goalkeeperCount: null, periodCount: null, periodMinutes: null, playersOnField: null, playersOnRoster: null, maxSubstitutions: null, reentryAllowed: false, federationReportRequired: false, fixedPlayerCount: null, icon: '⚽', seasonLabel: '2026/2027' };
+    return { name: '', category: '', facilityName: '', facilityAddress: '', headquartersAddress: '', federationNumber: '', outfieldPlayersCount: null, goalkeeperCount: null, periodCount: null, periodMinutes: null, playersOnField: null, playersOnRoster: null, maxSubstitutions: null, reentryAllowed: false, federationReportRequired: false, fixedPlayerCount: null, allPlayersMustPlay: false, icon: '⚽', seasonLabel: '2026/2027' };
   }
 }
