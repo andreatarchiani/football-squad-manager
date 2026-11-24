@@ -39,7 +39,7 @@ export class PlayerService {
   }
 
   async listForTeam(workspaceId: string, teamId: string, seasonId: string, teamName: string): Promise<PlayerRecord[]> {
-    const team: TeamRecord = { id: teamId, name: teamName, category: '', facilityName: '', facilityAddress: '', headquartersAddress: '', federationNumber: '', icon: '⚽', isArchived: false, seasonId, seasonLabel: '', seasonStatus: 'active' };
+    const team: TeamRecord = { id: teamId, name: teamName, category: '', facilityName: '', facilityAddress: '', headquartersAddress: '', federationNumber: '', outfieldPlayersCount: null, goalkeeperCount: null, periodCount: null, periodMinutes: null, playersOnField: null, playersOnRoster: null, maxSubstitutions: null, reentryAllowed: false, federationReportRequired: false, fixedPlayerCount: null, icon: '⚽', isArchived: false, seasonId, seasonLabel: '', seasonStatus: 'active' };
     return (await this.list(workspaceId, [team])).filter(player =>
       !player.isArchived && player.teamId === teamId && player.seasonId === seasonId
     );
