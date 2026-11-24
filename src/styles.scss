@@ -669,3 +669,26 @@ body {
 .match-finish-confirm-actions .finish-confirm-yes,.match-confirm .confirm-yes{border-color:#53caff;background:linear-gradient(135deg,#1686c2,#075080);box-shadow:0 0 16px #008fff35}
 .match-finish-confirm-actions .finish-confirm-cancel,.match-confirm .confirm-no{border-color:#267db7;background:#0b2743;color:#dff3ff}
 @media(max-width:650px){.captaincy-picker{grid-template-columns:1fr;gap:10px;padding:12px}.match-scoreboard-header{flex-wrap:wrap}.scoreboard-clock{min-width:140px;padding:10px}.match-events{padding:12px}.bench-heading{margin-bottom:8px}}
+
+/* Mobile: the player editor fills the entire viewport, including the bottom edge. */
+@media(max-width:650px){
+  .players-page .fsm-form-overlay{
+    align-items:stretch;
+    justify-items:stretch;
+    padding:0;
+  }
+  .players-page .fsm-form-dialog{
+    width:100%;
+    min-height:100vh;
+    min-height:100dvh;
+    max-height:100vh;
+    max-height:100dvh;
+    margin:0;
+    border-radius:0!important;
+    padding:16px 16px calc(24px + env(safe-area-inset-bottom))!important;
+  }
+  .players-page .fsm-form-dialog .form-actions{
+    bottom:calc(-1 * env(safe-area-inset-bottom));
+    padding-bottom:calc(12px + env(safe-area-inset-bottom));
+  }
+}
