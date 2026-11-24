@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-24 — Regolamenti di gara automatici per categoria
+
+- **Nuova funzionalità:** l'anagrafica squadre propone le categorie giovanili e, alla selezione, compila automaticamente tempi, minutaggio, numero di giocatori in campo e in lista, cambi, rientri, obbligo di referto federale e partecipazione minima di tutti i calciatori.
+
 ## 2026-11-20 — Anagrafica squadre e moduli di modifica
 
 - **Miglioramento:** spostati i Contatti chiave subito sotto il Documento d’identità nell’anagrafica giocatore; le finestre sovrapposte sono ora utilizzate anche per modificare giocatori e squadre.
