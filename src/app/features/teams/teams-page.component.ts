@@ -23,6 +23,12 @@ export class TeamsPageComponent implements OnChanges {
   private handledRosterToken = 0;
   private teamsLoadPromise: Promise<void> = Promise.resolve();
   protected readonly layoutSlot = signal<1 | 2>(1);
+  protected readonly categoryDropdownOpen = signal(false);
+  protected readonly teamCategories = ['Juniores Under 19','Under 18','Allievi Under 17','Allievi B Under 16','Giovanissimi Under 15','Giovanissimi B Under 14','Esordienti II anno Under 13','Esordienti I anno Under 12','Pulcini II anno Under 11','Pulcini I anno Under 10','Primi Calci II anno Under 9','Primi Calci I anno Under 8','Piccoli Amici II anno Under 7','Piccoli Amici I anno Under 6'];
+  protected selectTeamCategory(category: string): void {
+    this.onCategoryChange(category);
+    this.categoryDropdownOpen.set(false);
+  }
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamsService = inject(TeamService);
   private readonly playerService = inject(PlayerService);
