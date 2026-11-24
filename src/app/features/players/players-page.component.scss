@@ -65,3 +65,8 @@
 .role-options label:has(input:checked){border-color:#35bdf2;color:#fff;background:linear-gradient(145deg,#124b70,#0d3154);box-shadow:0 0 12px #008fff26}
 .role-options input{width:16px;height:16px;margin:0;accent-color:#36c5f5}
 @media(max-width:650px){.form-grid{isolation:auto}.form-dropdown-field.dropdown-open{z-index:1500}.role-field{padding:13px}.role-options{gap:7px}.role-options label{min-height:40px}}
+
+
+/* Fix: il pannello dell'anagrafica mantiene il fondale continuo per tutta l'altezza disponibile, anche con moduli lunghi e scroll interno. */
+.fsm-form-dialog{box-sizing:border-box;min-height:calc(100dvh - 32px);}
+@media(max-width:650px){.fsm-form-dialog{min-height:calc(100dvh - 20px);}}
