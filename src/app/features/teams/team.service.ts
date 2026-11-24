@@ -258,6 +258,7 @@ export class TeamService {
       reentryAllowed: input.reentryAllowed,
       federationReportRequired: input.federationReportRequired,
       fixedPlayerCount: input.fixedPlayerCount,
+      allPlayersMustPlay: input.allPlayersMustPlay,
       icon: input.icon,
       updatedAt: serverTimestamp()
     });
