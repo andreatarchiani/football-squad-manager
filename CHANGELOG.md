@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-24 — Categoria di appartenenza con elenco standard
+
+- **Miglioramento:** nell’anagrafica giocatori, la categoria di appartenenza si seleziona da un menu con lo stesso elenco di categorie previsto nell’anagrafica squadre, anche in modifica.
+
 ## 2026-11-24 — Regolamenti di gara automatici per categoria
 
 - **Nuova funzionalità:** l'anagrafica squadre propone le categorie giovanili e, alla selezione, compila automaticamente tempi, minutaggio, numero di giocatori in campo e in lista, cambi, rientri, obbligo di referto federale e partecipazione minima di tutti i calciatori.
