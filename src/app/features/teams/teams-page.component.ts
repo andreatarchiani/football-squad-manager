@@ -561,6 +561,16 @@ export class TeamsPageComponent implements OnChanges {
       facilityAddress: team.facilityAddress || '',
       headquartersAddress: team.headquartersAddress || '',
       federationNumber: team.federationNumber || '',
+      outfieldPlayersCount: team.outfieldPlayersCount ?? null,
+      goalkeeperCount: team.goalkeeperCount ?? null,
+      periodCount: team.periodCount ?? null,
+      periodMinutes: team.periodMinutes ?? null,
+      playersOnField: team.playersOnField ?? null,
+      playersOnRoster: team.playersOnRoster ?? null,
+      maxSubstitutions: team.maxSubstitutions ?? null,
+      reentryAllowed: team.reentryAllowed ?? false,
+      federationReportRequired: team.federationReportRequired ?? false,
+      fixedPlayerCount: team.fixedPlayerCount ?? null,
       icon: team.icon || '⚽',
       seasonLabel: team.seasonLabel || '2026/2027'
     };
@@ -708,6 +718,6 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   private emptyForm(): TeamInput {
-    return { name: '', category: '', facilityName: '', facilityAddress: '', headquartersAddress: '', federationNumber: '', icon: '⚽', seasonLabel: '2026/2027' };
+    return { name: '', category: '', facilityName: '', facilityAddress: '', headquartersAddress: '', federationNumber: '', outfieldPlayersCount: null, goalkeeperCount: null, periodCount: null, periodMinutes: null, playersOnField: null, playersOnRoster: null, maxSubstitutions: null, reentryAllowed: false, federationReportRequired: false, fixedPlayerCount: null, icon: '⚽', seasonLabel: '2026/2027' };
   }
 }
