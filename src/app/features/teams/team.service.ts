@@ -21,6 +21,16 @@ export interface TeamRecord {
   facilityAddress: string;
   headquartersAddress: string;
   federationNumber: string;
+  outfieldPlayersCount: number | null;
+  goalkeeperCount: number | null;
+  periodCount: number | null;
+  periodMinutes: number | null;
+  playersOnField: number | null;
+  playersOnRoster: number | null;
+  maxSubstitutions: number | null;
+  reentryAllowed: boolean;
+  federationReportRequired: boolean;
+  fixedPlayerCount: number | null;
   icon: string;
   isArchived: boolean;
   seasonId: string | null;
@@ -58,6 +68,16 @@ export interface TeamInput {
   facilityAddress: string;
   headquartersAddress: string;
   federationNumber: string;
+  outfieldPlayersCount: number | null;
+  goalkeeperCount: number | null;
+  periodCount: number | null;
+  periodMinutes: number | null;
+  playersOnField: number | null;
+  playersOnRoster: number | null;
+  maxSubstitutions: number | null;
+  reentryAllowed: boolean;
+  federationReportRequired: boolean;
+  fixedPlayerCount: number | null;
   icon: string;
   seasonLabel: string;
 }
@@ -86,6 +106,16 @@ export class TeamService {
         facilityAddress: String(data['facilityAddress'] ?? ''),
         headquartersAddress: String(data['headquartersAddress'] ?? ''),
         federationNumber: String(data['federationNumber'] ?? ''),
+        outfieldPlayersCount: data['outfieldPlayersCount'] == null ? null : Number(data['outfieldPlayersCount']),
+        goalkeeperCount: data['goalkeeperCount'] == null ? null : Number(data['goalkeeperCount']),
+        periodCount: data['periodCount'] == null ? null : Number(data['periodCount']),
+        periodMinutes: data['periodMinutes'] == null ? null : Number(data['periodMinutes']),
+        playersOnField: data['playersOnField'] == null ? null : Number(data['playersOnField']),
+        playersOnRoster: data['playersOnRoster'] == null ? null : Number(data['playersOnRoster']),
+        maxSubstitutions: data['maxSubstitutions'] == null ? null : Number(data['maxSubstitutions']),
+        reentryAllowed: data['reentryAllowed'] === true,
+        federationReportRequired: data['federationReportRequired'] === true,
+        fixedPlayerCount: data['fixedPlayerCount'] == null ? null : Number(data['fixedPlayerCount']),
         icon: String(data['icon'] ?? '⚽'),
         isArchived: data['isArchived'] === true,
         seasonId: season?.id ?? null,
@@ -177,6 +207,16 @@ export class TeamService {
       facilityAddress: input.facilityAddress.trim(),
       headquartersAddress: input.headquartersAddress.trim(),
       federationNumber: input.federationNumber.trim(),
+      outfieldPlayersCount: input.outfieldPlayersCount,
+      goalkeeperCount: input.goalkeeperCount,
+      periodCount: input.periodCount,
+      periodMinutes: input.periodMinutes,
+      playersOnField: input.playersOnField,
+      playersOnRoster: input.playersOnRoster,
+      maxSubstitutions: input.maxSubstitutions,
+      reentryAllowed: input.reentryAllowed,
+      federationReportRequired: input.federationReportRequired,
+      fixedPlayerCount: input.fixedPlayerCount,
       icon: input.icon,
       isArchived: false,
       createdAt: now,
@@ -204,6 +244,16 @@ export class TeamService {
       facilityAddress: input.facilityAddress.trim(),
       headquartersAddress: input.headquartersAddress.trim(),
       federationNumber: input.federationNumber.trim(),
+      outfieldPlayersCount: input.outfieldPlayersCount,
+      goalkeeperCount: input.goalkeeperCount,
+      periodCount: input.periodCount,
+      periodMinutes: input.periodMinutes,
+      playersOnField: input.playersOnField,
+      playersOnRoster: input.playersOnRoster,
+      maxSubstitutions: input.maxSubstitutions,
+      reentryAllowed: input.reentryAllowed,
+      federationReportRequired: input.federationReportRequired,
+      fixedPlayerCount: input.fixedPlayerCount,
       icon: input.icon,
       updatedAt: serverTimestamp()
     });
