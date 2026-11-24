@@ -31,7 +31,23 @@
       </div>
       <div class="form-grid">
         <label>Categoria *
-          <input name="category" [(ngModel)]="form.category" required maxlength="50" placeholder="Es. Juniores U19">
+          <select name="category" [(ngModel)]="form.category" (ngModelChange)="onCategoryChange($event)" required>
+            <option value="" disabled>Seleziona la categoria</option>
+            <option>Juniores Under 19</option>
+            <option>Under 18</option>
+            <option>Allievi Under 17</option>
+            <option>Allievi B Under 16</option>
+            <option>Giovanissimi Under 15</option>
+            <option>Giovanissimi B Under 14</option>
+            <option>Esordienti II anno Under 13</option>
+            <option>Esordienti I anno Under 12</option>
+            <option>Pulcini II anno Under 11</option>
+            <option>Pulcini I anno Under 10</option>
+            <option>Primi Calci II anno Under 9</option>
+            <option>Primi Calci I anno Under 8</option>
+            <option>Piccoli Amici II anno Under 7</option>
+            <option>Piccoli Amici I anno Under 6</option>
+          </select>
         </label>
         <label>Nome squadra *
           <input name="name" [(ngModel)]="form.name" required maxlength="80" placeholder="Es. Prima squadra">
@@ -76,7 +92,7 @@
           <label>Numero massimo cambi
             <input name="maxSubstitutions" type="number" min="0" max="30" [(ngModel)]="form.maxSubstitutions" placeholder="Es. 5">
           </label>
-          <label>Numero fisso di calciatori
+          <label>Numero fisso di calciatori in campo
             <input name="fixedPlayerCount" type="number" min="0" max="30" [(ngModel)]="form.fixedPlayerCount" placeholder="Se previsto">
           </label>
           <label class="team-rule-toggle">
@@ -86,6 +102,10 @@
           <label class="team-rule-toggle">
             <input name="federationReportRequired" type="checkbox" [(ngModel)]="form.federationReportRequired">
             Referto federale oltre alla lista
+          </label>
+          <label class="team-rule-toggle">
+            <input name="allPlayersMustPlay" type="checkbox" [(ngModel)]="form.allPlayersMustPlay">
+            Tutti devono giocare almeno un tempo
           </label>
         </div>
       </fieldset>
