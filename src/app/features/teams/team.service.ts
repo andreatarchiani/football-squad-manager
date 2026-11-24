@@ -79,6 +79,7 @@ export interface TeamInput {
   reentryAllowed: boolean;
   federationReportRequired: boolean;
   fixedPlayerCount: number | null;
+  allPlayersMustPlay: boolean;
   icon: string;
   seasonLabel: string;
 }
