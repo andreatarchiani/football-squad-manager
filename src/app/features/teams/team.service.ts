@@ -31,6 +31,7 @@ export interface TeamRecord {
   reentryAllowed: boolean;
   federationReportRequired: boolean;
   fixedPlayerCount: number | null;
+  allPlayersMustPlay: boolean;
   icon: string;
   isArchived: boolean;
   seasonId: string | null;
@@ -116,6 +117,7 @@ export class TeamService {
         reentryAllowed: data['reentryAllowed'] === true,
         federationReportRequired: data['federationReportRequired'] === true,
         fixedPlayerCount: data['fixedPlayerCount'] == null ? null : Number(data['fixedPlayerCount']),
+        allPlayersMustPlay: data['allPlayersMustPlay'] === true,
         icon: String(data['icon'] ?? '⚽'),
         isArchived: data['isArchived'] === true,
         seasonId: season?.id ?? null,
@@ -217,6 +219,7 @@ export class TeamService {
       reentryAllowed: input.reentryAllowed,
       federationReportRequired: input.federationReportRequired,
       fixedPlayerCount: input.fixedPlayerCount,
+      allPlayersMustPlay: input.allPlayersMustPlay,
       icon: input.icon,
       isArchived: false,
       createdAt: now,
