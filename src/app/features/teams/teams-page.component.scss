@@ -122,3 +122,12 @@
 
 
 
+
+
+/* Regolamento gara: sezione dedicata e controlli coerenti con l'anagrafica squadra. */
+.team-rules-fieldset{min-width:0;margin:18px 0 0;padding:16px;border:1px solid #267db7;border-radius:13px;background:linear-gradient(145deg,#09284b,#05152d);box-shadow:inset 0 1px #8bdfff12,0 0 14px #008fff14}
+.team-rules-fieldset legend{padding:0 8px;color:#70d9ff;font-size:12px;font-weight:850;letter-spacing:.04em}
+.team-rules-fieldset .form-grid{margin-top:4px}
+.team-rules-fieldset .team-rule-toggle{display:flex;align-items:center;gap:10px;min-height:44px;padding:9px 11px;border:1px solid #267db7;border-radius:9px;color:#d9edff;background:#082747;font-size:12px;font-weight:650}
+.team-rules-fieldset .team-rule-toggle input{width:18px;height:18px;flex:0 0 auto;accent-color:#27b9f5}
+@media(max-width:650px){.team-rules-fieldset{padding:12px}.team-rules-fieldset .form-grid{grid-template-columns:1fr}}
