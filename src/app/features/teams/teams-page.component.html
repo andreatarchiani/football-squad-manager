@@ -31,23 +31,20 @@
       </div>
       <div class="form-grid">
         <label>Categoria *
-          <select name="category" [(ngModel)]="form.category" (ngModelChange)="onCategoryChange($event)" required>
-            <option value="" disabled>Seleziona la categoria</option>
-            <option>Juniores Under 19</option>
-            <option>Under 18</option>
-            <option>Allievi Under 17</option>
-            <option>Allievi B Under 16</option>
-            <option>Giovanissimi Under 15</option>
-            <option>Giovanissimi B Under 14</option>
-            <option>Esordienti II anno Under 13</option>
-            <option>Esordienti I anno Under 12</option>
-            <option>Pulcini II anno Under 11</option>
-            <option>Pulcini I anno Under 10</option>
-            <option>Primi Calci II anno Under 9</option>
-            <option>Primi Calci I anno Under 8</option>
-            <option>Piccoli Amici II anno Under 7</option>
-            <option>Piccoli Amici I anno Under 6</option>
-          </select>
+          <div class="formation-picker team-category-picker" [class.dropdown-open]="categoryDropdownOpen()">
+            <button type="button" class="formation-picker-trigger" [class.is-open]="categoryDropdownOpen()" (click)="categoryDropdownOpen.update(open => !open)" [attr.aria-expanded]="categoryDropdownOpen()" aria-haspopup="listbox">
+              <strong>{{ form.category || 'Seleziona la categoria' }}</strong><span class="formation-picker-chevron"></span>
+            </button>
+            @if (categoryDropdownOpen()) {
+              <div class="formation-picker-menu" role="listbox" aria-label="Seleziona categoria">
+                @for (category of teamCategories; track category) {
+                  <button type="button" class="formation-picker-option" role="option" [class.is-selected]="form.category === category" [attr.aria-selected]="form.category === category" (click)="selectTeamCategory(category)">
+                    <span>{{ category }}</span>@if (form.category === category) { <span class="formation-picker-check">✓</span> }
+                  </button>
+                }
+              </div>
+            }
+          </div>
         </label>
         <label>Nome squadra *
           <input name="name" [(ngModel)]="form.name" required maxlength="80" placeholder="Es. Prima squadra">
