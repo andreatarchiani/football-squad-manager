@@ -52,6 +52,43 @@
           <input name="seasonLabel" [(ngModel)]="form.seasonLabel" required maxlength="9" placeholder="2026/2027">
         </label>
       </div>
+      <fieldset class="team-rules-fieldset">
+        <legend>Regolamento e gestione gara</legend>
+        <div class="form-grid">
+          <label>Calciatori in movimento
+            <input name="outfieldPlayersCount" type="number" min="0" max="99" [(ngModel)]="form.outfieldPlayersCount" placeholder="Es. 10">
+          </label>
+          <label>Portieri
+            <input name="goalkeeperCount" type="number" min="0" max="20" [(ngModel)]="form.goalkeeperCount" placeholder="Es. 1">
+          </label>
+          <label>Numero tempi
+            <input name="periodCount" type="number" min="1" max="8" [(ngModel)]="form.periodCount" placeholder="Es. 2">
+          </label>
+          <label>Minutaggio di ogni tempo
+            <input name="periodMinutes" type="number" min="1" max="120" [(ngModel)]="form.periodMinutes" placeholder="Es. 45">
+          </label>
+          <label>Numero giocatori schierabili
+            <input name="playersOnField" type="number" min="1" max="30" [(ngModel)]="form.playersOnField" placeholder="Es. 11">
+          </label>
+          <label>Numero giocatori in lista
+            <input name="playersOnRoster" type="number" min="1" max="60" [(ngModel)]="form.playersOnRoster" placeholder="Es. 20">
+          </label>
+          <label>Numero massimo cambi
+            <input name="maxSubstitutions" type="number" min="0" max="30" [(ngModel)]="form.maxSubstitutions" placeholder="Es. 5">
+          </label>
+          <label>Numero fisso di calciatori
+            <input name="fixedPlayerCount" type="number" min="0" max="30" [(ngModel)]="form.fixedPlayerCount" placeholder="Se previsto">
+          </label>
+          <label class="team-rule-toggle">
+            <input name="reentryAllowed" type="checkbox" [(ngModel)]="form.reentryAllowed">
+            Possibilità di rientrare in campo
+          </label>
+          <label class="team-rule-toggle">
+            <input name="federationReportRequired" type="checkbox" [(ngModel)]="form.federationReportRequired">
+            Referto federale oltre alla lista
+          </label>
+        </div>
+      </fieldset>
       <fieldset class="team-icon-fieldset">
         <legend>Logo</legend>
         <div class="team-icon-picker" role="group" aria-label="Seleziona il logo della squadra">
