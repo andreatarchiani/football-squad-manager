@@ -33,7 +33,9 @@ jobs:
           npm install --no-save --no-audit --no-fund playwright@1.49.1
           npx playwright install --with-deps chromium
       - name: Capture screenshots
-        run: npx firebase-tools emulators:exec --only auth,firestore --project demo-fsm "node ci-preview/shots.mjs"
+        run: |
+          node -e "const f='firebase.json',c=JSON.parse(require('fs').readFileSync(f));c.emulators={auth:{port:9099},firestore:{port:8080},ui:{enabled:false}};require('fs').writeFileSync(f,JSON.stringify(c,null,2))"
+          npx firebase-tools emulators:exec --only auth,firestore --project demo-fsm "node ci-preview/shots.mjs"
       - name: Publish screenshots to ui-shots branch
         if: always()
         run: |
