@@ -77,7 +77,8 @@ const server = createServer(async (req, res) => {
     const body = await readFile(join(DIST, url === '/' ? 'index.html' : url));
     res.writeHead(200, { 'Content-Type': types[extname(url)] || 'application/octet-stream' }); res.end(body);
   } catch { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end(await readFile(join(DIST, 'index.html'))); }
-}).listen(4300);
+});
+await new Promise((resolve, reject) => { server.once('error', reject); server.listen(4310, '127.0.0.1', resolve); });
 
 await seed();
 await mkdir(OUT, { recursive: true });
@@ -90,7 +91,7 @@ for (const [vpName, vp] of Object.entries(viewports)) {
   const page = await context.newPage();
   page.on('pageerror', (e) => log.push(`[${vpName}] pageerror: ${e.message}`));
   page.on('console', (m) => { if (m.type() === 'error') log.push(`[${vpName}] console: ${m.text().slice(0, 300)}`); });
-  await page.goto('http://127.0.0.1:4300/');
+  await page.goto('http://127.0.0.1:4310/');
   await page.waitForTimeout(3200);
   await page.screenshot({ path: `${OUT}/${vpName}-00-login.png`, fullPage: true });
   await page.fill('#email', EMAIL); await page.fill('#password', PASSWORD);
