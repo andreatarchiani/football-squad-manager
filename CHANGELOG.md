@@ -9,6 +9,7 @@
 - **Panchina Live:** stemmi Mia Squadra / Squadra Avversaria, colonne separate *Panchina* e *Cambi* (effettuati x/5 con l’elenco delle sostituzioni e cambio manuale tramite numero di maglia), selettore Manuale/Vocale e cronaca eventi con icone.
 - **Intestazione partita:** nell’area Partita compaiono la categoria della prossima partita e il riquadro *Mia squadra VS Avversario*.
 - **Marchio:** nelle immagini di Home e Campo la scritta “Nico Football Manager” è sostituita da “Football Squad Manager”.
+- **Prestazioni su smartphone:** su telefoni e tablet le luci sfumate, le sfocature e gli sfondi fissi sono sostituiti da bordi luminosi e piccoli bagliori, così lo scorrimento è fluido.
 - **Pulizia:** rimosso il nome dell’utente dalla barra superiore e il tema Material non utilizzato.
 
 ## 2026-11-24 — Categoria di appartenenza con elenco standard

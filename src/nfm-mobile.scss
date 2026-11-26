@@ -1,0 +1,49 @@
+/* =====================================================================
+   MOBILE PERFORMANCE — "lite" rendering for phones and tablets.
+   Large blurred glows (box-shadow / drop-shadow), backdrop blur and fixed
+   backgrounds are expensive to paint on mobile GPUs and make scrolling lag.
+   On touch devices they are replaced by bright borders and a few small,
+   cheap glows that keep the LED look.
+   ===================================================================== */
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
+  html,
+  body { background-attachment: scroll !important; }
+  .app-shell::before { display: none !important; }
+
+  /* Remove every costly effect... */
+  #nfm *,
+  #nfm *::before,
+  #nfm *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  body * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+
+  /* ...and the blurred "shadow under the shirt" blobs that relied on filter. */
+  #nfm .pitch-player::before,
+  #nfm .pitch-stadium-glow { display: none !important; }
+
+  /* Pages are painted only when they scroll into view. */
+  #nfm :is(.player-card, .team-card, .match-event, .voice-command-item) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 150px;
+  }
+  #nfm :is(.match-event, .voice-command-item) { contain-intrinsic-size: auto 44px; }
+
+  /* A few small glows to keep the LED style (blur ≤ 8px, single layer). */
+  #nfm .nfm-header { box-shadow: 0 2px 8px rgba(var(--c-rgb), .35) !important; }
+  #nfm .nfm-frame { box-shadow: 0 0 8px rgba(var(--c-rgb), .4) !important; }
+  #nfm .nfm-home-tile { box-shadow: 0 0 8px rgba(var(--t-rgb, var(--c-rgb)), .5) !important; }
+  #nfm .nfm-bottom-item.active { box-shadow: 0 0 8px rgba(var(--t-rgb, var(--c-rgb)), .5) !important; }
+  #nfm .match-team { box-shadow: 0 0 8px rgba(42, 157, 255, .5) !important; }
+  #nfm .match-away-team { box-shadow: 0 0 8px rgba(255, 59, 79, .5) !important; }
+  #nfm .nfm-event-button { box-shadow: 0 0 6px rgba(var(--e-rgb), .5) !important; }
+  #nfm .nfm-number.selected,
+  #nfm .on-field-list button.selected { box-shadow: 0 0 6px rgba(255, 210, 26, .6) !important; }
+
+  /* Continuous pulsing dots are not needed on a phone. */
+  #nfm :is(.live-dot, .nfm-live-dot) { animation: none !important; }
+}

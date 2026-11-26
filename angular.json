@@ -23,7 +23,8 @@
               "src/styles.scss",
               "src/nfm-theme.scss",
               "src/nfm-pages.scss",
-              "src/nfm-match.scss"
+              "src/nfm-match.scss",
+              "src/nfm-mobile.scss"
             ],
             "serviceWorker": "ngsw-config.json"
           },
