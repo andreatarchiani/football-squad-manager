@@ -111,6 +111,15 @@ export class CalendarPageComponent implements OnDestroy {
     this.notifications.notify({ title: 'Posizione di Maps salvata', message: 'Da qui si apre e si condivide direttamente in Maps.', type: 'success' });
   }
 
+  /** Pasting a Maps link saves the position (the text of the field stays the pitch name). */
+  protected onPasteVenue(event: ClipboardEvent, leg: Leg, index: number): void {
+    const text = event.clipboardData?.getData('text') ?? '';
+    const link = /https?:\/\/\S+/.exec(text)?.[0] ?? '';
+    if (!isMapsLink(link)) return;
+    event.preventDefault();
+    this.setVenueLink(leg, index, link);
+  }
+
   protected clearVenueLink(leg: Leg, index: number): void {
     this.editRound(leg, index, round => ({ ...round, venueUrl: '', venueLat: null, venueLon: null }));
   }

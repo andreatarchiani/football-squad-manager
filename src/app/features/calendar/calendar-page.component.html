@@ -158,7 +158,7 @@
             <span class="cal-venue-home"><b>In casa</b> · {{ homeVenue() }}</span>
           } @else {
             <span class="cal-venue-away">
-              <input class="cal-venue-text" type="text" maxlength="400" [value]="round.venue" (change)="setVenue(leg, i, $any($event.target).value)" (paste)="$event.preventDefault(); setVenue(leg, i, $any($event).clipboardData?.getData('text') ?? '')" placeholder="Nome / indirizzo del campo, oppure incolla il link di Maps" aria-label="Campo della partita in trasferta">
+              <input class="cal-venue-text" type="text" maxlength="400" [value]="round.venue" (change)="setVenue(leg, i, $any($event.target).value)" (paste)="onPasteVenue($event, leg, i)" placeholder="Nome / indirizzo del campo, oppure incolla il link di Maps" aria-label="Campo della partita in trasferta">
               @if (round.venueUrl) {
                 <span class="cal-maps-saved" title="{{ round.venueUrl }}">✓ Posizione Maps <button type="button" (click)="clearVenueLink(leg, i)" aria-label="Rimuovi il link di Maps">×</button></span>
               } @else {
