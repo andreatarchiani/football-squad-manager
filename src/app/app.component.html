@@ -218,25 +218,25 @@
           @case ('training') { <ng-container [ngTemplateOutlet]="sceneTpl" [ngTemplateOutletContext]="{ $implicit: 'training', label: 'Campo di allenamento con coni, sagome e lavagna tattica' }"></ng-container> }
           @case ('match-hub') { <ng-container [ngTemplateOutlet]="sceneTpl" [ngTemplateOutletContext]="{ $implicit: 'match', label: 'Stadio illuminato con borse, palloni e materiale da gara' }"></ng-container> }
           @case ('formation') {
-            <fsm-home-page (openTeams)="openTeamRoster($event)" (launchMatch)="launchMatch($event)" />
+            @defer { <fsm-home-page (openTeams)="openTeamRoster($event)" (launchMatch)="launchMatch($event)" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('teams') {
-            <fsm-teams-page [launchRequest]="matchLaunch()" [rosterRequest]="rosterRequest()" [resumeMatch]="false" />
+            @defer { <fsm-teams-page [launchRequest]="matchLaunch()" [rosterRequest]="rosterRequest()" [resumeMatch]="false" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('lineup') {
-            <fsm-teams-page class="nfm-lineup-mode" [launchRequest]="matchLaunch()" [rosterRequest]="rosterRequest()" [resumeMatch]="false" />
+            @defer { <fsm-teams-page class="nfm-lineup-mode" [launchRequest]="matchLaunch()" [rosterRequest]="rosterRequest()" [resumeMatch]="false" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('match') {
-            <fsm-teams-page class="nfm-live-mode" [launchRequest]="matchLaunch()" [resumeMatch]="true" (matchClosed)="returnHomeAfterMatch()" />
+            @defer { <fsm-teams-page class="nfm-live-mode" [launchRequest]="matchLaunch()" [resumeMatch]="true" (matchClosed)="returnHomeAfterMatch()" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('players') {
-            <fsm-players-page />
+            @defer { <fsm-players-page /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('staff') {
-            @defer { <fsm-staff-page /> } @loading (minimum 200ms) { <div class="nfm-defer-loading">Caricamento…</div> }
+            @defer { <fsm-staff-page /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('calendar') {
-            @defer { <fsm-calendar-page /> } @loading (minimum 200ms) { <div class="nfm-defer-loading">Caricamento…</div> }
+            @defer { <fsm-calendar-page /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
         }
         </div>
