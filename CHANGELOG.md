@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-26 — Campo della trasferta in 3 passi
+
+- **Modifica:** per il campo delle trasferte c’è un solo pulsante “Imposta il campo”, che apre una guida in 3 passi: apri Maps, copia il link del campo (Condividi › Copia link), incollalo; l’app conferma se il link è valido. Poi dalla giornata si apre direttamente in Maps.
+- **Modifica:** tolti il tasto ⇄ dall’Andata e la scritta “Salvato automaticamente” (il calendario continua a salvarsi da solo).
+
 ## 2026-11-26 — Campo delle trasferte da Maps e date del calendario
 
 - **Correzione:** modificando la data (o l’ora) di una giornata scrivendola, la data non viene più cancellata e la prossima partita si aggiorna subito.

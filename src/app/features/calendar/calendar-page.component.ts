@@ -79,11 +79,6 @@ export class CalendarPageComponent implements OnDestroy {
     this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, opponent: value } : round));
   }
 
-  /** ⇄ swaps the two teams: the team on the left plays at home. */
-  protected swap(index: number): void {
-    this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, home: !round.home, venue: '', venueLat: null, venueLon: null, venueUrl: '' } : round));
-  }
-
   protected setGroupName(value: string): void { this.calendar.update(data => ({ ...data, groupName: value })); this.scheduleSave(); }
 
   protected setWhen(leg: Leg, index: number, key: 'date' | 'time', value: string): void {
@@ -98,48 +93,53 @@ export class CalendarPageComponent implements OnDestroy {
     }
   }
 
-  /** Pitch of an away match: a name/address typed by hand, or a link pasted from Maps. */
-  protected setVenue(leg: Leg, index: number, text: string): void {
-    const value = text.trim();
-    if (isMapsLink(value)) { this.setVenueLink(leg, index, value); return; }
-    this.editRound(leg, index, round => ({ ...round, venue: text }));
+  /* ------------------------------------------- campo della trasferta */
+  protected readonly venueEditor = signal<{ leg: Leg; index: number; round: CalendarRound } | null>(null);
+  protected readonly draftLink = signal('');
+  protected readonly draftName = signal('');
+  protected readonly draftLinkValid = computed(() => isMapsLink(this.draftLink()));
+
+  protected openVenueEditor(leg: Leg, index: number): void {
+    const round = this.rows(leg)[index];
+    if (!round) return;
+    this.draftLink.set(round.venueUrl ?? '');
+    this.draftName.set(round.venue ?? '');
+    this.venueEditor.set({ leg, index, round });
   }
 
-  protected setVenueLink(leg: Leg, index: number, link: string): void {
-    const point = coordinatesFromLink(link);
-    this.editRound(leg, index, round => ({ ...round, venueUrl: link, venueLat: point?.lat ?? null, venueLon: point?.lon ?? null }));
-    this.notifications.notify({ title: 'Posizione di Maps salvata', message: 'Da qui si apre e si condivide direttamente in Maps.', type: 'success' });
+  protected closeVenueEditor(): void { this.venueEditor.set(null); }
+
+  /** "Incolla": reads the link copied in Maps. */
+  protected async pasteDraftLink(): Promise<void> {
+    try {
+      const text = (await navigator.clipboard.readText()).trim();
+      this.draftLink.set(/https?:\/\/\S+/.exec(text)?.[0] ?? text);
+    } catch {
+      this.notifications.notify({ title: 'Incolla a mano', message: 'Tieni premuto nella casella del link e scegli Incolla.', type: 'info', durationMs: 6000 });
+    }
   }
 
-  /** Pasting a Maps link saves the position (the text of the field stays the pitch name). */
-  protected onPasteVenue(event: ClipboardEvent, leg: Leg, index: number): void {
-    const text = event.clipboardData?.getData('text') ?? '';
-    const link = /https?:\/\/\S+/.exec(text)?.[0] ?? '';
-    if (!isMapsLink(link)) return;
-    event.preventDefault();
-    this.setVenueLink(leg, index, link);
+  protected saveVenue(): void {
+    const editor = this.venueEditor();
+    if (!editor) return;
+    const link = this.draftLinkValid() ? this.draftLink() : '';
+    const point = link ? coordinatesFromLink(link) : null;
+    const name = this.draftName().trim();
+    this.editRound(editor.leg, editor.index, round => ({ ...round, venue: name, venueUrl: link, venueLat: point?.lat ?? null, venueLon: point?.lon ?? null }));
+    this.venueEditor.set(null);
   }
 
-  protected clearVenueLink(leg: Leg, index: number): void {
-    this.editRound(leg, index, round => ({ ...round, venueUrl: '', venueLat: null, venueLon: null }));
+  protected removeVenue(): void {
+    const editor = this.venueEditor();
+    if (!editor) return;
+    this.editRound(editor.leg, editor.index, round => ({ ...round, venue: '', venueUrl: '', venueLat: null, venueLon: null }));
+    this.venueEditor.set(null);
   }
 
   /** Opens Maps to look for the pitch (typed text, or the opponent's sports ground). */
   protected searchOnMaps(round: CalendarRound): string {
     const text = round.venue.trim() || `campo sportivo ${round.opponent}`.trim();
     return mapsLink(text);
-  }
-
-  /** "Incolla link": reads the link copied in Maps (Condividi › Copia link). */
-  protected async pasteLink(leg: Leg, index: number): Promise<void> {
-    try {
-      const text = (await navigator.clipboard.readText()).trim();
-      const link = /https?:\/\/\S+/.exec(text)?.[0] ?? '';
-      if (isMapsLink(link)) { this.setVenueLink(leg, index, link); return; }
-      this.notifications.notify({ title: 'Nessun link di Maps copiato', message: 'In Maps apri il campo, premi Condividi › Copia link e poi torna qui.', type: 'warning', durationMs: 7000 });
-    } catch {
-      this.notifications.notify({ title: 'Incolla il link nel campo', message: 'Tieni premuto nel campo indirizzo e scegli Incolla.', type: 'info', durationMs: 6000 });
-    }
   }
 
   protected mapsUrl(round: CalendarRound): string | null {

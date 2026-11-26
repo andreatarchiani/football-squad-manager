@@ -20,15 +20,6 @@
       <span class="cal-label">Girone / Campionato</span>
       <input type="text" maxlength="80" placeholder="Es. Campionato Juniores – Girone unico Arezzo" [value]="calendar().groupName" (input)="setGroupName($any($event.target).value)" [disabled]="!team()">
     </label>
-    <div class="cal-save-state" [attr.data-state]="saveState()" role="status" aria-live="polite">
-      @switch (saveState()) {
-        @case ('pending') { <i></i> Modifiche in corso… }
-        @case ('saving') { <i></i> Salvataggio… }
-        @case ('saved') { <i></i> Salvato automaticamente }
-        @case ('error') { <i></i> Non salvato: controlla la connessione }
-        @default { <i></i> Salvataggio automatico }
-      }
-    </div>
   </div>
 
   @if (error()) { <div class="cal-alert" role="alert">{{ error() }}</div> }
@@ -49,7 +40,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14.5H4zM4 10.2h16M8 3.5v4.5M16 3.5v4.5"/></svg>
             <strong>Andata</strong><small>{{ calendar().andata.length }} giornate</small>
           </header>
-          <p class="cal-note">Inserisci data, ora e avversario. La squadra a sinistra gioca in casa: con ⇄ scambi casa e trasferta. Per il campo in trasferta premi “Cerca su Maps”, trova il campo, poi Condividi › Copia link e “Incolla link”.</p>
+          <p class="cal-note">Inserisci data, ora e avversario. La squadra a sinistra gioca in casa. Per le trasferte premi “Imposta il campo” e segui i 3 passi.</p>
           <ng-container [ngTemplateOutlet]="table" [ngTemplateOutletContext]="{ $implicit: 'A' }"></ng-container>
           <button type="button" class="cal-add" (click)="addRound()">＋ Aggiungi giornata</button>
         </section>
@@ -135,7 +126,7 @@
             } @else {
               <input class="cal-opponent" type="text" maxlength="80" list="fsm-group-teams" placeholder="Avversario" [value]="round.opponent" (input)="setOpponent(i, $any($event.target).value)" aria-label="Avversario (in casa)">
             }
-            <button type="button" class="cal-swap" (click)="swap(i)" title="Scambia casa e trasferta" aria-label="Scambia casa e trasferta">⇄</button>
+            <b class="cal-vs">VS</b>
             @if (round.home) {
               <input class="cal-opponent" type="text" maxlength="80" list="fsm-group-teams" placeholder="Avversario" [value]="round.opponent" (input)="setOpponent(i, $any($event.target).value)" aria-label="Avversario (in trasferta)">
             } @else {
@@ -157,17 +148,18 @@
           @if (round.home) {
             <span class="cal-venue-home"><b>In casa</b> · {{ homeVenue() }}</span>
           } @else {
-            <span class="cal-venue-away">
-              <input class="cal-venue-text" type="text" maxlength="400" [value]="round.venue" (change)="setVenue(leg, i, $any($event.target).value)" (paste)="onPasteVenue($event, leg, i)" placeholder="Nome / indirizzo del campo, oppure incolla il link di Maps" aria-label="Campo della partita in trasferta">
-              @if (round.venueUrl) {
-                <span class="cal-maps-saved" title="{{ round.venueUrl }}">✓ Posizione Maps <button type="button" (click)="clearVenueLink(leg, i)" aria-label="Rimuovi il link di Maps">×</button></span>
-              } @else {
-                <a class="cal-map-link find" [href]="searchOnMaps(round)" target="_blank" rel="noopener" title="Cerca il campo in Maps">Cerca su Maps</a>
-                <button type="button" class="cal-map-link" (click)="pasteLink(leg, i)" title="Incolla il link copiato da Maps">Incolla link</button>
-              }
-            </span>
+            @if (round.venue || round.venueUrl) {
+              <span class="cal-venue-set"><b>Trasferta</b> · {{ round.venue || 'Campo salvato da Maps' }}</span>
+              <span class="cal-venue-actions">
+                @if (mapsUrl(round); as url) { <a class="cal-map-link" [href]="url" target="_blank" rel="noopener">Apri in Maps</a> }
+                <button type="button" class="cal-map-link" (click)="openVenueEditor(leg, i)">Modifica</button>
+              </span>
+            } @else {
+              <span class="cal-venue-missing">Campo della trasferta non indicato</span>
+              <button type="button" class="cal-venue-set-button" (click)="openVenueEditor(leg, i)">📍 Imposta il campo</button>
+            }
           }
-          @if (mapsUrl(round); as url) { <a class="cal-map-link" [href]="url" target="_blank" rel="noopener" title="Apri in Maps" aria-label="Apri il campo in Maps">Apri</a> }
+          @if (round.home && mapsUrl(round); as url) { <a class="cal-map-link" [href]="url" target="_blank" rel="noopener">Apri in Maps</a> }
         </span>
       </div>
     } @empty {
@@ -175,3 +167,50 @@
     }
   </div>
 </ng-template>
+
+<!-- Campo della trasferta: procedura guidata in 3 passi -->
+@if (venueEditor(); as editor) {
+  <div class="venue-backdrop" role="presentation" (click)="closeVenueEditor()">
+    <section class="venue-dialog" role="dialog" aria-modal="true" aria-labelledby="venue-title" (click)="$event.stopPropagation()">
+      <header class="venue-head">
+        <div><small>GIORNATA {{ editor.round.number }} · TRASFERTA</small><h3 id="venue-title">Campo di {{ editor.round.opponent || 'Avversario' }}</h3></div>
+        <button type="button" class="venue-close" (click)="closeVenueEditor()" aria-label="Chiudi">×</button>
+      </header>
+
+      <ol class="venue-steps">
+        <li>
+          <span class="venue-step-num">1</span>
+          <div><strong>Apri Maps e trova il campo</strong><p>Si apre Maps già sulla ricerca del campo sportivo dell’avversario.</p>
+            <a class="venue-primary" [href]="searchOnMaps(editor.round)" target="_blank" rel="noopener">📍 Apri Maps</a></div>
+        </li>
+        <li>
+          <span class="venue-step-num">2</span>
+          <div><strong>Copia il link del campo</strong><p>In Maps tocca il campo, poi <b>Condividi</b> e scegli <b>Copia link</b>.</p></div>
+        </li>
+        <li>
+          <span class="venue-step-num">3</span>
+          <div><strong>Torna qui e incolla il link</strong>
+            <div class="venue-paste">
+              <input type="url" inputmode="url" placeholder="Il link compare qui" [value]="draftLink()" (input)="draftLink.set($any($event.target).value.trim())">
+              <button type="button" class="venue-secondary" (click)="pasteDraftLink()">Incolla</button>
+            </div>
+            @if (draftLink()) {
+              @if (draftLinkValid()) { <p class="venue-ok">✓ Link di Maps riconosciuto: chi lo apre arriva esattamente al campo.</p> }
+              @else { <p class="venue-bad">Questo non sembra un link di Maps. In Maps usa Condividi › Copia link.</p> }
+            }
+          </div>
+        </li>
+      </ol>
+
+      <label class="venue-name">Nome del campo <small>(facoltativo)</small>
+        <input type="text" maxlength="180" placeholder="Es. Stadio Comunale di Levane" [value]="draftName()" (input)="draftName.set($any($event.target).value)">
+      </label>
+
+      <footer class="venue-actions">
+        @if (editor.round.venue || editor.round.venueUrl) { <button type="button" class="venue-remove" (click)="removeVenue()">Rimuovi</button> }
+        <button type="button" class="venue-secondary" (click)="closeVenueEditor()">Annulla</button>
+        <button type="button" class="venue-save" (click)="saveVenue()" [disabled]="!(draftLinkValid() || draftName().trim())">Salva campo</button>
+      </footer>
+    </section>
+  </div>
+}
