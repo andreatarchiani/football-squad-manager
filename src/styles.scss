@@ -713,3 +713,36 @@ body {
   }
 }
 
+/* Player/team modal must fully mask the page beneath it: the previous translucent
+   overlay allowed underlying horizontal section borders to show through as a cut line. */
+@media(max-width:650px){
+  .fsm-form-overlay{
+    position:fixed!important;
+    inset:0!important;
+    width:100vw;
+    height:100vh;
+    height:100dvh;
+    min-height:100vh;
+    min-height:100dvh;
+    padding:0!important;
+    display:block!important;
+    overflow:hidden!important;
+    background:#061326!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+  .fsm-form-overlay>.fsm-form-dialog{
+    display:block;
+    width:100%!important;
+    height:100%;
+    min-height:100%;
+    max-height:100%!important;
+    margin:0!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain;
+    border:0!important;
+    border-radius:0!important;
+    background:linear-gradient(150deg,#0b2b4e 0%,#071a31 55%,#061326 100%)!important;
+  }
+}
+
