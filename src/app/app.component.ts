@@ -354,6 +354,14 @@ export class AppComponent {
     this.setView('formation');
   }
 
+  /** Lineup editor shown directly under the match centre in "Formazione". */
+  protected readonly formationEditor = signal<{ teamId: string; layoutSlot: 1 | 2; token: number; scroll: boolean } | null>(null);
+  protected showLineupEditor(request: { teamId: string; layoutSlot: 1 | 2 }): void {
+    const current = this.formationEditor();
+    if (current && current.teamId === request.teamId && current.layoutSlot === request.layoutSlot) return;
+    this.formationEditor.set({ ...request, token: Date.now(), scroll: false });
+  }
+
   protected openTeamRoster(request: { teamId: string; layoutSlot: 1 | 2 }): void {
     this.matchLaunch.set(null);
     if (!request.teamId) { this.setView('teams'); return; }
@@ -393,6 +401,7 @@ export class AppComponent {
     // A launch request must be consumed only once: re-opening "Panchina Live" later
     // has to resume the saved match instead of starting a new one.
     if (this.activePage() === 'match' && view !== 'match') this.matchLaunch.set(null);
+    if (view !== 'formation') this.formationEditor.set(null);
     if (view === 'teams') { this.matchLaunch.set(null); this.rosterRequest.set(null); }
     this.nextOpponent.set(this.readNextOpponent());
     this.nextTeam.set(this.readNextTeam());

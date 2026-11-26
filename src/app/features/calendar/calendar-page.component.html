@@ -86,6 +86,12 @@
               <div><dt>Campo</dt><dd class="venue">{{ round.home ? 'In casa' : 'In trasferta' }} · {{ venueOf(round) }}</dd></div>
               <div><dt>Fase</dt><dd>{{ round.leg === 'A' ? 'Andata' : 'Ritorno' }}</dd></div>
             </dl>
+            @if (mapsUrl(round); as url) {
+              <div class="cal-map-actions">
+                <a class="cal-map-button" [href]="url" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.1-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.9 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg>Apri in Maps</a>
+                <button type="button" class="cal-map-button secondary" (click)="shareVenue(round)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>Condividi</button>
+              </div>
+            }
           } @else {
             <div class="cal-empty small">Nessuna partita in programma da oggi in poi: inserisci le date delle giornate.</div>
           }
@@ -151,8 +157,9 @@
           @if (round.home) {
             <span class="cal-venue-home"><b>In casa</b> · {{ homeVenue() }}</span>
           } @else {
-            <fsm-address-field class="cal-venue-input" [value]="round.venue" (valueChange)="setVenue(leg, i, $event)" placeholder="Indirizzo del campo (trasferta)" [maxlength]="180" />
+            <fsm-address-field class="cal-venue-input" [value]="round.venue" (picked)="setVenue(leg, i, $event)" [near]="searchCentre()" placeholder="Indirizzo del campo: scrivi la via (es. via Roma)" [maxlength]="180" />
           }
+          @if (mapsUrl(round); as url) { <a class="cal-map-link" [href]="url" target="_blank" rel="noopener" title="Apri in Maps" aria-label="Apri il campo in Maps">Maps</a> }
         </span>
       </div>
     } @empty {

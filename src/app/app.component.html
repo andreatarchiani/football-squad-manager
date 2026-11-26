@@ -232,7 +232,7 @@
           @case ('training') { <ng-container [ngTemplateOutlet]="sceneTpl" [ngTemplateOutletContext]="{ $implicit: 'training', label: 'Campo di allenamento con coni, sagome e lavagna tattica' }"></ng-container> }
           @case ('match-hub') { <ng-container [ngTemplateOutlet]="sceneTpl" [ngTemplateOutletContext]="{ $implicit: 'match', label: 'Stadio illuminato con borse, palloni e materiale da gara' }"></ng-container> }
           @case ('formation') {
-            @defer { <fsm-home-page (openTeams)="openTeamRoster($event)" (launchMatch)="launchMatch($event)" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
+            @defer { <fsm-home-page (openTeams)="openTeamRoster($event)" (launchMatch)="launchMatch($event)" (teamReady)="showLineupEditor($event)" /> @if (formationEditor(); as editor) { <fsm-teams-page class="nfm-lineup-mode nfm-formation-editor" [launchRequest]="null" [rosterRequest]="editor" [resumeMatch]="false" /> } } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('teams') {
             @defer { <fsm-teams-page [launchRequest]="matchLaunch()" [rosterRequest]="rosterRequest()" [resumeMatch]="false" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }

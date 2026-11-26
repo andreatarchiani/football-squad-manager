@@ -53,10 +53,10 @@
           <input name="facilityName" [(ngModel)]="form.facilityName" maxlength="100" placeholder="Nome del campo sportivo">
         </label>
         <label>Indirizzo impianto
-          <fsm-address-field name="facilityAddress" [(value)]="form.facilityAddress" [maxlength]="180" placeholder="Scrivi e scegli l’indirizzo" />
+          <input name="facilityAddress" [(ngModel)]="form.facilityAddress" maxlength="180" placeholder="Via, numero civico, comune">
         </label>
         <label>Indirizzo sede
-          <fsm-address-field name="headquartersAddress" [(value)]="form.headquartersAddress" [maxlength]="180" placeholder="Scrivi e scegli l’indirizzo" />
+          <input name="headquartersAddress" [(ngModel)]="form.headquartersAddress" maxlength="180" placeholder="Indirizzo della sede sociale">
         </label>
         <label>Matricola federale
           <input name="federationNumber" [(ngModel)]="form.federationNumber" maxlength="60" placeholder="Matricola FIGC">

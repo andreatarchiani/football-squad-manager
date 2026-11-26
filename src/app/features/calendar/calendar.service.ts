@@ -11,6 +11,8 @@ export interface CalendarRound {
   date: string;            // YYYY-MM-DD
   time: string;            // HH:mm
   venue: string;           // address of the pitch (away games; home games use the team address)
+  venueLat?: number | null; // coordinates of the chosen address, for Maps
+  venueLon?: number | null;
 }
 
 
@@ -39,7 +41,9 @@ export function buildReturnLeg(andata: CalendarRound[], previous: CalendarRound[
       home: !round.home,
       date: keep ? old.date : '',
       time: keep ? old.time : (round.time || ''),
-      venue: keep ? old.venue : ''
+      venue: keep ? old.venue : '',
+      venueLat: keep ? old.venueLat ?? null : null,
+      venueLon: keep ? old.venueLon ?? null : null
     };
   });
 }
@@ -78,7 +82,8 @@ export class CalendarService {
   async save(workspaceId: string, teamId: string, teamName: string, calendar: CalendarData): Promise<void> {
     const clean = (round: CalendarRound) => ({
       number: round.number, leg: round.leg, opponent: round.opponent.trim().slice(0, 80), home: round.home,
-      date: round.date || '', time: round.time || '', venue: (round.venue || '').trim().slice(0, 180)
+      date: round.date || '', time: round.time || '', venue: (round.venue || '').trim().slice(0, 180),
+      venueLat: typeof round.venueLat === 'number' ? round.venueLat : null, venueLon: typeof round.venueLon === 'number' ? round.venueLon : null
     });
     await setDoc(doc(this.db(), 'workspaces', workspaceId, 'calendars', teamId), {
       teamId,
@@ -102,7 +107,9 @@ export class CalendarService {
       home: item['home'] !== false,
       date: String(item['date'] ?? ''),
       time: String(item['time'] ?? ''),
-      venue: String(item['venue'] ?? '')
+      venue: String(item['venue'] ?? ''),
+      venueLat: typeof item['venueLat'] === 'number' ? item['venueLat'] as number : null,
+      venueLon: typeof item['venueLon'] === 'number' ? item['venueLon'] as number : null
     };
   }
 

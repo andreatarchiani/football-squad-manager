@@ -33,32 +33,9 @@
           <small>SQUADRA AVVERSARIA</small>
         </div>
       </div>
-      <label class="opponent-field">
-        <span>INSERISCI L’AVVERSARIO</span>
-        <input type="text" maxlength="80" [value]="opponentName()" (input)="setOpponentName($any($event.target).value)" placeholder="Nome della squadra avversaria" autocomplete="off">
-      </label>
     </section>
-    <section class="home-roster-panel">
-      <div class="home-roster-heading"><div><span class="eyebrow">{{ selectedTeam.name }}</span><h2>La tua formazione</h2><p>Disposizione tattica della squadra</p></div><button type="button" class="launch-button" (click)="start()" [disabled]="previewLoading() || !completeStartingLineup">▶ Inizia partita</button></div>
-      <div class="formation-data-strip" aria-label="Riepilogo formazione">
-        <div><small>MODULO</small><strong>{{ previewFormation() }}</strong></div>
-        <div><small>GIOCATORI IN ROSA</small><strong>{{ previewPlayers().length }}</strong></div>
-        <div><small>FORMAZIONE</small><strong [class.is-ready]="completeStartingLineup">{{ completeStartingLineup ? 'PRONTA' : 'DA COMPLETARE' }}</strong></div>
-      </div>
-      <div class="home-roster-actions"><button type="button" class="home-edit-roster-button" (click)="openTeams.emit({ teamId: selectedTeam.id, layoutSlot: layoutSlot() })">✎ Modifica la formazione</button></div>
-      @if (previewLoading()) { <div class="preview-placeholder">Caricamento formazione…</div> }
-      @else {
-        <div class="home-pitch-stage"><div class="home-football-pitch" aria-label="Anteprima non modificabile della formazione">
-          <div class="home-pitch-boundary"></div><div class="pitch-line halfway"></div><div class="pitch-circle"></div><div class="pitch-center-dot"></div><div class="pitch-box top-box"><span class="home-six-yard-box"></span></div><div class="pitch-box bottom-box"><span class="home-six-yard-box"></span></div><div class="home-penalty-spot top-spot"></div><div class="home-penalty-spot bottom-spot"></div><div class="home-penalty-arc top-arc"></div><div class="home-penalty-arc bottom-arc"></div><div class="home-corner top-left"></div><div class="home-corner top-right"></div><div class="home-corner bottom-left"></div><div class="home-corner bottom-right"></div>
-          @for (slot of pitchSlots[previewFormation()]; track slot.id) {
-            <div class="home-pitch-player" [class.is-goalkeeper]="slot.id === 'por'" [style.left.%]="previewPosition(slot).x" [style.top.%]="previewPosition(slot).y">
-              <span class="home-pitch-shirt home-pitch-shirt-static">{{ previewPlayer(slot.id)?.shirtNumber ?? '—' }}</span>
-              <span class="home-pitch-player-name">{{ previewPlayer(slot.id)?.lastName || slot.label }}@if (previewPlayer(slot.id); as player) { @if (player.id === captainId()) { <span class="home-leadership-mark captain-armband-mark" title="Capitano">C</span> } @else if (player.id === viceCaptainId()) { <span class="home-leadership-mark vice-armband-mark" title="Vicecapitano">VC</span> } }</span>
-            </div>
-          }
-        </div></div>
-      }
-      @if (!completeStartingLineup) { <p class="lineup-completion-hint" role="status">La formazione non è completa. Apri la rosa per sistemare gli 11 titolari.</p> }
+    <section class="home-roster-panel home-roster-compact">
+      <div class="home-roster-heading"><div><span class="eyebrow">{{ selectedTeam.name }}</span><h2>La tua formazione</h2><p>Modulo, titolari, panchina e capitani: modificali qui sotto.</p></div><button type="button" class="launch-button" (click)="start()" [disabled]="previewLoading() || starting()">{{ starting() ? 'Preparazione…' : '▶ Inizia partita' }}</button></div>
     </section>
   } @else {
     <section class="home-roster-panel"><div class="next-match-heading"><span class="eyebrow">FOOTBALL SQUAD MANAGER</span><h2>Nessuna squadra attiva</h2><p>Crea una squadra per visualizzare la rosa e preparare la prossima partita.</p></div><button type="button" class="customize-action" (click)="openTeams.emit({ teamId: '', layoutSlot: layoutSlot() })">Vai a Squadre</button></section>

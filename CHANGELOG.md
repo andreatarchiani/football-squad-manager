@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-26 — Formazione subito modificabile e indirizzi del campo con Maps
+
+- **Formazione:** sotto il Match Center trovi direttamente modulo, titolari, panchina e capitani da modificare (non serve più “Modifica la formazione”); l’avversario arriva in automatico dalla prossima partita del calendario.
+- **Indirizzi:** i suggerimenti sono stati tolti dall’Anagrafe Squadra e restano solo per il campo delle gare in trasferta del calendario, ora più veloci e centrati sulla zona della tua squadra (non serve scrivere la città). Ogni campo si apre in Maps e la posizione si può condividere.
+
 ## 2026-11-26 — Calendario in Creazione Stagione e prossima partita automatica
 
 - **Modifica:** il calendario si trova ora in Ufficio › Creazione Stagione / Campionato, con due tabelle: *Andata* (da compilare) e *Ritorno* (creato in automatico, servono solo le date). Il tasto ⇄ scambia casa e trasferta.

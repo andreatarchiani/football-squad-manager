@@ -21,6 +21,9 @@ export class HomePageComponent {
   /** Next match from the calendar: fills the opponent automatically. */
   protected readonly nextMatch = signal<CalendarRound | null>(null);
   private readonly db = inject(FIRESTORE_DB, { optional: true });
+  /** Selected team: the app shows its lineup editor right below the match centre. */
+  @Output() readonly teamReady = new EventEmitter<{ teamId: string; layoutSlot: 1 | 2 }>();
+  protected readonly starting = signal(false);
   @Output() readonly openTeams = new EventEmitter<{ teamId: string; layoutSlot: 1 | 2 }>();
   @Output() readonly launchMatch = new EventEmitter<{ team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; opponentName: string }>();
   protected readonly teams = signal<TeamRecord[]>([]);
@@ -295,7 +298,12 @@ export class HomePageComponent {
     catch (error) { console.error('Unable to save account role.', error); this.error.set('Non è stato possibile salvare il tipo di profilo.'); }
   }
 
-  protected start(): void {
+  protected async start(): Promise<void> {
+    if (this.starting()) return;
+    // The lineup may have just been changed in the editor below: read it again first.
+    this.starting.set(true);
+    try { await new Promise(resolve => setTimeout(resolve, 400)); await this.loadPreview(); }
+    finally { this.starting.set(false); }
     const team = this.selectedTeam;
     if (!team || team.isArchived || !team.seasonId) {
       this.error.set('Seleziona una squadra attiva con una stagione valida prima di avviare la partita.');
@@ -329,6 +337,7 @@ export class HomePageComponent {
 
   private async loadPreview(): Promise<void> {
     void this.loadNextMatch();
+    if (this.selectedTeam) this.teamReady.emit({ teamId: this.selectedTeam.id, layoutSlot: this.layoutSlot() });
     const request = ++this.previewRequest;
     const team = this.selectedTeam;
     const workspaceId = this.auth.workspaceId();

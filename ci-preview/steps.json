@@ -173,7 +173,7 @@
   "name": "10-lineup",
   "actions": [
    {
-    "click": "button:has-text('Modifica la formazione')"
+    "wait": 1500
    }
   ],
   "settle": 3000
@@ -181,12 +181,6 @@
  {
   "name": "11-live",
   "actions": [
-   {
-    "click": ".nfm-menu-item:has-text('Formazione'), .nfm-subnav-item:has-text('Formazione')"
-   },
-   {
-    "wait": 3000
-   },
    {
     "click": "button:has-text('Inizia partita')"
    }

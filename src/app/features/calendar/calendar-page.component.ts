@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject
 import { NgTemplateOutlet } from '@angular/common';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { NotificationService } from '../../core/notifications/notification.service';
-import { AddressFieldComponent } from '../../shared/address-field.component';
+import { AddressFieldComponent, mapsLink, type PickedAddress } from '../../shared/address-field.component';
 import { TeamService, type TeamRecord } from '../teams/team.service';
 import { CalendarService, buildReturnLeg, duplicateDates, emptyCalendar, findNextMatch, type CalendarData, type CalendarRound } from './calendar.service';
 
@@ -82,7 +82,7 @@ export class CalendarPageComponent implements OnDestroy {
 
   /** ⇄ swaps the two teams: the team on the left plays at home. */
   protected swap(index: number): void {
-    this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, home: !round.home, venue: '' } : round));
+    this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, home: !round.home, venue: '', venueLat: null, venueLon: null } : round));
   }
 
   protected setGroupName(value: string): void { this.calendar.update(data => ({ ...data, groupName: value })); this.scheduleSave(); }
@@ -96,7 +96,32 @@ export class CalendarPageComponent implements OnDestroy {
     }
   }
 
-  protected setVenue(leg: Leg, index: number, value: string): void { this.editRound(leg, index, round => ({ ...round, venue: value })); }
+  protected setVenue(leg: Leg, index: number, picked: PickedAddress): void {
+    this.editRound(leg, index, round => ({ ...round, venue: picked.value, venueLat: picked.lat, venueLon: picked.lon }));
+  }
+
+  /** Address used to centre the search: the team's own pitch (or its headquarters). */
+  protected searchCentre(): string { const team = this.team(); return team?.facilityAddress || team?.headquartersAddress || ''; }
+
+  /** Google Maps link of the pitch of a match (works on iPhone and Android). */
+  protected mapsUrl(round: CalendarRound): string | null {
+    if (round.home) { const team = this.team(); const address = [team?.facilityName, team?.facilityAddress].filter(Boolean).join(', '); return team?.facilityAddress ? mapsLink(address) : null; }
+    return round.venue.trim() ? mapsLink(round.venue, round.venueLat, round.venueLon) : null;
+  }
+
+  protected async shareVenue(round: CalendarRound): Promise<void> {
+    const url = this.mapsUrl(round);
+    if (!url) return;
+    const title = `${this.homeName(round)} – ${this.awayName(round)}`;
+    const text = `${title} · ${this.formatDate(round.date)}${round.time ? ' ore ' + round.time : ''}\n${this.venueOf(round)}`;
+    try {
+      if (navigator.share) { await navigator.share({ title, text, url }); return; }
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      this.notifications.notify({ title: 'Posizione copiata', message: 'Incollala in un messaggio: si apre direttamente in Maps.', type: 'success' });
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') this.notifications.notify({ title: 'Condivisione non riuscita', message: url, type: 'warning', durationMs: 8000 });
+    }
+  }
 
   protected rows(leg: Leg): CalendarRound[] { return leg === 'A' ? this.calendar().andata : this.calendar().ritorno; }
 

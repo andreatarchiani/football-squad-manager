@@ -6,19 +6,18 @@ import { PlayerService, type PlayerRecord } from '../players/player.service';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { clearFieldProblems, showFieldProblems, type FieldProblem } from '../../core/form-feedback';
 import { LiveMatchComponent } from './live-match.component';
-import { AddressFieldComponent } from '../../shared/address-field.component';
 
 @Component({
   selector: 'fsm-teams-page',
   standalone: true,
-  imports: [FormsModule, LiveMatchComponent, AddressFieldComponent],
+  imports: [FormsModule, LiveMatchComponent],
   templateUrl: './teams-page.component.html',
   styleUrl: './teams-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TeamsPageComponent implements OnChanges {
   @Input() launchRequest: { team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; opponentName: string; token: number } | null = null;
-  @Input() rosterRequest: { teamId: string; layoutSlot: 1 | 2; token: number } | null = null;
+  @Input() rosterRequest: { teamId: string; layoutSlot: 1 | 2; token: number; scroll?: boolean } | null = null;
   @Input() resumeMatch = false;
   @Output() readonly matchClosed = new EventEmitter<void>();
   private handledLaunchToken = 0;
@@ -201,6 +200,7 @@ export class TeamsPageComponent implements OnChanges {
     this.autoStartMatch.set(false);
     if (this.expandedRosterId() !== team.id) await this.toggleRoster(team);
     if (request.layoutSlot !== this.layoutSlot()) await this.selectLayoutSlot(request.layoutSlot);
+    if (request.scroll === false) return;
     await new Promise<void>(resolve => setTimeout(resolve, 120));
     const rosterPanel = Array.from(document.querySelectorAll<HTMLElement>('[data-roster-team]'))
       .find(element => element.dataset['rosterTeam'] === team.id);
