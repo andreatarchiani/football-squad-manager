@@ -49,6 +49,9 @@
   box-shadow: 0 0 0 1px rgba(59, 164, 255, .35), 0 0 22px rgba(42, 157, 255, .55), inset 0 0 22px rgba(42, 157, 255, .18);
   text-align: center;
 }
+#nfm .match-scoreboard-header > .match-home-team { grid-column: 1; }
+#nfm .match-scoreboard-header > .match-scoreboard { grid-column: 2; justify-self: stretch; }
+#nfm .match-scoreboard-header > .match-away-team { grid-column: 3; }
 #nfm .match-scoreboard-header .match-team { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; justify-self: stretch; width: auto; max-width: none; }
 #nfm .match-scoreboard-header .match-team > * { grid-column: 1; grid-row: auto; justify-self: center; }
 #nfm .match-away-team {

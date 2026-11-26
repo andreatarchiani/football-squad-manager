@@ -203,7 +203,7 @@ export class AppComponent {
   protected readonly bugReportText = signal('');
   protected readonly releaseChangelogOpen = signal(false);
   private readonly releaseChangelogStorageKey = 'fsm-pending-release-changelog';
-  protected readonly releaseVersion = 'v0.10';
+  protected readonly releaseVersion = 'v0.11';
   protected readonly updating = signal(false);
   protected readonly loadingMinimumElapsed = signal(false);
   private readonly swUpdate = inject(SwUpdate);

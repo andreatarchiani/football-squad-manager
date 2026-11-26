@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-26 — Nuova interfaccia “Football Manager”
+
+- **Nuova grafica:** l’app è stata ridisegnata con tre aree a tema: **Ufficio** (arancio), **Allenamento** (verde) e **Partita** (blu LED). La Home presenta i grandi pulsanti di accesso alle aree; ogni area ha il proprio menu laterale con *Menù precedente* e *Home Page*. Su smartphone il menu diventa una barra in basso con le quattro aree e una barra di scorciatoie sotto il titolo.
+- **Riorganizzazione:** *Anagrafe Calciatore* e *Anagrafe Squadra* sono nell’Ufficio; *Formazione* e *Panchina Live* sono nella Partita. Le voci previste ma non ancora disponibili sono indicate come “In arrivo”.
+- **Panchina Live:** tabellone Mia squadra / Avversari, campo con maglie numerate, panchina con cambi rimasti e nuovo pannello *Registra evento* (gol fatto, gol subito, ammonizione, espulsione, passaggio chiave, cambio) con selezione del numero di maglia. Gli eventi seguono lo stesso salvataggio dei comandi vocali, che restano disponibili.
+- **Pulizia:** rimosso il nome dell’utente dalla barra superiore e il tema Material non utilizzato.
+
 ## 2026-11-24 — Categoria di appartenenza con elenco standard
 
 - **Miglioramento:** nell’anagrafica giocatori, la categoria di appartenenza si seleziona da un menu con lo stesso elenco di categorie previsto nell’anagrafica squadre, anche in modifica.
