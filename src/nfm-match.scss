@@ -173,10 +173,12 @@
   font-weight: 700;
 }
 #nfm .match-pitch-wrap .pitch-caption span { color: #fff; font-size: 17px; letter-spacing: 0; }
-#nfm .match-pitch-wrap .pitch-caption strong { padding: 2px 10px; border: 1px solid rgba(var(--c-rgb), .6); border-radius: 8px; color: var(--c-hi); background: rgba(0, 0, 0, .3); font-size: 15px; }
+#nfm .match-pitch-wrap .pitch-caption strong { white-space: nowrap; padding: 2px 10px; border: 1px solid rgba(var(--c-rgb), .6); border-radius: 8px; color: var(--c-hi); background: rgba(0, 0, 0, .3); font-size: 15px; }
 #nfm .match-tactics-toolbar { display: flex; justify-content: flex-end; margin: 0; }
 #nfm .match-tactics-toolbar .formation-picker { display: flex; align-items: center; gap: 8px; }
 #nfm .match-tactics-toolbar > span { display: none; }
+#nfm .match-tactics-toolbar .formation-picker-label { display: none; }
+#nfm .match-pitch-wrap .pitch-caption strong { display: none; }
 #nfm .match-pitch-wrap .match-pitch { grid-column: 1 / -1; width: min(100%, 540px); }
 
 #nfm .match-shirt-player .goal-indicator,
@@ -212,7 +214,7 @@
   background: var(--panel);
   box-shadow: 0 0 14px rgba(var(--c-rgb), .28);
 }
-#nfm .match-side .side-heading { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 0 2px; padding-bottom: 8px; border-bottom: 1px solid rgba(var(--c-rgb), .3); }
+#nfm .match-side .side-heading { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; margin: 0 0 2px; padding-bottom: 8px; border-bottom: 1px solid rgba(var(--c-rgb), .3); }
 #nfm .match-side .side-heading svg { width: 24px; height: 24px; fill: none; stroke: #fff; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 #nfm .match-side .side-heading strong { color: #fff; font-size: 18px; font-weight: 700; }
 #nfm .match-side .bench-heading span { padding: 1px 7px; border: 1px solid rgba(var(--c-rgb), .6); border-radius: 8px; color: var(--soft); background: rgba(0, 0, 0, .3); font-size: 11px; }
@@ -220,7 +222,7 @@
 #nfm .match-subs-col .side-heading { border-bottom-color: rgba(53, 224, 108, .35); }
 #nfm .match-subs-col .side-heading svg { stroke: var(--nfm-green-ok); }
 #nfm .selected-outgoing { padding: 7px 8px; border: 1px solid rgba(255, 210, 26, .7); border-radius: 10px; color: #ffe9a3; background: rgba(120, 90, 0, .25); font-size: 12px; line-height: 1.35; }
-#nfm .match-bench { display: grid; gap: 6px; max-height: 520px; overflow-y: auto; }
+#nfm .match-bench { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; max-height: 520px; overflow-y: auto; padding-right: 0; }
 #nfm .match-bench .bench-choice {
   grid-template-columns: 34px minmax(0, 1fr);
   gap: 8px;
@@ -315,9 +317,11 @@
   background: linear-gradient(180deg, rgba(var(--e-rgb), .75), var(--e-deep));
   box-shadow: 0 0 14px rgba(var(--e-rgb), .5), inset 0 1px rgba(255, 255, 255, .35);
   font: inherit;
-  font-size: 14.5px;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1.1;
+  letter-spacing: -.01em;
+  overflow-wrap: anywhere;
   text-align: center;
   text-shadow: 0 1px 3px rgba(0, 0, 0, .5);
   cursor: pointer;

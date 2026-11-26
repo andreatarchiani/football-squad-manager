@@ -900,6 +900,10 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   protected readonly substitutionEvents = computed(() => this.events().filter(event => event.type === 'substitution').slice().reverse());
   private readonly eventLabels: Record<MatchEventType, string> = { goal: 'Gol', 'opponent-goal': 'Gol subito', 'key-pass': 'Passaggio chiave', 'yellow-card': 'Ammonizione', 'red-card': 'Espulsione', substitution: 'Cambio', formation: 'Modulo' };
   protected eventLabel(type: MatchEventType): string { return this.eventLabels[type] ?? 'Evento'; }
+  protected descriptionStartsWithLabel(event: MatchEvent): boolean {
+    const head = this.eventLabel(event.type).toLowerCase().slice(0, 5);
+    return event.description.trim().toLowerCase().startsWith(head);
+  }
   protected eventIcon(type: MatchEventType): string {
     if (type === 'formation') return 'M3 5h18v14H3zM12 5v14M3 9.2h2.8v5.6H3M21 9.2h-2.8v5.6H21';
     return this.manualEventTypes.find(item => item.type === type)?.icon ?? '';

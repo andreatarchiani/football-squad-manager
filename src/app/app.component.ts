@@ -61,7 +61,7 @@ const VIEW_META: Record<AppView, { title: string; accent?: string; subtitle?: st
   training: { title: 'Allenamenti', icon: 'cone' },
   'match-hub': { title: 'Campo', icon: 'match' },
   formation: { title: 'Formazione', icon: 'formation', subtitle: 'Prepara la prossima partita e lo schieramento titolare' },
-  lineup: { title: 'Formazione', icon: 'formation', subtitle: 'Modulo, titolari, panchina, capitano e vice capitano' },
+  lineup: { title: 'Formazione', icon: 'formation', subtitle: 'Modulo, titolari, panchina e capitani' },
   match: { title: 'Panchina', accent: 'Live', icon: 'bench' }
 };
 const HOME_TILES: { label: string; icon: IconName; view?: AppView; tone: string; soon?: boolean }[] = [
