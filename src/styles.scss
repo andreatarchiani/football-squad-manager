@@ -765,10 +765,16 @@ body {
   }
   .players-page .fsm-form-dialog .form-actions .primary-button{
     display:inline-flex;
+    justify-content:center!important;
+    align-items:center!important;
+    text-align:center!important;
+    line-height:1.2!important;
+    white-space:nowrap;
     width:auto!important;
     min-width:180px;
     min-height:48px;
     margin:0;
+    padding-inline:20px!important;
   }
 }
 
