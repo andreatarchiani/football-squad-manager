@@ -2,16 +2,15 @@ import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject
 import { NgTemplateOutlet } from '@angular/common';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { NotificationService } from '../../core/notifications/notification.service';
-import { AddressFieldComponent, mapsLink, type PickedAddress } from '../../shared/address-field.component';
 import { TeamService, type TeamRecord } from '../teams/team.service';
-import { CalendarService, buildReturnLeg, duplicateDates, emptyCalendar, findNextMatch, type CalendarData, type CalendarRound } from './calendar.service';
+import { CalendarService, coordinatesFromLink, isMapsLink, mapsLink, buildReturnLeg, duplicateDates, emptyCalendar, findNextMatch, type CalendarData, type CalendarRound } from './calendar.service';
 
 type Leg = 'A' | 'R';
 
 @Component({
   selector: 'fsm-calendar-page',
   standalone: true,
-  imports: [AddressFieldComponent, NgTemplateOutlet],
+  imports: [NgTemplateOutlet],
   templateUrl: './calendar-page.component.html',
   styleUrl: './calendar-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -82,7 +81,7 @@ export class CalendarPageComponent implements OnDestroy {
 
   /** ⇄ swaps the two teams: the team on the left plays at home. */
   protected swap(index: number): void {
-    this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, home: !round.home, venue: '', venueLat: null, venueLon: null } : round));
+    this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, home: !round.home, venue: '', venueLat: null, venueLon: null, venueUrl: '' } : round));
   }
 
   protected setGroupName(value: string): void { this.calendar.update(data => ({ ...data, groupName: value })); this.scheduleSave(); }
@@ -99,16 +98,44 @@ export class CalendarPageComponent implements OnDestroy {
     }
   }
 
-  protected setVenue(leg: Leg, index: number, picked: PickedAddress): void {
-    this.editRound(leg, index, round => ({ ...round, venue: picked.value, venueLat: picked.lat, venueLon: picked.lon }));
+  /** Pitch of an away match: a name/address typed by hand, or a link pasted from Maps. */
+  protected setVenue(leg: Leg, index: number, text: string): void {
+    const value = text.trim();
+    if (isMapsLink(value)) { this.setVenueLink(leg, index, value); return; }
+    this.editRound(leg, index, round => ({ ...round, venue: text }));
   }
 
-  /** Address used to centre the search: the team's own pitch (or its headquarters). */
-  protected searchCentre(): string { const team = this.team(); return team?.facilityAddress || team?.headquartersAddress || ''; }
+  protected setVenueLink(leg: Leg, index: number, link: string): void {
+    const point = coordinatesFromLink(link);
+    this.editRound(leg, index, round => ({ ...round, venueUrl: link, venueLat: point?.lat ?? null, venueLon: point?.lon ?? null }));
+    this.notifications.notify({ title: 'Posizione di Maps salvata', message: 'Da qui si apre e si condivide direttamente in Maps.', type: 'success' });
+  }
 
-  /** Google Maps link of the pitch of a match (works on iPhone and Android). */
+  protected clearVenueLink(leg: Leg, index: number): void {
+    this.editRound(leg, index, round => ({ ...round, venueUrl: '', venueLat: null, venueLon: null }));
+  }
+
+  /** Opens Maps to look for the pitch (typed text, or the opponent's sports ground). */
+  protected searchOnMaps(round: CalendarRound): string {
+    const text = round.venue.trim() || `campo sportivo ${round.opponent}`.trim();
+    return mapsLink(text);
+  }
+
+  /** "Incolla link": reads the link copied in Maps (Condividi › Copia link). */
+  protected async pasteLink(leg: Leg, index: number): Promise<void> {
+    try {
+      const text = (await navigator.clipboard.readText()).trim();
+      const link = /https?:\/\/\S+/.exec(text)?.[0] ?? '';
+      if (isMapsLink(link)) { this.setVenueLink(leg, index, link); return; }
+      this.notifications.notify({ title: 'Nessun link di Maps copiato', message: 'In Maps apri il campo, premi Condividi › Copia link e poi torna qui.', type: 'warning', durationMs: 7000 });
+    } catch {
+      this.notifications.notify({ title: 'Incolla il link nel campo', message: 'Tieni premuto nel campo indirizzo e scegli Incolla.', type: 'info', durationMs: 6000 });
+    }
+  }
+
   protected mapsUrl(round: CalendarRound): string | null {
     if (round.home) { const team = this.team(); const address = [team?.facilityName, team?.facilityAddress].filter(Boolean).join(', '); return team?.facilityAddress ? mapsLink(address) : null; }
+    if (round.venueUrl) return round.venueUrl;
     return round.venue.trim() ? mapsLink(round.venue, round.venueLat, round.venueLon) : null;
   }
 
@@ -136,7 +163,7 @@ export class CalendarPageComponent implements OnDestroy {
     const team = this.team();
     return [team?.facilityName, team?.facilityAddress].filter(Boolean).join(' · ') || 'Indirizzo della tua squadra (inseriscilo in Anagrafe Squadra)';
   }
-  protected venueOf(round: CalendarRound): string { return round.home ? this.homeVenue() : (round.venue || 'Campo da indicare'); }
+  protected venueOf(round: CalendarRound): string { return round.home ? this.homeVenue() : (round.venue || (round.venueUrl ? 'Posizione salvata da Maps' : 'Campo da indicare')); }
   protected formatDate(value: string): string {
     if (!value) return 'Data da inserire';
     const date = new Date(`${value}T12:00:00`);

@@ -49,7 +49,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14.5H4zM4 10.2h16M8 3.5v4.5M16 3.5v4.5"/></svg>
             <strong>Andata</strong><small>{{ calendar().andata.length }} giornate</small>
           </header>
-          <p class="cal-note">Inserisci data, ora e avversario. La squadra a sinistra gioca in casa: con ⇄ scambi casa e trasferta.</p>
+          <p class="cal-note">Inserisci data, ora e avversario. La squadra a sinistra gioca in casa: con ⇄ scambi casa e trasferta. Per il campo in trasferta premi “Cerca su Maps”, trova il campo, poi Condividi › Copia link e “Incolla link”.</p>
           <ng-container [ngTemplateOutlet]="table" [ngTemplateOutletContext]="{ $implicit: 'A' }"></ng-container>
           <button type="button" class="cal-add" (click)="addRound()">＋ Aggiungi giornata</button>
         </section>
@@ -157,9 +157,17 @@
           @if (round.home) {
             <span class="cal-venue-home"><b>In casa</b> · {{ homeVenue() }}</span>
           } @else {
-            <fsm-address-field class="cal-venue-input" [value]="round.venue" (picked)="setVenue(leg, i, $event)" [near]="searchCentre()" placeholder="Indirizzo del campo: scrivi la via (es. via Roma)" [maxlength]="180" />
+            <span class="cal-venue-away">
+              <input class="cal-venue-text" type="text" maxlength="400" [value]="round.venue" (change)="setVenue(leg, i, $any($event.target).value)" (paste)="$event.preventDefault(); setVenue(leg, i, $any($event).clipboardData?.getData('text') ?? '')" placeholder="Nome / indirizzo del campo, oppure incolla il link di Maps" aria-label="Campo della partita in trasferta">
+              @if (round.venueUrl) {
+                <span class="cal-maps-saved" title="{{ round.venueUrl }}">✓ Posizione Maps <button type="button" (click)="clearVenueLink(leg, i)" aria-label="Rimuovi il link di Maps">×</button></span>
+              } @else {
+                <a class="cal-map-link find" [href]="searchOnMaps(round)" target="_blank" rel="noopener" title="Cerca il campo in Maps">Cerca su Maps</a>
+                <button type="button" class="cal-map-link" (click)="pasteLink(leg, i)" title="Incolla il link copiato da Maps">Incolla link</button>
+              }
+            </span>
           }
-          @if (mapsUrl(round); as url) { <a class="cal-map-link" [href]="url" target="_blank" rel="noopener" title="Apri in Maps" aria-label="Apri il campo in Maps">Maps</a> }
+          @if (mapsUrl(round); as url) { <a class="cal-map-link" [href]="url" target="_blank" rel="noopener" title="Apri in Maps" aria-label="Apri il campo in Maps">Apri</a> }
         </span>
       </div>
     } @empty {

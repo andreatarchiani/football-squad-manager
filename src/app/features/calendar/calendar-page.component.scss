@@ -94,8 +94,6 @@
 .cal-venue svg { width: 18px; height: 18px; color: var(--c-hi); }
 .cal-venue-home { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .cal-venue-home b { color: #b9f5cb; }
-.cal-venue-input { min-width: 0; }
-.cal-venue-input ::ng-deep input { width: 100%; min-height: 34px; padding: 0 10px; border: 1.5px solid rgba(255, 255, 255, .25); border-radius: 9px; color: #0d1a2a; background: #f2f4f7; font: inherit; font-size: 13.5px; }
 .cal-add { width: 100%; min-height: 44px; margin-top: 10px; border: 1.5px dashed var(--c-hi); border-radius: 12px; color: #fff; background: rgba(var(--c-rgb), .12); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
 .cal-add:hover { background: rgba(var(--c-rgb), .25); }
 
@@ -131,3 +129,11 @@
 .cal-map-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; border: 1.5px solid #fff3a6; border-radius: 12px; color: #1a1300; background: linear-gradient(180deg, #ffe74d, #ffb800); font: inherit; font-size: 14px; font-weight: 800; text-decoration: none; cursor: pointer; }
 .cal-map-button.secondary { border-color: var(--c-hi); color: #fff; background: rgba(var(--c-rgb), .2); }
 .cal-map-button svg { width: 18px; height: 18px; }
+
+.cal-venue-away { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.cal-venue-text { flex: 1 1 220px; min-width: 0; min-height: 34px; padding: 0 10px; border: 1.5px solid rgba(255, 255, 255, .25) !important; border-radius: 9px; color: #0d1a2a !important; background: #f2f4f7 !important; font: inherit; font-size: 13.5px; }
+.cal-venue-text::placeholder { color: #8a929c; }
+button.cal-map-link { font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.cal-map-link.find { border-color: #fff3a6; color: #1a1300; background: linear-gradient(180deg, #ffe74d, #ffb800); }
+.cal-maps-saved { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px 4px 10px; border: 1.5px solid #35e06c; border-radius: 999px; color: #b9f5cb; background: rgba(20, 120, 50, .35); font-size: 12px; font-weight: 700; }
+.cal-maps-saved button { display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .35); font-size: 14px; line-height: 1; cursor: pointer; }

@@ -13,6 +13,24 @@ export interface CalendarRound {
   venue: string;           // address of the pitch (away games; home games use the team address)
   venueLat?: number | null; // coordinates of the chosen address, for Maps
   venueLon?: number | null;
+  venueUrl?: string;        // link copied from Google / Apple Maps ("Condividi › Copia link")
+}
+
+/** True when the text is a link shared from a maps app. */
+export function isMapsLink(text: string): boolean {
+  return /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps|(www\.)?google\.[a-z.]+\/maps|maps\.google\.[a-z.]+|maps\.apple\.com|maps\.apple\/)/i.test(text.trim());
+}
+
+/** Coordinates written inside a full maps link (short links do not contain them). */
+export function coordinatesFromLink(link: string): { lat: number; lon: number } | null {
+  const match = /@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(link) ?? /[?&](?:q|ll|query|daddr|destination)=(-?\d+\.\d+),(-?\d+\.\d+)/.exec(link) ?? /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/.exec(link);
+  return match ? { lat: Number(match[1]), lon: Number(match[2]) } : null;
+}
+
+/** Link that opens a place in Google Maps (app or web, on iPhone and Android). */
+export function mapsLink(address: string, lat?: number | null, lon?: number | null): string {
+  const query = lat != null && lon != null ? `${lat},${lon}` : address;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
 
@@ -43,7 +61,8 @@ export function buildReturnLeg(andata: CalendarRound[], previous: CalendarRound[
       time: keep ? old.time : (round.time || ''),
       venue: keep ? old.venue : '',
       venueLat: keep ? old.venueLat ?? null : null,
-      venueLon: keep ? old.venueLon ?? null : null
+      venueLon: keep ? old.venueLon ?? null : null,
+      venueUrl: keep ? old.venueUrl ?? '' : ''
     };
   });
 }
@@ -83,7 +102,8 @@ export class CalendarService {
     const clean = (round: CalendarRound) => ({
       number: round.number, leg: round.leg, opponent: round.opponent.trim().slice(0, 80), home: round.home,
       date: round.date || '', time: round.time || '', venue: (round.venue || '').trim().slice(0, 180),
-      venueLat: typeof round.venueLat === 'number' ? round.venueLat : null, venueLon: typeof round.venueLon === 'number' ? round.venueLon : null
+      venueLat: typeof round.venueLat === 'number' ? round.venueLat : null, venueLon: typeof round.venueLon === 'number' ? round.venueLon : null,
+      venueUrl: isMapsLink(round.venueUrl ?? '') ? (round.venueUrl ?? '').trim().slice(0, 400) : ''
     });
     await setDoc(doc(this.db(), 'workspaces', workspaceId, 'calendars', teamId), {
       teamId,
@@ -109,7 +129,8 @@ export class CalendarService {
       time: String(item['time'] ?? ''),
       venue: String(item['venue'] ?? ''),
       venueLat: typeof item['venueLat'] === 'number' ? item['venueLat'] as number : null,
-      venueLon: typeof item['venueLon'] === 'number' ? item['venueLon'] as number : null
+      venueLon: typeof item['venueLon'] === 'number' ? item['venueLon'] as number : null,
+      venueUrl: String(item['venueUrl'] ?? '')
     };
   }
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-26 — Campo delle trasferte da Maps e date del calendario
+
+- **Correzione:** modificando la data (o l’ora) di una giornata scrivendola, la data non viene più cancellata e la prossima partita si aggiorna subito.
+- **Modifica:** per il campo delle trasferte non ci sono più i suggerimenti automatici: con “Cerca su Maps” trovi il campo nell’app Maps, poi *Condividi › Copia link* e “Incolla link”. La posizione si apre e si condivide direttamente in Maps.
+
 ## 2026-11-26 — Formazione subito modificabile e indirizzi del campo con Maps
 
 - **Formazione:** sotto il Match Center trovi direttamente modulo, titolari, panchina e capitani da modificare (non serve più “Modifica la formazione”); l’avversario arriva in automatico dalla prossima partita del calendario.
