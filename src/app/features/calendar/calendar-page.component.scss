@@ -63,7 +63,7 @@
 .cal-side.is-mine { color: var(--c-hi); }
 .cal-vs { display: grid; place-items: center; width: 34px; height: 24px; border: 1.5px solid var(--c-hi); border-radius: 999px; background: linear-gradient(180deg, #1f6fe0, #0a2f80); font-size: 11px; font-style: italic; font-weight: 800; }
 .cal-vs.big { width: 50px; height: 34px; font-size: 15px; }
-.cal-opponent { display: block; min-width: 0; }
+.cal-opponent { display: block; min-width: 140px; }
 .cal-opponent.is-invalid input { border-color: #ff4458; background: #fff1f2; box-shadow: 0 0 0 3px rgba(255, 68, 88, .45); }
 .cal-col-actions { display: flex; justify-content: flex-end; gap: 6px; }
 .cal-place { min-width: 58px; min-height: 32px; padding: 0 8px; border: 1.5px solid #3fd66b; border-radius: 9px; color: #fff; background: rgba(20, 120, 50, .45); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
@@ -88,8 +88,8 @@ span.cal-place { display: inline-grid; place-items: center; cursor: default; }
 .cal-next:disabled { opacity: .45; cursor: default; }
 
 /* -------------------------------------------------------- responsive */
-@media (max-width: 1280px) {
-  .cal-layout { grid-template-columns: minmax(0, 1fr) minmax(240px, .45fr); }
+@media (max-width: 1700px) {
+  .cal-layout { grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); }
   .cal-teams { grid-column: 2; grid-row: 2; }
   .cal-main { grid-column: 1; grid-row: 1 / span 2; }
   .cal-detail { grid-column: 2; grid-row: 1; }
@@ -97,7 +97,9 @@ span.cal-place { display: inline-grid; place-items: center; cursor: default; }
 @media (max-width: 900px) {
   .cal-layout { grid-template-columns: minmax(0, 1fr); }
   .cal-main, .cal-detail, .cal-teams { grid-column: 1; grid-row: auto; }
-  .cal-detail { order: -1; }
+  .cal-main { order: 1; }
+  .cal-detail { order: 2; }
+  .cal-teams { order: 3; }
   .cal-save { width: 100%; justify-content: center; margin-left: 0; }
   .cal-team-picker { flex: 1 1 100%; }
   .cal-row { grid-template-columns: 34px minmax(0, 1fr) 84px; grid-template-areas: 'num date time' 'match match match' 'actions actions actions'; row-gap: 6px; padding: 8px; }

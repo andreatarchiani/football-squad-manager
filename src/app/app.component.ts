@@ -61,7 +61,7 @@ const VIEW_META: Record<AppView, { title: string; accent?: string; subtitle?: st
   players: { title: 'Anagrafe Calciatore', icon: 'player', subtitle: 'Anagrafica dei calciatori e assegnazione alla squadra' },
   teams: { title: 'Anagrafe Squadra', icon: 'shield', subtitle: 'Dati della squadra, impianto e regolamento di gara' },
   staff: { title: 'Anagrafe Dirigenti', icon: 'manager', subtitle: 'Anagrafica dei dirigenti della società' },
-  calendar: { title: 'Calendario Campionato', icon: 'calendar', subtitle: 'Andata da inserire, ritorno creato in automatico' },
+  calendar: { title: 'Calendario', icon: 'calendar', subtitle: 'Inserisci l’andata, il ritorno si crea da solo' },
   training: { title: 'Allenamenti', icon: 'cone' },
   'match-hub': { title: 'Campo', icon: 'match' },
   formation: { title: 'Formazione', icon: 'formation', subtitle: 'Prepara la prossima partita e lo schieramento titolare' },
