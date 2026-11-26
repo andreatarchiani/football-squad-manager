@@ -617,8 +617,8 @@
   height: auto;
   margin: 0 auto;
   overflow: hidden;
-  border: 2.5px solid rgba(255, 255, 255, .92);
-  border-radius: 4px;
+  border: 0;
+  border-radius: 6px;
   background:
     radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255, 255, 255, .06), transparent 70%),
     repeating-linear-gradient(180deg, #2f9b3c 0 7.69%, #258431 7.69% 15.38%);
@@ -627,7 +627,9 @@
 }
 #nfm :is(.home-football-pitch, .football-pitch) :is(.pitch-line, .pitch-circle, .pitch-box, .home-penalty-arc, .home-corner, .home-six-yard-box, .match-six-yard-box, .pitch-goal) { border-color: rgba(255, 255, 255, .9); }
 #nfm :is(.home-football-pitch, .football-pitch) :is(.pitch-center-dot, .home-penalty-spot, .match-center-dot, .match-penalty-spot) { background: rgba(255, 255, 255, .95); }
-#nfm :is(.home-pitch-boundary, .match-boundary-glow) { display: none; }
+#nfm .match-boundary-glow { display: none; }
+#nfm .home-pitch-boundary { border-color: rgba(255, 255, 255, .9); box-shadow: none; }
+#nfm :is(.football-pitch, .home-football-pitch)::after { border-color: rgba(255, 255, 255, .9); box-shadow: none; }
 
 #nfm :is(.home-pitch-player, .pitch-stage .pitch-player, .match-shirt-player) {
   display: grid;
@@ -800,7 +802,8 @@
 #nfm .bench-section .editor-heading { flex-direction: row; align-items: center; justify-content: space-between; margin: 0 0 10px; }
 #nfm .bench-section .editor-heading strong { color: #fff; font-size: 19px; font-weight: 700; }
 #nfm .bench-section .editor-heading span { border-color: rgba(var(--c-rgb), .6); color: #fff; background: rgba(0, 0, 0, .3); font-size: 12px; }
-#nfm .bench-list { display: grid; gap: 6px; }
+#nfm .bench-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+#nfm .roster-panel { scroll-margin-top: 104px; }
 #nfm :is(.bench-player, .bench-choice) {
   display: grid;
   grid-template-columns: 46px minmax(0, 1fr) auto;
@@ -872,8 +875,14 @@
   #nfm .nfm-frame .page-heading .heading-actions { width: 100%; }
   #nfm .nfm-frame .list-toolbar { flex-wrap: wrap; padding: 10px 12px; }
   #nfm .nfm-frame :is(.team-list, .player-list) { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  #nfm .team-card { grid-template-columns: 50px minmax(0, 1fr); grid-template-areas: 'emblem details' 'actions roster'; padding: 12px; }
-  #nfm .team-card > .record-icon-actions { justify-content: flex-start; }
+  #nfm .team-card { grid-template-columns: 50px minmax(0, 1fr); grid-template-areas: 'emblem details' 'actions actions' 'roster roster'; padding: 12px; }
+  #nfm .team-card > .record-icon-actions { justify-content: flex-end; }
+  #nfm .team-card > .team-actions .roster-primary-button { width: 100%; justify-content: center; }
+  #nfm .player-card { grid-template-columns: 50px minmax(0, 1fr); grid-template-areas: 'number details' 'actions actions'; padding: 12px; }
+  #nfm .player-card > .record-icon-actions { justify-content: flex-end; }
+  #nfm .player-card > .player-number { align-self: start; }
+  #nfm .nfm-frame .list-toolbar-actions { flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: 10px 16px; }
+  #nfm .nfm-frame .list-toolbar-actions .archive-toggle { min-height: 42px; }
   #nfm .nfm-frame .team-emblem { width: 50px; height: 50px; font-size: 26px; }
   #nfm .nfm-frame :is(.team-details, .player-details) h3 { font-size: 17px; }
 

@@ -1,14 +1,171 @@
 [
-  { "name": "01-home", "settle": 2500 },
-  { "name": "02-office", "actions": [ { "click": ".nfm-home-tile:has-text('Ufficio')" } ], "settle": 1200 },
-  { "name": "03-players", "actions": [ { "click": ".nfm-menu-item:has-text('Anagrafe Calciatore'), .nfm-scene-item:has-text('Anagrafe Calciatore')" } ], "settle": 2500 },
-  { "name": "04-player-form", "actions": [ { "click": "button:has-text('Nuovo giocatore')" } ], "settle": 800 },
-  { "name": "05-teams", "actions": [ { "click": "button.text-button:has-text('Annulla')" }, { "click": ".nfm-menu-item:has-text('Anagrafe Squadra'), .nfm-subnav-item:has-text('Anagrafe Squadra')" } ], "settle": 2500 },
-  { "name": "06-team-form", "actions": [ { "click": "button:has-text('Nuova squadra')" } ], "settle": 800 },
-  { "name": "07-training", "actions": [ { "click": "button.text-button:has-text('Annulla')" }, { "click": ".nfm-logo" }, { "wait": 500 }, { "click": ".nfm-home-tile:has-text('Allenamento')" } ], "settle": 1200 },
-  { "name": "08-match-hub", "actions": [ { "click": ".nfm-logo" }, { "wait": 500 }, { "click": ".nfm-home-tile:has-text('Partita')" } ], "settle": 1200 },
-  { "name": "09-formation", "actions": [ { "click": ".nfm-menu-item:has-text('Formazione'), .nfm-scene-item:has-text('Formazione')" } ], "settle": 3000 },
-  { "name": "10-lineup", "actions": [ { "click": "button:has-text('Modifica la formazione')" } ], "settle": 3000 },
-  { "name": "11-live", "actions": [ { "click": ".nfm-menu-item:has-text('Formazione'), .nfm-subnav-item:has-text('Formazione')" }, { "wait": 3000 }, { "click": "button:has-text('Inizia partita')" } ], "settle": 3500 },
-  { "name": "12-live-event", "actions": [ { "click": ".nfm-event-button:has-text('Ammonizione')" } ], "settle": 800 }
+ {
+  "name": "01-home",
+  "settle": 2500
+ },
+ {
+  "name": "02-office",
+  "actions": [
+   {
+    "click": ".nfm-home-tile:has-text('Ufficio')"
+   }
+  ],
+  "settle": 1200
+ },
+ {
+  "name": "03-players",
+  "actions": [
+   {
+    "click": ".nfm-menu-item:has-text('Anagrafe Calciatore'), .nfm-scene-item:has-text('Anagrafe Calciatore')"
+   }
+  ],
+  "settle": 2500
+ },
+ {
+  "name": "04-player-form",
+  "actions": [
+   {
+    "click": "button:has-text('Nuovo giocatore')"
+   }
+  ],
+  "settle": 800
+ },
+ {
+  "name": "05-teams",
+  "actions": [
+   {
+    "click": "button.text-button:has-text('Annulla')"
+   },
+   {
+    "click": ".nfm-menu-item:has-text('Anagrafe Squadra'), .nfm-subnav-item:has-text('Anagrafe Squadra')"
+   }
+  ],
+  "settle": 2500
+ },
+ {
+  "name": "06-team-form",
+  "actions": [
+   {
+    "click": "button:has-text('Nuova squadra')"
+   }
+  ],
+  "settle": 800
+ },
+ {
+  "name": "07-training",
+  "actions": [
+   {
+    "click": "button.text-button:has-text('Annulla')"
+   },
+   {
+    "click": ".nfm-logo"
+   },
+   {
+    "wait": 500
+   },
+   {
+    "click": ".nfm-home-tile:has-text('Allenamento')"
+   }
+  ],
+  "settle": 1200
+ },
+ {
+  "name": "08-match-hub",
+  "actions": [
+   {
+    "click": ".nfm-logo"
+   },
+   {
+    "wait": 500
+   },
+   {
+    "click": ".nfm-home-tile:has-text('Partita')"
+   }
+  ],
+  "settle": 1200
+ },
+ {
+  "name": "09-formation",
+  "actions": [
+   {
+    "click": ".nfm-menu-item:has-text('Formazione'), .nfm-scene-item:has-text('Formazione')"
+   }
+  ],
+  "settle": 3000
+ },
+ {
+  "name": "10-lineup",
+  "actions": [
+   {
+    "click": "button:has-text('Modifica la formazione')"
+   }
+  ],
+  "settle": 3000
+ },
+ {
+  "name": "11-live",
+  "actions": [
+   {
+    "click": ".nfm-menu-item:has-text('Formazione'), .nfm-subnav-item:has-text('Formazione')"
+   },
+   {
+    "wait": 3000
+   },
+   {
+    "click": "button:has-text('Inizia partita')"
+   }
+  ],
+  "settle": 3500
+ },
+ {
+  "name": "12-live-event",
+  "actions": [
+   {
+    "click": ".nfm-event-button:has-text('Ammonizione')"
+   }
+  ],
+  "settle": 800
+ },
+ {
+  "name": "13-live-registered",
+  "actions": [
+   {
+    "click": ".nfm-number:has-text('Costa')"
+   },
+   {
+    "click": ".nfm-event-submit"
+   },
+   {
+    "wait": 3800
+   }
+  ],
+  "settle": 800
+ },
+ {
+  "name": "14-goal-dialog",
+  "actions": [
+   {
+    "click": ".nfm-event-button:has-text('Gol fatto')"
+   },
+   {
+    "click": ".nfm-event-column:nth-child(1) .nfm-number:has-text('Conti')"
+   },
+   {
+    "click": ".nfm-event-column:nth-child(2) .nfm-number:has-text('Neri')"
+   }
+  ],
+  "settle": 600
+ },
+ {
+  "name": "15-goal-registered",
+  "actions": [
+   {
+    "click": ".nfm-event-submit"
+   },
+   {
+    "wait": 4200
+   }
+  ],
+  "settle": 600
+ }
 ]

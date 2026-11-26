@@ -63,7 +63,7 @@
   }
   <section class="match-layout">
     <div class="match-pitch-wrap pitch-stage">
-      <div class="pitch-caption"><span>IL CAMPO</span><strong>{{ matchFormation() }}</strong></div>
+      <div class="pitch-caption"><span>Formazione</span><strong>{{ matchFormation() }}</strong></div>
       <div class="match-tactics-toolbar"><div class="formation-picker"><span class="formation-picker-label">Modulo in partita</span><button type="button" class="formation-picker-trigger" [class.is-open]="matchFormationDropdownOpen()" (click)="matchFormationDropdownOpen.update(open => !open)" [attr.aria-expanded]="matchFormationDropdownOpen()" aria-haspopup="listbox"><strong>{{ matchFormation() }}</strong><span class="formation-picker-chevron" aria-hidden="true"></span></button>@if (matchFormationDropdownOpen()) { <div class="formation-picker-menu" role="listbox" aria-label="Seleziona modulo">@for (module of formationOptions(); track module) { <button type="button" class="formation-picker-option" role="option" [class.is-selected]="matchFormation() === module" [attr.aria-selected]="matchFormation() === module" (click)="changeMatchFormation(module); matchFormationDropdownOpen.set(false)"><span>{{ module }}</span>@if (matchFormation() === module) { <span class="formation-picker-check">✓</span> }</button> }</div> }</div></div>
       <div class="pitch-stadium-glow"></div>
       <div class="match-pitch football-pitch" [attr.aria-label]="'Formazione ' + matchFormation()" (pointermove)="moveShirtDrag($event)" (pointerup)="endShirtDrag()" (pointercancel)="endShirtDrag()">

@@ -3,6 +3,10 @@
    ===================================================================== */
 #nfm .nfm-live-mode .teams-page { gap: 0; }
 #nfm .live-match {
+  position: static;
+  inset: auto;
+  z-index: auto;
+  overflow: visible;
   display: grid;
   gap: 14px;
   width: 100%;
@@ -13,6 +17,11 @@
   background: none;
   font-family: var(--nfm-font);
 }
+
+/* Overlays used to live inside a full-screen fixed container: lift them above
+   the sticky header and the phone navigation bar. */
+#nfm :is(.match-confirm-overlay, .match-moment-backdrop, .match-report-backdrop, .match-edit-backdrop, .match-finish-confirm-backdrop) { position: fixed; inset: 0; z-index: 30000; }
+#nfm .voice-feedback { z-index: 30500; }
 
 /* ---------------------------------------------------------- scoreboard */
 #nfm .match-scoreboard-header {
@@ -475,6 +484,9 @@
   #nfm .match-controls-panel .clock-controls { width: 100%; }
   #nfm .match-controls-panel .clock-controls button { flex: 1; min-width: 0; padding: 0 10px; font-size: 14px; }
   #nfm .match-layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'event' 'pitch' 'side'; }
+  #nfm .match-pitch-wrap.pitch-stage { grid-template-columns: minmax(0, 1fr) auto; padding: 10px 8px; }
+  #nfm .match-pitch-wrap .pitch-caption strong { display: none; }
+  #nfm .match-tactics-toolbar .formation-picker-label { display: none; }
   #nfm .nfm-event-grid { gap: 8px; }
   #nfm .nfm-event-button { min-height: 76px; font-size: 13px; }
   #nfm .nfm-event-button svg { width: 27px; height: 27px; }
