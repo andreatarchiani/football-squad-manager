@@ -42,7 +42,7 @@
 
   position: relative;
   display: grid;
-  grid-template-columns: 236px minmax(0, 1fr);
+  grid-template-columns: 252px minmax(0, 1fr);
   grid-template-rows: auto 1fr;
   min-height: 100vh;
   min-height: 100dvh;
@@ -311,21 +311,21 @@
   --t-deep: #8f3d06;
   position: relative;
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-columns: 50px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
   width: 100%;
   min-height: 96px;
-  padding: 12px 16px;
+  padding: 12px 12px 12px 14px;
   border: 2px solid var(--t);
   border-radius: 16px;
   color: #fff;
   background: linear-gradient(180deg, rgba(var(--t-rgb), .95), var(--t-deep));
   box-shadow: 0 0 0 1px rgba(var(--t-rgb), .35), 0 0 20px rgba(var(--t-rgb), .55), inset 0 2px 2px rgba(255, 255, 255, .35), inset 0 -10px 18px rgba(0, 0, 0, .25);
   font: inherit;
-  font-size: 25px;
+  font-size: 23px;
   font-weight: 700;
-  letter-spacing: -.01em;
+  letter-spacing: -.015em;
   text-align: left;
   text-shadow: 0 2px 4px rgba(0, 0, 0, .45);
   cursor: pointer;
@@ -334,7 +334,7 @@
 #nfm .nfm-home-tile[data-tone='training'] { --t: #35e45f; --t-rgb: 53, 228, 95; --t-deep: #0c6d22; }
 #nfm .nfm-home-tile[data-tone='match'] { --t: #2a9dff; --t-rgb: 42, 157, 255; --t-deep: #083f8f; }
 #nfm .nfm-home-tile[data-tone='data'] { --t: #ffb04a; --t-rgb: 255, 176, 74; --t-deep: #0d0d10; background: linear-gradient(180deg, #17171b, #070709); }
-#nfm .nfm-home-tile svg { width: 52px; height: 52px; fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .45)); }
+#nfm .nfm-home-tile svg { width: 48px; height: 48px; fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .45)); }
 #nfm .nfm-home-tile:hover:not(.is-soon) { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 0 0 1px rgba(var(--t-rgb), .5), 0 0 30px rgba(var(--t-rgb), .8), inset 0 2px 2px rgba(255, 255, 255, .35); }
 #nfm .nfm-home-tile.is-soon { cursor: default; }
 #nfm .nfm-home-tile .nfm-soon { position: absolute; right: 12px; bottom: 9px; border-color: rgba(var(--t-rgb), .7); color: var(--t); background: rgba(0, 0, 0, .35); text-shadow: none; }

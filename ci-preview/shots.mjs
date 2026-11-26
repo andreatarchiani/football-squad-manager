@@ -47,7 +47,7 @@ async function seed() {
     maxSubstitutions: 5, reentryAllowed: false, federationReportRequired: true, fixedPlayerCount: null, allPlayersMustPlay: false,
     icon: '🦁', isArchived: false
   });
-  await put(`workspaces/${ws}/teams/team2`, { name: 'Allievi Regionali', category: 'Allievi Regionali U17', facilityName: 'Stadio Comunale', icon: '⚽', isArchived: false });
+  await put(`workspaces/${ws}/teams/team2`, { name: 'Under 17 Regionale', category: 'Allievi Regionali U17', facilityName: 'Stadio Comunale', icon: '⚽', isArchived: false });
   await put(`workspaces/${ws}/teams/team2/seasons/s2`, { label: '2026/2027', status: 'active' });
   await put(`workspaces/${ws}/teams/${team}/seasons/${season}`, { label: '2026/2027', status: 'active' });
   const roster = [
@@ -102,8 +102,8 @@ for (const [vpName, vp] of Object.entries(viewports)) {
     if (step.only && step.only !== vpName) continue;
     try {
       for (const a of step.actions || []) {
-        if (a.click) await page.locator(a.click).filter({ visible: true }).first().click({ timeout: 6000 });
-        if (a.fill) await page.locator(a.fill).filter({ visible: true }).first().fill(a.value, { timeout: 6000 });
+        if (a.click) await page.locator(`${a.click} >> visible=true`).first().click({ timeout: 6000 });
+        if (a.fill) await page.locator(`${a.fill} >> visible=true`).first().fill(a.value, { timeout: 6000 });
         if (a.press) await page.keyboard.press(a.press);
         if (a.wait) await page.waitForTimeout(a.wait);
         if (a.eval) await page.evaluate(a.eval);
@@ -112,7 +112,7 @@ for (const [vpName, vp] of Object.entries(viewports)) {
       await page.screenshot({ path: `${OUT}/${vpName}-${step.name}.png`, fullPage: step.full !== false });
       log.push(`[${vpName}] ok ${step.name}`);
     } catch (e) {
-      log.push(`[${vpName}] FAIL ${step.name}: ${String(e.message).split('\n')[0]}`);
+      log.push(`[${vpName}] FAIL ${step.name}: ${String(e.message).split('\n').slice(0, 6).join(' | ')}`);
       await page.screenshot({ path: `${OUT}/${vpName}-${step.name}-FAIL.png` }).catch(() => {});
     }
   }

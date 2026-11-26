@@ -125,7 +125,11 @@
   flex: 0 0 auto;
   width: 22px;
   height: 22px;
+  min-width: 22px;
+  min-height: 22px;
   margin: 0;
+  padding: 0;
+  align-self: center;
   border: 1.5px solid rgba(255, 255, 255, .7);
   border-radius: 6px;
   background: rgba(0, 0, 0, .3);
@@ -368,8 +372,29 @@
 #nfm .fsm-form-dialog .role-field { grid-column: 1 / -1; margin: 10px 0 4px; }
 #nfm .fsm-form-dialog .role-options { display: flex; flex-wrap: wrap; gap: 10px 18px; }
 #nfm .fsm-form-dialog .role-options label { display: inline-flex; align-items: center; gap: 8px; color: #fff; font-size: 14px; cursor: pointer; }
-#nfm .fsm-form-dialog .team-rule-toggle { grid-template-columns: auto 1fr; justify-content: start; }
-#nfm .fsm-form-dialog .team-rule-toggle input { order: -1; }
+#nfm .fsm-form-dialog .form-grid > label.team-rule-toggle {
+  grid-template-columns: 22px minmax(0, 1fr);
+  justify-content: start;
+  gap: 12px;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(var(--c-rgb), .35);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+#nfm .fsm-form-dialog .role-field { padding: 8px 14px 12px; }
+#nfm .fsm-form-dialog .role-options label {
+  min-height: 40px;
+  padding: 0 14px 0 10px;
+  border: 1.5px solid rgba(var(--c-rgb), .55);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .3);
+  box-shadow: none;
+}
+#nfm .fsm-form-dialog .role-options label:has(input:checked) { border-color: var(--nfm-yellow); background: rgba(255, 210, 26, .14); box-shadow: 0 0 10px rgba(255, 210, 26, .35); }
+#nfm .fsm-form-dialog fieldset legend { text-transform: none; letter-spacing: 0; }
 #nfm .fsm-form-dialog .team-icon-picker { display: flex; flex-wrap: wrap; gap: 10px; }
 #nfm .fsm-form-dialog .team-icon-option {
   display: grid;
