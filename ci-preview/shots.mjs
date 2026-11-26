@@ -74,8 +74,9 @@ const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
 const server = createServer(async (req, res) => {
   const url = decodeURIComponent((req.url || '/').split('?')[0]);
   try {
-    const body = await readFile(join(DIST, url === '/' ? 'index.html' : url));
-    res.writeHead(200, { 'Content-Type': types[extname(url)] || 'application/octet-stream' }); res.end(body);
+    const file = url === '/' ? 'index.html' : url;
+    const body = await readFile(join(DIST, file));
+    res.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream' }); res.end(body);
   } catch { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end(await readFile(join(DIST, 'index.html'))); }
 });
 await new Promise((resolve, reject) => { server.once('error', reject); server.listen(4310, '127.0.0.1', resolve); });
