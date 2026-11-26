@@ -778,3 +778,15 @@ body {
   }
 }
 
+/* Team form: keep the submit label precisely centered inside its button on mobile. */
+@media(max-width:650px){
+  .teams-page .fsm-form-dialog .form-actions .primary-button{
+    display:inline-flex;
+    justify-content:center!important;
+    align-items:center!important;
+    text-align:center!important;
+    line-height:1.2!important;
+    white-space:nowrap;
+    padding-inline:20px!important;
+  }
+}
