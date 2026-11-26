@@ -692,3 +692,24 @@ body {
     padding-bottom:calc(12px + env(safe-area-inset-bottom));
   }
 }
+
+/* Mobile modal: keep the backdrop continuous across the full device viewport.
+   Explicit viewport height prevents the overlay from ending at a constrained app container. */
+@media(max-width:650px){
+  .fsm-form-overlay{
+    box-sizing:border-box;
+    height:100vh;
+    height:100dvh;
+    min-height:100vh;
+    min-height:100dvh;
+    max-height:none;
+    align-content:start;
+    background:#020b20e8;
+  }
+  .fsm-form-overlay .fsm-form-dialog{
+    box-sizing:border-box;
+    width:100%;
+    min-height:100dvh;
+  }
+}
+
