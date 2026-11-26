@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, OnDestroy, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, OnDestroy, OnInit, output, signal } from '@angular/core';
 import type { PlayerRecord } from '../players/player.service';
 import { VoiceRecognitionService } from '../../core/voice/voice-recognition.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
@@ -896,6 +896,23 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     { type: 'key-pass', label: 'Passaggio chiave', action: 'Registra passaggio chiave', icon: 'M4 15a4 4 0 1 0 8 0a4 4 0 1 0-8 0M11 12l8.5-8.5M16 7l2.5 2.5M14 9l2 2' },
     { type: 'substitution', label: 'Cambio', action: 'Registra cambio', icon: 'M4 9h13l-3.5-3.5M20 15H7l3.5 3.5' }
   ];
+  /** Substitutions already made, oldest first (for the "Cambi" column). */
+  protected readonly substitutionEvents = computed(() => this.events().filter(event => event.type === 'substitution').slice().reverse());
+  private readonly eventLabels: Record<MatchEventType, string> = { goal: 'Gol', 'opponent-goal': 'Gol subito', 'key-pass': 'Passaggio chiave', 'yellow-card': 'Ammonizione', 'red-card': 'Espulsione', substitution: 'Cambio', formation: 'Modulo' };
+  protected eventLabel(type: MatchEventType): string { return this.eventLabels[type] ?? 'Evento'; }
+  protected eventIcon(type: MatchEventType): string {
+    if (type === 'formation') return 'M3 5h18v14H3zM12 5v14M3 9.2h2.8v5.6H3M21 9.2h-2.8v5.6H21';
+    return this.manualEventTypes.find(item => item.type === type)?.icon ?? '';
+  }
+  /** POR · DIF · CEN · ATT badge for the bench list. */
+  protected roleCode(role: string | null | undefined): string {
+    const value = (role ?? '').toLowerCase();
+    if (value.startsWith('port')) return 'POR';
+    if (value.startsWith('dif')) return 'DIF';
+    if (value.startsWith('cen')) return 'CEN';
+    if (value.startsWith('att')) return 'ATT';
+    return '—';
+  }
   protected manualEventLabel(type: MatchEventType | null): string { return this.manualEventTypes.find(item => item.type === type)?.label ?? ''; }
   protected manualEventAction(type: MatchEventType | null): string { return this.manualEventTypes.find(item => item.type === type)?.action ?? 'Registra'; }
   protected openManualEvent(type: MatchEventType): void {

@@ -193,6 +193,15 @@
 #nfm .nfm-match-chip span { display: grid; min-width: 0; }
 #nfm .nfm-match-chip small { font-size: 14px; color: #fff; }
 #nfm .nfm-match-chip strong { overflow: hidden; color: var(--nfm-yellow); font-size: 14px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+#nfm .nfm-match-chip { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+#nfm .nfm-match-chip:hover { border-color: var(--c-hi); box-shadow: 0 0 18px rgba(var(--c-rgb), .55), inset 0 1px rgba(255, 255, 255, .08); }
+#nfm .nfm-versus-chip { gap: 10px; max-width: 420px; padding: 6px 12px; }
+#nfm .nfm-versus-chip .nfm-versus-team { display: block; max-width: 118px; overflow: hidden; color: #fff; font-size: 14px; font-weight: 500; line-height: 1.15; text-align: center; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+#nfm .nfm-versus-badge { display: grid; place-items: center; flex: 0 0 auto; width: 38px; height: 30px; border: 1.5px solid var(--c-hi); border-radius: 999px; color: #fff; background: linear-gradient(180deg, #1f6fe0, #0a2f80); box-shadow: 0 0 10px rgba(var(--c-rgb), .6); font-size: 13px; font-weight: 800; font-style: italic; }
+#nfm .nfm-versus-chip svg.nfm-crest { width: 26px; height: 30px; stroke-width: 1.4; }
+#nfm .nfm-crest-home { fill: #1d5fd6; stroke: #cfe3ff; }
+#nfm .nfm-crest-away { fill: #d42437; stroke: #ffd5da; }
+#nfm .nfm-crest .nfm-crest-ball { fill: none; stroke: #fff; }
 
 #nfm .nfm-icon-button {
   display: grid;
@@ -392,6 +401,9 @@
 #nfm .workspace-error { margin: 0 0 14px; }
 
 /* ============================================================ RESPONSIVE */
+@media (max-width: 1365px) {
+  #nfm .nfm-match-chip:not(.nfm-versus-chip) { display: none; }
+}
 @media (max-width: 1180px) {
   #nfm { grid-template-columns: 200px minmax(0, 1fr); }
   #nfm .nfm-menu-item { font-size: 15px; grid-template-columns: 28px minmax(0, 1fr); column-gap: 10px; }

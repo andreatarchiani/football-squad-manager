@@ -260,12 +260,24 @@
                 }
                 </div>
               </div>
+              <div class="starters-section" aria-label="Titolari">
+                <div class="editor-heading"><strong>Titolari ({{ startersCount() }})</strong><span>Tocca per cambiare</span></div>
+                <div class="starters-list">
+                  @for (slot of slots(); track slot.id) {
+                    <button type="button" class="starter-row" [class.is-empty]="!playerForSlot(slot.id)" (click)="togglePlayerPicker(slot.id)" [attr.aria-label]="'Cambia giocatore in posizione ' + slot.label">
+                      <span class="bench-number" [class.is-goalkeeper]="slot.id === 'por'">{{ playerForSlot(slot.id)?.shirtNumber ?? '+' }}</span>
+                      <span class="starter-name">{{ playerForSlot(slot.id)?.lastName || 'Da assegnare' }}@if (playerForSlot(slot.id); as starter) { @if (starter.id === captainId()) { <span class="captain-armband-mark" title="Capitano">C</span> } @else if (starter.id === viceCaptainId()) { <span class="vice-armband-mark" title="Vicecapitano">VC</span> } }</span>
+                      <span class="role-badge" [attr.data-role]="roleCode(slot.role)">{{ roleCode(slot.role) }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
               <div class="bench-section">
                 <div class="editor-heading"><strong>Panchina</strong><span>{{ benchPlayers().length }} giocatori</span></div>
                 @if (benchPlayers().length) {
                   <div class="bench-list">
                     @for (player of benchPlayers(); track player.id) {
-                      <div class="bench-player"><span class="bench-number">{{ player.shirtNumber ?? '—' }}</span><span>{{ player.firstName }} {{ player.lastName }}@if (player.id === captainId()) { <span class="leadership-mark" title="Capitano" aria-label="Capitano">👑</span> } @else if (player.id === viceCaptainId()) { <span class="leadership-mark" title="Vicecapitano" aria-label="Vicecapitano">🛡️</span> }</span><small>{{ player.roles.join(' · ') || player.primaryRole }}</small></div>
+                      <div class="bench-player"><span class="bench-number">{{ player.shirtNumber ?? '—' }}</span><span>{{ player.firstName }} {{ player.lastName }}@if (player.id === captainId()) { <span class="leadership-mark" title="Capitano" aria-label="Capitano">👑</span> } @else if (player.id === viceCaptainId()) { <span class="leadership-mark" title="Vicecapitano" aria-label="Vicecapitano">🛡️</span> }</span><small>{{ player.roles.join(' · ') || player.primaryRole }}</small><span class="role-badge" [attr.data-role]="roleCode(player.primaryRole)" [title]="player.primaryRole">{{ roleCode(player.primaryRole) }}</span></div>
                     }
                   </div>
                 } @else { <p class="roster-empty">Tutti i giocatori disponibili sono schierati.</p> }

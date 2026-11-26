@@ -76,6 +76,22 @@ export class HomePageComponent {
   protected setOpponentName(value: string): void {
     this.opponentName.set(value);
     if (typeof localStorage !== 'undefined') localStorage.setItem('fsm-next-opponent', value);
+    this.announceMatchContext();
+  }
+
+  /** Shares the selected team with the header chips (Giornata / squadra VS avversario). */
+  private rememberSelectedTeam(): void {
+    const team = this.selectedTeam;
+    try {
+      if (typeof localStorage === 'undefined') return;
+      if (team) localStorage.setItem('fsm-next-team', JSON.stringify({ name: team.name, category: team.category ?? '' }));
+      else localStorage.removeItem('fsm-next-team');
+    } catch { /* storage unavailable */ }
+    this.announceMatchContext();
+  }
+
+  private announceMatchContext(): void {
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('fsm-match-context'));
   }
 
   protected get selectableTeams(): TeamRecord[] {
@@ -133,6 +149,7 @@ export class HomePageComponent {
     if (uid && typeof localStorage !== 'undefined') {
       localStorage.setItem(this.selectionStorageKey(uid), validTeamId);
     }
+    this.rememberSelectedTeam();
     void this.loadPreview();
     if (!uid || !this.db) return;
     this.saving.set(true);
@@ -359,6 +376,7 @@ export class HomePageComponent {
         void setDoc(doc(this.db, 'userProfiles', uid), { defaultTeamId: selected, updatedAt: new Date() }, { merge: true })
           .catch(error => console.error('Unable to save automatically selected team.', error));
       }
+      this.rememberSelectedTeam();
       void this.loadPreview();
     } catch (error) {
       console.error('Unable to load home workspace.', error);

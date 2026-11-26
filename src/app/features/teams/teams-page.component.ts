@@ -175,6 +175,16 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   protected slots() { return this.pitchSlots[this.formation()]; }
+  protected startersCount(): number { return this.slots().filter(slot => !!this.playerForSlot(slot.id)).length; }
+  /** Short role badge used in the Titolari / Panchina lists (POR, DIF, CEN, ATT). */
+  protected roleCode(role: string | null | undefined): string {
+    const value = (role ?? '').toLowerCase();
+    if (value.startsWith('port')) return 'POR';
+    if (value.startsWith('dif')) return 'DIF';
+    if (value.startsWith('centro') || value.startsWith('cen')) return 'CEN';
+    if (value.startsWith('att')) return 'ATT';
+    return '—';
+  }
 
   protected captainLabel(team: TeamRecord): string { const player = this.rosterFor(team).find(item => item.id === this.captainId()); return player ? `${player.shirtNumber ?? '—'} · ${player.firstName} ${player.lastName}` : 'Seleziona giocatore'; }
   protected viceCaptainLabel(team: TeamRecord): string { const player = this.rosterFor(team).find(item => item.id === this.viceCaptainId()); return player ? `${player.shirtNumber ?? '—'} · ${player.firstName} ${player.lastName}` : 'Seleziona giocatore'; }

@@ -1,9 +1,12 @@
 <main class="live-match" aria-label="Modalità partita in corso">
   <header class="match-topbar match-scoreboard-header">
     <div class="match-team match-home-team">
-      <small><span class="live-dot"></span> CASA</small>
-      <strong>{{ teamName() }}</strong>
-      <em>FORMAZIONE {{ matchFormation() }}</em>
+      <svg class="match-crest" viewBox="0 0 48 56" aria-hidden="true" focusable="false"><path class="crest-shield" d="M24 2 45 9v17c0 14-9 23-21 28C12 49 3 40 3 26V9z"/><path class="crest-inner" d="M24 8 39 13v13c0 10-6.5 17-15 21C15.5 43 9 36 9 26V13z"/><circle class="crest-ball" cx="24" cy="26" r="8"/><path class="crest-ball-mark" d="M24 21.5l3.6 2.6-1.4 4.2h-4.4l-1.4-4.2z"/></svg>
+      <div class="match-team-copy">
+        <small><span class="live-dot"></span> MIA SQUADRA</small>
+        <strong>{{ teamName() }}</strong>
+        <em>FORMAZIONE {{ matchFormation() }}</em>
+      </div>
     </div>
     <div class="match-scoreboard" aria-label="Risultato e tempo di gioco">
       <div class="scoreboard-clock">
@@ -14,8 +17,11 @@
       <div class="match-score"><span>{{ score }}</span><b>–</b><span>{{ opponentGoals() }}</span></div>
     </div>
     <div class="match-team match-away-team">
-      <small>TRASFERTA</small>
-      <strong>{{ opponentName() || 'Avversari' }}</strong>
+      <svg class="match-crest" viewBox="0 0 48 56" aria-hidden="true" focusable="false"><path class="crest-shield" d="M24 2 45 9v17c0 14-9 23-21 28C12 49 3 40 3 26V9z"/><path class="crest-inner" d="M24 8 39 13v13c0 10-6.5 17-15 21C15.5 43 9 36 9 26V13z"/><path class="crest-stripes" d="M17 16v22M24 14v30M31 16v22"/><circle class="crest-ball" cx="24" cy="14" r="5"/></svg>
+      <div class="match-team-copy">
+        <small>SQUADRA AVVERSARIA</small>
+        <strong>{{ opponentName() || 'Avversari' }}</strong>
+      </div>
     </div>
   </header>
   <section class="match-clock match-controls-panel">
@@ -82,28 +88,43 @@
         }
       </div>
     </div>
-    <aside class="match-side">
-      <div class="side-heading bench-heading"><strong>Panchina</strong><span>{{ bench().length }} giocatori in panchina</span></div>
-      <p class="substitution-help">Per un cambio manuale, seleziona prima un titolare da sostituire e poi un giocatore in panchina.</p>
-      @if (selectedOutgoingId(); as outgoingId) { <div class="selected-outgoing">Esce: {{ player(outgoingId)?.lastName }} · scegli chi entra</div> }
+    <aside class="match-side match-bench-col" aria-label="Panchina">
+      <div class="side-heading bench-heading">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5h18M5 10.5V7h14v3.5M4 10.5V17M20 10.5V17M3 13.8h18M7.5 13.8v4.5M16.5 13.8v4.5"/></svg>
+        <strong>Panchina</strong><span>{{ bench().length }}</span>
+      </div>
       <div class="match-bench">
         @for (player of bench(); track player.id) {
-          <button type="button" class="bench-choice" [class.bench-choice-unavailable]="player.status !== 'active'" [disabled]="!selectedOutgoingId() || changesUsed() >= maxChanges || player.status !== 'active' || redCards().includes(player.id)" (click)="chooseIncoming(player)">
-            <span class="bench-choice-number">{{ player.shirtNumber ?? '—' }}</span><span><strong>{{ player.firstName }} {{ player.lastName }}</strong><small>{{ redCards().includes(player.id) ? 'Espulso' : (availabilityLabel(player) || (player.roles.join(' · ') || player.primaryRole)) }}</small></span>@if (player.status === 'active') { <b>＋</b> }
+          <button type="button" class="bench-choice" [class.bench-choice-unavailable]="player.status !== 'active' || redCards().includes(player.id)" [class.is-armed]="!!selectedOutgoingId() && changesUsed() < maxChanges && player.status === 'active' && !redCards().includes(player.id)" [disabled]="!selectedOutgoingId() || changesUsed() >= maxChanges || player.status !== 'active' || redCards().includes(player.id)" (click)="chooseIncoming(player)" [title]="player.firstName + ' ' + player.lastName + (redCards().includes(player.id) ? ' · Espulso' : availabilityLabel(player) ? ' · ' + availabilityLabel(player) : '')">
+            <span class="bench-choice-number">{{ player.shirtNumber ?? '—' }}</span><span class="bench-choice-name"><strong>{{ player.lastName }}</strong><small>{{ redCards().includes(player.id) ? 'Espulso' : (availabilityLabel(player) || roleCode(player.primaryRole)) }}</small></span>
           </button>
         } @empty { <p class="bench-empty">Nessun giocatore disponibile in panchina.</p> }
       </div>
-      <div class="change-counter"><strong>{{ maxChanges - changesUsed() }}</strong><span>cambi rimasti</span></div>
-      <div class="on-field-list"><strong>In campo · tocca per selezionare chi esce</strong>
+    </aside>
+    <aside class="match-side match-subs-col" aria-label="Cambi">
+      <div class="side-heading subs-heading">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h13l-3.5-3.5M20 15H7l3.5 3.5"/></svg>
+        <strong>Cambi</strong>
+      </div>
+      <div class="change-counter"><span>Effettuati:</span><strong>{{ changesUsed() }}</strong><b>/ {{ maxChanges }}</b></div>
+      <div class="subs-done">
+        @for (sub of substitutionEvents(); track $index) {
+          <div class="sub-card">
+            <span class="sub-minute">{{ sub.minute }}′</span>
+            <span class="sub-line sub-out"><em>Esce:</em> {{ player(sub.outgoingId)?.shirtNumber ?? '' }} {{ player(sub.outgoingId)?.lastName ?? '' }}</span>
+            <span class="sub-line sub-in"><em>Entra:</em> {{ player(sub.incomingId)?.shirtNumber ?? '' }} {{ player(sub.incomingId)?.lastName ?? '' }}</span>
+          </div>
+        } @empty { <p class="subs-empty">Nessun cambio effettuato.</p> }
+      </div>
+      <div class="on-field-list"><strong>Cambio manuale · tocca chi esce</strong>
         @for (player of onField(); track player.id) {
-          <button type="button" (click)="chooseOutgoing(player)" [class.selected]="selectedOutgoingId() === player.id" [disabled]="changesUsed() >= maxChanges || playerHasRedCard(player)">
-            <span>#{{ player.shirtNumber ?? '—' }}</span>{{ player.firstName }} {{ player.lastName }}
-          </button>
+          <button type="button" (click)="chooseOutgoing(player)" [class.selected]="selectedOutgoingId() === player.id" [disabled]="changesUsed() >= maxChanges || playerHasRedCard(player)" [title]="player.firstName + ' ' + player.lastName">{{ player.shirtNumber ?? '—' }}</button>
         }
       </div>
+      @if (selectedOutgoingId(); as outgoingId) { <div class="selected-outgoing">Esce {{ player(outgoingId)?.lastName }} · scegli chi entra dalla panchina</div> }
     </aside>
     <aside class="nfm-event-panel" aria-label="Registra evento">
-      <div class="nfm-event-heading"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12z"/></svg><strong>Registra evento</strong><span>Manuale · Vocale</span></div>
+      <div class="nfm-event-heading"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12z"/></svg><strong>Registra evento</strong><span class="nfm-event-modes" aria-hidden="true"><i class="is-on">Manuale</i><i class="is-on">Vocale</i></span></div>
       <div class="nfm-event-grid">
         @for (item of manualEventTypes; track item.type) {
           <button type="button" class="nfm-event-button" [attr.data-kind]="item.type" [disabled]="finished() || (item.type === 'substitution' && changesUsed() >= maxChanges)" (click)="openManualEvent(item.type)">
@@ -145,8 +166,8 @@
     </aside>
   </section>
   <section class="match-events">
-    <div class="events-heading"><strong>Eventi della partita</strong><span>{{ events().length }} registrati</span></div>
-    @for (event of events(); track $index) { <div class="match-event"><b>{{ event.minute }}′</b><span>{{ event.description }}</span></div> }
+    <div class="events-heading"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7v5l3 2M5 3.5 2.5 6M19 3.5 21.5 6M4 13a8 8 0 1 0 16 0a8 8 0 1 0-16 0"/></svg><strong>Eventi della partita</strong><em>(ordine cronologico)</em><span>{{ events().length }} registrati</span></div>
+    @for (event of events(); track $index) { <div class="match-event" [attr.data-kind]="event.type"><b>{{ event.minute }}′</b><svg class="match-event-icon" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="eventIcon(event.type)"/></svg><span><strong>{{ eventLabel(event.type) }}:</strong> {{ event.description }}</span></div> }
     @empty { <p class="events-empty">Gli eventi registrati durante la partita compariranno qui.</p> }
   </section>
   @if (finishConfirmationOpen()) {

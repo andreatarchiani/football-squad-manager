@@ -732,13 +732,16 @@
 #nfm .roster-panel {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(300px, .9fr);
+  grid-template-columns: minmax(0, 1.18fr) minmax(250px, .82fr) minmax(250px, .82fr);
   grid-template-areas:
-    'head head'
-    'captain captain'
-    'toolbar toolbar'
-    'pitch bench';
-  gap: 14px 18px;
+    'head head head'
+    'pitch toolbar bench'
+    'pitch starters bench'
+    'pitch starters captain'
+    'pitch starters .';
+  grid-template-rows: auto auto auto auto 1fr;
+  align-items: start;
+  gap: 14px 16px;
   margin: 0;
   padding: 16px 18px 18px;
   border: 1.5px solid var(--panel-line);
@@ -756,6 +759,73 @@
 #nfm .roster-panel > .tactical-toolbar { grid-area: toolbar; }
 #nfm .roster-panel > .pitch-stage { grid-area: pitch; }
 #nfm .roster-panel > .bench-section { grid-area: bench; align-self: start; }
+#nfm .roster-panel > .starters-section { grid-area: starters; align-self: start; }
+#nfm .roster-panel > .pitch-stage { align-self: start; }
+
+/* Narrow side columns, as in the "Formazione" reference: compact boxes. */
+#nfm .roster-panel > .captaincy-picker { grid-template-columns: minmax(0, 1fr); align-items: stretch; gap: 10px; padding: 12px 14px; }
+#nfm .roster-panel > .tactical-toolbar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 12px 14px; }
+#nfm .roster-panel > .tactical-toolbar .formation-picker { justify-content: space-between; }
+#nfm .roster-panel > .tactical-toolbar .layout-slot-switch { display: grid; grid-template-columns: 1fr 1fr; margin-left: 0; }
+#nfm .roster-panel > .tactical-toolbar > span { font-size: 12px; line-height: 1.35; }
+
+#nfm .starters-section {
+  margin: 0;
+  padding: 14px;
+  border: 1.5px solid var(--panel-line);
+  border-radius: 18px;
+  background: var(--panel);
+  box-shadow: 0 0 14px rgba(var(--c-rgb), .25);
+}
+#nfm .starters-section .editor-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 10px; }
+#nfm .starters-section .editor-heading strong { color: #fff; font-size: 19px; font-weight: 700; }
+#nfm .starters-section .editor-heading span { color: var(--muted); font-size: 12px; }
+#nfm .starters-list { display: grid; gap: 4px; }
+#nfm .starter-row {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 3px 8px 3px 4px;
+  border: 0;
+  border-bottom: 1px solid rgba(var(--c-rgb), .22);
+  border-radius: 8px;
+  color: #fff;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s;
+}
+#nfm .starter-row:hover { background: rgba(var(--c-rgb), .14); }
+#nfm .starter-row.is-empty .starter-name { color: var(--muted); font-style: italic; }
+#nfm .starter-row .bench-number { width: 40px; height: 28px; font-size: 15px; }
+#nfm .bench-number.is-goalkeeper { border-color: #ffe27a; color: #1a1300; background: linear-gradient(180deg, #ffd21a, #d9a400); box-shadow: 0 0 8px rgba(255, 210, 26, .45); }
+#nfm .starter-name { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+#nfm .starter-name :is(.captain-armband-mark, .vice-armband-mark) { display: inline-grid; place-items: center; min-width: 24px; height: 20px; padding: 0 4px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+#nfm .starter-name .captain-armband-mark { color: #1a1300; background: var(--nfm-yellow); }
+#nfm .starter-name .vice-armband-mark { color: #fff; background: #1458d8; border: 1px solid #9fd1ff; }
+
+#nfm .role-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 46px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 7px;
+  color: #10202e;
+  background: #d9dee6;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: .03em;
+}
+#nfm .role-badge[data-role='DIF'] { background: #a9d8ff; }
+#nfm .role-badge[data-role='CEN'] { background: #3fd66b; color: #062611; }
+#nfm .role-badge[data-role='ATT'] { background: #ff6b6b; color: #2a0306; }
+#nfm .bench-player { grid-template-columns: 46px minmax(0, 1fr) auto; }
+#nfm .bench-player > small { display: none; }
 
 #nfm .captaincy-picker {
   display: grid;
@@ -864,7 +934,7 @@
 @media (max-width: 1180px) {
   #nfm .home-roster-panel { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'head' 'strip' 'actions' 'hint' 'pitch'; grid-template-rows: none; }
   #nfm .formation-data-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  #nfm .roster-panel { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'head' 'captain' 'toolbar' 'pitch' 'bench'; }
+  #nfm .roster-panel { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-areas: 'head head' 'pitch toolbar' 'pitch starters' 'bench captain'; grid-template-rows: none; }
 }
 
 @media (max-width: 900px) {
@@ -915,6 +985,8 @@
   #nfm .formation-data-strip strong { font-size: 16px; }
   #nfm .captaincy-picker { grid-template-columns: minmax(0, 1fr); }
   #nfm .layout-slot-switch { margin-left: 0; }
+  #nfm .roster-panel { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'head' 'toolbar' 'pitch' 'starters' 'bench' 'captain'; }
+  #nfm .starter-row { min-height: 42px; font-size: 15px; }
 
   #nfm :is(.home-pitch-stage, .pitch-stage) { padding: 10px 8px; }
   #nfm :is(.home-pitch-player, .pitch-stage .pitch-player, .match-shirt-player) { min-width: 46px; }

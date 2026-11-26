@@ -191,6 +191,7 @@ export class AppComponent {
   protected readonly activePage = signal<AppView>(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team') ? 'match' : 'home');
   protected readonly matchActive = signal(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team'));
   protected readonly nextOpponent = signal(this.readNextOpponent());
+  protected readonly nextTeam = signal(this.readNextTeam());
   protected readonly section = computed<AppSection>(() => VIEW_SECTION[this.activePage()]);
   protected readonly viewMeta = computed(() => VIEW_META[this.activePage()]);
   protected readonly sectionMenu = computed<NavItem[]>(() => SECTION_MENU[this.section()] ?? []);
@@ -217,6 +218,7 @@ export class AppComponent {
       this.releaseChangelogOpen.set(true);
     }
     window.setTimeout(() => this.loadingMinimumElapsed.set(true), 2500);
+    window.addEventListener('fsm-match-context', () => { this.nextOpponent.set(this.readNextOpponent()); this.nextTeam.set(this.readNextTeam()); });
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe((event) => {
         if (event.type === 'VERSION_READY') {
@@ -354,8 +356,18 @@ export class AppComponent {
     if (this.activePage() === 'match' && view !== 'match') this.matchLaunch.set(null);
     if (view === 'teams') { this.matchLaunch.set(null); this.rosterRequest.set(null); }
     this.nextOpponent.set(this.readNextOpponent());
+    this.nextTeam.set(this.readNextTeam());
     this.activePage.set(view);
     if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
+  }
+
+  /** Team selected in "Formazione" (written there), shown in the header match chips. */
+  private readNextTeam(): { name: string; category: string } {
+    try {
+      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('fsm-next-team') : null;
+      const parsed = raw ? JSON.parse(raw) : null;
+      return { name: String(parsed?.name ?? '').trim(), category: String(parsed?.category ?? '').trim() };
+    } catch { return { name: '', category: '' }; }
   }
 
   private readNextOpponent(): string {
