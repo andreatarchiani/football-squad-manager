@@ -47,7 +47,7 @@ async function seed() {
     maxSubstitutions: 5, reentryAllowed: false, federationReportRequired: true, fixedPlayerCount: null, allPlayersMustPlay: false,
     icon: '🦁', isArchived: false
   });
-  await put(`workspaces/${ws}/teams/team2`, { name: 'Under 17 Regionale', category: 'Allievi Regionali U17', facilityName: 'Stadio Comunale', icon: '⚽', isArchived: false });
+  await put(`workspaces/${ws}/teams/team2`, { name: 'Under 17 Regionale', category: 'Allievi Regionali U17', facilityName: 'Stadio Comunale', icon: '⚽', isArchived: true });
   await put(`workspaces/${ws}/teams/team2/seasons/s2`, { label: '2026/2027', status: 'active' });
   await put(`workspaces/${ws}/teams/${team}/seasons/${season}`, { label: '2026/2027', status: 'active' });
   const roster = [
