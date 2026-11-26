@@ -67,7 +67,8 @@ export class PlayersPageComponent {
  }
  private reportProblems(formEl:HTMLElement|undefined,problems:FieldProblem[]){
   showFieldProblems(formEl,problems);
-  const names=problems.map(p=>p.label??p.field).join(', ');
+  const groups=[...new Set(problems.map(p=>(p.label??p.field).split(' · ')[0]))];
+  const names=problems.length>3?`${problems.length} campi da completare: ${groups.join(', ')}`:problems.map(p=>p.label??p.field).join(', ');
   this.formError.set(problems.length===1?`${problems[0].label}: ${problems[0].message.toLowerCase()}.`:`Controlla i campi evidenziati: ${names}.`);
   this.notifications.notify({title:problems.length===1&&problems[0].message==='Compila questo campo'?'Compila questo campo':'Controlla i campi evidenziati',message:names,type:'warning',durationMs:6000});
  }

@@ -22,15 +22,15 @@
  <fieldset class="role-field wide guardian-toggles"><legend>Il giocatore ha un tutore o una tutrice?</legend><div class="role-options">@for(kind of guardianKinds;track kind.key){<label><input type="checkbox" [checked]="!!form.guardians[kind.key]" (change)="toggleGuardian(kind.key,$any($event.target).checked)"> {{kind.label}}</label>}</div></fieldset>
  @for(kind of guardianKinds;track kind.key){@if(form.guardians[kind.key];as g){
  <div class="wide guardian-title"><span>{{kind.label}}</span></div>
- <label>Nome *<input [name]="'guardian-'+kind.key+'-firstName'" [(ngModel)]="g.firstName" maxlength="50" placeholder="Nome"></label>
- <label>Cognome *<input [name]="'guardian-'+kind.key+'-lastName'" [(ngModel)]="g.lastName" maxlength="50" placeholder="Cognome"></label>
- <label>Data di nascita *<input [name]="'guardian-'+kind.key+'-dateOfBirth'" type="date" [(ngModel)]="g.dateOfBirth"></label>
- <label>Luogo di nascita *<input [name]="'guardian-'+kind.key+'-placeOfBirth'" [(ngModel)]="g.placeOfBirth" maxlength="100" placeholder="Comune di nascita"></label>
- <label>Residenza *<input [name]="'guardian-'+kind.key+'-residence'" [(ngModel)]="g.residence" maxlength="160" placeholder="Indirizzo di residenza"></label>
- <label>CAP *<input [name]="'guardian-'+kind.key+'-postalCode'" [(ngModel)]="g.postalCode" maxlength="10" inputmode="numeric" placeholder="CAP"></label>
- <label>Documento d'identità *<input [name]="'guardian-'+kind.key+'-identityDocument'" [(ngModel)]="g.identityDocument" maxlength="80" placeholder="Tipo e numero documento"></label>
- <label>Mail *<input [name]="'guardian-'+kind.key+'-email'" type="email" [(ngModel)]="g.email" maxlength="120" placeholder="nome@dominio.it"></label>
- <label>Telefono *<input [name]="'guardian-'+kind.key+'-phone'" type="tel" [(ngModel)]="g.phone" maxlength="30" placeholder="Numero di telefono"></label>
+ <label [attr.data-field]="'guardian-'+kind.key+'-firstName'">Nome *<input [name]="'guardian-'+kind.key+'-firstName'" [(ngModel)]="g.firstName" maxlength="50" placeholder="Nome"></label>
+ <label [attr.data-field]="'guardian-'+kind.key+'-lastName'">Cognome *<input [name]="'guardian-'+kind.key+'-lastName'" [(ngModel)]="g.lastName" maxlength="50" placeholder="Cognome"></label>
+ <label [attr.data-field]="'guardian-'+kind.key+'-dateOfBirth'">Data di nascita *<input [name]="'guardian-'+kind.key+'-dateOfBirth'" type="date" [(ngModel)]="g.dateOfBirth"></label>
+ <label [attr.data-field]="'guardian-'+kind.key+'-placeOfBirth'">Luogo di nascita *<input [name]="'guardian-'+kind.key+'-placeOfBirth'" [(ngModel)]="g.placeOfBirth" maxlength="100" placeholder="Comune di nascita"></label>
+ <label [attr.data-field]="'guardian-'+kind.key+'-residence'">Residenza *<input [name]="'guardian-'+kind.key+'-residence'" [(ngModel)]="g.residence" maxlength="160" placeholder="Indirizzo di residenza"></label>
+ <label [attr.data-field]="'guardian-'+kind.key+'-postalCode'">CAP *<input [name]="'guardian-'+kind.key+'-postalCode'" [(ngModel)]="g.postalCode" maxlength="10" inputmode="numeric" placeholder="CAP"></label>
+ <label [attr.data-field]="'guardian-'+kind.key+'-identityDocument'">Documento d'identità *<input [name]="'guardian-'+kind.key+'-identityDocument'" [(ngModel)]="g.identityDocument" maxlength="80" placeholder="Tipo e numero documento"></label>
+ <label [attr.data-field]="'guardian-'+kind.key+'-email'">Mail *<input [name]="'guardian-'+kind.key+'-email'" type="email" [(ngModel)]="g.email" maxlength="120" placeholder="nome@dominio.it"></label>
+ <label [attr.data-field]="'guardian-'+kind.key+'-phone'">Telefono *<input [name]="'guardian-'+kind.key+'-phone'" type="tel" [(ngModel)]="g.phone" maxlength="30" placeholder="Numero di telefono"></label>
  }}
  <div class="wide"><strong>Contatti chiave</strong></div>
  <label>Numero di telefono<input name="keyContactPhone" type="tel" [(ngModel)]="form.keyContactPhone" maxlength="30" placeholder="Telefono del contatto di riferimento"></label>
