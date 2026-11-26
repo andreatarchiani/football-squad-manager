@@ -44,6 +44,8 @@
   #nfm .nfm-number.selected,
   #nfm .on-field-list button.selected { box-shadow: 0 0 6px rgba(255, 210, 26, .6) !important; }
 
+  #nfm .nfm-bottom-nav { background: linear-gradient(180deg, #080e1e, #03070f) !important; box-shadow: 0 -2px 8px rgba(var(--c-rgb), .25) !important; }
+
   /* Continuous pulsing dots are not needed on a phone. */
   #nfm :is(.live-dot, .nfm-live-dot) { animation: none !important; }
 }
