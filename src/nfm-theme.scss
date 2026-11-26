@@ -97,12 +97,22 @@
   --nfm-dialog-bg: linear-gradient(160deg, #0b3a20 0%, #062414 55%, #03140b 100%);
 }
 
+/* Home: violet LED, distinct from Ufficio (orange), Allenamento (green) and Partita (blue). */
 #nfm[data-theme='home'] {
-  --c: #ff8a1e;
-  --c-hi: #ffb453;
-  --c-rgb: 255, 138, 30;
-  --header-bg: linear-gradient(180deg, #0b1124, #050914);
-  --bg: #04070f;
+  --c: #9b6bff;
+  --c-hi: #c4a8ff;
+  --c-rgb: 155, 107, 255;
+  --c-deep: #4f25b8;
+  --panel: linear-gradient(160deg, rgba(40, 22, 84, .92), rgba(16, 9, 38, .95));
+  --panel-solid: #1a0f3a;
+  --panel-line: rgba(176, 140, 255, .55);
+  --strip: linear-gradient(90deg, #7b4dff, #5228c8 55%, rgba(40, 16, 110, .2));
+  --soft: #cbbcf0;
+  --muted: #9c8cc4;
+  --header-bg: linear-gradient(180deg, #120b2a, #07051a);
+  --bg: #06041a;
+  --nfm-modal-bg: #07051a;
+  --nfm-dialog-bg: linear-gradient(160deg, #2a1658 0%, #170c38 55%, #0b0620 100%);
 }
 
 /* ---------------------------------------------------------------- header */
@@ -154,7 +164,7 @@
 #nfm .nfm-title-icon { display: grid; place-items: center; flex: 0 0 auto; width: 58px; height: 52px; color: var(--c-hi); }
 #nfm[data-theme='office'] .nfm-title-icon,
 #nfm[data-theme='home'] .nfm-title-icon { color: #23d8f0; }
-#nfm[data-theme='home'] .nfm-title-icon { color: #ffa21e; }
+#nfm[data-theme='home'] .nfm-title-icon { color: #c4a8ff; }
 #nfm .nfm-title-icon svg { width: 52px; height: 52px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 8px rgba(var(--c-rgb), .6)); }
 #nfm .nfm-title-copy { min-width: 0; }
 #nfm .nfm-title h1 {
@@ -550,7 +560,7 @@
     font-weight: 600;
     cursor: pointer;
   }
-  #nfm .nfm-bottom-item[data-tone='home'] { --t: #ffa21e; --t-rgb: 255, 162, 30; }
+  #nfm .nfm-bottom-item[data-tone='home'] { --t: #9b6bff; --t-rgb: 155, 107, 255; }
   #nfm .nfm-bottom-item[data-tone='office'] { --t: #ff8a1e; --t-rgb: 255, 138, 30; }
   #nfm .nfm-bottom-item[data-tone='training'] { --t: #35e45f; --t-rgb: 53, 228, 95; }
   #nfm .nfm-bottom-item svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
@@ -565,4 +575,55 @@
 
 @media (prefers-reduced-motion: reduce) {
   #nfm *, #nfm *::before, #nfm *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ---------------------------------------------------- signed-in profile */
+#nfm .nfm-profile-chip,
+#nfm .nfm-profile-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 6px 14px 6px 6px;
+  border: 1.5px solid var(--panel-line);
+  border-radius: 999px;
+  background: linear-gradient(160deg, rgba(40, 22, 84, .9), rgba(14, 8, 34, .95));
+  box-shadow: 0 0 14px rgba(var(--c-rgb), .35);
+}
+#nfm .nfm-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--c-hi);
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(160deg, var(--c), var(--c-deep, #4f25b8));
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+#nfm .nfm-profile-text { display: grid; min-width: 0; line-height: 1.15; }
+#nfm .nfm-profile-text small { color: var(--soft); font-size: 11px; font-weight: 600; letter-spacing: .04em; }
+#nfm .nfm-profile-text strong { overflow: hidden; color: #fff; font-size: 15px; white-space: nowrap; text-overflow: ellipsis; }
+#nfm .nfm-profile-text em { overflow: hidden; color: var(--muted); font-size: 12px; font-style: normal; white-space: nowrap; text-overflow: ellipsis; }
+#nfm .nfm-profile-chip { max-width: 330px; }
+#nfm .nfm-profile-strip { display: none; }
+@media (max-width: 1180px) { #nfm .nfm-profile-chip .nfm-profile-text em { display: none; } }
+@media (max-width: 900px) {
+  #nfm .nfm-profile-chip { display: none; }
+  #nfm .nfm-profile-strip { position: relative; z-index: 1; display: flex; margin: 12px 0 0; border-radius: 16px; }
+}
+
+/* ------------------------------------------------- page transitions */
+#nfm { overflow-x: clip; }
+#nfm .nfm-page { animation: nfm-page-forward .34s cubic-bezier(.22, .8, .24, 1); }
+#nfm .nfm-page[data-nav='back'] { animation-name: nfm-page-back; }
+#nfm .nfm-title { animation: nfm-title-in .3s ease-out; }
+@keyframes nfm-page-forward { from { opacity: 0; transform: translate3d(42px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes nfm-page-back { from { opacity: 0; transform: translate3d(-42px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes nfm-title-in { from { opacity: 0; transform: translate3d(0, -6px, 0); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  #nfm :is(.nfm-page, .nfm-title) { animation: none; }
 }

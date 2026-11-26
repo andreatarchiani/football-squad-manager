@@ -68,6 +68,11 @@ const VIEW_META: Record<AppView, { title: string; accent?: string; subtitle?: st
   lineup: { title: 'Formazione', icon: 'formation', subtitle: 'Modulo, titolari, panchina e capitani' },
   match: { title: 'Panchina', accent: 'Live', icon: 'bench' }
 };
+/** Depth of every screen: going to a smaller depth is "indietro" (slide from the left). */
+const VIEW_DEPTH: Record<AppView, number> = {
+  home: 0, office: 1, training: 1, 'match-hub': 1,
+  players: 2, teams: 2, staff: 2, calendar: 2, formation: 2, match: 2, lineup: 3
+};
 const HOME_TILES: { label: string; icon: IconName; view?: AppView; tone: string; soon?: boolean }[] = [
   { label: 'Ufficio', icon: 'desk', view: 'office', tone: 'office' },
   { label: 'Allenamento', icon: 'tactic', view: 'training', tone: 'training' },
@@ -196,6 +201,18 @@ export class AppComponent {
   protected readonly matchActive = signal(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team'));
   protected readonly nextOpponent = signal(this.readNextOpponent());
   protected readonly nextTeam = signal(this.readNextTeam());
+  /** Direction of the page animation: 'forward' slides in from the right, 'back' from the left. */
+  protected readonly navDirection = signal<'forward' | 'back'>('forward');
+  /** Who is signed in: shown on the Home so it is clear which profile is in use. */
+  protected readonly profile = computed(() => {
+    const user = this.auth.user();
+    const name = user?.displayName?.trim() || '';
+    const email = user?.email ?? '';
+    const words = (name || email).replace(/@.*/, '').split(/[\s._-]+/).filter(Boolean);
+    const initials = ((words[0]?.[0] ?? '') + (words[1]?.[0] ?? '')).toUpperCase() || '?';
+    const google = !!user?.providerData.some(item => item.providerId === 'google.com');
+    return { name: name || email || 'Profilo', email, initials, method: google ? 'Google' : 'Email e password', role: this.auth.accountRole() };
+  });
   protected readonly section = computed<AppSection>(() => VIEW_SECTION[this.activePage()]);
   protected readonly viewMeta = computed(() => VIEW_META[this.activePage()]);
   protected readonly sectionMenu = computed<NavItem[]>(() => SECTION_MENU[this.section()] ?? []);
@@ -221,7 +238,13 @@ export class AppComponent {
       localStorage.removeItem(this.releaseChangelogStorageKey);
       this.releaseChangelogOpen.set(true);
     }
-    window.setTimeout(() => this.loadingMinimumElapsed.set(true), 2500);
+    window.setTimeout(() => this.loadingMinimumElapsed.set(true), 700);
+    try { history.replaceState({ fsmView: this.activePage() }, ''); } catch { /* history unavailable */ }
+    window.addEventListener('popstate', (event: PopStateEvent) => {
+      const view = (event.state as { fsmView?: AppView } | null)?.fsmView;
+      if (this.isSupportAccount() || !this.auth.user()) return;
+      this.setView(view && view in VIEW_DEPTH ? view : 'home', true);
+    });
     window.addEventListener('fsm-match-context', () => { this.nextOpponent.set(this.readNextOpponent()); this.nextTeam.set(this.readNextTeam()); });
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe((event) => {
@@ -354,7 +377,15 @@ export class AppComponent {
     this.setView(!landing || view === landing ? 'home' : landing);
   }
 
-  protected setView(view: AppView): void {
+  protected setView(view: AppView, fromHistory = false): void {
+    const current = this.activePage();
+    if (view !== current) {
+      this.navDirection.set(fromHistory || VIEW_DEPTH[view] < VIEW_DEPTH[current] ? 'back' : 'forward');
+      // Phone "back" gesture / browser back button go to the previous screen of the app.
+      if (!fromHistory && typeof history !== 'undefined') {
+        try { history.pushState({ fsmView: view }, ''); } catch { /* history unavailable */ }
+      }
+    }
     // A launch request must be consumed only once: re-opening "Panchina Live" later
     // has to resume the saved match instead of starting a new one.
     if (this.activePage() === 'match' && view !== 'match') this.matchLaunch.set(null);

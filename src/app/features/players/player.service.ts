@@ -1,28 +1,60 @@
 import { Injectable, inject } from '@angular/core';
 import { collection, doc, getDocs, increment, runTransaction, serverTimestamp, updateDoc, type Firestore } from 'firebase/firestore';
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
+import { cached, invalidateOnWrite } from '../../core/data-cache';
 import type { TeamRecord } from '../teams/team.service';
 
 export const PLAYER_ROLES = ['Portiere', 'Difensore', 'Centrocampista', 'Attaccante'] as const;
 export type PlayerRole = typeof PLAYER_ROLES[number];
 export type PlayerStatus = 'active' | 'injured' | 'suspended' | 'left';
+/** Madre / Tutrice and Padre / Tutore of a player. */
+export interface Guardian { firstName: string; lastName: string; dateOfBirth: string; placeOfBirth: string; residence: string; postalCode: string; identityDocument: string; email: string; phone: string; }
+export type GuardianKind = 'mother' | 'father';
+export interface Guardians { mother: Guardian | null; father: Guardian | null; }
+export const GUARDIAN_FIELDS: (keyof Guardian)[] = ['firstName', 'lastName', 'dateOfBirth', 'placeOfBirth', 'residence', 'postalCode', 'identityDocument', 'email', 'phone'];
+export function emptyGuardian(): Guardian { return { firstName: '', lastName: '', dateOfBirth: '', placeOfBirth: '', residence: '', postalCode: '', identityDocument: '', email: '', phone: '' }; }
+function readGuardian(value: unknown): Guardian | null {
+  if (!value || typeof value !== 'object') return null;
+  const data = value as Record<string, unknown>;
+  const guardian = emptyGuardian();
+  for (const field of GUARDIAN_FIELDS) guardian[field] = String(data[field] ?? '');
+  return guardian;
+}
+function cleanGuardian(guardian: Guardian | null): Guardian | null {
+  if (!guardian) return null;
+  const out = emptyGuardian();
+  for (const field of GUARDIAN_FIELDS) out[field] = String(guardian[field] ?? '').trim().slice(0, 160);
+  return out;
+}
 export interface PlayerRecord {
   id: string; firstName: string; lastName: string; dateOfBirth: string; placeOfBirth: string; residence: string; postalCode: string; identityDocument: string; affiliationCategory: string; federationNumber: string; federationCard: string; keyContactPhone: string; keyContactEmail: string; preferredFoot: string;
   primaryRole: PlayerRole; notes: string; isArchived: boolean; teamId: string; seasonId: string;
-  teamName: string; seasonLabel: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus; isCaptain: boolean; isViceCaptain: boolean; goals?: number; assists?: number; yellowCards?: number; keyPasses?: number;
+  teamName: string; seasonLabel: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus; isCaptain: boolean; isViceCaptain: boolean; guardians: Guardians; goals?: number; assists?: number; yellowCards?: number; keyPasses?: number;
 }
 export interface PlayerInput {
   firstName: string; lastName: string; dateOfBirth: string; placeOfBirth: string; residence: string; postalCode: string; identityDocument: string; affiliationCategory: string; federationNumber: string; federationCard: string; keyContactPhone: string; keyContactEmail: string; preferredFoot: string; primaryRole: PlayerRole;
-  notes: string; teamId: string; shirtNumber: string; roles: PlayerRole[]; status: PlayerStatus;
+  notes: string; teamId: string; shirtNumber: string; roles: PlayerRole[]; status: PlayerStatus; guardians: Guardians;
 }
 
 @Injectable({ providedIn: 'root' })
 export class PlayerService {
   private readonly firestore = inject(FIRESTORE_DB, { optional: true });
 
+  constructor() {
+    invalidateOnWrite(this, ['save', 'recordGoal', 'recordAssist', 'removeGoal', 'removeAssist', 'recordYellowCard', 'recordKeyPass', 'removeKeyPass', 'removeYellowCard', 'delete', 'setArchived']);
+  }
+
+  /** Players with their squad assignment (cached for a short time, see data-cache). */
   async list(workspaceId: string, teams: TeamRecord[]): Promise<PlayerRecord[]> {
+    const key = `players:${workspaceId}:${teams.map(team => `${team.id}/${team.seasonId ?? ''}`).sort().join(',')}`;
+    const players = await cached(key, () => this.fetchList(workspaceId, teams));
+    return players.map(player => ({ ...player, roles: [...player.roles], guardians: { mother: player.guardians.mother ? { ...player.guardians.mother } : null, father: player.guardians.father ? { ...player.guardians.father } : null } }));
+  }
+
+  private async fetchList(workspaceId: string, teams: TeamRecord[]): Promise<PlayerRecord[]> {
     const db = this.requireFirestore();
-    const snapshots = await getDocs(collection(db, 'workspaces', workspaceId, 'players'));
+    // Players and squads are downloaded in parallel (they used to wait for each other).
+    const playersRequest = getDocs(collection(db, 'workspaces', workspaceId, 'players'));
     const assignments = new Map<string, { teamId: string; seasonId: string; shirtNumber: number | null; roles: PlayerRole[]; status: PlayerStatus; isCaptain: boolean; isViceCaptain: boolean }>();
     await Promise.all(teams.filter(t => t.seasonId).map(async team => {
       const members = await getDocs(collection(db, 'workspaces', workspaceId, 'teams', team.id, 'seasons', team.seasonId!, 'squadMembers'));
@@ -31,10 +63,11 @@ export class PlayerService {
         assignments.set(member.id, { teamId: team.id, seasonId: team.seasonId!, shirtNumber: typeof d['shirtNumber'] === 'number' ? d['shirtNumber'] : null, roles: Array.isArray(d['roles']) ? d['roles'] as PlayerRole[] : [], status: this.status(d['status']), isCaptain: d['isCaptain'] === true, isViceCaptain: d['isViceCaptain'] === true });
       });
     }));
+    const snapshots = await playersRequest;
     const teamMap = new Map(teams.map(t => [t.id, t]));
     return snapshots.docs.map(s => {
       const d = s.data(); const a = assignments.get(s.id); const t = a ? teamMap.get(a.teamId) : undefined;
-      return { id:s.id, firstName:String(d['firstName']??''), lastName:String(d['lastName']??''), dateOfBirth:String(d['dateOfBirth']??''), placeOfBirth:String(d['placeOfBirth']??''), residence:String(d['residence']??''), postalCode:String(d['postalCode']??''), identityDocument:String(d['identityDocument']??''), affiliationCategory:String(d['affiliationCategory']??''), federationNumber:String(d['federationNumber']??''), federationCard:String(d['federationCard']??''), keyContactPhone:String(d['keyContactPhone']??''), keyContactEmail:String(d['keyContactEmail']??''), preferredFoot:String(d['preferredFoot']??''), primaryRole:this.role(d['primaryRole']), notes:String(d['notes']??''), isArchived:d['isArchived']===true, teamId:a?.teamId??'', seasonId:a?.seasonId??'', teamName:t?.name??'', seasonLabel:t?.seasonLabel??'', shirtNumber:a?.shirtNumber??null, roles:a?.roles??[], status:a?.status??'active', isCaptain:a?.isCaptain??false, isViceCaptain:a?.isViceCaptain??false, goals: typeof d['goals']==='number' ? d['goals'] : 0, assists: typeof d['assists']==='number' ? d['assists'] : 0, yellowCards: typeof d['yellowCards']==='number' ? d['yellowCards'] : 0, keyPasses: typeof d['keyPasses']==='number' ? d['keyPasses'] : 0 };
+      return { id:s.id, firstName:String(d['firstName']??''), lastName:String(d['lastName']??''), dateOfBirth:String(d['dateOfBirth']??''), placeOfBirth:String(d['placeOfBirth']??''), residence:String(d['residence']??''), postalCode:String(d['postalCode']??''), identityDocument:String(d['identityDocument']??''), affiliationCategory:String(d['affiliationCategory']??''), federationNumber:String(d['federationNumber']??''), federationCard:String(d['federationCard']??''), keyContactPhone:String(d['keyContactPhone']??''), keyContactEmail:String(d['keyContactEmail']??''), preferredFoot:String(d['preferredFoot']??''), primaryRole:this.role(d['primaryRole']), notes:String(d['notes']??''), isArchived:d['isArchived']===true, teamId:a?.teamId??'', seasonId:a?.seasonId??'', teamName:t?.name??'', seasonLabel:t?.seasonLabel??'', shirtNumber:a?.shirtNumber??null, roles:a?.roles??[], status:a?.status??'active', isCaptain:a?.isCaptain??false, isViceCaptain:a?.isViceCaptain??false, guardians:{ mother: readGuardian((d['guardians'] as Record<string, unknown> | undefined)?.['mother']), father: readGuardian((d['guardians'] as Record<string, unknown> | undefined)?.['father']) }, goals: typeof d['goals']==='number' ? d['goals'] : 0, assists: typeof d['assists']==='number' ? d['assists'] : 0, yellowCards: typeof d['yellowCards']==='number' ? d['yellowCards'] : 0, keyPasses: typeof d['keyPasses']==='number' ? d['keyPasses'] : 0 };
     }).sort((a,b)=>Number(a.isArchived)-Number(b.isArchived)||a.lastName.localeCompare(b.lastName,'it')||a.firstName.localeCompare(b.firstName,'it'));
   }
 
@@ -71,7 +104,7 @@ export class PlayerService {
       if (oldMemberRef && oldMemberRef.path!==memberRef.path) tx.delete(oldMemberRef);
       if (reservationRef) tx.set(reservationRef,{playerId:playerRef.id,createdAt:now,updatedAt:now});
       tx.set(memberRef,{playerId:playerRef.id,shirtNumber:number,roles:input.roles.length?input.roles:[input.primaryRole],status:input.status,isCaptain:existing?.isCaptain??false,isViceCaptain:existing?.isViceCaptain??false,updatedAt:now,...(existing?.teamId===team.id&&existing.seasonId===team.seasonId?{}:{joinedAt:now,createdAt:now})});
-      tx.set(playerRef,{firstName:input.firstName.trim(),lastName:input.lastName.trim(),dateOfBirth:input.dateOfBirth,placeOfBirth:input.placeOfBirth.trim(),residence:input.residence.trim(),postalCode:input.postalCode.trim(),identityDocument:input.identityDocument.trim(),affiliationCategory:input.affiliationCategory.trim(),federationNumber:input.federationNumber.trim(),federationCard:input.federationCard.trim(),keyContactPhone:input.keyContactPhone.trim(),keyContactEmail:input.keyContactEmail.trim(),preferredFoot:input.preferredFoot,primaryRole:input.primaryRole,notes:input.notes.trim(),isArchived:false,createdAt:oldPlayer?.data()?.['createdAt']??now,updatedAt:now},{merge:true});
+      tx.set(playerRef,{firstName:input.firstName.trim(),lastName:input.lastName.trim(),dateOfBirth:input.dateOfBirth,placeOfBirth:input.placeOfBirth.trim(),residence:input.residence.trim(),postalCode:input.postalCode.trim(),identityDocument:input.identityDocument.trim(),affiliationCategory:input.affiliationCategory.trim(),federationNumber:input.federationNumber.trim(),federationCard:input.federationCard.trim(),keyContactPhone:input.keyContactPhone.trim(),keyContactEmail:input.keyContactEmail.trim(),preferredFoot:input.preferredFoot,primaryRole:input.primaryRole,notes:input.notes.trim(),guardians:{mother:cleanGuardian(input.guardians?.mother??null),father:cleanGuardian(input.guardians?.father??null)},isArchived:false,createdAt:oldPlayer?.data()?.['createdAt']??now,updatedAt:now},{merge:true});
     });
   }
 

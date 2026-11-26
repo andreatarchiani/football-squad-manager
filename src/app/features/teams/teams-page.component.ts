@@ -6,11 +6,12 @@ import { PlayerService, type PlayerRecord } from '../players/player.service';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { clearFieldProblems, showFieldProblems, type FieldProblem } from '../../core/form-feedback';
 import { LiveMatchComponent } from './live-match.component';
+import { AddressFieldComponent } from '../../shared/address-field.component';
 
 @Component({
   selector: 'fsm-teams-page',
   standalone: true,
-  imports: [FormsModule, LiveMatchComponent],
+  imports: [FormsModule, LiveMatchComponent, AddressFieldComponent],
   templateUrl: './teams-page.component.html',
   styleUrl: './teams-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

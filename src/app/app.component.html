@@ -90,14 +90,22 @@
         <span class="nfm-logo-text"><strong>Football</strong><small>Squad Manager</small></span>
       </button>
       <span class="nfm-header-slash" aria-hidden="true"></span>
-      <div class="nfm-title">
+      @for (page of [activePage()]; track page) {
+      <div class="nfm-title" [attr.data-nav]="navDirection()">
         <span class="nfm-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path [attr.d]="icons[viewMeta().icon]"/></svg></span>
         <div class="nfm-title-copy">
           <h1>{{ viewMeta().title }}@if (viewMeta().accent) { <span class="nfm-title-accent">{{ viewMeta().accent }}</span> }</h1>
           @if (viewMeta().subtitle) { <p>{{ viewMeta().subtitle }}</p> }
         </div>
       </div>
+      }
       <div class="nfm-header-actions">
+        @if (section() === 'home') {
+          <div class="nfm-profile-chip" [title]="'Accesso con ' + profile().method">
+            <span class="nfm-avatar" aria-hidden="true">{{ profile().initials }}</span>
+            <span class="nfm-profile-text"><small>Connesso come{{ profile().role ? ' · ' + profile().role : '' }}</small><strong>{{ profile().name }}</strong>@if (profile().email && profile().email !== profile().name) { <em>{{ profile().email }}</em> }</span>
+          </div>
+        }
         @if (section() === 'match') {
           <button type="button" class="nfm-match-chip" (click)="setView('formation')" title="Prossima partita">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons.calendar"/></svg>
@@ -185,10 +193,16 @@
       }
 
       <div class="nfm-frame" [class.nfm-frame-scene]="activePage() === 'home' || activePage() === 'office' || activePage() === 'training' || activePage() === 'match-hub'">
-        @switch (activePage()) {
+        @for (page of [activePage()]; track page) {
+        <div class="nfm-page" [attr.data-nav]="navDirection()">
+        @switch (page) {
           @case ('home') {
             <section class="nfm-scene nfm-scene-home" aria-label="Home">
               <div class="nfm-scene-image" role="img" aria-label="Scrivania dell'allenatore davanti allo stadio illuminato"></div>
+              <div class="nfm-profile-strip">
+                <span class="nfm-avatar" aria-hidden="true">{{ profile().initials }}</span>
+                <span class="nfm-profile-text"><small>Connesso come{{ profile().role ? ' · ' + profile().role : '' }}</small><strong>{{ profile().name }}</strong><em>{{ profile().email }} · {{ profile().method }}</em></span>
+              </div>
               <nav class="nfm-scene-menu nfm-scene-menu-home" aria-label="Aree principali">
                 @for (tile of homeTiles; track tile.label) {
                   <button type="button" class="nfm-home-tile" [attr.data-tone]="tile.tone" [class.is-soon]="tile.soon" [attr.aria-disabled]="tile.soon ? 'true' : null" (click)="openItem(tile)">
@@ -225,9 +239,37 @@
             @defer { <fsm-calendar-page /> } @loading (minimum 200ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
         }
+        </div>
+        }
       </div>
     </main>
 
+    @if (bugReportOpen()) {
+      <div class="nfm-bug-backdrop" role="presentation" (click)="closeBugReport()">
+        <section class="nfm-bug-dialog" role="dialog" aria-modal="true" aria-labelledby="bug-report-title" (click)="$event.stopPropagation()" (keydown.escape)="closeBugReport()">
+          <header class="nfm-bug-head">
+            <span class="nfm-bug-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 9h8M9 5l-1.5-2M15 5l1.5-2M5 10H3M21 10h-2M5 15H3M21 15h-2" /><rect x="6" y="5" width="12" height="15" rx="5" /><path d="M9 13h6M12 10v7" /></svg></span>
+            <div><small>ASSISTENZA</small><h2 id="bug-report-title">Segnala un bug</h2></div>
+            <button type="button" class="nfm-bug-close" aria-label="Chiudi" (click)="closeBugReport()">×</button>
+          </header>
+          <p class="nfm-bug-intro">Descrivi cosa non funziona: la segnalazione arriva direttamente al Centro Assistenza.</p>
+          <div class="nfm-bug-page"><svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons[viewMeta().icon]"/></svg><span>Schermata: <strong>{{ viewMeta().title }}{{ viewMeta().accent ? ' ' + viewMeta().accent : '' }}</strong></span></div>
+          <label class="nfm-bug-field">
+            <span>Cosa è successo?</span>
+            <textarea rows="6" maxlength="2000" placeholder="Esempio: durante la partita il pulsante “Cambio” non risponde…" [value]="bugReportText()" (input)="updateBugReportText($event)"></textarea>
+            <small class="nfm-bug-count">{{ bugReportText().length }} / 2000</small>
+          </label>
+          @if (bugReportFileError()) { <p class="nfm-bug-error" role="alert">{{ bugReportFileError() }}</p> }
+          <p class="nfm-bug-note"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Per ora si invia solo testo (niente foto o video): così il servizio resta gratuito.</p>
+          <footer class="nfm-bug-actions">
+            <button type="button" class="nfm-bug-cancel" (click)="closeBugReport()">Annulla</button>
+            <button type="button" class="nfm-bug-send" (click)="sendBugReport()" [disabled]="!bugReportText().trim() || bugReportSending()">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 4l-4 16-4-6zM12 14l8-10"/></svg>{{ bugReportSending() ? 'Invio…' : 'Invia segnalazione' }}
+            </button>
+          </footer>
+        </section>
+      </div>
+    }
     <nav class="nfm-bottom-nav" aria-label="Navigazione principale">
       @for (entry of mainSections; track entry.view) {
         <button type="button" class="nfm-bottom-item" [attr.data-tone]="entry.section" [class.active]="section() === entry.section" [attr.aria-current]="section() === entry.section ? 'page' : null" (click)="setView(entry.view)">
@@ -252,28 +294,6 @@
       </nav>
     </section>
   </ng-template>
-}
-
-@if (bugReportOpen()) {
-  <div class="bug-report-backdrop" role="presentation" (click)="closeBugReport()">
-    <section class="bug-report-dialog" role="dialog" aria-modal="true" aria-labelledby="bug-report-title" (click)="$event.stopPropagation()">
-      <header class="bug-report-header">
-        <div>
-          <span class="eyebrow">ASSISTENZA</span>
-          <h2 id="bug-report-title">Segnala un bug</h2>
-          <p>Descrivi brevemente cosa non funziona. La segnalazione arriverà direttamente al Centro Assistenza.</p>
-        </div>
-        <button type="button" class="bug-report-close" aria-label="Chiudi" (click)="closeBugReport()">×</button>
-      </header>
-      <textarea class="bug-report-textarea" rows="6" maxlength="2000" placeholder="Esempio: durante la partita il pulsante non risponde..." [value]="bugReportText()" (input)="updateBugReportText($event)"></textarea>
-      <p class="bug-report-note">Per mantenere il servizio gratuito, le segnalazioni contengono per ora solo testo, senza immagini o video.</p>
-      @if (bugReportFileError()) { <p class="bug-report-file-error" role="alert">{{ bugReportFileError() }}</p> }
-      <div class="bug-report-actions">
-        <button type="button" (click)="sendBugReport()" [disabled]="!bugReportText().trim() || bugReportSending()">{{ bugReportSending() ? 'Invio…' : 'Invia' }}</button>
-      </div>
-      <p class="bug-report-note">Il messaggio verrà salvato nel Centro Assistenza e sarà visibile all'account di supporto, senza email o download.</p>
-    </section>
-  </div>
 }
 
 @if (releaseChangelogOpen()) {

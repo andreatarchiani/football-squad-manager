@@ -4,8 +4,25 @@
   "settle": 2500
  },
  {
+  "name": "01b-bug-report",
+  "actions": [
+   {
+    "click": ".bug-report-button"
+   },
+   {
+    "fill": ".nfm-bug-field textarea",
+    "value": "Il pulsante Cambio non risponde durante la partita."
+   }
+  ],
+  "settle": 700,
+  "full": false
+ },
+ {
   "name": "02-office",
   "actions": [
+   {
+    "click": ".nfm-bug-close"
+   },
    {
     "click": ".nfm-home-tile:has-text('Ufficio')"
    }
@@ -41,6 +58,31 @@
   "full": false
  },
  {
+  "name": "04c-player-guardian",
+  "actions": [
+   {
+    "click": ".guardian-toggles label:has-text('Madre')"
+   },
+   {
+    "fill": "input[name=firstName]",
+    "value": "Luca"
+   },
+   {
+    "fill": "input[name=lastName]",
+    "value": "Neri"
+   },
+   {
+    "fill": "input[name=shirtNumber]",
+    "value": "23"
+   },
+   {
+    "click": "button[type=submit]:has-text('Inserisci giocatore')"
+   }
+  ],
+  "settle": 1400,
+  "full": false
+ },
+ {
   "name": "05-teams",
   "actions": [
    {
@@ -69,6 +111,20 @@
    }
   ],
   "settle": 1200,
+  "full": false
+ },
+ {
+  "name": "06c-team-address",
+  "actions": [
+   {
+    "fill": "input[name=facilityAddress]",
+    "value": "Via Roma Arezzo"
+   },
+   {
+    "wait": 2600
+   }
+  ],
+  "settle": 400,
   "full": false
  },
  {

@@ -1062,3 +1062,99 @@
   #nfm :is(.captain-armband-mark, .vice-armband-mark, .match-leadership-mark) { height: 14px; min-width: 14px; font-size: 9px; }
 }
 #nfm .nfm-defer-loading { padding: 40px 16px; color: var(--soft); text-align: center; }
+
+/* Genitori / Tutori in the player form. */
+#nfm .fsm-form-dialog .guardian-toggles { margin-top: 4px; }
+#nfm .fsm-form-dialog .form-grid > .guardian-title { grid-column: 1 / -1; padding: 14px 0 2px; }
+#nfm .fsm-form-dialog .form-grid > .guardian-title span {
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px;
+  border: 1.5px solid var(--panel-line); border-radius: 10px;
+  color: #fff; background: rgba(var(--c-rgb), .22); font-size: 16px; font-weight: 700;
+}
+#nfm .fsm-form-dialog .form-grid > .guardian-title span::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--c-hi); }
+
+/* ===================================================================
+   SEGNALA UN BUG — dialog in the colours of the current area.
+   =================================================================== */
+#nfm .nfm-bug-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(var(--c-rgb), .22), transparent 60%), rgba(2, 4, 10, .86);
+  backdrop-filter: blur(8px);
+  animation: nfm-fade-in .18s ease-out;
+}
+#nfm .nfm-bug-dialog {
+  width: min(100%, 560px);
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
+  padding: 16px 20px 18px;
+  border: 2px solid var(--c);
+  border-radius: 22px;
+  color: #fff;
+  background: var(--nfm-dialog-bg);
+  box-shadow: 0 0 0 1px rgba(var(--c-rgb), .3), 0 0 30px rgba(var(--c-rgb), .5), 0 30px 80px rgba(0, 0, 0, .75);
+  font-family: var(--nfm-font);
+  animation: nfm-pop-in .22s cubic-bezier(.2, .9, .3, 1.2);
+}
+#nfm .nfm-bug-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 0 -6px 12px;
+  padding: 8px 10px;
+  border: 1.5px solid var(--panel-line);
+  border-radius: 14px;
+  background: var(--strip), var(--panel-solid);
+}
+#nfm .nfm-bug-icon { display: grid; place-items: center; width: 44px; height: 44px; border: 1.5px solid rgba(255, 255, 255, .7); border-radius: 50%; background: rgba(0, 0, 0, .3); }
+#nfm .nfm-bug-icon svg { width: 24px; height: 24px; fill: none; stroke: #fff; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+#nfm .nfm-bug-head small { color: rgba(255, 255, 255, .85); font-size: 10px; font-weight: 700; letter-spacing: .14em; }
+#nfm .nfm-bug-head h2 { margin: 1px 0 0; color: #fff; font-size: 23px; font-weight: 700; }
+#nfm .nfm-bug-close { display: grid; place-items: center; width: 40px; height: 40px; border: 1.5px solid rgba(255, 255, 255, .7); border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .35); font-size: 24px; line-height: 1; cursor: pointer; }
+#nfm .nfm-bug-close:hover { background: rgba(255, 255, 255, .15); }
+#nfm .nfm-bug-intro { margin: 0 0 12px; color: var(--soft); font-size: 14px; line-height: 1.45; }
+#nfm .nfm-bug-page { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 8px 12px; border: 1px solid rgba(var(--c-rgb), .45); border-radius: 12px; color: var(--soft); background: rgba(0, 0, 0, .28); font-size: 13px; }
+#nfm .nfm-bug-page svg { width: 22px; height: 22px; fill: none; stroke: var(--c-hi); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+#nfm .nfm-bug-page strong { color: #fff; }
+#nfm .nfm-bug-field { display: grid; gap: 6px; color: #fff; font-size: 15px; font-weight: 600; }
+#nfm .nfm-bug-field textarea {
+  width: 100%;
+  min-height: 150px;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 12px 14px;
+  border: 1.5px solid #d9dde3;
+  border-radius: 12px;
+  color: var(--field-text);
+  background: var(--field);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+#nfm .nfm-bug-field textarea::placeholder { color: #8a929c; }
+#nfm .nfm-bug-field textarea:focus { outline: none; border-color: var(--c); box-shadow: 0 0 0 3px rgba(var(--c-rgb), .45); }
+#nfm .nfm-bug-count { justify-self: end; color: var(--muted); font-size: 12px; font-weight: 500; }
+#nfm .nfm-bug-error { margin: 8px 0 0; padding: 8px 12px; border: 1.5px solid #ff4458; border-radius: 10px; color: #ffd0d5; background: rgba(140, 20, 35, .35); font-size: 13px; }
+#nfm .nfm-bug-note { display: flex; align-items: flex-start; gap: 8px; margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+#nfm .nfm-bug-note svg { flex: 0 0 auto; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+#nfm .nfm-bug-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(var(--c-rgb), .35); }
+#nfm .nfm-bug-cancel { min-width: 120px; min-height: 48px; border: 1.5px solid var(--panel-line); border-radius: 14px; color: #fff; background: rgba(0, 0, 0, .3); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+#nfm .nfm-bug-send { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 220px; min-height: 48px; border: 1.5px solid #fff3a6; border-radius: 14px; color: #1a1300; background: linear-gradient(180deg, #ffe74d, var(--nfm-yellow-2)); box-shadow: 0 0 16px rgba(255, 205, 0, .45); font: inherit; font-size: 16px; font-weight: 800; cursor: pointer; }
+#nfm .nfm-bug-send svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linejoin: round; }
+#nfm .nfm-bug-send:disabled { cursor: not-allowed; opacity: .5; box-shadow: none; }
+@keyframes nfm-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nfm-pop-in { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+@media (max-width: 900px) {
+  #nfm .nfm-bug-backdrop { align-items: end; padding: 10px 10px calc(10px + env(safe-area-inset-bottom)); }
+  #nfm .nfm-bug-dialog { padding: 12px 14px 14px; }
+  #nfm .nfm-bug-head h2 { font-size: 20px; }
+  #nfm .nfm-bug-actions { display: grid; grid-template-columns: 1fr 2fr; }
+  #nfm .nfm-bug-cancel, #nfm .nfm-bug-send { min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) { #nfm :is(.nfm-bug-backdrop, .nfm-bug-dialog) { animation: none; } }

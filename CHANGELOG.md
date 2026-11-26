@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-26 — Animazioni, Home viola, tutori e caricamento più veloce
+
+- **Animazioni:** passando da una schermata all’altra la pagina scorre da destra; tornando indietro (anche con il gesto “indietro” del telefono) scorre da sinistra.
+- **Home:** nuovo colore viola, diverso da Ufficio, Allenamento e Partita, e riquadro “Connesso come” con nome, email, modalità di accesso e ruolo del profilo.
+- **Segnala un bug:** finestra ridisegnata nei colori dell’area in cui ti trovi, con la schermata da cui segnali, il conteggio dei caratteri e i pulsanti Annulla / Invia segnalazione.
+- **Indirizzi automatici:** in Anagrafe Squadra, scrivendo l’indirizzo dell’impianto o della sede compaiono i suggerimenti come su Maps (dati OpenStreetMap).
+- **Tutori:** nel giocatore puoi indicare Madre / Tutrice e Padre / Tutore; per ciascuno vanno compilati nome, cognome, data e luogo di nascita, residenza, CAP, documento d’identità, mail e telefono.
+- **Velocità:** squadre e giocatori non vengono più scaricati da capo a ogni cambio di schermata, giocatori e rose si caricano in parallelo e l’avvio dell’app è più rapido.
+
 ## 2026-11-26 — Anagrafe Dirigente, Calendario e moduli più chiari
 
 - **Nuova funzionalità — Anagrafe Dirigente:** in Ufficio puoi inserire, modificare ed eliminare i dirigenti con nome, cognome, data e luogo di nascita, residenza, CAP, documento d’identità, categoria di appartenenza, matricola e tessera federale.

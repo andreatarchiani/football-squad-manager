@@ -12,6 +12,7 @@ import {
   type Firestore
 } from 'firebase/firestore';
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
+import { cached, invalidateOnWrite } from '../../core/data-cache';
 
 export interface TeamRecord {
   id: string;
@@ -88,7 +89,17 @@ export interface TeamInput {
 export class TeamService {
   private readonly firestore = inject(FIRESTORE_DB, { optional: true });
 
+  constructor() {
+    invalidateOnWrite(this, ['saveTacticalLayout', 'saveCaptaincy', 'clearLiveMatch', 'create', 'update', 'deleteTeam', 'setArchived']);
+  }
+
+  /** Teams with their active season (cached for a short time, see data-cache). */
   async list(workspaceId: string): Promise<TeamRecord[]> {
+    const teams = await cached(`teams:${workspaceId}`, () => this.fetchList(workspaceId));
+    return teams.map(team => ({ ...team }));
+  }
+
+  private async fetchList(workspaceId: string): Promise<TeamRecord[]> {
     const db = this.requireFirestore();
     const teamsSnapshot = await getDocs(collection(db, 'workspaces', workspaceId, 'teams'));
     const teams = await Promise.all(teamsSnapshot.docs.map(async (teamSnapshot) => {

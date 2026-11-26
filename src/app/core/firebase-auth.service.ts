@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { FIREBASE_AUTH, FIRESTORE_DB } from './firebase.tokens';
+import { invalidateData } from './data-cache';
 import type { Auth, User } from 'firebase/auth';
 import {
   GoogleAuthProvider,
@@ -29,6 +30,8 @@ export class FirebaseAuthService {
   readonly loading = signal(this.configured);
   readonly workspaceId = signal<string | null>(null);
   readonly workspaceError = signal<string | null>(null);
+  /** Role chosen in the profile (Allenatore, Società, ...), shown on the Home. */
+  readonly accountRole = signal('');
 
   constructor() {
     if (!this.auth || !this.firestore) {
@@ -46,9 +49,15 @@ export class FirebaseAuthService {
         return;
       }
 
+      // Start immediately with the workspace remembered on this device; the
+      // profile is still read below and wins if it points somewhere else.
+      const remembered = this.rememberedWorkspace(user.uid);
+      if (remembered) { this.workspaceId.set(remembered); this.loading.set(false); }
+
       try {
         const workspaceId = await this.ensurePersonalWorkspace(user);
-        this.workspaceId.set(workspaceId);
+        if (this.workspaceId() !== workspaceId) this.workspaceId.set(workspaceId);
+        try { localStorage.setItem(`fsm-ws-${user.uid}`, workspaceId); } catch { /* storage unavailable */ }
       } catch (error) {
         console.error('Unable to initialize the personal workspace.', error);
         this.workspaceError.set(
@@ -93,6 +102,7 @@ export class FirebaseAuthService {
 
   async signOut(): Promise<void> {
     await signOut(this.requireAuth());
+    invalidateData();
     this.workspaceId.set(null);
   }
 
@@ -103,6 +113,10 @@ export class FirebaseAuthService {
     return this.auth;
   }
 
+  private rememberedWorkspace(uid: string): string | null {
+    try { return localStorage.getItem(`fsm-ws-${uid}`); } catch { return null; }
+  }
+
   private async ensurePersonalWorkspace(user: User): Promise<string> {
     if (!this.firestore) {
       throw new Error('Firestore non è disponibile.');
@@ -111,6 +125,7 @@ export class FirebaseAuthService {
     const profileRef = doc(this.firestore, 'userProfiles', user.uid);
     const profileSnapshot = await getDoc(profileRef);
     if (profileSnapshot.exists()) {
+      this.accountRole.set(String(profileSnapshot.data()['accountRole'] ?? ''));
       const workspaceId = profileSnapshot.data()['defaultWorkspaceId'];
       if (typeof workspaceId === 'string' && workspaceId.length > 0) {
         return workspaceId;
