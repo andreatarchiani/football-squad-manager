@@ -54,7 +54,7 @@
 .cal-table { display: grid; gap: 6px; }
 .cal-row {
   display: grid;
-  grid-template-columns: 42px 146px 96px minmax(0, 1fr) 38px;
+  grid-template-columns: 42px 146px 112px minmax(0, 1fr) 38px;
   grid-template-areas: 'num date time match actions' 'venue venue venue venue venue';
   align-items: center;
   gap: 6px 8px;
@@ -81,7 +81,8 @@
 .cal-side-name { overflow: hidden; font-size: 14.5px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
 .cal-match > :first-child { text-align: right; }
 .cal-side-name.is-mine { color: var(--c-hi); }
-.cal-opponent { width: 100%; box-sizing: border-box; min-width: 0; min-height: 36px; padding: 0 10px; border: 1.5px solid rgba(255, 255, 255, .25); border-radius: 9px; color: #0d1a2a; background: #f2f4f7; font: inherit; font-size: 14px; text-align: left; }
+.cal-opponent { width: 100%; box-sizing: border-box; min-width: 0; min-height: 36px; padding: 0 10px; border: 1.5px solid rgba(255, 255, 255, .25) !important; border-radius: 9px; color: #0d1a2a !important; background: #f2f4f7 !important; font: inherit; font-size: 14px; text-align: left; }
+.cal-opponent::placeholder { color: #8a929c; }
 .cal-swap { display: grid; place-items: center; width: 38px; height: 30px; padding: 0; border: 1.5px solid var(--c-hi); border-radius: 999px; color: #fff; background: linear-gradient(180deg, var(--c), var(--c-deep, #8a3c00)); font-size: 17px; font-weight: 800; line-height: 1; cursor: pointer; }
 .cal-swap:hover { filter: brightness(1.12); }
 .cal-vs { display: grid; place-items: center; width: 38px; height: 26px; border: 1.5px solid var(--c-hi); border-radius: 999px; background: linear-gradient(180deg, var(--c), var(--c-deep, #8a3c00)); font-size: 11px; font-style: italic; font-weight: 800; }

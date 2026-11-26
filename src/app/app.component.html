@@ -297,6 +297,12 @@
   <ng-template #sceneTpl let-tone let-label="label">
     <section class="nfm-scene" [attr.data-scene]="tone" [attr.aria-label]="viewMeta().title">
       <div class="nfm-scene-image" role="img" [attr.aria-label]="label"></div>
+      @if (tone === 'match' && nextMatch(); as next) {
+        <button type="button" class="nfm-next-strip" (click)="setView('formation')">
+          <small>Prossima partita · Giornata {{ next.round.number }} · {{ matchDay(next.round.date) }}{{ next.round.time ? ' · ' + next.round.time : '' }}</small>
+          <strong>{{ next.round.home ? next.team : next.round.opponent }} <b>VS</b> {{ next.round.home ? next.round.opponent : next.team }}</strong>
+        </button>
+      }
       <nav class="nfm-scene-menu" aria-label="Voci della sezione">
         @for (item of sectionMenu(); track item.label) {
           <button type="button" class="nfm-scene-item" [class.is-soon]="item.soon" [attr.aria-disabled]="item.soon ? 'true' : null" (click)="openItem(item)">
