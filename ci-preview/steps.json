@@ -1,0 +1,9 @@
+[
+  { "name": "01-home", "settle": 2500 },
+  { "name": "02-teams", "actions": [ { "click": "button:has-text('Squadre')" }, { "wait": 1800 } ] },
+  { "name": "03-team-form", "actions": [ { "click": "button:has-text('Nuova squadra')" }, { "wait": 600 } ] },
+  { "name": "04-roster", "actions": [ { "click": "button:has-text('Annulla')" }, { "click": "button:has-text('Apri rosa')" }, { "wait": 2000 } ] },
+  { "name": "05-players", "actions": [ { "click": "button:has-text('Giocatori')" }, { "wait": 1800 } ] },
+  { "name": "06-player-form", "actions": [ { "click": "button:has-text('Nuovo giocatore')" }, { "wait": 600 } ] },
+  { "name": "07-live", "actions": [ { "click": "button:has-text('Annulla')" }, { "click": "button:has-text('Home')" }, { "wait": 2500 }, { "click": "button:has-text('Inizia partita')" }, { "wait": 3000 } ] }
+]

@@ -1,0 +1,45 @@
+name: UI preview screenshots
+on:
+  push:
+    branches: ['redesign/**']
+permissions:
+  contents: write
+concurrency:
+  group: ui-preview-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund --progress=false
+      - name: Production build (budgets + AOT type check)
+        run: npm run build 2>&1 | tee build.log
+      - name: Preview build against emulators
+        run: |
+          cp ci-preview/app.config.preview.ts src/app/app.config.ts
+          npx ng build --configuration development
+      - name: Install Playwright
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: Capture screenshots
+        run: npx firebase-tools emulators:exec --only auth,firestore --project demo-fsm "node ci-preview/shots.mjs"
+      - name: Publish screenshots to ui-shots branch
+        if: always()
+        run: |
+          mkdir -p ui-shots && cp build.log ui-shots/ 2>/dev/null || true
+          cd ui-shots
+          git init -q -b ui-shots
+          git config user.name ci && git config user.email ci@example.invalid
+          git add -A && git commit -qm "shots ${GITHUB_SHA}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" ui-shots
