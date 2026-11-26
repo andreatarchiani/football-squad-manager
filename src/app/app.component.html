@@ -107,17 +107,31 @@
           </div>
         }
         @if (section() === 'match') {
-          <button type="button" class="nfm-match-chip" (click)="setView('formation')" title="Prossima partita">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons.calendar"/></svg>
-            <span><small>Prossima partita</small><strong>{{ nextTeam().category || 'Stagione in corso' }}</strong></span>
-          </button>
-          <button type="button" class="nfm-match-chip nfm-versus-chip" (click)="setView('formation')" title="Prossima partita">
-            <svg class="nfm-crest nfm-crest-home" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5 20 5.5v6c0 5-3.3 8.4-8 10-4.7-1.6-8-5-8-10v-6z"/><path class="nfm-crest-ball" d="M12 8.2l2.4 1.7-.9 2.8h-3l-.9-2.8z"/></svg>
-            <span class="nfm-versus-team">{{ nextTeam().name || 'La mia squadra' }}</span>
-            <b class="nfm-versus-badge">VS</b>
-            <span class="nfm-versus-team">{{ nextOpponent() || 'Avversario' }}</span>
-            <svg class="nfm-crest nfm-crest-away" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5 20 5.5v6c0 5-3.3 8.4-8 10-4.7-1.6-8-5-8-10v-6z"/><path class="nfm-crest-ball" d="M9 7v11M12 7v13M15 7v11"/></svg>
-          </button>
+          @if (nextMatch(); as next) {
+            <button type="button" class="nfm-match-chip" (click)="setView('formation')" title="Prossima partita dal calendario">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons.calendar"/></svg>
+              <span><small>Giornata {{ next.round.number }} · {{ matchDay(next.round.date) }}{{ next.round.time ? ' · ' + next.round.time : '' }}</small><strong>{{ next.category || 'Campionato' }}</strong></span>
+            </button>
+            <button type="button" class="nfm-match-chip nfm-versus-chip" (click)="setView('formation')" title="Prossima partita dal calendario">
+              <svg class="nfm-crest" [class.nfm-crest-home]="next.round.home" [class.nfm-crest-away]="!next.round.home" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5 20 5.5v6c0 5-3.3 8.4-8 10-4.7-1.6-8-5-8-10v-6z"/><path class="nfm-crest-ball" d="M12 8.2l2.4 1.7-.9 2.8h-3l-.9-2.8z"/></svg>
+              <span class="nfm-versus-team">{{ next.round.home ? next.team : next.round.opponent }}</span>
+              <b class="nfm-versus-badge">VS</b>
+              <span class="nfm-versus-team">{{ next.round.home ? next.round.opponent : next.team }}</span>
+              <svg class="nfm-crest" [class.nfm-crest-home]="!next.round.home" [class.nfm-crest-away]="next.round.home" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5 20 5.5v6c0 5-3.3 8.4-8 10-4.7-1.6-8-5-8-10v-6z"/><path class="nfm-crest-ball" d="M9 7v11M12 7v13M15 7v11"/></svg>
+            </button>
+          } @else {
+            <button type="button" class="nfm-match-chip" (click)="setView('formation')" title="Prossima partita">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons.calendar"/></svg>
+              <span><small>Prossima partita</small><strong>{{ nextTeam().category || 'Stagione in corso' }}</strong></span>
+            </button>
+            <button type="button" class="nfm-match-chip nfm-versus-chip" (click)="setView('formation')" title="Prossima partita">
+              <svg class="nfm-crest nfm-crest-home" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5 20 5.5v6c0 5-3.3 8.4-8 10-4.7-1.6-8-5-8-10v-6z"/><path class="nfm-crest-ball" d="M12 8.2l2.4 1.7-.9 2.8h-3l-.9-2.8z"/></svg>
+              <span class="nfm-versus-team">{{ nextTeam().name || 'La mia squadra' }}</span>
+              <b class="nfm-versus-badge">VS</b>
+              <span class="nfm-versus-team">{{ nextOpponent() || 'Avversario' }}</span>
+              <svg class="nfm-crest nfm-crest-away" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5 20 5.5v6c0 5-3.3 8.4-8 10-4.7-1.6-8-5-8-10v-6z"/><path class="nfm-crest-ball" d="M9 7v11M12 7v13M15 7v11"/></svg>
+            </button>
+          }
         }
         <button type="button" aria-label="Segnala un bug" title="Segnala un bug" class="nfm-icon-button bug-report-button" (click)="openBugReport()">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 9h8M9 5l-1.5-2M15 5l1.5-2M5 10H3M21 10h-2M5 15H3M21 15h-2" /><rect x="6" y="5" width="12" height="15" rx="5" /><path d="M9 13h6M12 10v7" /></svg>

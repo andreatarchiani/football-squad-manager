@@ -379,31 +379,19 @@
     "wait": 500
    },
    {
-    "click": ".nfm-home-tile:has-text('Partita')"
+    "click": ".nfm-home-tile:has-text('Ufficio')"
    },
    {
     "wait": 600
    },
    {
-    "click": ".nfm-menu-item:has-text('Calendario'), .nfm-scene-item:has-text('Calendario')"
+    "click": ".nfm-menu-item:has-text('Creazione Stagione'), .nfm-scene-item:has-text('Creazione Stagione')"
    }
   ],
   "settle": 2500
  },
  {
-  "name": "25-calendar-validation",
-  "actions": [
-   {
-    "click": "button.cal-add"
-   },
-   {
-    "click": "button.cal-save"
-   }
-  ],
-  "settle": 1200
- },
- {
-  "name": "26-calendar-andata",
+  "name": "25-calendar-andata",
   "actions": [
    {
     "click": "button.cal-add"
@@ -415,63 +403,100 @@
     "click": "button.cal-add"
    },
    {
-    "fill": ".cal-row:nth-child(2) .cal-opponent input",
+    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) .cal-opponent",
     "value": "Fulgor Castelfranco"
    },
    {
-    "fill": ".cal-row:nth-child(2) input[type=date]",
-    "value": "2026-09-19"
+    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=date]",
+    "value": "2027-01-10"
    },
    {
-    "fill": ".cal-row:nth-child(2) input[type=time]",
+    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=time]",
     "value": "15:30"
    },
    {
-    "fill": ".cal-row:nth-child(3) .cal-opponent input",
+    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-opponent",
     "value": "Atletico Levane Leona"
    },
    {
-    "fill": ".cal-row:nth-child(3) input[type=date]",
-    "value": "2026-09-26"
+    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) input[type=date]",
+    "value": "2027-01-17"
    },
    {
-    "wait": 300
+    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-swap"
    },
    {
-    "click": ".cal-row:nth-child(5) button.cal-delete"
+    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-venue input",
+    "value": "Via Roma Levane"
    },
    {
-    "click": ".cal-row:nth-child(4) button.cal-delete"
+    "wait": 2500
    },
    {
-    "click": ".cal-row:nth-child(3) button.cal-place"
+    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(4) .cal-delete"
+   },
+   {
+    "wait": 1500
    }
   ],
   "settle": 800
  },
  {
-  "name": "27-calendar-ritorno",
+  "name": "26-calendar-conflict",
   "actions": [
    {
-    "click": ".cal-tabs button:has-text('Ritorno')"
+    "fill": ".cal-main > section:nth-child(2) .cal-row:nth-child(2) input[type=date]",
+    "value": "2027-01-17"
    },
    {
-    "fill": ".cal-row:nth-child(2) input[type=date]",
-    "value": "2027-01-23"
+    "wait": 1800
    }
   ],
-  "settle": 800
+  "settle": 600
  },
  {
-  "name": "28-calendar-saved",
+  "name": "27-calendar-fixed",
   "actions": [
    {
-    "click": "button.cal-save"
+    "fill": ".cal-main > section:nth-child(2) .cal-row:nth-child(2) input[type=date]",
+    "value": "2027-02-21"
+   },
+   {
+    "wait": 2000
+   }
+  ],
+  "settle": 600
+ },
+ {
+  "name": "28-match-header",
+  "actions": [
+   {
+    "click": ".nfm-logo"
+   },
+   {
+    "wait": 500
+   },
+   {
+    "click": ".nfm-home-tile:has-text('Partita')"
    },
    {
     "wait": 2500
    }
   ],
-  "settle": 800
+  "settle": 800,
+  "full": false
+ },
+ {
+  "name": "29-formation-next",
+  "actions": [
+   {
+    "click": ".nfm-menu-item:has-text('Formazione'), .nfm-scene-item:has-text('Formazione')"
+   },
+   {
+    "wait": 2500
+   }
+  ],
+  "settle": 800,
+  "full": false
  }
 ]

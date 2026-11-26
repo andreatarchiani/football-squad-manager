@@ -1,18 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { NotificationService } from '../../core/notifications/notification.service';
-import { clearFieldProblems, showFieldProblems, type FieldProblem } from '../../core/form-feedback';
+import { AddressFieldComponent } from '../../shared/address-field.component';
 import { TeamService, type TeamRecord } from '../teams/team.service';
-import { CalendarService, buildReturnLeg, emptyCalendar, type CalendarData, type CalendarRound } from './calendar.service';
+import { CalendarService, buildReturnLeg, duplicateDates, emptyCalendar, findNextMatch, type CalendarData, type CalendarRound } from './calendar.service';
+
+type Leg = 'A' | 'R';
 
 @Component({
   selector: 'fsm-calendar-page',
   standalone: true,
+  imports: [AddressFieldComponent, NgTemplateOutlet],
   templateUrl: './calendar-page.component.html',
   styleUrl: './calendar-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CalendarPageComponent {
+export class CalendarPageComponent implements OnDestroy {
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamService = inject(TeamService);
   private readonly service = inject(CalendarService);
@@ -22,15 +26,11 @@ export class CalendarPageComponent {
   protected readonly teamId = signal('');
   protected readonly teamMenuOpen = signal(false);
   protected readonly calendar = signal<CalendarData>(emptyCalendar());
-  protected readonly leg = signal<'A' | 'R'>('A');
-  protected readonly selected = signal<{ leg: 'A' | 'R'; index: number } | null>(null);
   protected readonly loading = signal(true);
-  protected readonly saving = signal(false);
-  protected readonly dirty = signal(false);
+  protected readonly saveState = signal<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
   protected readonly error = signal('');
 
   protected readonly team = computed(() => this.teams().find(team => team.id === this.teamId()));
-  protected readonly rows = computed(() => this.leg() === 'A' ? this.calendar().andata : this.calendar().ritorno);
   /** Teams of the group: my team plus every opponent written in the first leg. */
   protected readonly groupTeams = computed(() => {
     const names = new Map<string, string>();
@@ -42,55 +42,73 @@ export class CalendarPageComponent {
     }
     return [...names.values()];
   });
-  protected readonly selectedRound = computed<CalendarRound | null>(() => {
-    const pick = this.selected();
-    if (!pick) return null;
-    const list = pick.leg === 'A' ? this.calendar().andata : this.calendar().ritorno;
-    return list[pick.index] ?? null;
+  /** Next match: the closest date from today (no need to choose it). */
+  protected readonly nextMatch = computed(() => findNextMatch(this.calendar()));
+  protected readonly conflicts = computed(() => duplicateDates(this.calendar()));
+  protected readonly conflictRounds = computed(() => {
+    const dates = this.conflicts();
+    return [...this.calendar().andata, ...this.calendar().ritorno].filter(round => round.date && dates.has(round.date)).map(round => round.number);
   });
   protected readonly missingReturnDates = computed(() => this.calendar().ritorno.filter(round => !round.date).length);
 
+  private saveTimer: ReturnType<typeof setTimeout> | null = null;
+  private saveChain: Promise<void> = Promise.resolve();
+
   constructor() { effect(() => { if (this.auth.workspaceId()) void this.loadTeams(); }); }
+
+  ngOnDestroy(): void { if (this.saveTimer) { clearTimeout(this.saveTimer); this.saveTimer = null; void this.saveNow(); } }
 
   /* ------------------------------------------------------------ team */
   protected async selectTeam(id: string): Promise<void> {
     this.teamMenuOpen.set(false);
     if (id === this.teamId()) return;
-    if (this.dirty() && !(await this.notifications.confirm({ title: 'Cambiare squadra?', message: 'Le modifiche al calendario non salvate andranno perse.', confirmText: 'Cambia squadra', cancelText: 'Annulla' }))) return;
+    await this.flush();
     this.teamId.set(id);
     await this.loadCalendar();
   }
 
   /* ------------------------------------------------------- andata edits */
   protected addRound(): void {
-    this.updateAndata(andata => [...andata, { number: andata.length + 1, leg: 'A', opponent: '', home: andata.length % 2 === 0, date: '', time: andata.at(-1)?.time ?? '' }]);
-    this.leg.set('A');
-    this.selected.set({ leg: 'A', index: this.calendar().andata.length - 1 });
+    this.updateAndata(andata => [...andata, { number: andata.length + 1, leg: 'A', opponent: '', home: andata.length % 2 === 0, date: '', time: andata.at(-1)?.time ?? '', venue: '' }]);
   }
 
   protected removeRound(index: number): void {
     this.updateAndata(andata => andata.filter((_, i) => i !== index).map((round, i) => ({ ...round, number: i + 1 })));
-    this.selected.set(null);
   }
 
-  protected setOpponent(index: number, value: string): void { this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, opponent: value } : round)); }
-  protected setHome(index: number, home: boolean): void { this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, home } : round)); }
-  protected setGroupName(value: string): void { this.calendar.update(data => ({ ...data, groupName: value })); this.dirty.set(true); }
-
-  /** Dates and times can be edited in both legs. */
-  protected setWhen(leg: 'A' | 'R', index: number, key: 'date' | 'time', value: string): void {
-    const edit = (round: CalendarRound): CalendarRound => key === 'date' ? { ...round, date: value } : { ...round, time: value };
-    if (leg === 'A') { this.updateAndata(andata => andata.map((round, i) => i === index ? edit(round) : round)); return; }
-    this.calendar.update(data => ({ ...data, ritorno: data.ritorno.map((round, i) => i === index ? edit(round) : round) }));
-    this.dirty.set(true);
+  protected setOpponent(index: number, value: string): void {
+    this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, opponent: value } : round));
   }
 
-  protected select(index: number): void { this.selected.set({ leg: this.leg(), index }); }
+  /** ⇄ swaps the two teams: the team on the left plays at home. */
+  protected swap(index: number): void {
+    this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, home: !round.home, venue: '' } : round));
+  }
+
+  protected setGroupName(value: string): void { this.calendar.update(data => ({ ...data, groupName: value })); this.scheduleSave(); }
+
+  protected setWhen(leg: Leg, index: number, key: 'date' | 'time', value: string): void {
+    this.editRound(leg, index, round => key === 'date' ? { ...round, date: value } : { ...round, time: value });
+    if (key === 'date' && value && this.conflicts().has(value)) {
+      const mine = this.rows(leg)[index]?.number;
+      const others = this.conflictRounds().filter(number => number !== mine);
+      this.notifications.notify({ title: 'Due partite nello stesso giorno', message: `Il ${this.shortDate(value)} c’è già la giornata ${others.join(', ')}. La squadra non può giocare due volte lo stesso giorno: controlla le date.`, type: 'warning', durationMs: 8000 });
+    }
+  }
+
+  protected setVenue(leg: Leg, index: number, value: string): void { this.editRound(leg, index, round => ({ ...round, venue: value })); }
+
+  protected rows(leg: Leg): CalendarRound[] { return leg === 'A' ? this.calendar().andata : this.calendar().ritorno; }
 
   /* ------------------------------------------------------------ helpers */
   protected homeName(round: CalendarRound): string { return round.home ? (this.team()?.name ?? 'La mia squadra') : (round.opponent || 'Avversario'); }
   protected awayName(round: CalendarRound): string { return round.home ? (round.opponent || 'Avversario') : (this.team()?.name ?? 'La mia squadra'); }
   protected isMine(name: string): boolean { return name === this.team()?.name; }
+  protected homeVenue(): string {
+    const team = this.team();
+    return [team?.facilityName, team?.facilityAddress].filter(Boolean).join(' · ') || 'Indirizzo della tua squadra (inseriscilo in Anagrafe Squadra)';
+  }
+  protected venueOf(round: CalendarRound): string { return round.home ? this.homeVenue() : (round.venue || 'Campo da indicare'); }
   protected formatDate(value: string): string {
     if (!value) return 'Data da inserire';
     const date = new Date(`${value}T12:00:00`);
@@ -99,48 +117,14 @@ export class CalendarPageComponent {
   protected shortDate(value: string): string {
     if (!value) return '—';
     const date = new Date(`${value}T12:00:00`);
-    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: '2-digit' });
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
   }
 
-  /** Sends the opponent of a round to "Formazione" as the next match. */
-  protected useAsNextMatch(round: CalendarRound): void {
-    try { localStorage.setItem('fsm-next-opponent', round.opponent.trim()); } catch { /* storage unavailable */ }
-    window.dispatchEvent(new CustomEvent('fsm-match-context'));
-    this.notifications.notify({ title: 'Prossima partita impostata', message: `${this.homeName(round)} – ${this.awayName(round)}`, type: 'success' });
-  }
-
-  /* -------------------------------------------------------------- save */
-  protected async save(host?: HTMLElement): Promise<void> {
-    clearFieldProblems(host);
-    const team = this.team();
-    const workspaceId = this.auth.workspaceId();
-    if (!team || !workspaceId) return;
-    const andata = this.calendar().andata;
-    if (!andata.length) {
-      this.notifications.notify({ title: 'Calendario vuoto', message: 'Aggiungi almeno una giornata di andata.', type: 'warning' });
-      return;
-    }
-    const problems: FieldProblem[] = andata
-      .map((round, index) => ({ round, index }))
-      .filter(item => !item.round.opponent.trim())
-      .map(item => ({ field: `opponent-${item.index}`, label: `Giornata ${item.round.number}`, message: 'Compila questo campo' }));
-    if (problems.length) {
-      this.leg.set('A');
-      // Wait for the andata table to be on screen before highlighting.
-      window.setTimeout(() => showFieldProblems(host, problems), 0);
-      this.notifications.notify({ title: 'Manca l’avversario', message: problems.map(problem => problem.label).join(', '), type: 'warning', durationMs: 6000 });
-      return;
-    }
-    this.saving.set(true);
-    try {
-      await this.service.save(workspaceId, team.id, team.name, this.calendar());
-      this.dirty.set(false);
-      const missing = this.missingReturnDates();
-      this.notifications.notify({ title: 'Calendario salvato', message: missing ? `Ritorno creato in automatico: mancano ${missing} date da inserire.` : 'Andata e ritorno sono completi.', type: 'success' });
-    } catch (error) {
-      console.error('Unable to save calendar.', error);
-      this.notifications.notify({ title: 'Calendario non salvato', message: 'Controlla la connessione a internet e riprova.', type: 'error', durationMs: 7000 });
-    } finally { this.saving.set(false); }
+  /* -------------------------------------------------------- auto save */
+  private editRound(leg: Leg, index: number, change: (round: CalendarRound) => CalendarRound): void {
+    if (leg === 'A') { this.updateAndata(andata => andata.map((round, i) => i === index ? change(round) : round)); return; }
+    this.calendar.update(data => ({ ...data, ritorno: data.ritorno.map((round, i) => i === index ? change(round) : round) }));
+    this.scheduleSave();
   }
 
   private updateAndata(change: (andata: CalendarRound[]) => CalendarRound[]): void {
@@ -148,7 +132,38 @@ export class CalendarPageComponent {
       const andata = change(data.andata);
       return { ...data, andata, ritorno: buildReturnLeg(andata, data.ritorno) };
     });
-    this.dirty.set(true);
+    this.scheduleSave();
+  }
+
+  private scheduleSave(): void {
+    this.saveState.set('pending');
+    if (this.saveTimer) clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(() => { this.saveTimer = null; void this.saveNow(); }, 900);
+  }
+
+  private async flush(): Promise<void> {
+    if (this.saveTimer) { clearTimeout(this.saveTimer); this.saveTimer = null; await this.saveNow(); }
+    await this.saveChain;
+  }
+
+  private saveNow(): Promise<void> {
+    const team = this.team();
+    const workspaceId = this.auth.workspaceId();
+    if (!team || !workspaceId) return Promise.resolve();
+    const data = this.calendar();
+    this.saveChain = this.saveChain.then(async () => {
+      this.saveState.set('saving');
+      try {
+        await this.service.save(workspaceId, team.id, team.name, data);
+        if (!this.saveTimer) this.saveState.set('saved');
+        window.dispatchEvent(new CustomEvent('fsm-match-context'));
+      } catch (error) {
+        console.error('Unable to save calendar.', error);
+        this.saveState.set('error');
+        this.notifications.notify({ title: 'Calendario non salvato', message: 'Controlla la connessione: riproverò alla prossima modifica.', type: 'error', durationMs: 7000 });
+      }
+    });
+    return this.saveChain;
   }
 
   private async loadTeams(): Promise<void> {
@@ -158,9 +173,9 @@ export class CalendarPageComponent {
     try {
       const teams = (await this.teamService.list(workspaceId)).filter(team => !team.isArchived);
       this.teams.set(teams);
-      let preferred = '';
-      try { preferred = JSON.parse(localStorage.getItem('fsm-next-team') ?? 'null')?.name ?? ''; } catch { preferred = ''; }
-      this.teamId.set(teams.find(team => team.name === preferred)?.id ?? teams[0]?.id ?? '');
+      let preferred: { id?: string; name?: string } = {};
+      try { preferred = JSON.parse(localStorage.getItem('fsm-next-team') ?? '{}') ?? {}; } catch { preferred = {}; }
+      this.teamId.set(teams.find(team => team.id === preferred.id || team.name === preferred.name)?.id ?? teams[0]?.id ?? '');
       await this.loadCalendar();
     } catch (error) {
       console.error('Unable to load teams for the calendar.', error);
@@ -172,16 +187,13 @@ export class CalendarPageComponent {
   private async loadCalendar(): Promise<void> {
     const workspaceId = this.auth.workspaceId();
     const teamId = this.teamId();
-    this.selected.set(null);
-    this.leg.set('A');
+    this.saveState.set('idle');
     if (!workspaceId || !teamId) { this.calendar.set(emptyCalendar()); this.loading.set(false); return; }
     this.loading.set(true);
     try {
       const data = await this.service.load(workspaceId, teamId);
       this.calendar.set({ ...data, ritorno: buildReturnLeg(data.andata, data.ritorno) });
-      this.dirty.set(false);
       this.error.set('');
-      if (data.andata.length) this.selected.set({ leg: 'A', index: 0 });
     } catch (error) {
       console.error('Unable to load calendar.', error);
       this.error.set('Non è stato possibile caricare il calendario.');

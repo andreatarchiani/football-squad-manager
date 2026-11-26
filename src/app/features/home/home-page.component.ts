@@ -4,6 +4,7 @@ import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
 import { TeamService, type TeamRecord } from '../teams/team.service';
 import { PlayerService, type PlayerRecord } from '../players/player.service';
+import { CalendarService, type CalendarRound } from '../calendar/calendar.service';
 
 @Component({
   selector: 'fsm-home-page',
@@ -16,6 +17,9 @@ export class HomePageComponent {
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamsService = inject(TeamService);
   private readonly playerService = inject(PlayerService);
+  private readonly calendarService = inject(CalendarService);
+  /** Next match from the calendar: fills the opponent automatically. */
+  protected readonly nextMatch = signal<CalendarRound | null>(null);
   private readonly db = inject(FIRESTORE_DB, { optional: true });
   @Output() readonly openTeams = new EventEmitter<{ teamId: string; layoutSlot: 1 | 2 }>();
   @Output() readonly launchMatch = new EventEmitter<{ team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; opponentName: string }>();
@@ -84,7 +88,7 @@ export class HomePageComponent {
     const team = this.selectedTeam;
     try {
       if (typeof localStorage === 'undefined') return;
-      if (team) localStorage.setItem('fsm-next-team', JSON.stringify({ name: team.name, category: team.category ?? '' }));
+      if (team) localStorage.setItem('fsm-next-team', JSON.stringify({ id: team.id, name: team.name, category: team.category ?? '' }));
       else localStorage.removeItem('fsm-next-team');
     } catch { /* storage unavailable */ }
     this.announceMatchContext();
@@ -305,7 +309,26 @@ export class HomePageComponent {
     this.launchMatch.emit({ team, players: [...this.previewPlayers()], lineup: { ...this.previewLineup() }, formation: this.previewFormation(), positions: { ...this.previewPositions() }, layoutSlot: this.layoutSlot(), opponentName: this.opponentName().trim() });
   }
 
+  private async loadNextMatch(): Promise<void> {
+    const team = this.selectedTeam;
+    const workspaceId = this.auth.workspaceId();
+    if (!team || !workspaceId) { this.nextMatch.set(null); return; }
+    try {
+      const round = await this.calendarService.nextMatch(workspaceId, team.id);
+      if (this.selectedTeam?.id !== team.id) return;
+      this.nextMatch.set(round);
+      if (round && round.opponent.trim() && round.opponent.trim() !== this.opponentName().trim()) this.setOpponentName(round.opponent.trim());
+    } catch (error) { console.warn('Unable to read the calendar.', error); }
+  }
+
+  protected matchWhen(round: CalendarRound): string {
+    const date = new Date(`${round.date}T12:00:00`);
+    const day = Number.isNaN(date.getTime()) ? round.date : date.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+    return `Giornata ${round.number} · ${day}${round.time ? ' · ore ' + round.time : ''} · ${round.home ? 'in casa' : 'in trasferta'}`;
+  }
+
   private async loadPreview(): Promise<void> {
+    void this.loadNextMatch();
     const request = ++this.previewRequest;
     const team = this.selectedTeam;
     const workspaceId = this.auth.workspaceId();

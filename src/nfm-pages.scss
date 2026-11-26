@@ -443,13 +443,10 @@
   }
   #nfm .fsm-form-dialog .form-heading { position: relative; top: auto; z-index: 1; }
   #nfm .fsm-form-dialog .form-actions {
-    position: sticky;
-    bottom: 0;
-    z-index: 6;
-    margin: 16px -22px -18px;
-    padding: 14px 22px 18px;
-    border-radius: 0 0 20px 20px;
-    background: var(--panel-solid);
+    position: static;
+    margin: 18px 0 0;
+    padding: 14px 0 0;
+    background: none;
   }
 }
 
@@ -1158,3 +1155,8 @@
   #nfm .nfm-bug-cancel, #nfm .nfm-bug-send { min-width: 0; }
 }
 @media (prefers-reduced-motion: reduce) { #nfm :is(.nfm-bug-backdrop, .nfm-bug-dialog) { animation: none; } }
+
+/* Open dropdowns stay above the rest of the form (and its buttons). */
+#nfm .fsm-form-dialog :is(.dropdown-open, .form-dropdown-field.dropdown-open, .team-category-picker.dropdown-open) { position: relative; z-index: 30; }
+#nfm .fsm-form-dialog :is(.form-dropdown-menu, .formation-picker-menu) { z-index: 40; }
+#nfm .fsm-form-dialog .form-actions { position: relative; z-index: 1; }

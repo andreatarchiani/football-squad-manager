@@ -11,7 +11,8 @@ import { PlayersPageComponent } from './features/players/players-page.component'
 import { HomePageComponent } from './features/home/home-page.component';
 import { StaffPageComponent } from './features/staff/staff-page.component';
 import { CalendarPageComponent } from './features/calendar/calendar-page.component';
-import type { TeamRecord } from './features/teams/team.service';
+import { TeamService, type TeamRecord } from './features/teams/team.service';
+import { CalendarService, type CalendarRound } from './features/calendar/calendar.service';
 import type { PlayerRecord } from './features/players/player.service';
 import { FIRESTORE_DB } from './core/firebase.tokens';
 import { addDoc, collection, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore';
@@ -49,7 +50,7 @@ const NAV_ICONS = {
 } as const;
 
 const VIEW_SECTION: Record<AppView, AppSection> = {
-  home: 'home', office: 'office', players: 'office', teams: 'office', staff: 'office', training: 'training', calendar: 'match',
+  home: 'home', office: 'office', players: 'office', teams: 'office', staff: 'office', training: 'training', calendar: 'office',
   'match-hub': 'match', formation: 'match', lineup: 'match', match: 'match'
 };
 const SECTION_LANDING: Record<AppSection, AppView | null> = { home: null, office: 'office', training: 'training', match: 'match-hub' };
@@ -59,7 +60,7 @@ const VIEW_META: Record<AppView, { title: string; accent?: string; subtitle?: st
   players: { title: 'Anagrafe Calciatore', icon: 'player', subtitle: 'Anagrafica dei calciatori e assegnazione alla squadra' },
   teams: { title: 'Anagrafe Squadra', icon: 'shield', subtitle: 'Dati della squadra, impianto e regolamento di gara' },
   staff: { title: 'Anagrafe Dirigenti', icon: 'manager', subtitle: 'Anagrafica dei dirigenti della società' },
-  calendar: { title: 'Calendario', icon: 'calendar', subtitle: 'Inserisci l’andata, il ritorno si crea da solo' },
+  calendar: { title: 'Stagione / Campionato', icon: 'trophy', subtitle: 'Calendario: inserisci l’andata, il ritorno si crea da solo' },
   training: { title: 'Allenamenti', icon: 'cone' },
   'match-hub': { title: 'Campo', icon: 'match' },
   formation: { title: 'Formazione', icon: 'formation', subtitle: 'Prepara la prossima partita e lo schieramento titolare' },
@@ -88,7 +89,7 @@ const SECTION_MENU: Partial<Record<AppSection, NavItem[]>> = {
     { label: 'Anagrafe Calciatore', icon: 'player', view: 'players' },
     { label: 'Anagrafe Dirigente', icon: 'manager', view: 'staff' },
     { label: 'Anagrafe Squadra', icon: 'shield', view: 'teams' },
-    { label: 'Creazione Stagione / Campionato', icon: 'trophy', soon: true },
+    { label: 'Creazione Stagione / Campionato', icon: 'trophy', view: 'calendar' },
     { label: 'Configurazione statistiche', icon: 'stats', soon: true }
   ],
   training: [
@@ -97,7 +98,6 @@ const SECTION_MENU: Partial<Record<AppSection, NavItem[]>> = {
     { label: 'Composizione Allenamento', icon: 'tactic', soon: true }
   ],
   match: [
-    { label: 'Calendario', icon: 'calendar', view: 'calendar' },
     { label: 'Convocazione', icon: 'people', soon: true },
     { label: 'Distinta Gara', icon: 'sheet', soon: true },
     { label: 'Formazione', icon: 'formation', view: 'formation' },
@@ -199,6 +199,11 @@ export class AppComponent {
   protected readonly matchActive = signal(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team'));
   protected readonly nextOpponent = signal(this.readNextOpponent());
   protected readonly nextTeam = signal(this.readNextTeam());
+  /** Next match from the calendar (closest date from today), shown in the Partita header. */
+  protected readonly nextMatch = signal<{ round: CalendarRound; team: string; category: string } | null>(null);
+  private readonly teamService = inject(TeamService);
+  private readonly calendarService = inject(CalendarService);
+  private nextMatchRequest = 0;
   /** Direction of the page animation: 'forward' slides in from the right, 'back' from the left. */
   protected readonly navDirection = signal<'forward' | 'back'>('forward');
   /** Who is signed in: shown on the Home so it is clear which profile is in use. */
@@ -243,7 +248,8 @@ export class AppComponent {
       if (this.isSupportAccount() || !this.auth.user()) return;
       this.setView(view && view in VIEW_DEPTH ? view : 'home', true);
     });
-    window.addEventListener('fsm-match-context', () => { this.nextOpponent.set(this.readNextOpponent()); this.nextTeam.set(this.readNextTeam()); });
+    window.addEventListener('fsm-match-context', () => { this.nextOpponent.set(this.readNextOpponent()); this.nextTeam.set(this.readNextTeam()); void this.refreshNextMatch(); });
+    effect(() => { if (this.auth.workspaceId()) untracked(() => void this.refreshNextMatch()); });
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe((event) => {
         if (event.type === 'VERSION_READY') {
@@ -394,13 +400,36 @@ export class AppComponent {
     if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
   }
 
+  /** Looks up the closest match in the calendar of the selected team (or the first team). */
+  private async refreshNextMatch(): Promise<void> {
+    const workspaceId = this.auth.workspaceId();
+    const request = ++this.nextMatchRequest;
+    if (!workspaceId) { this.nextMatch.set(null); return; }
+    try {
+      const teams = (await this.teamService.list(workspaceId)).filter(team => !team.isArchived);
+      const wanted = this.readNextTeam();
+      const team = teams.find(item => item.id === wanted.id) ?? teams.find(item => item.name === wanted.name) ?? teams[0];
+      const round = team ? await this.calendarService.nextMatch(workspaceId, team.id) : null;
+      if (request !== this.nextMatchRequest) return;
+      this.nextMatch.set(round && team ? { round, team: team.name, category: team.category } : null);
+    } catch (error) {
+      console.warn('Unable to read the next match from the calendar.', error);
+      if (request === this.nextMatchRequest) this.nextMatch.set(null);
+    }
+  }
+
+  protected matchDay(value: string): string {
+    const date = new Date(`${value}T12:00:00`);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+
   /** Team selected in "Formazione" (written there), shown in the header match chips. */
-  private readNextTeam(): { name: string; category: string } {
+  private readNextTeam(): { id: string; name: string; category: string } {
     try {
       const raw = typeof localStorage !== 'undefined' ? localStorage.getItem('fsm-next-team') : null;
       const parsed = raw ? JSON.parse(raw) : null;
-      return { name: String(parsed?.name ?? '').trim(), category: String(parsed?.category ?? '').trim() };
-    } catch { return { name: '', category: '' }; }
+      return { id: String(parsed?.id ?? ''), name: String(parsed?.name ?? '').trim(), category: String(parsed?.category ?? '').trim() };
+    } catch { return { id: '', name: '', category: '' }; }
   }
 
   private readNextOpponent(): string {

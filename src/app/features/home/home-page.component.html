@@ -10,7 +10,7 @@
       <div class="next-match-heading">
         <span class="eyebrow">PROSSIMA PARTITA</span>
         <h2>{{ selectedTeam.category || 'La prossima sfida' }}</h2>
-        <p>Una nuova sfida da preparare.</p>
+        <p>@if (nextMatch(); as next) { {{ matchWhen(next) }} } @else { Una nuova sfida da preparare. }</p>
       </div>
       <div class="matchday-scoreboard">
         <div class="matchday-club matchday-club-home">

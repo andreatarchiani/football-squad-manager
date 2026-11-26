@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-26 — Calendario in Creazione Stagione e prossima partita automatica
+
+- **Modifica:** il calendario si trova ora in Ufficio › Creazione Stagione / Campionato, con due tabelle: *Andata* (da compilare) e *Ritorno* (creato in automatico, servono solo le date). Il tasto ⇄ scambia casa e trasferta.
+- **Nuova funzionalità:** il calendario si salva da solo a ogni modifica; se due giornate hanno la stessa data l’app avvisa ed evidenzia le date; per ogni gara c’è l’indirizzo del campo (in casa viene usato quello della squadra, in trasferta si scrive con i suggerimenti degli indirizzi).
+- **Nuova funzionalità:** la prossima partita viene trovata in automatico dalla data di oggi: compare in alto nell’area Partita, nel riquadro *Prossima partita* del calendario e compila l’avversario in Formazione.
+- **Correzione:** nei moduli le tendine non finiscono più sotto il pulsante e i pulsanti “Crea squadra”, “Inserisci giocatore” e “Inserisci dirigente” sono in fondo al modulo.
+
 ## 2026-11-26 — Animazioni, Home viola, tutori e caricamento più veloce
 
 - **Animazioni:** passando da una schermata all’altra la pagina scorre da destra; tornando indietro (anche con il gesto “indietro” del telefono) scorre da sinistra.

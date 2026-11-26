@@ -10,7 +10,9 @@ export interface CalendarRound {
   home: boolean;           // true = my team plays at home
   date: string;            // YYYY-MM-DD
   time: string;            // HH:mm
+  venue: string;           // address of the pitch (away games; home games use the team address)
 }
+
 
 export interface CalendarData {
   groupName: string;       // e.g. "Girone unico Arezzo"
@@ -36,9 +38,25 @@ export function buildReturnLeg(andata: CalendarRound[], previous: CalendarRound[
       opponent: round.opponent,
       home: !round.home,
       date: keep ? old.date : '',
-      time: keep ? old.time : (round.time || '')
+      time: keep ? old.time : (round.time || ''),
+      venue: keep ? old.venue : ''
     };
   });
+}
+
+export function findNextMatch(calendar: CalendarData, now = new Date()): CalendarRound | null {
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const upcoming = [...calendar.andata, ...calendar.ritorno]
+    .filter(round => round.date && round.date >= today && round.opponent.trim())
+    .sort((a, b) => (a.date + (a.time || '99:99')).localeCompare(b.date + (b.time || '99:99')));
+  return upcoming[0] ?? null;
+}
+
+/** Dates used by more than one round (the team cannot play twice the same day). */
+export function duplicateDates(calendar: CalendarData): Set<string> {
+  const seen = new Map<string, number>();
+  for (const round of [...calendar.andata, ...calendar.ritorno]) if (round.date) seen.set(round.date, (seen.get(round.date) ?? 0) + 1);
+  return new Set([...seen].filter(([, count]) => count > 1).map(([date]) => date));
 }
 
 @Injectable({ providedIn: 'root' })
@@ -60,7 +78,7 @@ export class CalendarService {
   async save(workspaceId: string, teamId: string, teamName: string, calendar: CalendarData): Promise<void> {
     const clean = (round: CalendarRound) => ({
       number: round.number, leg: round.leg, opponent: round.opponent.trim().slice(0, 80), home: round.home,
-      date: round.date || '', time: round.time || ''
+      date: round.date || '', time: round.time || '', venue: (round.venue || '').trim().slice(0, 180)
     });
     await setDoc(doc(this.db(), 'workspaces', workspaceId, 'calendars', teamId), {
       teamId,
@@ -71,6 +89,11 @@ export class CalendarService {
     });
   }
 
+  /** Closest match from now on (today included), or null when nothing is scheduled. */
+  async nextMatch(workspaceId: string, teamId: string): Promise<CalendarRound | null> {
+    return findNextMatch(await this.load(workspaceId, teamId));
+  }
+
   private round(item: Record<string, unknown>): CalendarRound {
     return {
       number: Number(item['number'] ?? 0),
@@ -78,7 +101,8 @@ export class CalendarService {
       opponent: String(item['opponent'] ?? ''),
       home: item['home'] !== false,
       date: String(item['date'] ?? ''),
-      time: String(item['time'] ?? '')
+      time: String(item['time'] ?? ''),
+      venue: String(item['venue'] ?? '')
     };
   }
 
