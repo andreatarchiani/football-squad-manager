@@ -88,6 +88,9 @@ export class CalendarPageComponent implements OnDestroy {
   protected setGroupName(value: string): void { this.calendar.update(data => ({ ...data, groupName: value })); this.scheduleSave(); }
 
   protected setWhen(leg: Leg, index: number, key: 'date' | 'time', value: string): void {
+    // Called on change and on blur: ignore repeats so nothing is saved or announced twice.
+    const current = this.rows(leg)[index];
+    if (!current || current[key] === value) return;
     this.editRound(leg, index, round => key === 'date' ? { ...round, date: value } : { ...round, time: value });
     if (key === 'date' && value && this.conflicts().has(value)) {
       const mine = this.rows(leg)[index]?.number;

@@ -465,6 +465,23 @@
   "settle": 600
  },
  {
+  "name": "27b-calendar-next-changes",
+  "actions": [
+   {
+    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=date]",
+    "value": "2027-03-01"
+   },
+   {
+    "press": "Tab"
+   },
+   {
+    "wait": 2200
+   }
+  ],
+  "settle": 500,
+  "full": false
+ },
+ {
   "name": "28-match-header",
   "actions": [
    {

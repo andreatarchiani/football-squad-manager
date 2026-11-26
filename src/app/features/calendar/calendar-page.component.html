@@ -126,8 +126,8 @@
     @for (round of rows(leg); track round.number; let i = $index) {
       <div class="cal-row" role="row" [class.is-next]="nextMatch()?.number === round.number">
         <span class="cal-num" role="cell">{{ round.number }}ª</span>
-        <span role="cell"><input type="date" [value]="round.date" (input)="setWhen(leg, i, 'date', $any($event.target).value)" [class.is-missing]="!round.date" [class.is-conflict]="!!round.date && conflicts().has(round.date)" aria-label="Data"></span>
-        <span role="cell"><input type="time" [value]="round.time" (input)="setWhen(leg, i, 'time', $any($event.target).value)" aria-label="Ora"></span>
+        <span role="cell"><input type="date" [value]="round.date" (change)="setWhen(leg, i, 'date', $any($event.target).value)" (blur)="setWhen(leg, i, 'date', $any($event.target).value)" [class.is-missing]="!round.date" [class.is-conflict]="!!round.date && conflicts().has(round.date)" aria-label="Data"></span>
+        <span role="cell"><input type="time" [value]="round.time" (change)="setWhen(leg, i, 'time', $any($event.target).value)" (blur)="setWhen(leg, i, 'time', $any($event.target).value)" aria-label="Ora"></span>
         <span class="cal-match" role="cell">
           @if (leg === 'A') {
             @if (round.home) {

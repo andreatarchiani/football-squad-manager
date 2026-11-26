@@ -405,6 +405,8 @@ export class AppComponent {
     if (view === 'teams') { this.matchLaunch.set(null); this.rosterRequest.set(null); }
     this.nextOpponent.set(this.readNextOpponent());
     this.nextTeam.set(this.readNextTeam());
+    // Entering "Partita": recompute the next match (dates may have changed, or the day).
+    if (VIEW_SECTION[view] === 'match' && VIEW_SECTION[current] !== 'match') void this.refreshNextMatch();
     this.activePage.set(view);
     if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
   }
