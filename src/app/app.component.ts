@@ -2,8 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, u
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { SwUpdate } from '@angular/service-worker';
 import { interval } from 'rxjs';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { FirebaseAuthService } from './core/firebase-auth.service';
 import { NotificationService } from './core/notifications/notification.service';
 import { NotificationHostComponent } from './core/notifications/notification-host.component';
@@ -118,7 +116,7 @@ interface SupportTicket { id: string; authorEmail: string; authorName: string; d
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [DatePipe, NgTemplateOutlet, MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, StaffPageComponent, CalendarPageComponent, NotificationHostComponent],
+  imports: [DatePipe, NgTemplateOutlet, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, StaffPageComponent, CalendarPageComponent, NotificationHostComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
