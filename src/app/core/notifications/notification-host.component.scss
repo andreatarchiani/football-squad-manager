@@ -111,3 +111,15 @@
   .toast,.confirmation-backdrop,.confirmation-dialog { animation: none; }
   .confirmation-actions button { transition: none; }
 }
+
+/* "Football Manager" look: blue LED panels with yellow primary action. */
+.toast { border: 1.5px solid #2a9dffa6; border-radius: 14px; background: linear-gradient(160deg, #0a2650, #040f26); box-shadow: 0 0 18px #2a9dff59, 0 16px 42px #000a; font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, system-ui, sans-serif; }
+.toast-copy strong { color: #fff; font-size: 13px; }
+.toast-copy p { color: #a9cbe8; font-size: 12px; }
+.confirmation-backdrop { background: rgba(2, 4, 10, .84); backdrop-filter: blur(8px); }
+.confirmation-dialog { border: 2px solid #2a9dff; border-radius: 22px; color: #fff; background: linear-gradient(160deg, #0a2650 0%, #061a3a 55%, #040f26 100%); box-shadow: 0 0 0 1px #2a9dff4d, 0 0 30px #2a9dff80, 0 30px 80px #000c; font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, system-ui, sans-serif; }
+.confirmation-dialog h2 { color: #fff; }
+.confirmation-dialog > p { color: #a9cbe8; }
+.confirmation-cancel { border: 1.5px solid #4fbeffb3; color: #fff; background: linear-gradient(180deg, #13284e, #081530); }
+.confirmation-confirm { border: 1.5px solid #fff3a6; color: #1a1300; background: linear-gradient(180deg, #ffe74d, #ffb800); box-shadow: 0 0 16px #ffcd0073; }
+.confirmation-confirm.confirm-danger { border-color: #ff8a96; color: #fff; background: linear-gradient(180deg, #e0283f, #8d0d1f); box-shadow: 0 0 16px #ff3b4f80; }

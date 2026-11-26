@@ -49,6 +49,8 @@
   box-shadow: 0 0 0 1px rgba(59, 164, 255, .35), 0 0 22px rgba(42, 157, 255, .55), inset 0 0 22px rgba(42, 157, 255, .18);
   text-align: center;
 }
+#nfm .match-scoreboard-header .match-team { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; justify-self: stretch; width: auto; max-width: none; }
+#nfm .match-scoreboard-header .match-team > * { grid-column: 1; grid-row: auto; justify-self: center; }
 #nfm .match-away-team {
   border-color: #ff4458;
   background: linear-gradient(180deg, rgba(120, 18, 32, .92), rgba(46, 6, 14, .96));
@@ -270,10 +272,11 @@
   background: linear-gradient(180deg, rgba(var(--e-rgb), .75), var(--e-deep));
   box-shadow: 0 0 14px rgba(var(--e-rgb), .5), inset 0 1px rgba(255, 255, 255, .35);
   font: inherit;
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 700;
   line-height: 1.1;
   text-align: center;
+  overflow-wrap: anywhere;
   text-shadow: 0 1px 3px rgba(0, 0, 0, .5);
   cursor: pointer;
   transition: transform .15s, filter .15s, box-shadow .15s;
@@ -462,7 +465,7 @@
 #nfm .nfm-event-submit:disabled { cursor: not-allowed; opacity: .45; box-shadow: none; }
 
 /* ----------------------------------------------------------- responsive */
-@media (max-width: 1400px) {
+@media (max-width: 1640px) {
   #nfm .match-layout { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-areas: 'pitch event' 'pitch side'; }
   #nfm .match-layout > .match-pitch-wrap { grid-area: pitch; }
   #nfm .match-layout > .match-side { grid-area: side; }
@@ -471,7 +474,7 @@
 @media (max-width: 900px) {
   #nfm .match-scoreboard-header { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 8px; }
   #nfm .match-team { min-height: 0; padding: 8px 6px; border-radius: 14px; }
-  #nfm .match-team strong { font-size: 15px; white-space: normal; }
+  #nfm .match-team strong { font-size: 15px; white-space: normal; overflow-wrap: anywhere; }
   #nfm .match-team small { font-size: 9px; letter-spacing: .08em; }
   #nfm .match-team em { font-size: 10px; }
   #nfm .match-scoreboard { min-width: 104px; }
