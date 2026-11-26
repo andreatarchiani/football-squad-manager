@@ -219,10 +219,10 @@
             <fsm-players-page />
           }
           @case ('staff') {
-            <fsm-staff-page />
+            @defer { <fsm-staff-page /> } @loading (minimum 200ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('calendar') {
-            <fsm-calendar-page />
+            @defer { <fsm-calendar-page /> } @loading (minimum 200ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
         }
       </div>

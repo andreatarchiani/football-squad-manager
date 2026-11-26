@@ -1061,3 +1061,4 @@
   #nfm :is(.home-pitch-player-name, .pitch-stage .pitch-player-name, .match-player-label) { max-width: 68px; padding: 2px 5px; font-size: 10px; }
   #nfm :is(.captain-armband-mark, .vice-armband-mark, .match-leadership-mark) { height: 14px; min-width: 14px; font-size: 9px; }
 }
+#nfm .nfm-defer-loading { padding: 40px 16px; color: var(--soft); text-align: center; }
