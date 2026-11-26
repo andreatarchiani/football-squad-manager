@@ -74,49 +74,81 @@
     </main>
   </div>
 } @else {
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="Navigazione principale">
-      <a class="brand" href="/" aria-label="Football Squad Manager, home">
-        <span class="brand-mark"><img src="/stadium-brand.svg" alt="" aria-hidden="true"></span>
-        <span class="brand-copy"><strong>FOOTBALL</strong><small>SQUAD MANAGER</small></span>
-      </a>
-      <div class="workspace-label">WORKSPACE</div>
-      <div class="workspace-switcher"><span class="workspace-avatar">FS</span><span><strong>La mia società</strong><small>Spazio personale</small></span></div>
-      <div class="nav-label">GESTIONE</div>
-      <nav>
-        @for (item of navigation; track item; let index = $index) {
-          <button class="nav-item" [class.active]="(index === 0 && activePage() === 'overview') || (index === 1 && activePage() === 'teams') || (index === 2 && activePage() === 'players')" [disabled]="index > 2" [attr.aria-current]="(index === 0 && activePage() === 'overview') || (index === 1 && activePage() === 'teams') || (index === 2 && activePage() === 'players') ? 'page' : null" (click)="navigate(index)" type="button">
-            <span class="nav-icon" aria-hidden="true">@if (index === 0) { <svg viewBox="0 0 24 24" focusable="false"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"/></svg> } @else if (index === 1) { <svg viewBox="0 0 24 24" focusable="false"><path d="M3 5h18v14H3zM3 12h18M9 5v14M15 5v14"/><circle cx="12" cy="12" r="2"/></svg> } @else if (index === 2) { <svg viewBox="0 0 24 24" focusable="false"><circle cx="9" cy="7" r="3"/><path d="M3 20v-2c0-3 2.5-5 6-5s6 2 6 5v2M16 5c3 0 4.5 5 1 6m1 2c2.5 1 3.5 3 3.5 5v2"/></svg> } @else { {{ ['▦', '⚑', '♟', '◇', '◷'][index] }} }</span><span>{{ item }}</span>
+  <div id="nfm" class="nfm-shell" [attr.data-theme]="section()" [attr.data-view]="activePage()">
+    <header class="nfm-header">
+      <button type="button" class="nfm-logo" (click)="setView('home')" aria-label="Football Squad Manager, torna alla Home">
+        <svg class="nfm-logo-mark" viewBox="0 0 70 50" aria-hidden="true" focusable="false">
+          <path d="M3 37C11 22 25 13.5 45 12" stroke="#1d6dff" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+          <path d="M6 43.5C15 31 28 24 46 22.5" stroke="#ff2e43" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M11 48.5C20 39.5 31 34.5 45 33.5" stroke="#ffcc12" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+          <circle cx="48" cy="24" r="19" fill="#fbfbfb" stroke="#101317" stroke-width="1.6"/>
+          <path d="M48 16.4 55.3 21.7 52.5 30.3h-9l-2.8-8.6z" fill="#14171c"/>
+          <path d="M48 5.2v4.6l-5 3.2M48 9.8l5 3.2M30.3 19.2l4.4 1.6 1.4 5.4M34.7 20.8l3.6-4.6M65.7 19.2l-4.4 1.6-1.4 5.4M61.3 20.8l-3.6-4.6M37.5 39.3l2.6-3.6 5.6-.4M40.1 35.7l-1.4-5.3M58.5 39.3l-2.6-3.6-5.6-.4M55.9 35.7l1.4-5.3" stroke="#14171c" stroke-width="1.7" fill="none" stroke-linejoin="round"/>
+          <path d="M43.2 6.2 48 5.2l4.8 1-4.8 3.6zM31 17.8l3.4-3.6-.6 4.9-3.3 3.2zM65 17.8l-3.4-3.6.6 4.9 3.3 3.2zM40 41.2l-3-4.4 4.6 1.1 2.7 4.1zM56 41.2l3-4.4-4.6 1.1-2.7 4.1z" fill="#14171c"/>
+          <circle cx="48" cy="24" r="19" fill="none" stroke="#ffffff" stroke-opacity=".5" stroke-width="1" transform="translate(-.6 -.8)"/>
+        </svg>
+        <span class="nfm-logo-text"><strong>Football</strong><small>Squad Manager</small></span>
+      </button>
+      <span class="nfm-header-slash" aria-hidden="true"></span>
+      <div class="nfm-title">
+        <span class="nfm-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path [attr.d]="icons[viewMeta().icon]"/></svg></span>
+        <div class="nfm-title-copy">
+          <h1>{{ viewMeta().title }}@if (viewMeta().accent) { <span class="nfm-title-accent">{{ viewMeta().accent }}</span> }</h1>
+          @if (viewMeta().subtitle) { <p>{{ viewMeta().subtitle }}</p> }
+        </div>
+      </div>
+      <div class="nfm-header-actions">
+        @if (section() === 'match') {
+          <button type="button" class="nfm-match-chip" (click)="setView('formation')" title="Prossima partita">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons.calendar"/></svg>
+            <span><small>Prossima partita</small><strong>vs {{ nextOpponent() || 'avversario da definire' }}</strong></span>
           </button>
         }
-      </nav>
-      <div class="sidebar-footer"><span class="status-dot"></span> Connesso <span class="version">v0.8</span></div>
+        <button type="button" aria-label="Segnala un bug" title="Segnala un bug" class="nfm-icon-button bug-report-button" (click)="openBugReport()">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 9h8M9 5l-1.5-2M15 5l1.5-2M5 10H3M21 10h-2M5 15H3M21 15h-2" /><rect x="6" y="5" width="12" height="15" rx="5" /><path d="M9 13h6M12 10v7" /></svg>
+        </button>
+        <button type="button" aria-label="Esci dall'account" title="Esci" class="nfm-icon-button logout-button" (click)="signOut()">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10 17l5-5-5-5M15 12H3" /><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <aside class="nfm-sidebar" aria-label="Menu della sezione">
+      @if (section() === 'home') {
+        <nav class="nfm-home-menu" aria-label="Aree principali">
+          @for (tile of homeTiles; track tile.label) {
+            <button type="button" class="nfm-home-tile" [attr.data-tone]="tile.tone" [class.is-soon]="tile.soon" [attr.aria-disabled]="tile.soon ? 'true' : null" (click)="openItem(tile)">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons[tile.icon]"/></svg>
+              <span>{{ tile.label }}</span>
+              @if (tile.soon) { <small class="nfm-soon">In arrivo</small> }
+            </button>
+          }
+        </nav>
+      } @else {
+        <nav class="nfm-menu" aria-label="Voci della sezione">
+          @for (item of sectionMenu(); track item.label) {
+            <button type="button" class="nfm-menu-item" [class.active]="isItemActive(item)" [class.is-soon]="item.soon" [attr.aria-disabled]="item.soon ? 'true' : null" [attr.aria-current]="isItemActive(item) ? 'page' : null" [title]="item.soon ? item.label + ' · in arrivo' : item.label" (click)="openItem(item)">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons[item.icon]"/></svg>
+              <span>{{ item.label }}</span>
+              @if (item.soon) { <small class="nfm-soon">In arrivo</small> }
+              @if (item.view === 'match' && matchActive()) { <small class="nfm-live-dot" aria-label="Partita in corso"></small> }
+            </button>
+          }
+          <span class="nfm-menu-divider" aria-hidden="true"></span>
+          <button type="button" class="nfm-menu-item" (click)="goBack()">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons.back"/></svg>
+            <span>{{ section() === 'office' ? 'Indietro' : 'Menù precedente' }}</span>
+          </button>
+          <button type="button" class="nfm-menu-item" (click)="setView('home')">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons.home"/></svg>
+            <span>Home Page</span>
+          </button>
+        </nav>
+      }
+      <div class="nfm-sidebar-art" aria-hidden="true"></div>
     </aside>
 
-    <main class="main-content">
-      <header class="topbar">
-        <div class="topbar-title">
-          <span class="topbar-icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><circle cx="24" cy="13" r="6"/><path d="M12 37v-4c0-7 5-12 12-12s12 5 12 12v4H12Z"/><circle cx="10" cy="19" r="4"/><path d="M3 35v-5c0-5 3-8 7-8m28-3a4 4 0 1 0 0-8m0 11c4 0 7 3 7 8v5"/></svg></span>
-          <div><div class="eyebrow">FOOTBALL SQUAD MANAGER</div><h1>{{ activePage() === 'match' ? 'Partita' : activePage() === 'teams' ? 'Squadre' : activePage() === 'players' ? 'Giocatori' : 'Home' }}</h1></div>
-        </div>
-        <div class="topbar-actions">
-          <span class="today-label">{{ auth.user()?.displayName || auth.user()?.email }}</span>
-          <button type="button" aria-label="Segnala un bug" title="Segnala un bug" class="bug-report-button" (click)="openBugReport()">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M8 9h8M9 5l-1.5-2M15 5l1.5-2M5 10H3M21 10h-2M5 15H3M21 15h-2" />
-              <rect x="6" y="5" width="12" height="15" rx="5" />
-              <path d="M9 13h6M12 10v7" />
-            </svg>
-          </button>
-          <button type="button" aria-label="Esci dall'account" title="Esci" class="logout-button" (click)="signOut()">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M10 17l5-5-5-5M15 12H3" />
-              <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
-            </svg>
-          </button>
-        </div>
-      </header>
-
+    <main class="nfm-main">
       @if (updateAvailable()) {
         <section class="update-banner" role="status" aria-live="polite">
           <div class="update-copy"><strong>Nuova versione disponibile</strong><span>È disponibile un aggiornamento di Football Squad Manager.</span></div>
@@ -128,31 +160,85 @@
         <section class="workspace-error" role="alert">{{ auth.workspaceError() }}</section>
       }
 
-      <div class="stadium-frame">
-      @if (activePage() === 'overview') {
-        <fsm-home-page (openTeams)="openTeamRoster($event)" (launchMatch)="launchMatch($event)" />
-      } @else if (activePage() === 'teams') {
-        <fsm-teams-page [launchRequest]="matchLaunch()" [rosterRequest]="rosterRequest()" [resumeMatch]="false" />
-      } @else if (activePage() === 'match') {
-        <fsm-teams-page [launchRequest]="matchLaunch()" [resumeMatch]="true" (matchClosed)="returnHomeAfterMatch()" />
-      } @else if (activePage() === 'players') {
-        <fsm-players-page />
+      @if (section() !== 'home' && activePage() !== 'office' && activePage() !== 'training' && activePage() !== 'match-hub') {
+        <nav class="nfm-subnav" aria-label="Voci della sezione">
+          <button type="button" class="nfm-subnav-item nfm-subnav-back" (click)="goBack()" aria-label="Menù precedente">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons.back"/></svg>
+          </button>
+          @for (item of sectionMenu(); track item.label) {
+            @if (!item.soon) {
+              <button type="button" class="nfm-subnav-item" [class.active]="isItemActive(item)" [attr.aria-current]="isItemActive(item) ? 'page' : null" (click)="openItem(item)">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons[item.icon]"/></svg>
+                <span>{{ item.label }}</span>
+                @if (item.view === 'match' && matchActive()) { <small class="nfm-live-dot" aria-label="Partita in corso"></small> }
+              </button>
+            }
+          }
+        </nav>
       }
+
+      <div class="nfm-frame" [class.nfm-frame-scene]="activePage() === 'home' || activePage() === 'office' || activePage() === 'training' || activePage() === 'match-hub'">
+        @switch (activePage()) {
+          @case ('home') {
+            <section class="nfm-scene nfm-scene-home" aria-label="Home">
+              <div class="nfm-scene-image" role="img" aria-label="Scrivania dell'allenatore davanti allo stadio illuminato"></div>
+              <nav class="nfm-scene-menu nfm-scene-menu-home" aria-label="Aree principali">
+                @for (tile of homeTiles; track tile.label) {
+                  <button type="button" class="nfm-home-tile" [attr.data-tone]="tile.tone" [class.is-soon]="tile.soon" [attr.aria-disabled]="tile.soon ? 'true' : null" (click)="openItem(tile)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons[tile.icon]"/></svg>
+                    <span>{{ tile.label }}</span>
+                    @if (tile.soon) { <small class="nfm-soon">In arrivo</small> }
+                  </button>
+                }
+              </nav>
+            </section>
+          }
+          @case ('office') { <ng-container [ngTemplateOutlet]="sceneTpl" [ngTemplateOutletContext]="{ $implicit: 'office', label: 'Ufficio della società con scrivania, trofei e lavagna tattica' }"></ng-container> }
+          @case ('training') { <ng-container [ngTemplateOutlet]="sceneTpl" [ngTemplateOutletContext]="{ $implicit: 'training', label: 'Campo di allenamento con coni, sagome e lavagna tattica' }"></ng-container> }
+          @case ('match-hub') { <ng-container [ngTemplateOutlet]="sceneTpl" [ngTemplateOutletContext]="{ $implicit: 'match', label: 'Stadio illuminato con borse, palloni e materiale da gara' }"></ng-container> }
+          @case ('formation') {
+            <fsm-home-page (openTeams)="openTeamRoster($event)" (launchMatch)="launchMatch($event)" />
+          }
+          @case ('teams') {
+            <fsm-teams-page [launchRequest]="matchLaunch()" [rosterRequest]="rosterRequest()" [resumeMatch]="false" />
+          }
+          @case ('lineup') {
+            <fsm-teams-page class="nfm-lineup-mode" [launchRequest]="matchLaunch()" [rosterRequest]="rosterRequest()" [resumeMatch]="false" />
+          }
+          @case ('match') {
+            <fsm-teams-page class="nfm-live-mode" [launchRequest]="matchLaunch()" [resumeMatch]="true" (matchClosed)="returnHomeAfterMatch()" />
+          }
+          @case ('players') {
+            <fsm-players-page />
+          }
+        }
       </div>
     </main>
 
-    <nav class="mobile-bottom-nav" aria-label="Navigazione principale">
-      <button type="button" class="mobile-nav-item" [class.active]="activePage() === 'overview'" [attr.aria-current]="activePage() === 'overview' ? 'page' : null" (click)="navigate(0)">
-        <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" /></svg></span><span>Home</span>
-      </button>
-      <button type="button" class="mobile-nav-item" [class.active]="activePage() === 'teams'" [attr.aria-current]="activePage() === 'teams' ? 'page' : null" (click)="navigate(1)">
-        <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 5h18v14H3zM3 12h18M9 5v14M15 5v14"/><circle cx="12" cy="12" r="2"/></svg></span><span>Squadre</span>
-      </button>
-      <button type="button" class="mobile-nav-item" [class.active]="activePage() === 'players'" [attr.aria-current]="activePage() === 'players' ? 'page' : null" (click)="navigate(2)">
-        <span class="mobile-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><path d="M3 20v-2c0-3 2.5-5 6-5s6 2 6 5v2M16 5c3 0 4.5 5 1 6m1 2c2.5 1 3.5 3 3.5 5v2"/></svg></span><span>Giocatori</span>
-      </button>
+    <nav class="nfm-bottom-nav" aria-label="Navigazione principale">
+      @for (entry of mainSections; track entry.view) {
+        <button type="button" class="nfm-bottom-item" [attr.data-tone]="entry.section" [class.active]="section() === entry.section" [attr.aria-current]="section() === entry.section ? 'page' : null" (click)="setView(entry.view)">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons[entry.icon]"/></svg>
+          <span>{{ entry.label }}</span>
+        </button>
+      }
     </nav>
   </div>
+
+  <ng-template #sceneTpl let-tone let-label="label">
+    <section class="nfm-scene" [attr.data-scene]="tone" [attr.aria-label]="viewMeta().title">
+      <div class="nfm-scene-image" role="img" [attr.aria-label]="label"></div>
+      <nav class="nfm-scene-menu" aria-label="Voci della sezione">
+        @for (item of sectionMenu(); track item.label) {
+          <button type="button" class="nfm-scene-item" [class.is-soon]="item.soon" [attr.aria-disabled]="item.soon ? 'true' : null" (click)="openItem(item)">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons[item.icon]"/></svg>
+            <span>{{ item.label }}</span>
+            @if (item.soon) { <small class="nfm-soon">In arrivo</small> } @else { <b aria-hidden="true">›</b> }
+          </button>
+        }
+      </nav>
+    </section>
+  </ng-template>
 }
 
 @if (bugReportOpen()) {

@@ -25,36 +25,6 @@
       @if (!finished()) { <button type="button" class="finish-match" (click)="finishMatch()">■ Fine partita</button> }
       @else { <button type="button" class="finish-match" (click)="finishReportOpen.set(true)">Riepilogo finale</button> }
     </div>
-    <button
-      type="button"
-      class="voice-hold-button"
-      [class.is-listening]="voiceListening()"
-      [disabled]="finished()"
-      (pointerdown)="beginVoiceHold($event)"
-      (pointerup)="endVoiceHold($event)"
-      (pointercancel)="cancelVoiceHold()"
-      (lostpointercapture)="cancelVoiceHold()"
-      (keydown)="beginVoiceKeyboard($event)"
-      (keyup)="endVoiceKeyboard($event)"
-      (contextmenu)="$event.preventDefault()"
-      [attr.aria-pressed]="voiceListening()"
-      aria-label="Tocca e tieni premuto per eseguire un comando vocale">
-      <span class="voice-hold-icon" aria-hidden="true">🎙</span>
-      <span>{{ voiceListening() ? 'TI STO ASCOLTANDO · RILASCIA PER ESEGUIRE' : 'TOCCA E TIENI PREMUTO PER ESEGUIRE IL COMANDO' }}</span>
-    </button>
-    <section class="voice-command-guide" [class.is-collapsed]="!voiceHelpOpen()" aria-label="Comandi vocali disponibili">
-      <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong><p>Tieni premuto il pulsante, pronuncia una frase e rilascialo. Il comando viene eseguito al rilascio.</p></div><button type="button" class="voice-guide-toggle" (click)="toggleVoiceHelp()" [attr.aria-expanded]="voiceHelpOpen()" aria-controls="voice-command-list"><span>{{ voiceHelpOpen() ? 'Nascondi' : 'Mostra' }}</span><svg viewBox="0 0 20 20" aria-hidden="true" [class.is-expanded]="voiceHelpOpen()"><path d="m5 7.5 5 5 5-5"/></svg></button></div>
-      @if (voiceHelpOpen()) {
-        <div class="voice-command-list" id="voice-command-list">
-          <article class="voice-command-item"><span class="voice-command-icon">⚽</span><div><strong>Segnalare un gol</strong><p>“Goal numero <b>9</b>”, “ha segnato il <b>9</b>” oppure “gol del <b>9</b> con assist del <b>10</b>”.</p></div></article>
-          <article class="voice-command-item"><span class="voice-command-icon">🥅</span><div><strong>Segnalare un gol subito</strong><p>“Goal subito”, “goal preso”, “rete subita” oppure “goal subito a causa dell’errore del <b>6</b>”. L’intera frase pronunciata viene salvata nella cronaca.</p></div></article>
-          <article class="voice-command-item"><span class="voice-command-icon">🔑</span><div><strong>Passaggio chiave</strong><p>“Passaggio chiave numero <b>8</b>” oppure “chiave del numero <b>8</b>”.</p></div></article>
-          <article class="voice-command-item"><span class="voice-command-icon">🟨</span><div><strong>Ammonizione</strong><p>“Ammonito numero <b>5</b>” oppure “ammonizione del numero <b>5</b>”. Alla seconda ammonizione il giocatore viene espulso automaticamente.</p></div></article>
-          <article class="voice-command-item"><span class="voice-command-icon">🟥</span><div><strong>Segnalare un'espulsione</strong><p>“Espulsione numero <b>5</b>”, “espulso il <b>5</b>” oppure “cartellino rosso al <b>5</b>”.</p></div></article>
-          <article class="voice-command-item"><span class="voice-command-icon">🔄</span><div><strong>Effettuare una sostituzione</strong><p>“Cambio numero <b>7</b> con numero <b>18</b>”, “cambio del numero <b>7</b> con il numero <b>18</b>” oppure “esce il <b>7</b>, entra il <b>18</b>”.</p><small>Prima indica chi esce, poi chi entra.</small></div></article>
-        </div>
-      }
-    </section>
   </section>
   @if (voiceListening() || voiceMessage() || voiceDraft()) {
     <aside class="voice-feedback" [class.is-listening]="voiceListening()" role="status" aria-live="polite" (click)="dismissVoiceFeedback()">
@@ -100,7 +70,7 @@
         <div class="match-boundary-glow"></div><div class="match-halfway pitch-line"></div><div class="match-center-circle pitch-circle"></div><div class="match-center-dot"></div><div class="match-box pitch-box match-box-top"><span class="match-six-yard-box"></span></div><div class="match-box pitch-box match-box-bottom"><span class="match-six-yard-box"></span></div><div class="match-penalty-spot match-penalty-spot-top"></div><div class="match-penalty-spot match-penalty-spot-bottom"></div><div class="match-penalty-arc match-penalty-arc-top"></div><div class="match-penalty-arc match-penalty-arc-bottom"></div><div class="match-corner match-corner-tl"></div><div class="match-corner match-corner-tr"></div><div class="match-corner match-corner-bl"></div><div class="match-corner match-corner-br"></div><div class="match-goal pitch-goal match-goal-top"></div><div class="match-goal pitch-goal match-goal-bottom"></div>
         @for (slot of slots(); track slot.id) {
           @if (playerInSlot(slot.id); as player) {
-            <div class="match-shirt-player pitch-player" [style.left.%]="slot.x" [style.top.%]="slot.y" [class.sent-off]="playerHasRedCard(player)" (pointerdown)="startShirtDrag($event, player.id)">
+            <div class="match-shirt-player pitch-player" [class.is-goalkeeper]="isGoalkeeperSlot(slot.id)" [style.left.%]="slot.x" [style.top.%]="slot.y" [class.sent-off]="playerHasRedCard(player)" (pointerdown)="startShirtDrag($event, player.id)">
               <span class="match-shirt pitch-shirt">{{ player.shirtNumber ?? '—' }}</span><span class="match-player-label pitch-player-name">{{ player.lastName }}@if (player.id === captainId()) { <span class="match-leadership-mark captain" title="Capitano" aria-label="Capitano">C</span> } @else if (player.id === viceCaptainId()) { <span class="match-leadership-mark vice" title="Vicecapitano" aria-label="Vicecapitano">VC</span> }</span>
               @if (playerHasRedCard(player)) { <span class="sent-off-card" aria-label="Cartellino rosso">🟥 ROSSO</span> }
               @else if (yellowCardsFor(player)) { <span class="booked-card" aria-label="Cartellino giallo">🟨 GIALLO</span> }
@@ -131,6 +101,47 @@
           </button>
         }
       </div>
+    </aside>
+    <aside class="nfm-event-panel" aria-label="Registra evento">
+      <div class="nfm-event-heading"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12z"/></svg><strong>Registra evento</strong><span>Manuale · Vocale</span></div>
+      <div class="nfm-event-grid">
+        @for (item of manualEventTypes; track item.type) {
+          <button type="button" class="nfm-event-button" [attr.data-kind]="item.type" [disabled]="finished() || (item.type === 'substitution' && changesUsed() >= maxChanges)" (click)="openManualEvent(item.type)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="item.icon"/></svg>
+            <span>{{ item.label }}</span>
+          </button>
+        }
+      </div>
+    <button
+      type="button"
+      class="voice-hold-button"
+      [class.is-listening]="voiceListening()"
+      [disabled]="finished()"
+      (pointerdown)="beginVoiceHold($event)"
+      (pointerup)="endVoiceHold($event)"
+      (pointercancel)="cancelVoiceHold()"
+      (lostpointercapture)="cancelVoiceHold()"
+      (keydown)="beginVoiceKeyboard($event)"
+      (keyup)="endVoiceKeyboard($event)"
+      (contextmenu)="$event.preventDefault()"
+      [attr.aria-pressed]="voiceListening()"
+      aria-label="Tocca e tieni premuto per eseguire un comando vocale">
+      <span class="voice-hold-icon" aria-hidden="true">🎙</span>
+      <span>{{ voiceListening() ? 'TI STO ASCOLTANDO · RILASCIA PER ESEGUIRE' : 'TOCCA E TIENI PREMUTO PER ESEGUIRE IL COMANDO' }}</span>
+    </button>
+    <section class="voice-command-guide" [class.is-collapsed]="!voiceHelpOpen()" aria-label="Comandi vocali disponibili">
+      <div class="voice-guide-heading"><div><strong>COMANDI VOCALI</strong><p>Tieni premuto il pulsante, pronuncia una frase e rilascialo. Il comando viene eseguito al rilascio.</p></div><button type="button" class="voice-guide-toggle" (click)="toggleVoiceHelp()" [attr.aria-expanded]="voiceHelpOpen()" aria-controls="voice-command-list"><span>{{ voiceHelpOpen() ? 'Nascondi' : 'Mostra' }}</span><svg viewBox="0 0 20 20" aria-hidden="true" [class.is-expanded]="voiceHelpOpen()"><path d="m5 7.5 5 5 5-5"/></svg></button></div>
+      @if (voiceHelpOpen()) {
+        <div class="voice-command-list" id="voice-command-list">
+          <article class="voice-command-item"><span class="voice-command-icon">⚽</span><div><strong>Segnalare un gol</strong><p>“Goal numero <b>9</b>”, “ha segnato il <b>9</b>” oppure “gol del <b>9</b> con assist del <b>10</b>”.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🥅</span><div><strong>Segnalare un gol subito</strong><p>“Goal subito”, “goal preso”, “rete subita” oppure “goal subito a causa dell’errore del <b>6</b>”. L’intera frase pronunciata viene salvata nella cronaca.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🔑</span><div><strong>Passaggio chiave</strong><p>“Passaggio chiave numero <b>8</b>” oppure “chiave del numero <b>8</b>”.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🟨</span><div><strong>Ammonizione</strong><p>“Ammonito numero <b>5</b>” oppure “ammonizione del numero <b>5</b>”. Alla seconda ammonizione il giocatore viene espulso automaticamente.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🟥</span><div><strong>Segnalare un'espulsione</strong><p>“Espulsione numero <b>5</b>”, “espulso il <b>5</b>” oppure “cartellino rosso al <b>5</b>”.</p></div></article>
+          <article class="voice-command-item"><span class="voice-command-icon">🔄</span><div><strong>Effettuare una sostituzione</strong><p>“Cambio numero <b>7</b> con numero <b>18</b>”, “cambio del numero <b>7</b> con il numero <b>18</b>” oppure “esce il <b>7</b>, entra il <b>18</b>”.</p><small>Prima indica chi esce, poi chi entra.</small></div></article>
+        </div>
+      }
+    </section>
     </aside>
   </section>
   <section class="match-events">
@@ -197,6 +208,54 @@
           <label>Descrizione <textarea rows="3" [value]="editDescription()" (input)="updateEditDescription($any($event.target).value)"></textarea></label>
         }
         <div class="match-edit-actions"><button type="button" (click)="cancelEditEvent()">Annulla</button><button type="button" (click)="saveEditedEvent()">Salva modifiche</button></div>
+      </section>
+    </div>
+  }
+  @if (manualEvent(); as kind) {
+    <div class="nfm-event-backdrop" (click)="closeManualEvent()">
+      <section class="nfm-event-dialog" [attr.data-kind]="kind" role="dialog" aria-modal="true" aria-labelledby="nfm-event-title" (click)="$event.stopPropagation()" (keydown.escape)="closeManualEvent()">
+        <header class="nfm-event-dialog-head">
+          <span class="nfm-event-dialog-icon" aria-hidden="true"></span>
+          <h2 id="nfm-event-title">{{ manualEventLabel(kind) }}</h2>
+          <button type="button" class="nfm-event-close" aria-label="Chiudi" (click)="closeManualEvent()">×</button>
+        </header>
+        @if (kind === 'opponent-goal') {
+          <p class="nfm-event-note">Registra una rete della squadra avversaria al minuto {{ minute }}′. Il risultato verrà aggiornato e l’evento comparirà nella cronaca.</p>
+        } @else {
+          <div class="nfm-event-columns">
+            <div class="nfm-event-column">
+              <h3>{{ kind === 'substitution' ? 'Esce dal campo' : kind === 'goal' ? 'Marcatore' : 'Seleziona il giocatore' }}</h3>
+              <div class="nfm-number-grid">
+                @for (candidate of manualCandidates(); track candidate.id) {
+                  <button type="button" class="nfm-number" [class.selected]="manualPlayerId() === candidate.id" [attr.aria-pressed]="manualPlayerId() === candidate.id" [title]="candidate.firstName + ' ' + candidate.lastName" (click)="selectManualPlayer(candidate.id)">{{ candidate.shirtNumber ?? '—' }}<small>{{ candidate.lastName }}</small></button>
+                } @empty { <p class="nfm-event-note">Nessun giocatore disponibile in campo.</p> }
+              </div>
+            </div>
+            @if (kind === 'goal' || kind === 'substitution') {
+              <div class="nfm-event-column">
+                <h3>{{ kind === 'substitution' ? 'Entra dalla panchina' : 'Assist (facoltativo)' }}</h3>
+                <div class="nfm-number-grid">
+                  @for (candidate of manualSecondCandidates(); track candidate.id) {
+                    <button type="button" class="nfm-number" [class.selected]="manualSecondId() === candidate.id" [attr.aria-pressed]="manualSecondId() === candidate.id" [title]="candidate.firstName + ' ' + candidate.lastName" (click)="selectManualSecond(candidate.id)">{{ candidate.shirtNumber ?? '—' }}<small>{{ candidate.lastName }}</small></button>
+                  } @empty { <p class="nfm-event-note">{{ kind === 'substitution' ? 'Nessun giocatore disponibile in panchina.' : 'Nessun altro giocatore in campo.' }}</p> }
+                </div>
+              </div>
+            } @else {
+              <div class="nfm-event-column nfm-event-summary">
+                <h3>Riepilogo</h3>
+                @if (player(manualPlayerId()); as chosen) {
+                  <p><strong>#{{ chosen.shirtNumber }} {{ chosen.firstName }} {{ chosen.lastName }}</strong></p>
+                  @if (kind === 'yellow-card' && yellowCardsFor(chosen)) { <p class="nfm-event-warning">Seconda ammonizione: il giocatore verrà espulso automaticamente.</p> }
+                } @else { <p>Tocca il numero di maglia del giocatore.</p> }
+                <p class="nfm-event-minute">Minuto {{ minute }}′</p>
+              </div>
+            }
+          </div>
+        }
+        <footer class="nfm-event-actions">
+          <button type="button" class="nfm-event-cancel" (click)="closeManualEvent()">Annulla</button>
+          <button type="button" class="nfm-event-submit" [disabled]="!manualEventReady()" (click)="submitManualEvent()">✓ {{ manualEventAction(kind) }}</button>
+        </footer>
       </section>
     </div>
   }

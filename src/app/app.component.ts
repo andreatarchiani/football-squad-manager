@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { SwUpdate } from '@angular/service-worker';
 import { interval } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +16,92 @@ import type { PlayerRecord } from './features/players/player.service';
 import { FIRESTORE_DB } from './core/firebase.tokens';
 import { addDoc, collection, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore';
 
+type AppView = 'home' | 'office' | 'training' | 'match-hub' | 'players' | 'teams' | 'formation' | 'lineup' | 'match';
+type AppSection = 'home' | 'office' | 'training' | 'match';
+type IconName = keyof typeof NAV_ICONS;
+interface NavItem { label: string; icon: IconName; view?: AppView; soon?: boolean; }
+
+/** Draws a circle as path data so that every icon is a single <path>. */
+const circle = (cx: number, cy: number, r: number): string => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0`;
+
+const NAV_ICONS = {
+  home: 'M3 10.5 12 3l9 7.5M5.5 8.6V21h5v-6h3v6h5V8.6',
+  office: 'M4 8h16v12H4zM9 8V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V8M4 13.5h16M11 12.5h2v2h-2z',
+  desk: `${circle(9, 6.5, 3)}M3.5 17c0-3.2 2.4-5.5 5.5-5.5 1.5 0 2.8.5 3.8 1.4M11 14.5h10v6H11zM16 20.5v-6`,
+  cone: 'M12 3.5 7.2 18h9.6zM9.4 11.3h5.2M8.4 14.5h7.2M4 20.5h16',
+  match: `M3 5h18v14H3zM12 5v14${circle(12, 12, 2.6)}M3 9.2h2.8v5.6H3M21 9.2h-2.8v5.6H21`,
+  data: 'M4.5 20v-5.5M9.5 20V10M14.5 20v-7.5M19.5 20V5.5M3 20.5h18',
+  player: `M3.5 5h17v14h-17z${circle(9, 10, 2.2)}M5.8 16.2c.5-1.9 1.6-2.9 3.2-2.9s2.7 1 3.2 2.9M14.2 9.5h4M14.2 13h3`,
+  manager: `${circle(12, 8, 3.6)}M5 20.5c.6-3.9 3.3-6.3 7-6.3s6.4 2.4 7 6.3`,
+  shield: 'M12 3 19.5 6v5.6c0 4.8-3.1 8-7.5 9.4-4.4-1.4-7.5-4.6-7.5-9.4V6zM12 8.2l2.4 1.7-.9 2.8h-3l-.9-2.8z',
+  trophy: 'M8 4h8v5.2a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3.4 3.6M16 6h3a3 3 0 0 1-3.4 3.6M12 13.2V17M8.5 20.5h7M9.8 17h4.4',
+  stats: 'M4.5 20v-5.5M9.5 20V10M14.5 20v-7.5M19.5 20V5.5M3.5 9.5l5-4 4.5 3 6.5-5',
+  back: 'M9.5 14.5 4.5 9.5l5-5M4.5 9.5h10.5a5 5 0 0 1 0 10H12',
+  people: `${circle(9, 8, 3)}M3 19.5c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5M15.8 5.3a3 3 0 0 1 0 5.4M17.6 14.2c2.1.6 3.4 2.6 3.4 5.3`,
+  tactic: 'M6.5 4.5h11v16h-11zM9.5 3h5v3h-5zM9 10l2 2M11 10l-2 2M13.5 16l2 2M15.5 16l-2 2M10.5 17.5c.9-2.4 2.4-3.7 4.6-4.3M14 12l1.4 1.1-1.4 1.1',
+  calendar: 'M4 6h16v14.5H4zM4 10.2h16M8 3.5v4.5M16 3.5v4.5M7.5 13.5h2M11 13.5h2M14.5 13.5h2M7.5 16.8h2M11 16.8h2',
+  sheet: 'M6.5 4.5h11v16h-11zM9.5 3h5v3h-5zM9.5 10h5M9.5 13.5h5M9.5 17h3',
+  formation: `${circle(12, 5, 1.6)}${circle(6, 10.5, 1.6)}${circle(18, 10.5, 1.6)}${circle(8.5, 17.5, 1.6)}${circle(15.5, 17.5, 1.6)}M7.3 9.3l3.4-3M16.7 9.3l-3.4-3M6.6 12.1l1.3 3.8M17.4 12.1l-1.3 3.8`,
+  flag: 'M6.5 21V3.5M6.5 4h10.5l-2.2 3.4L17 10.8H6.5M3.5 21h7',
+  bench: 'M3 10.5h18M5 10.5V7h14v3.5M4 10.5V17M20 10.5V17M3 13.8h18M7.5 13.8v4.5M16.5 13.8v4.5',
+  possession: `${circle(12, 12, 8.5)}${circle(12, 12, 3.5)}M3.5 12h5M15.5 12h5`,
+  analysis: 'M4 4.5h16v13H4zM7 14l3-3.2 3 2.2 4-5M8.5 21h7M12 17.5V21'
+} as const;
+
+const VIEW_SECTION: Record<AppView, AppSection> = {
+  home: 'home', office: 'office', players: 'office', teams: 'office', training: 'training',
+  'match-hub': 'match', formation: 'match', lineup: 'match', match: 'match'
+};
+const SECTION_LANDING: Record<AppSection, AppView | null> = { home: null, office: 'office', training: 'training', match: 'match-hub' };
+const VIEW_META: Record<AppView, { title: string; accent?: string; subtitle?: string; icon: IconName }> = {
+  home: { title: 'Home Page', icon: 'home' },
+  office: { title: 'Ufficio', icon: 'office' },
+  players: { title: 'Anagrafe Calciatore', icon: 'player', subtitle: 'Anagrafica dei calciatori e assegnazione alla squadra' },
+  teams: { title: 'Anagrafe Squadra', icon: 'shield', subtitle: 'Dati della squadra, impianto e regolamento di gara' },
+  training: { title: 'Allenamenti', icon: 'cone' },
+  'match-hub': { title: 'Campo', icon: 'match' },
+  formation: { title: 'Formazione', icon: 'formation', subtitle: 'Prepara la prossima partita e lo schieramento titolare' },
+  lineup: { title: 'Formazione', icon: 'formation', subtitle: 'Modulo, titolari, panchina, capitano e vice capitano' },
+  match: { title: 'Panchina', accent: 'Live', icon: 'bench' }
+};
+const HOME_TILES: { label: string; icon: IconName; view?: AppView; tone: string; soon?: boolean }[] = [
+  { label: 'Ufficio', icon: 'desk', view: 'office', tone: 'office' },
+  { label: 'Allenamento', icon: 'tactic', view: 'training', tone: 'training' },
+  { label: 'Partita', icon: 'match', view: 'match-hub', tone: 'match' },
+  { label: 'Dati', icon: 'data', tone: 'data', soon: true }
+];
+const MAIN_SECTIONS: { label: string; icon: IconName; view: AppView; section: AppSection }[] = [
+  { label: 'Home', icon: 'home', view: 'home', section: 'home' },
+  { label: 'Ufficio', icon: 'desk', view: 'office', section: 'office' },
+  { label: 'Allenamento', icon: 'cone', view: 'training', section: 'training' },
+  { label: 'Partita', icon: 'match', view: 'match-hub', section: 'match' }
+];
+const SECTION_MENU: Partial<Record<AppSection, NavItem[]>> = {
+  office: [
+    { label: 'Anagrafe Calciatore', icon: 'player', view: 'players' },
+    { label: 'Anagrafe Dirigente', icon: 'manager', soon: true },
+    { label: 'Anagrafe Squadra', icon: 'shield', view: 'teams' },
+    { label: 'Creazione Stagione / Campionato', icon: 'trophy', soon: true },
+    { label: 'Configurazione statistiche', icon: 'stats', soon: true }
+  ],
+  training: [
+    { label: 'Inserimento Presenze', icon: 'people', soon: true },
+    { label: 'Creazione Esercitazione', icon: 'cone', soon: true },
+    { label: 'Composizione Allenamento', icon: 'tactic', soon: true }
+  ],
+  match: [
+    { label: 'Calendario', icon: 'calendar', soon: true },
+    { label: 'Convocazione', icon: 'people', soon: true },
+    { label: 'Distinta Gara', icon: 'sheet', soon: true },
+    { label: 'Formazione', icon: 'formation', view: 'formation' },
+    { label: 'Palle inattive', icon: 'flag', soon: true },
+    { label: 'Panchina Live', icon: 'bench', view: 'match' },
+    { label: 'Possesso palla', icon: 'possession', soon: true },
+    { label: 'Statistiche avanzate', icon: 'stats', soon: true },
+    { label: 'Analisi Partita', icon: 'analysis', soon: true }
+  ]
+};
+
 type SupportStatus = 'new' | 'progress' | 'resolved';
 interface SupportTicket { id: string; authorEmail: string; authorName: string; description: string; page: string; browser: string; status: SupportStatus; createdAt: Date; updatedAt: Date; }
 
@@ -23,7 +109,7 @@ interface SupportTicket { id: string; authorEmail: string; authorName: string; d
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [DatePipe, MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, NotificationHostComponent],
+  imports: [DatePipe, NgTemplateOutlet, MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, NotificationHostComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -100,8 +186,16 @@ export class AppComponent {
     }
   }
 
-  protected readonly navigation = ['Home', 'Squadre', 'Giocatori', 'Formazioni', 'Partite'];
-  protected readonly activePage = signal<'overview' | 'teams' | 'players' | 'match'>(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team') ? 'match' : 'overview');
+  /** Navigation model of the "Football Manager" interface: a home hub plus three themed areas. */
+  protected readonly icons = NAV_ICONS;
+  protected readonly activePage = signal<AppView>(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team') ? 'match' : 'home');
+  protected readonly matchActive = signal(typeof localStorage !== 'undefined' && !!localStorage.getItem('fsm-active-match-team'));
+  protected readonly nextOpponent = signal(this.readNextOpponent());
+  protected readonly section = computed<AppSection>(() => VIEW_SECTION[this.activePage()]);
+  protected readonly viewMeta = computed(() => VIEW_META[this.activePage()]);
+  protected readonly sectionMenu = computed<NavItem[]>(() => SECTION_MENU[this.section()] ?? []);
+  protected readonly homeTiles = HOME_TILES;
+  protected readonly mainSections = MAIN_SECTIONS;
   protected readonly matchLaunch = signal<{ team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; opponentName: string; token: number } | null>(null);
   protected readonly rosterRequest = signal<{ teamId: string; layoutSlot: 1 | 2; token: number } | null>(null);
   protected readonly updateAvailable = signal(false);
@@ -217,22 +311,56 @@ export class AppComponent {
   protected launchMatch(request: { team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; opponentName: string }): void {
     this.rosterRequest.set(null);
     this.matchLaunch.set({ ...request, token: Date.now() });
+    this.matchActive.set(true);
     this.activePage.set('match');
   }
 
-  protected returnHomeAfterMatch(): void { this.matchLaunch.set(null); this.activePage.set('overview'); }
+  protected returnHomeAfterMatch(): void {
+    this.matchLaunch.set(null);
+    this.matchActive.set(false);
+    this.setView('formation');
+  }
 
   protected openTeamRoster(request: { teamId: string; layoutSlot: 1 | 2 }): void {
     this.matchLaunch.set(null);
-    if (!request.teamId) { this.rosterRequest.set(null); this.activePage.set('teams'); return; }
+    if (!request.teamId) { this.setView('teams'); return; }
     this.rosterRequest.set({ ...request, token: Date.now() });
-    this.activePage.set('teams');
+    this.setView('lineup');
   }
 
-  protected navigate(index: number): void {
-    if (index === 0) this.activePage.set('overview');
-    if (index === 1) { this.matchLaunch.set(null); this.rosterRequest.set(null); this.activePage.set('teams'); }
-    if (index === 2) this.activePage.set('players');
+  /** Opens a menu entry. Entries without a screen yet are marked "in arrivo" and stay inert. */
+  protected openItem(item: { view?: AppView; soon?: boolean }): void {
+    if (item.soon || !item.view) return;
+    if (item.view === 'match' && !this.matchActive()) { this.setView('formation'); return; }
+    this.setView(item.view);
+  }
+
+  protected isItemActive(item: { view?: AppView }): boolean {
+    const view = this.activePage();
+    return !!item.view && (item.view === view || (item.view === 'formation' && view === 'lineup'));
+  }
+
+  /** "Indietro" / "Menù precedente": from a screen back to its area, from an area back to Home. */
+  protected goBack(): void {
+    const view = this.activePage();
+    if (view === 'lineup') { this.setView('formation'); return; }
+    const landing = SECTION_LANDING[this.section()];
+    this.setView(!landing || view === landing ? 'home' : landing);
+  }
+
+  protected setView(view: AppView): void {
+    // A launch request must be consumed only once: re-opening "Panchina Live" later
+    // has to resume the saved match instead of starting a new one.
+    if (this.activePage() === 'match' && view !== 'match') this.matchLaunch.set(null);
+    if (view === 'teams') { this.matchLaunch.set(null); this.rosterRequest.set(null); }
+    this.nextOpponent.set(this.readNextOpponent());
+    this.activePage.set(view);
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
+  }
+
+  private readNextOpponent(): string {
+    try { return typeof localStorage !== 'undefined' ? (localStorage.getItem('fsm-next-opponent') ?? '').trim() : ''; }
+    catch { return ''; }
   }
 
   protected readonly auth = inject(FirebaseAuthService);

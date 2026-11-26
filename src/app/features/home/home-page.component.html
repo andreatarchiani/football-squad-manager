@@ -51,7 +51,7 @@
         <div class="home-pitch-stage"><div class="home-football-pitch" aria-label="Anteprima non modificabile della formazione">
           <div class="home-pitch-boundary"></div><div class="pitch-line halfway"></div><div class="pitch-circle"></div><div class="pitch-center-dot"></div><div class="pitch-box top-box"><span class="home-six-yard-box"></span></div><div class="pitch-box bottom-box"><span class="home-six-yard-box"></span></div><div class="home-penalty-spot top-spot"></div><div class="home-penalty-spot bottom-spot"></div><div class="home-penalty-arc top-arc"></div><div class="home-penalty-arc bottom-arc"></div><div class="home-corner top-left"></div><div class="home-corner top-right"></div><div class="home-corner bottom-left"></div><div class="home-corner bottom-right"></div>
           @for (slot of pitchSlots[previewFormation()]; track slot.id) {
-            <div class="home-pitch-player" [style.left.%]="previewPosition(slot).x" [style.top.%]="previewPosition(slot).y">
+            <div class="home-pitch-player" [class.is-goalkeeper]="slot.id === 'por'" [style.left.%]="previewPosition(slot).x" [style.top.%]="previewPosition(slot).y">
               <span class="home-pitch-shirt home-pitch-shirt-static">{{ previewPlayer(slot.id)?.shirtNumber ?? '—' }}</span>
               <span class="home-pitch-player-name">{{ previewPlayer(slot.id)?.lastName || slot.label }}@if (previewPlayer(slot.id); as player) { @if (player.id === captainId()) { <span class="home-leadership-mark captain-armband-mark" title="Capitano">C</span> } @else if (player.id === viceCaptainId()) { <span class="home-leadership-mark vice-armband-mark" title="Vicecapitano">VC</span> } }</span>
             </div>

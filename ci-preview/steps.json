@@ -1,9 +1,14 @@
 [
   { "name": "01-home", "settle": 2500 },
-  { "name": "02-teams", "actions": [ { "click": "button:has-text('Squadre')" }, { "wait": 1800 } ] },
-  { "name": "03-team-form", "actions": [ { "click": "button:has-text('Nuova squadra')" }, { "wait": 600 } ] },
-  { "name": "04-roster", "actions": [ { "click": "button:has-text('Annulla')" }, { "click": "button:has-text('Apri rosa')" }, { "wait": 2000 } ] },
-  { "name": "05-players", "actions": [ { "click": "button:has-text('Giocatori')" }, { "wait": 1800 } ] },
-  { "name": "06-player-form", "actions": [ { "click": "button:has-text('Nuovo giocatore')" }, { "wait": 600 } ] },
-  { "name": "07-live", "actions": [ { "click": "button:has-text('Annulla')" }, { "click": "button:has-text('Home')" }, { "wait": 2500 }, { "click": "button:has-text('Inizia partita')" }, { "wait": 3000 } ] }
+  { "name": "02-office", "actions": [ { "click": ".nfm-home-tile:has-text('Ufficio')" } ], "settle": 1200 },
+  { "name": "03-players", "actions": [ { "click": ".nfm-menu-item:has-text('Anagrafe Calciatore'), .nfm-scene-item:has-text('Anagrafe Calciatore')" } ], "settle": 2500 },
+  { "name": "04-player-form", "actions": [ { "click": "button:has-text('Nuovo giocatore')" } ], "settle": 800 },
+  { "name": "05-teams", "actions": [ { "click": "button.text-button:has-text('Annulla')" }, { "click": ".nfm-menu-item:has-text('Anagrafe Squadra'), .nfm-subnav-item:has-text('Anagrafe Squadra')" } ], "settle": 2500 },
+  { "name": "06-team-form", "actions": [ { "click": "button:has-text('Nuova squadra')" } ], "settle": 800 },
+  { "name": "07-training", "actions": [ { "click": "button.text-button:has-text('Annulla')" }, { "click": ".nfm-logo" }, { "wait": 500 }, { "click": ".nfm-home-tile:has-text('Allenamento')" } ], "settle": 1200 },
+  { "name": "08-match-hub", "actions": [ { "click": ".nfm-logo" }, { "wait": 500 }, { "click": ".nfm-home-tile:has-text('Partita')" } ], "settle": 1200 },
+  { "name": "09-formation", "actions": [ { "click": ".nfm-menu-item:has-text('Formazione'), .nfm-scene-item:has-text('Formazione')" } ], "settle": 3000 },
+  { "name": "10-lineup", "actions": [ { "click": "button:has-text('Modifica la formazione')" } ], "settle": 3000 },
+  { "name": "11-live", "actions": [ { "click": ".nfm-menu-item:has-text('Formazione'), .nfm-subnav-item:has-text('Formazione')" }, { "wait": 3000 }, { "click": "button:has-text('Inizia partita')" } ], "settle": 3500 },
+  { "name": "12-live-event", "actions": [ { "click": ".nfm-event-button:has-text('Ammonizione')" } ], "settle": 800 }
 ]

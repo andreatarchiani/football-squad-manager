@@ -249,7 +249,7 @@
                 <div class="pitch-box top-box"></div><div class="pitch-box bottom-box"></div>
                 <div class="pitch-goal top-goal"></div><div class="pitch-goal bottom-goal"></div>
                 @for (slot of slots(); track slot.id) {
-                  <div class="pitch-player" [style.left.%]="positionForSlot(slot).x" [style.top.%]="positionForSlot(slot).y"
+                  <div class="pitch-player" [class.is-goalkeeper]="slot.id === 'por'" [style.left.%]="positionForSlot(slot).x" [style.top.%]="positionForSlot(slot).y"
                     (pointerdown)="startDrag($event, slot.id)" (pointermove)="moveDrag($event)"
                     (pointerup)="endDrag()" (pointercancel)="endDrag()">
                     <button class="pitch-shirt" type="button" (click)="togglePlayerPicker(slot.id)"

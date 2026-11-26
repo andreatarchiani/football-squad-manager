@@ -882,6 +882,68 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
     this.voiceMessage.set(action.type === 'opponent-goal' ? 'Gol subito registrato.' : action.type === 'goal' ? 'Gol registrato.' : action.type === 'key-pass' ? 'Passaggio chiave registrato.' : action.type === 'yellow-card' ? 'Ammonizione registrata.' : action.type === 'red-card' ? 'Espulsione registrata.' : 'Sostituzione eseguita.');
     void this.persistMatchState();
   }
+  /* ---------- Manual event entry ("Registra evento" panel) ----------
+     Builds the same PendingAction produced by a voice command and confirms it,
+     so scores, cards, statistics and persistence follow the existing flow. */
+  protected readonly manualEvent = signal<MatchEventType | null>(null);
+  protected readonly manualPlayerId = signal('');
+  protected readonly manualSecondId = signal('');
+  protected readonly manualEventTypes: { type: MatchEventType; label: string; action: string; icon: string }[] = [
+    { type: 'goal', label: 'Gol fatto', action: 'Registra gol', icon: 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 7.2l4.1 3-1.6 4.8h-5l-1.6-4.8z' },
+    { type: 'opponent-goal', label: 'Gol subito', action: 'Registra gol subito', icon: 'M3 20V6h18v14M3 6l3 3h12l3-3M7 9v11M17 9v11M10.5 9v11M13.5 9v11M3 13h18M3 16.5h18' },
+    { type: 'yellow-card', label: 'Ammonizione', action: 'Registra ammonizione', icon: 'M8.6 3.5h6.8a1.6 1.6 0 0 1 1.6 1.6v11.8a1.6 1.6 0 0 1-1.6 1.6H8.6A1.6 1.6 0 0 1 7 16.9V5.1a1.6 1.6 0 0 1 1.6-1.6z' },
+    { type: 'red-card', label: 'Espulsione', action: 'Registra espulsione', icon: 'M8.6 3.5h6.8a1.6 1.6 0 0 1 1.6 1.6v11.8a1.6 1.6 0 0 1-1.6 1.6H8.6A1.6 1.6 0 0 1 7 16.9V5.1a1.6 1.6 0 0 1 1.6-1.6z' },
+    { type: 'key-pass', label: 'Passaggio chiave', action: 'Registra passaggio chiave', icon: 'M4 15a4 4 0 1 0 8 0a4 4 0 1 0-8 0M11 12l8.5-8.5M16 7l2.5 2.5M14 9l2 2' },
+    { type: 'substitution', label: 'Cambio', action: 'Registra cambio', icon: 'M4 9h13l-3.5-3.5M20 15H7l3.5 3.5' }
+  ];
+  protected manualEventLabel(type: MatchEventType | null): string { return this.manualEventTypes.find(item => item.type === type)?.label ?? ''; }
+  protected manualEventAction(type: MatchEventType | null): string { return this.manualEventTypes.find(item => item.type === type)?.action ?? 'Registra'; }
+  protected openManualEvent(type: MatchEventType): void {
+    if (this.finished()) return;
+    this.manualPlayerId.set(''); this.manualSecondId.set('');
+    this.manualEvent.set(type);
+  }
+  protected closeManualEvent(): void { this.manualEvent.set(null); this.manualPlayerId.set(''); this.manualSecondId.set(''); }
+  /** Players that can be the subject of the event: on the pitch and not sent off. */
+  protected manualCandidates(): PlayerRecord[] { return this.onField().filter(player => !this.redCards().includes(player.id)); }
+  /** Second choice: assist provider (goal) or incoming substitute (cambio). */
+  protected manualSecondCandidates(): PlayerRecord[] {
+    if (this.manualEvent() === 'substitution') return this.bench().filter(player => player.status === 'active' && !this.redCards().includes(player.id));
+    return this.manualCandidates().filter(player => player.id !== this.manualPlayerId());
+  }
+  protected selectManualPlayer(id: string): void { this.manualPlayerId.set(id); if (this.manualSecondId() === id) this.manualSecondId.set(''); }
+  protected selectManualSecond(id: string): void { this.manualSecondId.set(this.manualSecondId() === id ? '' : id); }
+  protected manualEventReady(): boolean {
+    const type = this.manualEvent();
+    if (!type || this.finished()) return false;
+    if (type === 'opponent-goal') return true;
+    if (type === 'substitution') return !!this.manualPlayerId() && !!this.manualSecondId() && this.changesUsed() < this.maxChanges;
+    return !!this.manualPlayerId();
+  }
+  protected submitManualEvent(): void {
+    const type = this.manualEvent();
+    if (!type || !this.manualEventReady()) return;
+    const player = this.player(this.manualPlayerId());
+    const second = this.player(this.manualSecondId());
+    const name = (p: PlayerRecord) => '#' + p.shirtNumber + ' ' + p.firstName + ' ' + p.lastName;
+    let action: PendingAction | null = null;
+    if (type === 'opponent-goal') action = { type, description: 'Gol subito' };
+    else if (player && type === 'goal') action = { type, playerId: player.id, assistPlayerId: second?.id, description: 'Gol di ' + name(player) + (second ? ' su assist di ' + name(second) : '') };
+    else if (player && type === 'key-pass') action = { type, playerId: player.id, description: 'Passaggio chiave di ' + name(player) };
+    else if (player && type === 'red-card') action = { type, playerId: player.id, description: 'Espulsione di ' + name(player) };
+    else if (player && type === 'yellow-card') {
+      const next = (this.yellowCards()[player.id] ?? 0) + 1;
+      action = { type, playerId: player.id, description: next >= 2 ? 'Seconda ammonizione: ' + name(player) + ' · espulsione automatica' : 'Ammonizione a ' + name(player) + ' (prima ammonizione)' };
+    } else if (player && second && type === 'substitution') {
+      action = { type, outgoingId: player.id, incomingId: second.id, description: 'Cambio: esce #' + player.shirtNumber + ' ' + player.lastName + ', entra #' + second.shirtNumber + ' ' + second.lastName };
+    }
+    if (!action) return;
+    this.closeManualEvent();
+    this.pending.set(action);
+    this.confirmAction();
+  }
+  protected isGoalkeeperSlot(slotId: string): boolean { return slotId === 'por'; }
+
   protected cancelAction(): void { this.voice.cancel(); this.voiceListening.set(false); this.pending.set(null); this.voiceDraft.set(''); this.voiceMessage.set('Evento annullato.'); }
   protected chooseOutgoing(player:PlayerRecord): void { if(this.playerHasRedCard(player)){this.voiceMessage.set('Un giocatore espulso non può essere sostituito. La squadra continua in inferiorità numerica.');return;} this.selectedOutgoingId.set(player.id);this.voiceMessage.set(`Selezionato ${player.lastName}. Ora scegli chi entra dalla panchina.`); }
   protected chooseIncoming(player:PlayerRecord): void {
