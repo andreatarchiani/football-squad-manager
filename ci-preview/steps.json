@@ -432,7 +432,7 @@
   "name": "25b-venue-dialog",
   "actions": [
    {
-    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-venue-set-button"
+    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) .cal-venue-set-button"
    },
    {
     "fill": ".venue-paste input",
