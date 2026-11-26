@@ -380,11 +380,11 @@
 #nfm .nfm-scene-image {
   position: absolute;
   inset: 0;
-  background: url('/theme/home-hero.webp') center / cover no-repeat;
+  background: url('/theme/home-hero.webp?v=2') center / cover no-repeat;
 }
 #nfm .nfm-scene[data-scene='office'] .nfm-scene-image { background-image: url('/theme/office.webp'); }
 #nfm .nfm-scene[data-scene='training'] .nfm-scene-image { background-image: url('/theme/training.webp'); }
-#nfm .nfm-scene[data-scene='match'] .nfm-scene-image { background-image: url('/theme/match.webp'); }
+#nfm .nfm-scene[data-scene='match'] .nfm-scene-image { background-image: url('/theme/match.webp?v=2'); }
 #nfm .nfm-scene-menu { display: none; }
 
 /* Sub navigation (phones/tablets only). */

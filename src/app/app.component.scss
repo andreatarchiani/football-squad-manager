@@ -100,7 +100,7 @@
 .bug-report-note{color:#8fb0d0}
 .bug-report-file-error{color:#ffd0d5}
 .release-changelog-close:focus-visible,.bug-report-close:focus-visible,.release-changelog-footer button:focus-visible,.bug-report-actions button:focus-visible{outline:2px solid #4fd2ff;outline-offset:3px}
-.loading-state{background:linear-gradient(180deg,#030814b3,#030814f2 70%),url('/theme/home-hero.webp') center/cover no-repeat,#04070f;color:#c9d4e6}
+.loading-state{background:linear-gradient(180deg,#030814b3,#030814f2 70%),url('/theme/home-hero.webp?v=2') center/cover no-repeat,#04070f;color:#c9d4e6}
 .loading-emblem::before{border-color:#2a9dff;box-shadow:0 0 24px #2a9dff66,inset 0 0 18px #2a9dff22}
 .loading-emblem-ball{background:radial-gradient(circle at 35% 25%,#1f3c6e,#0a1630 75%)}
 .loading-progress span{background:#2a9dff}
