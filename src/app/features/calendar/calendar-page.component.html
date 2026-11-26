@@ -1,0 +1,136 @@
+<section class="calendar-page" #calendarHost>
+  <!-- Toolbar: squadra, girone, salva -->
+  <div class="cal-toolbar">
+    <div class="cal-team-picker" [class.is-open]="teamMenuOpen()">
+      <span class="cal-label">Squadra</span>
+      <button type="button" class="cal-team-trigger" (click)="teamMenuOpen.update(open => !open)" [attr.aria-expanded]="teamMenuOpen()" aria-haspopup="listbox" [disabled]="!teams().length">
+        <strong>{{ team()?.name || 'Nessuna squadra' }}</strong>
+        @if (team()?.category) { <small>{{ team()?.category }}</small> }
+        <span class="cal-chevron" aria-hidden="true"></span>
+      </button>
+      @if (teamMenuOpen()) {
+        <div class="cal-team-menu" role="listbox" aria-label="Seleziona squadra">
+          @for (item of teams(); track item.id) {
+            <button type="button" role="option" [class.is-selected]="item.id === teamId()" [attr.aria-selected]="item.id === teamId()" (click)="selectTeam(item.id)"><span>{{ item.name }}</span><small>{{ item.category }}</small></button>
+          }
+        </div>
+      }
+    </div>
+    <label class="cal-group">
+      <span class="cal-label">Girone</span>
+      <input type="text" maxlength="80" placeholder="Es. Girone unico Arezzo" [value]="calendar().groupName" (input)="setGroupName($any($event.target).value)" [disabled]="!team()">
+    </label>
+    <button type="button" class="cal-save" (click)="save(calendarHost)" [disabled]="saving() || !team()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/></svg>
+      {{ saving() ? 'Salvataggio…' : 'Salva calendario' }}
+      @if (dirty() && !saving()) { <i class="cal-dirty" aria-label="Modifiche non salvate"></i> }
+    </button>
+  </div>
+
+  @if (error()) { <div class="cal-alert" role="alert">{{ error() }}</div> }
+
+  @if (loading()) {
+    <div class="cal-empty">Caricamento calendario…</div>
+  } @else if (!team()) {
+    <div class="cal-empty"><strong>Prima crea una squadra</strong><span>Il calendario si collega a una squadra: creala in Ufficio › Anagrafe Squadra.</span></div>
+  } @else {
+    <div class="cal-layout">
+      <!-- Squadre del girone -->
+      <aside class="cal-panel cal-teams" aria-label="Squadre del girone">
+        <header class="cal-panel-head">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a3 3 0 1 0 0-6a3 3 0 1 0 0 6M3 19.5c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5M15.8 5.3a3 3 0 0 1 0 5.4M17.6 14.2c2.1.6 3.4 2.6 3.4 5.3"/></svg>
+          <strong>Squadre del girone ({{ groupTeams().length }})</strong>
+        </header>
+        <ul>
+          @for (name of groupTeams(); track name) {
+            <li [class.is-mine]="isMine(name)"><span class="cal-crest" aria-hidden="true">{{ name.charAt(0).toUpperCase() }}</span>{{ name }}</li>
+          }
+        </ul>
+        <p class="cal-hint">Le squadre si aggiungono da sole quando scrivi gli avversari dell’andata.</p>
+      </aside>
+
+      <!-- Andata / Ritorno -->
+      <div class="cal-panel cal-main">
+        <div class="cal-tabs" role="tablist" aria-label="Fase del campionato">
+          <button type="button" role="tab" [class.active]="leg() === 'A'" [attr.aria-selected]="leg() === 'A'" (click)="leg.set('A')">Andata <small>{{ calendar().andata.length }}</small></button>
+          <button type="button" role="tab" [class.active]="leg() === 'R'" [attr.aria-selected]="leg() === 'R'" (click)="leg.set('R')">Ritorno <small>{{ calendar().ritorno.length }}</small>@if (missingReturnDates()) { <b class="cal-badge" [title]="missingReturnDates() + ' date da inserire'">{{ missingReturnDates() }}</b> }</button>
+        </div>
+
+        @if (leg() === 'A') {
+          <p class="cal-note">Inserisci data, ora, avversario e se giochi in casa o in trasferta. Il ritorno viene creato in automatico invertendo casa e trasferta.</p>
+        } @else {
+          <p class="cal-note">Ritorno generato in automatico dall’andata: inserisci solo le date (e l’ora).</p>
+        }
+
+        <div class="cal-table" role="table" [attr.aria-label]="leg() === 'A' ? 'Giornate di andata' : 'Giornate di ritorno'">
+          <div class="cal-row cal-head" role="row">
+            <span role="columnheader">G.</span><span role="columnheader">Data</span><span role="columnheader">Ora</span><span role="columnheader">Partita</span><span role="columnheader" class="cal-col-actions"></span>
+          </div>
+          @for (round of rows(); track round.number; let i = $index) {
+            <div class="cal-row" role="row" [class.is-selected]="selected()?.leg === leg() && selected()?.index === i" (click)="select(i)">
+              <span class="cal-num" role="cell">{{ round.number }}ª</span>
+              <span role="cell"><input type="date" [value]="round.date" (input)="setWhen(leg(), i, 'date', $any($event.target).value)" [class.is-missing]="leg() === 'R' && !round.date" aria-label="Data"></span>
+              <span role="cell"><input type="time" [value]="round.time" (input)="setWhen(leg(), i, 'time', $any($event.target).value)" aria-label="Ora"></span>
+              <span class="cal-match" role="cell">
+                @if (leg() === 'A') {
+                  @if (round.home) {
+                    <span class="cal-side is-mine">{{ team()?.name }}</span>
+                    <b class="cal-vs">VS</b>
+                    <label class="cal-opponent" [attr.data-field]="'opponent-' + i"><input type="text" maxlength="80" list="fsm-group-teams" placeholder="Avversario" [value]="round.opponent" (input)="setOpponent(i, $any($event.target).value)" aria-label="Avversario"></label>
+                  } @else {
+                    <label class="cal-opponent" [attr.data-field]="'opponent-' + i"><input type="text" maxlength="80" list="fsm-group-teams" placeholder="Avversario" [value]="round.opponent" (input)="setOpponent(i, $any($event.target).value)" aria-label="Avversario"></label>
+                    <b class="cal-vs">VS</b>
+                    <span class="cal-side is-mine">{{ team()?.name }}</span>
+                  }
+                } @else {
+                  <span class="cal-side" [class.is-mine]="round.home">{{ homeName(round) }}</span>
+                  <b class="cal-vs">VS</b>
+                  <span class="cal-side" [class.is-mine]="!round.home">{{ awayName(round) }}</span>
+                }
+              </span>
+              <span class="cal-col-actions" role="cell">
+                @if (leg() === 'A') {
+                  <button type="button" class="cal-place" [class.away]="!round.home" (click)="$event.stopPropagation(); setHome(i, !round.home)" [title]="round.home ? 'In casa: tocca per trasferta' : 'In trasferta: tocca per casa'">{{ round.home ? 'Casa' : 'Trasf.' }}</button>
+                  <button type="button" class="cal-delete" (click)="$event.stopPropagation(); removeRound(i)" aria-label="Elimina giornata" title="Elimina giornata"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 14h12l1-14M9 7V4h6v3"/></svg></button>
+                } @else {
+                  <span class="cal-place auto" [class.away]="!round.home">{{ round.home ? 'Casa' : 'Trasf.' }}</span>
+                }
+              </span>
+            </div>
+          } @empty {
+            <div class="cal-empty small">@if (leg() === 'A') { Nessuna giornata: aggiungi la prima. } @else { Il ritorno comparirà appena inserisci l’andata. }</div>
+          }
+        </div>
+        @if (leg() === 'A') {
+          <button type="button" class="cal-add" (click)="addRound()">＋ Aggiungi giornata</button>
+        }
+        <datalist id="fsm-group-teams">
+          @for (name of groupTeams(); track name) { @if (!isMine(name)) { <option [value]="name"></option> } }
+        </datalist>
+      </div>
+
+      <!-- Dettaglio giornata -->
+      <aside class="cal-panel cal-detail" aria-label="Dettaglio giornata">
+        @if (selectedRound(); as round) {
+          <header class="cal-panel-head">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14.5H4zM4 10.2h16M8 3.5v4.5M16 3.5v4.5"/></svg>
+            <strong>Giornata {{ round.number }}</strong><small>{{ round.leg === 'A' ? 'Andata' : 'Ritorno' }}</small>
+          </header>
+          <div class="cal-versus">
+            <div [class.is-mine]="round.home"><span class="cal-crest big" aria-hidden="true">{{ homeName(round).charAt(0).toUpperCase() }}</span><strong>{{ homeName(round) }}</strong></div>
+            <b class="cal-vs big">VS</b>
+            <div [class.is-mine]="!round.home"><span class="cal-crest big away" aria-hidden="true">{{ awayName(round).charAt(0).toUpperCase() }}</span><strong>{{ awayName(round) }}</strong></div>
+          </div>
+          <dl class="cal-facts">
+            <div><dt>Giorno</dt><dd [class.missing]="!round.date">{{ formatDate(round.date) }}</dd></div>
+            <div><dt>Ora</dt><dd [class.missing]="!round.time">{{ round.time || 'Da inserire' }}</dd></div>
+            <div><dt>Campo</dt><dd>{{ round.home ? 'In casa' + (team()?.facilityName ? ' · ' + team()?.facilityName : '') : 'In trasferta' }}</dd></div>
+          </dl>
+          <button type="button" class="cal-next" (click)="useAsNextMatch(round)" [disabled]="!round.opponent.trim()">Imposta come prossima partita ›</button>
+        } @else {
+          <div class="cal-empty small">Tocca una giornata per vedere il dettaglio.</div>
+        }
+      </aside>
+    </div>
+  }
+</section>

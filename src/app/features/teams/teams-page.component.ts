@@ -4,6 +4,7 @@ import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { TeamService, type TeamInput, type TeamRecord } from './team.service';
 import { PlayerService, type PlayerRecord } from '../players/player.service';
 import { NotificationService } from '../../core/notifications/notification.service';
+import { clearFieldProblems, showFieldProblems, type FieldProblem } from '../../core/form-feedback';
 import { LiveMatchComponent } from './live-match.component';
 
 @Component({
@@ -86,6 +87,7 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly teamSort = signal<'name-asc' | 'name-desc'>('name-asc');
   protected readonly teamSortDropdownOpen = signal(false);
   protected readonly error = signal('');
+  protected readonly formError = signal('');
   protected readonly notice = signal('');
   protected readonly editingId = signal<string | null>(null);
   protected readonly formOpen = signal(false);
@@ -578,6 +580,7 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   protected openCreate(): void {
+    this.formError.set('');
     this.editingId.set(null);
     this.formOpen.set(true);
     this.form = this.emptyForm();
@@ -588,6 +591,7 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   protected openEdit(team: TeamRecord): void {
+    this.formError.set('');
     this.editingId.set(team.id);
     this.formOpen.set(true);
     this.teamIconPreview.set('');
@@ -618,6 +622,7 @@ export class TeamsPageComponent implements OnChanges {
   }
 
   protected cancelEdit(): void {
+    this.formError.set('');
     this.editingId.set(null);
     this.formOpen.set(false);
     this.form = this.emptyForm();
@@ -626,14 +631,26 @@ export class TeamsPageComponent implements OnChanges {
     this.error.set('');
   }
 
-  protected async save(): Promise<void> {
-    const workspaceId = this.auth.workspaceId();
-    const seasonMatch = /^([0-9]{4})\/([0-9]{4})$/.exec(this.form.seasonLabel.trim());
-    if (!workspaceId || !this.form.name.trim() || !seasonMatch
-      || Number(seasonMatch[2]) !== Number(seasonMatch[1]) + 1) {
-      this.error.set('Inserisci il nome della squadra e una stagione valida nel formato 2026/2027.');
+  protected async save(formEl?: HTMLElement): Promise<void> {
+    this.formError.set('');
+    clearFieldProblems(formEl);
+    const problems: FieldProblem[] = [];
+    const empty = 'Compila questo campo';
+    if (!this.form.category?.trim()) problems.push({ field: 'category', label: 'Categoria', message: 'Seleziona la categoria' });
+    if (!this.form.name.trim()) problems.push({ field: 'name', label: 'Nome squadra', message: empty });
+    const season = this.form.seasonLabel.trim();
+    const seasonMatch = /^([0-9]{4})\/([0-9]{4})$/.exec(season);
+    if (!season) problems.push({ field: 'seasonLabel', label: 'Stagione sportiva', message: empty });
+    else if (!seasonMatch || Number(seasonMatch[2]) !== Number(seasonMatch[1]) + 1) problems.push({ field: 'seasonLabel', label: 'Stagione sportiva', message: 'Scrivi la stagione così: 2026/2027' });
+    if (problems.length) {
+      showFieldProblems(formEl, problems);
+      const names = problems.map(problem => problem.label).join(', ');
+      this.formError.set(problems.length === 1 ? `${problems[0].label}: ${problems[0].message.toLowerCase()}.` : `Controlla i campi evidenziati: ${names}.`);
+      this.notifications.notify({ title: problems.length === 1 && problems[0].message === empty ? empty : 'Controlla i campi evidenziati', message: names, type: 'warning', durationMs: 6000 });
       return;
     }
+    const workspaceId = this.auth.workspaceId();
+    if (!workspaceId) { this.formError.set('Sessione scaduta: esci e accedi di nuovo.'); return; }
 
     this.saving.set(true);
     this.error.set('');
@@ -655,7 +672,9 @@ export class TeamsPageComponent implements OnChanges {
       await this.loadTeams();
     } catch (error) {
       console.error('Unable to save team.', error);
-      this.error.set('Non è stato possibile salvare la squadra. Verifica la connessione e i permessi Firestore.');
+      const message = 'Non è stato possibile salvare la squadra. Controlla la connessione a internet e riprova.';
+      this.formError.set(message);
+      this.notifications.notify({ title: 'Squadra non salvata', message, type: 'error', durationMs: 7000 });
     } finally {
       this.saving.set(false);
     }

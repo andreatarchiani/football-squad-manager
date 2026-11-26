@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-26 — Anagrafe Dirigente, Calendario e moduli più chiari
+
+- **Nuova funzionalità — Anagrafe Dirigente:** in Ufficio puoi inserire, modificare ed eliminare i dirigenti con nome, cognome, data e luogo di nascita, residenza, CAP, documento d’identità, categoria di appartenenza, matricola e tessera federale.
+- **Nuova funzionalità — Calendario Campionato:** nell’area Partita inserisci le giornate di andata (data, ora, avversario, casa o trasferta); il ritorno viene creato in automatico invertendo casa e trasferta e ti chiede solo le date. Ogni giornata può diventare la “prossima partita” della Formazione.
+- **Miglioramento:** se un modulo (giocatore, squadra, dirigente, calendario) non può essere salvato, l’app ti porta sul campo mancante, lo evidenzia in rosso e scrive “Compila questo campo” (o il motivo preciso, ad esempio numero di maglia già usato).
+- **Correzione:** le finestre “Nuovo giocatore” e “Crea squadra” non si sovrappongono più ai campi e la cornice contiene tutto il modulo, anche su Safari; il pulsante di salvataggio resta sempre visibile.
+
 ## 2026-11-26 — Nuova interfaccia “Football Manager”
 
 - **Nuova grafica:** l’app è stata ridisegnata con tre aree a tema: **Ufficio** (arancio), **Allenamento** (verde) e **Partita** (blu LED). La Home presenta i grandi pulsanti di accesso alle aree; ogni area ha il proprio menu laterale con *Menù precedente* e *Home Page*. Su smartphone il menu diventa una barra in basso con le quattro aree e una barra di scorciatoie sotto il titolo.

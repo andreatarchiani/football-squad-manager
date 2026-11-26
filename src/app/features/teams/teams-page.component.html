@@ -24,13 +24,13 @@
   }
 
   @if (formOpen()) {
-    <div class="fsm-form-overlay" role="presentation" (click)="cancelEdit()"><form class="team-form fsm-form-dialog" role="dialog" aria-modal="true" aria-labelledby="team-form-title" (click)="$event.stopPropagation()" (ngSubmit)="save()">
+    <div class="fsm-form-overlay" role="presentation" (click)="cancelEdit()"><form #teamFormEl class="team-form fsm-form-dialog" role="dialog" aria-modal="true" aria-labelledby="team-form-title" (click)="$event.stopPropagation()" (ngSubmit)="save(teamFormEl)">
       <div class="form-heading">
         <div><span class="eyebrow">DATI PRINCIPALI</span><h3 id="team-form-title">{{ editingId() ? 'Modifica squadra' : 'Crea una squadra' }}</h3></div>
         <button class="text-button" type="button" (click)="cancelEdit()">Annulla</button>
       </div>
       <div class="form-grid">
-        <label>Categoria *
+        <label data-field="category">Categoria *
           <div class="formation-picker team-category-picker" [class.dropdown-open]="categoryDropdownOpen()">
             <button type="button" class="formation-picker-trigger" [class.is-open]="categoryDropdownOpen()" (click)="categoryDropdownOpen.update(open => !open)" [attr.aria-expanded]="categoryDropdownOpen()" aria-haspopup="listbox">
               <strong>{{ form.category || 'Seleziona la categoria' }}</strong><span class="formation-picker-chevron"></span>
@@ -130,6 +130,7 @@
         }
       </fieldset>
       <p class="form-hint">La stagione viene creata insieme alla squadra e impostata come attiva.</p>
+      @if (formError()) { <div class="form-error-banner" role="alert"><strong>Non ho salvato la squadra</strong><span>{{ formError() }}</span></div> }
       <div class="form-actions">
         <button class="primary-button" type="submit" [disabled]="saving()">{{ saving() ? 'Salvataggio…' : (editingId() ? 'Salva modifiche' : 'Crea squadra') }}</button>
       </div>

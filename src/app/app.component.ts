@@ -11,12 +11,14 @@ import { AuthPageComponent } from './features/auth/auth-page.component';
 import { TeamsPageComponent } from './features/teams/teams-page.component';
 import { PlayersPageComponent } from './features/players/players-page.component';
 import { HomePageComponent } from './features/home/home-page.component';
+import { StaffPageComponent } from './features/staff/staff-page.component';
+import { CalendarPageComponent } from './features/calendar/calendar-page.component';
 import type { TeamRecord } from './features/teams/team.service';
 import type { PlayerRecord } from './features/players/player.service';
 import { FIRESTORE_DB } from './core/firebase.tokens';
 import { addDoc, collection, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore';
 
-type AppView = 'home' | 'office' | 'training' | 'match-hub' | 'players' | 'teams' | 'formation' | 'lineup' | 'match';
+type AppView = 'home' | 'office' | 'training' | 'match-hub' | 'players' | 'teams' | 'staff' | 'calendar' | 'formation' | 'lineup' | 'match';
 type AppSection = 'home' | 'office' | 'training' | 'match';
 type IconName = keyof typeof NAV_ICONS;
 interface NavItem { label: string; icon: IconName; view?: AppView; soon?: boolean; }
@@ -49,7 +51,7 @@ const NAV_ICONS = {
 } as const;
 
 const VIEW_SECTION: Record<AppView, AppSection> = {
-  home: 'home', office: 'office', players: 'office', teams: 'office', training: 'training',
+  home: 'home', office: 'office', players: 'office', teams: 'office', staff: 'office', training: 'training', calendar: 'match',
   'match-hub': 'match', formation: 'match', lineup: 'match', match: 'match'
 };
 const SECTION_LANDING: Record<AppSection, AppView | null> = { home: null, office: 'office', training: 'training', match: 'match-hub' };
@@ -58,6 +60,8 @@ const VIEW_META: Record<AppView, { title: string; accent?: string; subtitle?: st
   office: { title: 'Ufficio', icon: 'office' },
   players: { title: 'Anagrafe Calciatore', icon: 'player', subtitle: 'Anagrafica dei calciatori e assegnazione alla squadra' },
   teams: { title: 'Anagrafe Squadra', icon: 'shield', subtitle: 'Dati della squadra, impianto e regolamento di gara' },
+  staff: { title: 'Anagrafe Dirigenti', icon: 'manager', subtitle: 'Anagrafica dei dirigenti della società' },
+  calendar: { title: 'Calendario Campionato', icon: 'calendar', subtitle: 'Andata da inserire, ritorno creato in automatico' },
   training: { title: 'Allenamenti', icon: 'cone' },
   'match-hub': { title: 'Campo', icon: 'match' },
   formation: { title: 'Formazione', icon: 'formation', subtitle: 'Prepara la prossima partita e lo schieramento titolare' },
@@ -79,7 +83,7 @@ const MAIN_SECTIONS: { label: string; icon: IconName; view: AppView; section: Ap
 const SECTION_MENU: Partial<Record<AppSection, NavItem[]>> = {
   office: [
     { label: 'Anagrafe Calciatore', icon: 'player', view: 'players' },
-    { label: 'Anagrafe Dirigente', icon: 'manager', soon: true },
+    { label: 'Anagrafe Dirigente', icon: 'manager', view: 'staff' },
     { label: 'Anagrafe Squadra', icon: 'shield', view: 'teams' },
     { label: 'Creazione Stagione / Campionato', icon: 'trophy', soon: true },
     { label: 'Configurazione statistiche', icon: 'stats', soon: true }
@@ -90,7 +94,7 @@ const SECTION_MENU: Partial<Record<AppSection, NavItem[]>> = {
     { label: 'Composizione Allenamento', icon: 'tactic', soon: true }
   ],
   match: [
-    { label: 'Calendario', icon: 'calendar', soon: true },
+    { label: 'Calendario', icon: 'calendar', view: 'calendar' },
     { label: 'Convocazione', icon: 'people', soon: true },
     { label: 'Distinta Gara', icon: 'sheet', soon: true },
     { label: 'Formazione', icon: 'formation', view: 'formation' },
@@ -109,7 +113,7 @@ interface SupportTicket { id: string; authorEmail: string; authorName: string; d
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [DatePipe, NgTemplateOutlet, MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, NotificationHostComponent],
+  imports: [DatePipe, NgTemplateOutlet, MatButtonModule, MatIconModule, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, StaffPageComponent, CalendarPageComponent, NotificationHostComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

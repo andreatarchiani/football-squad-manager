@@ -158,6 +158,28 @@ service cloud.firestore {
         allow create, update, delete: if canEdit(workspaceId);
       }
 
+      // Anagrafe Dirigente: club officials (no link to teams or seasons).
+      match /staff/{staffId} {
+        allow read: if activeMember(workspaceId);
+        allow create, update: if canEdit(workspaceId)
+          && request.resource.data.firstName is string
+          && request.resource.data.firstName.size() > 0
+          && request.resource.data.firstName.size() <= 50
+          && request.resource.data.lastName is string
+          && request.resource.data.lastName.size() > 0
+          && request.resource.data.lastName.size() <= 50;
+        allow delete: if canEdit(workspaceId);
+      }
+
+      // Calendario campionato: one document per team with all rounds.
+      match /calendars/{calendarId} {
+        allow read: if activeMember(workspaceId);
+        allow create, update: if canEdit(workspaceId)
+          && request.resource.data.rounds is list
+          && request.resource.data.rounds.size() <= 120;
+        allow delete: if canEdit(workspaceId);
+      }
+
       match /formations/{formationId} {
         allow read: if activeMember(workspaceId);
         allow create, update, delete: if canEdit(workspaceId);

@@ -1,0 +1,72 @@
+<section class="players-page staff-page">
+  <div class="page-heading">
+    <div><h2>Dirigenti</h2><p>Anagrafica dei dirigenti della società.</p></div>
+    <div class="heading-actions"><button class="primary-button" type="button" (click)="openCreate()">＋ Nuovo dirigente</button></div>
+  </div>
+  @if (error()) { <div class="feedback error" role="alert">{{ error() }}</div> }
+
+  @if (formOpen()) {
+    <div class="fsm-form-overlay" role="presentation" (click)="cancel()">
+      <form #staffFormEl class="player-form fsm-form-dialog" role="dialog" aria-modal="true" aria-labelledby="staff-form-title" (click)="$event.stopPropagation()" autocomplete="off" (ngSubmit)="save(staffFormEl)">
+        <div class="form-heading">
+          <div><span class="eyebrow">ANAGRAFICA</span><h3 id="staff-form-title">{{ editingId() ? 'Modifica dirigente' : 'Dirigente' }}</h3></div>
+          <button class="text-button" type="button" (click)="cancel()">Annulla</button>
+        </div>
+        <div class="form-grid">
+          <label>Nome *<input name="firstName" [(ngModel)]="form.firstName" maxlength="50" placeholder="Nome"></label>
+          <label>Cognome *<input name="lastName" [(ngModel)]="form.lastName" maxlength="50" placeholder="Cognome"></label>
+          <label>Data di nascita<input name="dateOfBirth" type="date" [(ngModel)]="form.dateOfBirth"></label>
+          <label>Luogo di nascita<input name="placeOfBirth" [(ngModel)]="form.placeOfBirth" maxlength="100" placeholder="Comune di nascita"></label>
+          <label>Residenza<input name="residence" [(ngModel)]="form.residence" maxlength="160" placeholder="Indirizzo di residenza"></label>
+          <label>CAP<input name="postalCode" [(ngModel)]="form.postalCode" maxlength="10" inputmode="numeric" placeholder="CAP"></label>
+          <label>Documento d'identità<input name="identityDocument" [(ngModel)]="form.identityDocument" maxlength="80" placeholder="Tipo e numero documento"></label>
+          <label class="form-dropdown-field" data-field="affiliationCategory" [class.dropdown-open]="categoryOpen()">Categoria appartenenza
+            <div class="form-dropdown">
+              <button type="button" class="form-dropdown-trigger" [class.is-open]="categoryOpen()" (click)="categoryOpen.update(open => !open)" [attr.aria-expanded]="categoryOpen()" aria-haspopup="listbox"><span>{{ form.affiliationCategory || 'Seleziona categoria' }}</span><span class="sort-picker-chevron"></span></button>
+              @if (categoryOpen()) {
+                <div class="form-dropdown-menu" role="listbox" aria-label="Seleziona categoria di appartenenza">
+                  @for (category of categories; track category) {
+                    <button type="button" class="form-dropdown-option" role="option" [class.is-selected]="form.affiliationCategory === category" [attr.aria-selected]="form.affiliationCategory === category" (click)="setCategory(category)">{{ category }} @if (form.affiliationCategory === category) { <span>✓</span> }</button>
+                  }
+                </div>
+              }
+            </div>
+          </label>
+          <label>Matricola federale<input name="federationNumber" [(ngModel)]="form.federationNumber" maxlength="50" placeholder="Matricola FIGC"></label>
+          <label>Tessera federale<input name="federationCard" [(ngModel)]="form.federationCard" maxlength="80" placeholder="Numero tessera"></label>
+        </div>
+        @if (formError()) { <div class="form-error-banner" role="alert"><strong>Non ho salvato il dirigente</strong><span>{{ formError() }}</span></div> }
+        <div class="form-actions"><button class="primary-button" type="submit" [disabled]="saving()">{{ saving() ? 'Salvataggio…' : (editingId() ? 'Salva modifiche' : 'Inserisci dirigente') }}</button></div>
+      </form>
+    </div>
+  }
+
+  <div class="list-toolbar"><div><strong>{{ staff().length }}</strong> dirigenti registrati</div></div>
+  @if (loading()) {
+    <div class="empty-state">Caricamento dirigenti…</div>
+  } @else if (staff().length === 0) {
+    <div class="empty-state"><div class="empty-icon">👔</div><h3>Nessun dirigente inserito</h3><p>Aggiungi i dirigenti della società con i dati anagrafici e federali.</p><button class="primary-button" type="button" (click)="openCreate()">Aggiungi il primo dirigente</button></div>
+  } @else {
+    <div class="player-list">
+      @for (person of staff(); track person.id) {
+        <article class="player-card staff-card">
+          <div class="record-icon-actions" aria-label="Azioni dirigente">
+            <button class="icon-action edit-action" type="button" (click)="openEdit(person)" aria-label="Modifica dirigente" title="Modifica dirigente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5M4 20l4.5-1 10.8-10.8a2.1 2.1 0 0 0-3-3L5.5 16 4 20Z"/></svg></button>
+            <button class="icon-action delete-action" type="button" (click)="remove(person)" aria-label="Elimina dirigente" title="Elimina dirigente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 14h12l1-14M9 7V4h6v3"/></svg></button>
+          </div>
+          <div class="player-number">{{ initials(person) }}</div>
+          <div class="player-details">
+            <h3>{{ person.firstName }} {{ person.lastName }}</h3>
+            <p>{{ person.affiliationCategory || 'Categoria non indicata' }}@if (person.placeOfBirth) { <span>•</span> {{ person.placeOfBirth }} }</p>
+            <div class="player-meta">
+              @if (person.dateOfBirth) { <span>{{ person.dateOfBirth }}</span> }
+              @if (person.federationNumber) { <span>Matricola {{ person.federationNumber }}</span> }
+              @if (person.federationCard) { <span>Tessera {{ person.federationCard }}</span> }
+              @if (person.identityDocument) { <span>{{ person.identityDocument }}</span> }
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

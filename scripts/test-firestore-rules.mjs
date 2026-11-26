@@ -163,6 +163,21 @@ try {
   await assertFails(updateDoc(doc(supportDb, 'supportTickets', 'ticket-1'), { description: 'tampered', updatedAt: timestamp() }));
   await assertFails(updateDoc(doc(supportDb, 'supportTickets', 'ticket-1'), { status: 'invalid', updatedAt: timestamp() }));
 
+  // Anagrafe Dirigente and Calendario: members read, editors write, outsiders nothing.
+  const staffRef = doc(ownerDb, 'workspaces', 'workspace-1', 'staff', 'staff-1');
+  await assertSucceeds(setDoc(staffRef, {
+    firstName: 'Mario', lastName: 'Rossi', dateOfBirth: '', placeOfBirth: '', residence: '', postalCode: '',
+    identityDocument: '', affiliationCategory: '', federationNumber: '', federationCard: '', createdAt: timestamp(), updatedAt: timestamp()
+  }));
+  await assertFails(setDoc(doc(ownerDb, 'workspaces', 'workspace-1', 'staff', 'staff-2'), { firstName: '', lastName: 'Rossi' }));
+  await assertSucceeds(getDoc(staffRef));
+  await assertFails(getDoc(doc(outsiderDb, 'workspaces', 'workspace-1', 'staff', 'staff-1')));
+  await assertFails(setDoc(doc(outsiderDb, 'workspaces', 'workspace-1', 'staff', 'staff-3'), { firstName: 'X', lastName: 'Y' }));
+  const calendarRef = doc(ownerDb, 'workspaces', 'workspace-1', 'calendars', 'team-1');
+  await assertSucceeds(setDoc(calendarRef, { teamId: 'team-1', teams: ['A', 'B'], rounds: [], updatedAt: timestamp() }));
+  await assertFails(setDoc(calendarRef, { teamId: 'team-1', rounds: 'not-a-list' }));
+  await assertFails(getDoc(doc(outsiderDb, 'workspaces', 'workspace-1', 'calendars', 'team-1')));
+
   process.stdout.write('Firestore Security Rules tests passed.\n');
 } finally {
   await testEnv.cleanup();
