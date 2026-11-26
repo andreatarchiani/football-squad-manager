@@ -279,7 +279,6 @@
   font-weight: 700;
   line-height: 1.1;
   text-align: center;
-  overflow-wrap: anywhere;
   text-shadow: 0 1px 3px rgba(0, 0, 0, .5);
   cursor: pointer;
   transition: transform .15s, filter .15s, box-shadow .15s;
@@ -477,7 +476,8 @@
 @media (max-width: 900px) {
   #nfm .match-scoreboard-header { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 8px; }
   #nfm .match-team { min-height: 0; padding: 8px 6px; border-radius: 14px; }
-  #nfm .match-team strong { font-size: 15px; white-space: normal; overflow-wrap: anywhere; }
+  #nfm .match-team strong { font-size: 14px; white-space: normal; overflow-wrap: break-word; text-align: center; }
+  #nfm .match-scoreboard-header .match-team em { display: none; }
   #nfm .match-team small { font-size: 9px; letter-spacing: .08em; }
   #nfm .match-team em { font-size: 10px; }
   #nfm .match-scoreboard { min-width: 104px; }
@@ -494,7 +494,7 @@
   #nfm .match-pitch-wrap .pitch-caption strong { display: none; }
   #nfm .match-tactics-toolbar .formation-picker-label { display: none; }
   #nfm .nfm-event-grid { gap: 8px; }
-  #nfm .nfm-event-button { min-height: 76px; font-size: 13px; }
+  #nfm .nfm-event-button { min-height: 76px; padding: 8px 3px; font-size: 12px; letter-spacing: -.01em; }
   #nfm .nfm-event-button svg { width: 27px; height: 27px; }
   #nfm .match-bench { max-height: none; }
   #nfm .match-event { grid-template-columns: 44px minmax(0, 1fr); padding: 5px 4px; }

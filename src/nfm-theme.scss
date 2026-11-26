@@ -426,7 +426,7 @@
 
   #nfm .nfm-main { padding: 12px 10px 18px; }
   #nfm .nfm-frame { min-height: 0; padding: 12px; border-radius: 20px; }
-  #nfm .nfm-frame::before { inset: 6px; border-radius: 15px; }
+  #nfm .nfm-frame::before { display: none; }
 
   #nfm .nfm-subnav {
     display: flex;

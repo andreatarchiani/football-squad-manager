@@ -167,5 +167,62 @@
    }
   ],
   "settle": 600
+ },
+ {
+  "name": "16-finish-confirm",
+  "actions": [
+   {
+    "click": "button.finish-match:has-text('Fine partita')"
+   }
+  ],
+  "settle": 700
+ },
+ {
+  "name": "17-report",
+  "actions": [
+   {
+    "click": "button.finish-confirm-yes"
+   }
+  ],
+  "settle": 1500
+ },
+ {
+  "name": "18-after-exit",
+  "actions": [
+   {
+    "click": "button.exit-match-report"
+   },
+   {
+    "wait": 2500
+   }
+  ],
+  "settle": 800
+ },
+ {
+  "name": "19-team-roster",
+  "actions": [
+   {
+    "click": ".nfm-logo"
+   },
+   {
+    "wait": 500
+   },
+   {
+    "click": ".nfm-home-tile:has-text('Ufficio')"
+   },
+   {
+    "wait": 600
+   },
+   {
+    "click": ".nfm-menu-item:has-text('Anagrafe Squadra'), .nfm-scene-item:has-text('Anagrafe Squadra')"
+   },
+   {
+    "wait": 2500
+   },
+   {
+    "click": "button.roster-primary-button"
+   }
+  ],
+  "settle": 2500
  }
 ]
