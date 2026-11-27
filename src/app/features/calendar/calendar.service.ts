@@ -352,29 +352,6 @@ export class CalendarService {
     return (await this.nextMatchEvent(workspaceId, teamId))?.round ?? null;
   }
 
-  private cleanCallup(info: CallupInfo): CallupInfo {
-    return {
-      meetingTime: String(info.meetingTime ?? '').slice(0, 5), meetingPlace: String(info.meetingPlace ?? '').trim().slice(0, 180),
-      kit: String(info.kit ?? '').trim().slice(0, 180), notes: String(info.notes ?? '').trim().slice(0, 600),
-      excluded: (info.excluded ?? []).slice(0, 80).map(id => String(id).slice(0, 80))
-    };
-  }
-
-  private callups(value: unknown): Record<string, CallupInfo> {
-    const result: Record<string, CallupInfo> = {};
-    if (value && typeof value === 'object') {
-      for (const [key, raw] of Object.entries(value as Record<string, Record<string, unknown>>)) {
-        result[key] = { meetingTime: String(raw?.['meetingTime'] ?? ''), meetingPlace: String(raw?.['meetingPlace'] ?? ''), kit: String(raw?.['kit'] ?? ''), notes: String(raw?.['notes'] ?? ''), excluded: Array.isArray(raw?.['excluded']) ? (raw['excluded'] as unknown[]).map(String) : [] };
-      }
-    }
-    return result;
-  }
-
-  /** Closest match from now on (today included), or null when nothing is scheduled. */
-  async nextMatch(workspaceId: string, teamId: string): Promise<CalendarRound | null> {
-    return findNextMatch(await this.load(workspaceId, teamId));
-  }
-
   private groupTeam(item: Record<string, unknown>): GroupTeam {
     const text = (key: string) => String(item[key] ?? '');
     return { id: text('id') || `t-${Math.random().toString(36).slice(2, 9)}`, name: text('name'), icon: text('icon'), city: text('city'), facilityName: text('facilityName'), headquarters: text('headquarters'), federation: text('federation'), address: text('address'), mapsUrl: text('mapsUrl'), contact: text('contact'), phone: text('phone'), email: text('email') };
