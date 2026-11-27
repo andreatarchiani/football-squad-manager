@@ -33,7 +33,7 @@
     "name": "03-players",
     "actions": [
       {
-        "click": ".nfm-menu-item:has-text('Anagrafe Calciatore'), .nfm-scene-item:has-text('Anagrafe Calciatore')"
+        "click": ".nfm-menu-item:has-text('Anagrafe Calciatore'), .nfm-subnav-item:has-text('Anagrafe Calciatore')"
       }
     ],
     "settle": 2500
@@ -164,7 +164,7 @@
     "name": "09-formation",
     "actions": [
       {
-        "click": ".nfm-menu-item:has-text('Formazione'), .nfm-scene-item:has-text('Formazione')"
+        "click": ".nfm-menu-item:has-text('Formazione'), .nfm-subnav-item:has-text('Formazione')"
       }
     ],
     "settle": 3000
@@ -284,7 +284,7 @@
         "wait": 600
       },
       {
-        "click": ".nfm-menu-item:has-text('Anagrafe squadre'), .nfm-scene-item:has-text('Anagrafe squadre')"
+        "click": ".nfm-menu-item:has-text('Anagrafe squadre'), .nfm-subnav-item:has-text('Anagrafe squadre')"
       },
       {
         "wait": 2500
@@ -311,7 +311,7 @@
         "wait": 600
       },
       {
-        "click": ".nfm-menu-item:has-text('Anagrafe Dirigente'), .nfm-scene-item:has-text('Anagrafe Dirigente')"
+        "click": ".nfm-menu-item:has-text('Anagrafe Dirigente'), .nfm-subnav-item:has-text('Anagrafe Dirigente')"
       }
     ],
     "settle": 2000
@@ -379,7 +379,7 @@
         "wait": 600
       },
       {
-        "click": ".nfm-menu-item:has-text('Creazione Stagione'), .nfm-scene-item:has-text('Creazione Stagione')"
+        "click": ".nfm-menu-item:has-text('Creazione Stagione'), .nfm-subnav-item:has-text('Creazione Stagione')"
       }
     ],
     "settle": 2500
@@ -667,7 +667,7 @@
     "name": "29-formation-next",
     "actions": [
       {
-        "click": ".nfm-menu-item:has-text('Formazione'), .nfm-scene-item:has-text('Formazione')"
+        "click": ".nfm-menu-item:has-text('Formazione'), .nfm-subnav-item:has-text('Formazione')"
       },
       {
         "wait": 2500
@@ -680,7 +680,7 @@
     "name": "30-callup",
     "actions": [
       {
-        "click": ".nfm-menu-item:has-text('Convocazione'), .nfm-scene-item:has-text('Convocazione')"
+        "click": ".nfm-menu-item:has-text('Convocazione'), .nfm-subnav-item:has-text('Convocazione')"
       },
       {
         "wait": 3000
@@ -716,7 +716,7 @@
         "wait": 2500
       },
       {
-        "click": ".nfm-menu-item:has-text('Anagrafe squadre'), .nfm-scene-item:has-text('Anagrafe squadre')"
+        "click": ".nfm-menu-item:has-text('Anagrafe squadre'), .nfm-subnav-item:has-text('Anagrafe squadre')"
       },
       {
         "wait": 2500
@@ -782,7 +782,7 @@
         "wait": 500
       },
       {
-        "click": ".nfm-menu-item:has-text('Anagrafe calciatore'), .nfm-scene-item:has-text('Anagrafe calciatore')"
+        "click": ".nfm-menu-item:has-text('Anagrafe calciatore'), .nfm-subnav-item:has-text('Anagrafe calciatore')"
       },
       {
         "wait": 2500
@@ -794,7 +794,7 @@
     "name": "34-staff-new-event",
     "actions": [
       {
-        "click": ".nfm-menu-item:has-text('Anagrafe dirigente'), .nfm-scene-item:has-text('Anagrafe dirigente')"
+        "click": ".nfm-menu-item:has-text('Anagrafe dirigente'), .nfm-subnav-item:has-text('Anagrafe dirigente')"
       },
       {
         "wait": 2500
@@ -845,7 +845,7 @@
         "wait": 2500
       },
       {
-        "click": ".nfm-menu-item:has-text('Anagrafe dirigente'), .nfm-scene-item:has-text('Anagrafe dirigente')"
+        "click": ".nfm-menu-item:has-text('Anagrafe dirigente'), .nfm-subnav-item:has-text('Anagrafe dirigente')"
       },
       {
         "wait": 2500
@@ -869,7 +869,7 @@
         "wait": 2500
       },
       {
-        "click": ".nfm-menu-item:has-text('Anagrafe squadre'), .nfm-scene-item:has-text('Anagrafe squadre')"
+        "click": ".nfm-menu-item:has-text('Anagrafe squadre'), .nfm-subnav-item:has-text('Anagrafe squadre')"
       },
       {
         "wait": 2500
@@ -899,7 +899,7 @@
         "wait": 300
       },
       {
-        "click": ".nfm-menu-item:has-text('Archivio anagrafe'), .nfm-scene-item:has-text('Archivio anagrafe')"
+        "click": ".nfm-menu-item:has-text('Archivio anagrafe'), .nfm-subnav-item:has-text('Archivio anagrafe')"
       },
       {
         "wait": 2500
