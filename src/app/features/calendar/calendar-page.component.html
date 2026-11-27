@@ -40,7 +40,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14.5H4zM4 10.2h16M8 3.5v4.5M16 3.5v4.5"/></svg>
             <strong>Andata</strong><small>{{ calendar().andata.length }} giornate</small>
           </header>
-          <p class="cal-note">Inserisci data, ora e avversario. La squadra a sinistra gioca in casa. Per le trasferte premi “Imposta il campo” e segui i 3 passi.</p>
+          <p class="cal-note">Scegli l’avversario dalle squadre del girone e inserisci data e ora. La squadra a sinistra gioca in casa: con ⇄ scambi casa e trasferta. Per le trasferte premi “Imposta il campo” e segui i 3 passi.</p>
           <ng-container [ngTemplateOutlet]="table" [ngTemplateOutletContext]="{ $implicit: 'A' }"></ng-container>
           <button type="button" class="cal-add" (click)="addRound()">＋ Aggiungi giornata</button>
         </section>
@@ -95,17 +95,19 @@
           </header>
           <ul>
             @for (name of groupTeams(); track name) {
-              <li [class.is-mine]="isMine(name)"><span class="cal-crest" aria-hidden="true">{{ name.charAt(0).toUpperCase() }}</span>{{ name }}</li>
+              @if (isMine(name)) {
+                <li class="is-mine"><span class="cal-crest" aria-hidden="true">{{ name.charAt(0).toUpperCase() }}</span><span class="cal-team-name">{{ name }}</span></li>
+              } @else if (groupTeamByName(name); as known) {
+                <li><span class="cal-crest" aria-hidden="true">{{ name.charAt(0).toUpperCase() }}</span><span class="cal-team-name">{{ name }}@if (known.city) { <small>{{ known.city }}</small> }</span><button type="button" class="cal-team-edit" (click)="editGroupTeam(known.id)">Modifica</button></li>
+              }
             }
           </ul>
-          <p class="cal-hint">Le squadre si aggiungono da sole quando scrivi gli avversari dell’andata.</p>
+          <button type="button" class="cal-add" (click)="newGroupTeam()">＋ Crea nuova squadra del girone</button>
+          <p class="cal-hint">Le squadre create qui compaiono nel menu “Avversario” di ogni giornata. Una squadra già scelta in un’altra giornata non è più selezionabile.</p>
         </section>
       </aside>
     </div>
 
-    <datalist id="fsm-group-teams">
-      @for (name of groupTeams(); track name) { @if (!isMine(name)) { <option [value]="name"></option> } }
-    </datalist>
   }
 </section>
 
@@ -124,11 +126,11 @@
             @if (round.home) {
               <span class="cal-side-name is-mine">{{ team()?.name }}</span>
             } @else {
-              <input class="cal-opponent" type="text" maxlength="80" list="fsm-group-teams" placeholder="Avversario" [value]="round.opponent" (input)="setOpponent(i, $any($event.target).value)" aria-label="Avversario (in casa)">
+              <ng-container [ngTemplateOutlet]="opponentSelect" [ngTemplateOutletContext]="{ $implicit: round, index: i }"></ng-container>
             }
-            <b class="cal-vs">VS</b>
+            <button type="button" class="cal-swap" (click)="swap(i)" aria-label="Scambia casa e trasferta" title="Scambia casa e trasferta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h14l-3.5-3.5M20 15H6l3.5 3.5"/></svg></button>
             @if (round.home) {
-              <input class="cal-opponent" type="text" maxlength="80" list="fsm-group-teams" placeholder="Avversario" [value]="round.opponent" (input)="setOpponent(i, $any($event.target).value)" aria-label="Avversario (in trasferta)">
+              <ng-container [ngTemplateOutlet]="opponentSelect" [ngTemplateOutletContext]="{ $implicit: round, index: i }"></ng-container>
             } @else {
               <span class="cal-side-name is-mine">{{ team()?.name }}</span>
             }
@@ -167,6 +169,42 @@
     }
   </div>
 </ng-template>
+
+<ng-template #opponentSelect let-round let-index="index">
+  <select class="cal-opponent" [value]="round.opponent" (change)="setOpponent(index, $any($event.target).value)" [class.is-missing]="!round.opponent" aria-label="Avversario">
+    <option value="" [selected]="!round.opponent">{{ calendar().groupTeams.length ? 'Scegli avversario' : 'Crea prima le squadre' }}</option>
+    @for (item of availableTeams(index); track item.id) { <option [value]="item.name" [selected]="item.name === round.opponent">{{ item.name }}</option> }
+  </select>
+</ng-template>
+
+<!-- Nuova squadra del girone -->
+@if (teamEditor(); as draft) {
+  <div class="venue-backdrop" role="presentation" (click)="closeTeamEditor()">
+    <section class="venue-dialog" role="dialog" aria-modal="true" aria-labelledby="gt-title" (click)="$event.stopPropagation()">
+      <header class="venue-head">
+        <div><small>SQUADRE DEL GIRONE</small><h3 id="gt-title">{{ teamEditorOriginal() ? 'Modifica squadra' : 'Nuova squadra' }}</h3></div>
+        <button type="button" class="venue-close" (click)="closeTeamEditor()" aria-label="Chiudi">×</button>
+      </header>
+      <div class="gt-form">
+        <label>Nome squadra *<input type="text" maxlength="80" [value]="draft.name" (input)="setTeamField('name', $any($event.target).value)" placeholder="Es. A.S.D. Levane" [class.is-missing]="!draft.name.trim()"></label>
+        @if (teamEditorError()) { <p class="venue-bad">{{ teamEditorError() }}</p> }
+        <label>Città<input type="text" maxlength="80" [value]="draft.city" (input)="setTeamField('city', $any($event.target).value)"></label>
+        <label>Indirizzo del campo<input type="text" maxlength="180" [value]="draft.address" (input)="setTeamField('address', $any($event.target).value)" placeholder="Via, numero"></label>
+        <label>Link di Maps del campo <small>(facoltativo)</small><input type="url" inputmode="url" maxlength="400" [value]="draft.mapsUrl" (input)="setTeamField('mapsUrl', $any($event.target).value.trim())" placeholder="Condividi › Copia link in Maps"></label>
+        <label>Referente<input type="text" maxlength="80" [value]="draft.contact" (input)="setTeamField('contact', $any($event.target).value)"></label>
+        <div class="gt-two">
+          <label>Telefono<input type="tel" maxlength="40" [value]="draft.phone" (input)="setTeamField('phone', $any($event.target).value)"></label>
+          <label>Email<input type="email" maxlength="120" [value]="draft.email" (input)="setTeamField('email', $any($event.target).value)"></label>
+        </div>
+      </div>
+      <footer class="venue-actions">
+        @if (teamEditorOriginal()) { <button type="button" class="venue-remove" (click)="removeGroupTeam()" [disabled]="isTeamUsed(draft.name)" [title]="isTeamUsed(draft.name) ? 'È usata in una giornata: toglila prima dal calendario' : ''">Elimina</button> }
+        <button type="button" class="venue-secondary" (click)="closeTeamEditor()">Annulla</button>
+        <button type="button" class="venue-save" (click)="saveGroupTeam()" [disabled]="!teamEditorValid()">Salva squadra</button>
+      </footer>
+    </section>
+  </div>
+}
 
 <!-- Campo della trasferta: procedura guidata in 3 passi -->
 @if (venueEditor(); as editor) {

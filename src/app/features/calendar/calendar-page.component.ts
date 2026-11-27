@@ -3,7 +3,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { TeamService, type TeamRecord } from '../teams/team.service';
-import { CalendarService, coordinatesFromLink, isMapsLink, mapsLink, buildReturnLeg, duplicateDates, emptyCalendar, findNextMatch, type CalendarData, type CalendarRound } from './calendar.service';
+import { CalendarService, coordinatesFromLink, isMapsLink, mapsLink, buildReturnLeg, duplicateDates, emptyCalendar, findNextMatch, emptyGroupTeam, type CalendarData, type CalendarRound, type GroupTeam } from './calendar.service';
 
 type Leg = 'A' | 'R';
 
@@ -30,17 +30,14 @@ export class CalendarPageComponent implements OnDestroy {
   protected readonly error = signal('');
 
   protected readonly team = computed(() => this.teams().find(team => team.id === this.teamId()));
-  /** Teams of the group: my team plus every opponent written in the first leg. */
+  /** Teams of the group: my team plus the teams created in the group list. */
   protected readonly groupTeams = computed(() => {
-    const names = new Map<string, string>();
+    const names = [...this.calendar().groupTeams.map(team => team.name)];
     const mine = this.team()?.name;
-    if (mine) names.set(mine.toLowerCase(), mine);
-    for (const round of this.calendar().andata) {
-      const name = round.opponent.trim();
-      if (name && !names.has(name.toLowerCase())) names.set(name.toLowerCase(), name);
-    }
-    return [...names.values()];
+    return mine ? [mine, ...names.filter(name => name.toLowerCase() !== mine.toLowerCase())] : names;
   });
+  /** Opponents already used in the first leg (each team is met once). */
+  private readonly usedOpponents = computed(() => this.calendar().andata.map(round => round.opponent.trim().toLowerCase()));
   /** Next match: the closest date from today (no need to choose it). */
   protected readonly nextMatch = computed(() => findNextMatch(this.calendar()));
   protected readonly conflicts = computed(() => duplicateDates(this.calendar()));
@@ -74,6 +71,73 @@ export class CalendarPageComponent implements OnDestroy {
   protected removeRound(index: number): void {
     this.updateAndata(andata => andata.filter((_, i) => i !== index).map((round, i) => ({ ...round, number: i + 1 })));
   }
+
+  protected swap(index: number): void {
+    this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, home: !round.home } : round));
+  }
+
+  /** Teams that can still be chosen in this round: not mine, not already picked in another round. */
+  protected availableTeams(index: number): GroupTeam[] {
+    const used = this.usedOpponents();
+    const mine = this.team()?.name.toLowerCase();
+    return this.calendar().groupTeams.filter(team => {
+      const name = team.name.toLowerCase();
+      return name !== mine && (!used.includes(name) || used[index] === name);
+    });
+  }
+
+  /* ------------------------------------------- squadre del girone */
+  protected readonly teamEditor = signal<GroupTeam | null>(null);
+  private readonly originalName = signal('');
+  protected readonly teamEditorOriginal = this.originalName.asReadonly();
+  protected readonly teamEditorValid = computed(() => {
+    const draft = this.teamEditor();
+    if (!draft || !draft.name.trim()) return false;
+    const name = draft.name.trim().toLowerCase();
+    return name !== this.team()?.name.toLowerCase() && !this.calendar().groupTeams.some(team => team.id !== draft.id && team.name.toLowerCase() === name);
+  });
+  protected readonly teamEditorError = computed(() => {
+    const draft = this.teamEditor();
+    if (!draft?.name.trim()) return '';
+    return this.teamEditorValid() ? '' : 'Esiste già una squadra con questo nome nel girone.';
+  });
+
+  protected newGroupTeam(): void { this.originalName.set(''); this.teamEditor.set({ ...emptyGroupTeam(), id: `t-${Date.now().toString(36)}` }); }
+  protected editGroupTeam(id: string): void {
+    const team = this.calendar().groupTeams.find(item => item.id === id);
+    if (team) { this.originalName.set(team.name); this.teamEditor.set({ ...team }); }
+  }
+  protected setTeamField(key: keyof GroupTeam, value: string): void { this.teamEditor.update(draft => draft ? { ...draft, [key]: value } : draft); }
+  protected closeTeamEditor(): void { this.teamEditor.set(null); }
+
+  protected saveGroupTeam(): void {
+    const draft = this.teamEditor();
+    if (!draft || !this.teamEditorValid()) return;
+    const team = { ...draft, name: draft.name.trim(), mapsUrl: isMapsLink(draft.mapsUrl) ? draft.mapsUrl.trim() : '' };
+    const old = this.originalName();
+    this.calendar.update(data => {
+      const exists = data.groupTeams.some(item => item.id === team.id);
+      const groupTeams = exists ? data.groupTeams.map(item => item.id === team.id ? team : item) : [...data.groupTeams, team];
+      // A renamed team keeps its rounds.
+      const rename = (round: CalendarRound) => old && round.opponent === old ? { ...round, opponent: team.name } : round;
+      const andata = data.andata.map(rename);
+      return { ...data, groupTeams, andata, ritorno: buildReturnLeg(andata, data.ritorno.map(rename)) };
+    });
+    this.teamEditor.set(null);
+    this.scheduleSave();
+  }
+
+  protected removeGroupTeam(): void {
+    const draft = this.teamEditor();
+    if (!draft || this.isTeamUsed(draft.name)) return;
+    this.calendar.update(data => ({ ...data, groupTeams: data.groupTeams.filter(team => team.id !== draft.id) }));
+    this.teamEditor.set(null);
+    this.scheduleSave();
+  }
+
+  protected isTeamUsed(name: string): boolean { return this.usedOpponents().includes(name.trim().toLowerCase()); }
+  protected groupTeamByName(name: string): GroupTeam | undefined { return this.calendar().groupTeams.find(team => team.name.toLowerCase() === name.trim().toLowerCase()); }
+  protected groupTeamOf(id: string): GroupTeam | undefined { return this.calendar().groupTeams.find(team => team.id === id); }
 
   protected setOpponent(index: number, value: string): void {
     this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, opponent: value } : round));
@@ -145,7 +209,10 @@ export class CalendarPageComponent implements OnDestroy {
   protected mapsUrl(round: CalendarRound): string | null {
     if (round.home) { const team = this.team(); const address = [team?.facilityName, team?.facilityAddress].filter(Boolean).join(', '); return team?.facilityAddress ? mapsLink(address) : null; }
     if (round.venueUrl) return round.venueUrl;
-    return round.venue.trim() ? mapsLink(round.venue, round.venueLat, round.venueLon) : null;
+    if (round.venue.trim()) return mapsLink(round.venue, round.venueLat, round.venueLon);
+    const known = this.groupTeamByName(round.opponent);
+    if (known?.mapsUrl) return known.mapsUrl;
+    return known?.address ? mapsLink([known.address, known.city].filter(Boolean).join(', ')) : null;
   }
 
   protected async shareVenue(round: CalendarRound): Promise<void> {
@@ -172,7 +239,12 @@ export class CalendarPageComponent implements OnDestroy {
     const team = this.team();
     return [team?.facilityName, team?.facilityAddress].filter(Boolean).join(' · ') || 'Indirizzo della tua squadra (inseriscilo in Anagrafe Squadra)';
   }
-  protected venueOf(round: CalendarRound): string { return round.home ? this.homeVenue() : (round.venue || (round.venueUrl ? 'Posizione salvata da Maps' : 'Campo da indicare')); }
+  /** Pitch address saved with the opponent in the group list. */
+  protected knownVenue(round: CalendarRound): string {
+    const known = this.groupTeamByName(round.opponent);
+    return known ? [known.address, known.city].filter(Boolean).join(', ') : '';
+  }
+  protected venueOf(round: CalendarRound): string { return round.home ? this.homeVenue() : (round.venue || this.knownVenue(round) || (round.venueUrl ? 'Posizione salvata da Maps' : 'Campo da indicare')); }
   protected formatDate(value: string): string {
     if (!value) return 'Data da inserire';
     const date = new Date(`${value}T12:00:00`);
@@ -256,7 +328,14 @@ export class CalendarPageComponent implements OnDestroy {
     this.loading.set(true);
     try {
       const data = await this.service.load(workspaceId, teamId);
-      this.calendar.set({ ...data, ritorno: buildReturnLeg(data.andata, data.ritorno) });
+      // Calendars made before the group list: turn the typed opponents into teams of the group.
+      const known = new Set(data.groupTeams.map(team => team.name.toLowerCase()));
+      const groupTeams = [...data.groupTeams];
+      for (const round of data.andata) {
+        const name = round.opponent.trim();
+        if (name && !known.has(name.toLowerCase())) { known.add(name.toLowerCase()); groupTeams.push({ ...emptyGroupTeam(), id: `t-${groupTeams.length}-${Date.now().toString(36)}`, name }); }
+      }
+      this.calendar.set({ ...data, groupTeams, ritorno: buildReturnLeg(data.andata, data.ritorno) });
       this.error.set('');
     } catch (error) {
       console.error('Unable to load calendar.', error);

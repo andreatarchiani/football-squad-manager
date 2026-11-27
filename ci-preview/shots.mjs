@@ -104,6 +104,7 @@ for (const [vpName, vp] of Object.entries(viewports)) {
       for (const a of step.actions || []) {
         if (a.click) await page.locator(`${a.click} >> visible=true`).first().click({ timeout: 6000 });
         if (a.fill) await page.locator(`${a.fill} >> visible=true`).first().fill(a.value, { timeout: 6000 });
+        if (a.select) await page.locator(`${a.select} >> visible=true`).first().selectOption(a.value, { timeout: 6000 });
         if (a.press) await page.keyboard.press(a.press);
         if (a.wait) await page.waitForTimeout(a.wait);
         if (a.eval) await page.evaluate(a.eval);

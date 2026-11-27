@@ -34,13 +34,28 @@ export function mapsLink(address: string, lat?: number | null, lon?: number | nu
 }
 
 
+/** A team of the group (girone) with its details. */
+export interface GroupTeam {
+  id: string;
+  name: string;
+  city: string;
+  address: string;     // address of the pitch
+  mapsUrl: string;     // optional link copied from Maps
+  contact: string;     // contact person
+  phone: string;
+  email: string;
+}
+
+export function emptyGroupTeam(): GroupTeam { return { id: '', name: '', city: '', address: '', mapsUrl: '', contact: '', phone: '', email: '' }; }
+
 export interface CalendarData {
   groupName: string;       // e.g. "Girone unico Arezzo"
+  groupTeams: GroupTeam[]; // teams of the group, chosen from a list in each round
   andata: CalendarRound[];
   ritorno: CalendarRound[];
 }
 
-export function emptyCalendar(): CalendarData { return { groupName: '', andata: [], ritorno: [] }; }
+export function emptyCalendar(): CalendarData { return { groupName: '', groupTeams: [], andata: [], ritorno: [] }; }
 
 /**
  * Builds the return leg from the first leg: same opponents in the same order,
@@ -93,6 +108,7 @@ export class CalendarService {
     const rounds = Array.isArray(data['rounds']) ? (data['rounds'] as Record<string, unknown>[]).map(item => this.round(item)) : [];
     return {
       groupName: String(data['groupName'] ?? ''),
+      groupTeams: Array.isArray(data['groupTeams']) ? (data['groupTeams'] as Record<string, unknown>[]).map(item => this.groupTeam(item)).filter(team => team.name) : [],
       andata: rounds.filter(round => round.leg === 'A').sort((a, b) => a.number - b.number),
       ritorno: rounds.filter(round => round.leg === 'R').sort((a, b) => a.number - b.number)
     };
@@ -109,6 +125,11 @@ export class CalendarService {
       teamId,
       teamName,
       groupName: calendar.groupName.trim().slice(0, 80),
+      groupTeams: calendar.groupTeams.slice(0, 40).map(team => ({
+        id: team.id, name: team.name.trim().slice(0, 80), city: team.city.trim().slice(0, 80), address: team.address.trim().slice(0, 180),
+        mapsUrl: isMapsLink(team.mapsUrl) ? team.mapsUrl.trim().slice(0, 400) : '', contact: team.contact.trim().slice(0, 80),
+        phone: team.phone.trim().slice(0, 40), email: team.email.trim().slice(0, 120)
+      })),
       rounds: [...calendar.andata, ...calendar.ritorno].map(clean),
       updatedAt: serverTimestamp()
     });
@@ -117,6 +138,11 @@ export class CalendarService {
   /** Closest match from now on (today included), or null when nothing is scheduled. */
   async nextMatch(workspaceId: string, teamId: string): Promise<CalendarRound | null> {
     return findNextMatch(await this.load(workspaceId, teamId));
+  }
+
+  private groupTeam(item: Record<string, unknown>): GroupTeam {
+    const text = (key: string) => String(item[key] ?? '');
+    return { id: text('id') || `t-${Math.random().toString(36).slice(2, 9)}`, name: text('name'), city: text('city'), address: text('address'), mapsUrl: text('mapsUrl'), contact: text('contact'), phone: text('phone'), email: text('email') };
   }
 
   private round(item: Record<string, unknown>): CalendarRound {

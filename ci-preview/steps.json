@@ -385,6 +385,70 @@
   "settle": 2500
  },
  {
+  "name": "24b-group-teams",
+  "actions": [
+   {
+    "click": ".cal-teams button.cal-add"
+   },
+   {
+    "fill": ".gt-form label:nth-of-type(1) input",
+    "value": "Fulgor Castelfranco"
+   },
+   {
+    "fill": ".gt-form label:nth-of-type(2) input",
+    "value": "Castelfranco"
+   },
+   {
+    "click": "button.venue-save"
+   },
+   {
+    "wait": 500
+   },
+   {
+    "click": ".cal-teams button.cal-add"
+   },
+   {
+    "fill": ".gt-form label:nth-of-type(1) input",
+    "value": "Atletico Levane Leona"
+   },
+   {
+    "fill": ".gt-form label:nth-of-type(2) input",
+    "value": "Levane"
+   },
+   {
+    "click": "button.venue-save"
+   },
+   {
+    "wait": 500
+   },
+   {
+    "click": ".cal-teams button.cal-add"
+   },
+   {
+    "fill": ".gt-form label:nth-of-type(1) input",
+    "value": "Montevarchi Giovani"
+   },
+   {
+    "fill": ".gt-form label:nth-of-type(2) input",
+    "value": "Montevarchi"
+   }
+  ],
+  "settle": 600,
+  "full": false
+ },
+ {
+  "name": "24c-group-saved",
+  "actions": [
+   {
+    "click": "button.venue-save"
+   },
+   {
+    "wait": 500
+   }
+  ],
+  "settle": 400
+ },
+ {
   "name": "25-calendar-andata",
   "actions": [
    {
@@ -397,8 +461,8 @@
     "click": "button.cal-add"
    },
    {
-    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) .cal-opponent",
-    "value": "Fulgor Castelfranco"
+    "value": "Fulgor Castelfranco",
+    "select": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) .cal-opponent"
    },
    {
     "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=date]",
@@ -409,8 +473,8 @@
     "value": "15:30"
    },
    {
-    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-opponent",
-    "value": "Atletico Levane Leona"
+    "value": "Atletico Levane Leona",
+    "select": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-opponent"
    },
    {
     "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) input[type=date]",
@@ -432,7 +496,7 @@
   "name": "25b-venue-dialog",
   "actions": [
    {
-    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) .cal-venue-set-button"
+    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-venue-set-button"
    },
    {
     "fill": ".venue-paste input",

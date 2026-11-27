@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-27 — Squadre del girone e freccia casa/trasferta
+
+- **Nuovo:** nella lista “Squadre del girone” il pulsante “Crea nuova squadra del girone” permette di inserire nome, città, campo (indirizzo e link Maps), referente, telefono ed email. Le squadre si possono modificare ed eliminare (se non usate).
+- **Modifica:** nelle giornate dell’andata l’avversario si sceglie da un menu con le squadre del girone; quelle già scelte in un’altra giornata spariscono dal menu.
+- **Ripristinato:** la freccia ⇄ per scambiare casa e trasferta nell’andata.
+- I calendari già inseriti vengono convertiti: gli avversari scritti prima diventano squadre del girone.
+
 ## 2026-11-26 — Campo della trasferta in 3 passi
 
 - **Modifica:** per il campo delle trasferte c’è un solo pulsante “Imposta il campo”, che apre una guida in 3 passi: apri Maps, copia il link del campo (Condividi › Copia link), incollalo; l’app conferma se il link è valido. Poi dalla giornata si apre direttamente in Maps.
