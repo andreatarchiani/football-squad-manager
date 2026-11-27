@@ -75,14 +75,16 @@
       <!-- Anteprima condivisione -->
       <aside class="cu-side">
         <section class="cu-panel cu-share">
-          <header class="cu-head"><strong>Messaggio da condividere</strong></header>
-          <pre class="cu-preview">{{ shareText() }}</pre>
-          <div class="cu-actions">
-            <button type="button" class="cu-primary" (click)="share()">📤 Condividi convocazione</button>
-            <a class="cu-secondary" [href]="whatsappUrl()" target="_blank" rel="noopener">WhatsApp</a>
-            <button type="button" class="cu-secondary" (click)="copy()">Copia testo</button>
+          <header class="cu-head"><strong>Immagine da inviare ai giocatori</strong></header>
+          <div class="cu-image-box" [class.is-busy]="imageBusy()">
+            @if (imageUrl()) { <img class="cu-image" [src]="imageUrl()" alt="Convocazione pronta da condividere"> } @else { <p class="cu-hint">Preparazione dell’immagine…</p> }
           </div>
-          <p class="cu-hint">Il messaggio contiene titolari, panchina, orari, ritrovo e il link di Maps del campo.</p>
+          <div class="cu-actions">
+            <button type="button" class="cu-primary" (click)="share()" [disabled]="!imageUrl()">📤 Condividi immagine</button>
+            <button type="button" class="cu-secondary" (click)="download()" [disabled]="!imageUrl()">⬇ Scarica</button>
+            @if (venue().url) { <button type="button" class="cu-secondary" (click)="copyMapsLink()">Copia link Maps</button> }
+          </div>
+          <p class="cu-hint">L’immagine contiene titolari, panchina, orari, ritrovo e campo. Condividendola, il link di Maps del campo viaggia insieme come didascalia.</p>
         </section>
       </aside>
     </div>

@@ -4,6 +4,7 @@ import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { TeamService, type TeamRecord } from '../teams/team.service';
 import { PlayerService, type PlayerRecord } from '../players/player.service';
+import { renderCallupImage, type CallupImageData, type CallupImagePlayer } from './callup-image';
 import { CalendarService, emptyCallup, eventTitle, mapsLink, type CalendarData, type CalendarRound, type CallupInfo } from '../calendar/calendar.service';
 
 interface CallupPlayer { player: PlayerRecord; tag: string; }
@@ -60,11 +61,25 @@ export class CallupPageComponent {
   });
   protected readonly groups = GROUPS;
   protected readonly venue = computed(() => this.matchVenue());
-  protected readonly shareText = computed(() => this.buildText());
+  /** The picture of the call-up (what the coach sends to the players). */
+  protected readonly imageData = computed<CallupImageData | null>(() => this.buildImageData());
+  protected readonly imageUrl = signal('');
+  protected readonly imageBusy = signal(false);
+  private imageBlob: Blob | null = null;
+  private imageTimer: ReturnType<typeof setTimeout> | null = null;
 
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
 
-  constructor() { effect(() => { if (this.auth.workspaceId()) void this.load(); }); }
+  constructor() {
+    effect(() => { if (this.auth.workspaceId()) void this.load(); });
+    effect(() => {
+      const data = this.imageData();
+      if (this.imageTimer) clearTimeout(this.imageTimer);
+      if (!data) { this.imageUrl.set(''); this.imageBlob = null; return; }
+      this.imageBusy.set(true);
+      this.imageTimer = setTimeout(() => void this.refreshImage(data), 250);
+    });
+  }
 
   /* ------------------------------------------------------------ edits */
   protected setField(key: 'meetingTime' | 'meetingPlace' | 'kit' | 'notes', value: string): void {
@@ -78,24 +93,53 @@ export class CallupPageComponent {
   }
 
   /* ------------------------------------------------------------- share */
-  protected async share(): Promise<void> {
-    const text = this.shareText();
-    const title = `Convocazione ${this.team()?.name ?? ''}`.trim();
+  private async refreshImage(data: CallupImageData): Promise<void> {
     try {
-      if (navigator.share) { await navigator.share({ title, text }); return; }
-      await navigator.clipboard.writeText(text);
-      this.notifications.notify({ title: 'Convocazione copiata', message: 'Incollala in WhatsApp o in un messaggio.', type: 'success' });
+      const blob = await renderCallupImage(data);
+      if (this.imageUrl()) URL.revokeObjectURL(this.imageUrl());
+      this.imageBlob = blob;
+      this.imageUrl.set(URL.createObjectURL(blob));
+    } catch (error) { console.error('Unable to draw the call-up picture.', error); this.imageUrl.set(''); }
+    finally { this.imageBusy.set(false); }
+  }
+
+  private fileName(): string {
+    const round = this.round();
+    return `convocazione-${(this.team()?.name ?? 'squadra').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-g${round?.number ?? ''}.png`;
+  }
+
+  /** Opens the phone's share sheet with the picture (WhatsApp, Telegram…). The Maps link goes along as the caption. */
+  protected async share(): Promise<void> {
+    if (!this.imageBlob) return;
+    const file = new File([this.imageBlob], this.fileName(), { type: 'image/png' });
+    const url = this.venue().url;
+    try {
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: `Convocazione ${this.team()?.name ?? ''}`.trim(), text: url ? `Campo: ${url}` : '' });
+        return;
+      }
+      this.download();
+      this.notifications.notify({ title: 'Immagine scaricata', message: 'Questo dispositivo non può condividere direttamente: allega l’immagine in WhatsApp.', type: 'info', durationMs: 7000 });
     } catch (error) {
-      if ((error as Error).name !== 'AbortError') this.notifications.notify({ title: 'Condivisione non riuscita', message: 'Usa “Copia testo” e incolla il messaggio.', type: 'warning', durationMs: 7000 });
+      if ((error as Error).name !== 'AbortError') { this.download(); this.notifications.notify({ title: 'Condivisione non riuscita', message: 'Ho scaricato l’immagine: allegala tu in WhatsApp.', type: 'warning', durationMs: 7000 }); }
     }
   }
 
-  protected async copy(): Promise<void> {
-    try { await navigator.clipboard.writeText(this.shareText()); this.notifications.notify({ title: 'Testo copiato', message: 'Incollalo dove vuoi: contiene anche il link di Maps.', type: 'success' }); }
-    catch { this.notifications.notify({ title: 'Copia non riuscita', message: 'Il browser non permette di copiare: usa “Condividi”.', type: 'warning' }); }
+  protected download(): void {
+    if (!this.imageBlob) return;
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(this.imageBlob);
+    link.download = this.fileName();
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(link.href), 4000);
   }
 
-  protected whatsappUrl(): string { return `https://wa.me/?text=${encodeURIComponent(this.shareText())}`; }
+  protected async copyMapsLink(): Promise<void> {
+    const url = this.venue().url;
+    if (!url) return;
+    try { await navigator.clipboard.writeText(url); this.notifications.notify({ title: 'Link copiato', message: 'Link di Maps del campo copiato.', type: 'success' }); }
+    catch { this.notifications.notify({ title: 'Copia non riuscita', message: 'Il browser non permette di copiare.', type: 'warning' }); }
+  }
 
   /* ----------------------------------------------------------- helpers */
   protected homeName(): string { const round = this.round(); return round?.home ? (this.team()?.name ?? '') : (round?.opponent ?? ''); }
@@ -134,40 +178,19 @@ export class CallupPageComponent {
     return { name, url };
   }
 
-  private line(item: CallupPlayer, withTag: boolean): string {
-    const { player } = item;
-    const number = player.shirtNumber != null ? `#${player.shirtNumber} ` : '';
-    const badge = this.badge(player);
-    return `${withTag ? item.tag + ' · ' : '• '}${number}${this.fullName(player)}${badge ? ` (${badge})` : ''}`;
-  }
-
-  private buildText(): string {
+  private buildImageData(): CallupImageData | null {
     const team = this.team(); const round = this.round(); const info = this.info();
-    if (!team || !round) return '';
-    const venue = this.venue();
-    const out: string[] = [];
-    out.push('📋 CONVOCAZIONE');
-    out.push(`${team.name}${team.category ? ' · ' + team.category : ''}`);
+    if (!team || !round) return null;
     const calendar = this.calendar();
-    const group = calendar ? eventTitle(calendar) : '';
-    out.push(`${group ? group + ' · ' : ''}Giornata ${round.number} · ${round.leg === 'A' ? 'Andata' : 'Ritorno'}`);
-    out.push('');
-    out.push(`🆚 ${this.homeName()} – ${this.awayName()}`);
-    out.push(`📅 ${this.formatDate(round.date)}${round.time ? ` · gara ore ${round.time}` : ''}`);
-    if (info.meetingTime || info.meetingPlace) out.push(`🤝 Ritrovo${info.meetingTime ? ' ore ' + info.meetingTime : ''}${info.meetingPlace ? ' · ' + info.meetingPlace : ''}`);
-    out.push(`🏟️ ${round.home ? 'In casa' : 'In trasferta'}${venue.name ? ' · ' + venue.name : ''}`);
-    if (venue.url) out.push(`🗺️ Maps: ${venue.url}`);
-    if (info.kit) out.push(`👕 ${info.kit}`);
-    out.push('');
-    out.push(`⭐ TITOLARI${this.formation() ? ' (' + this.formation() + ')' : ''}`);
-    if (this.starters().length) this.starters().forEach(item => out.push(this.line(item, true))); else out.push('Formazione da definire');
-    out.push('');
-    out.push('🪑 PANCHINA');
-    if (this.bench().length) this.bench().forEach(item => out.push(this.line(item, false))); else out.push('—');
-    if (info.notes) { out.push(''); out.push(`📝 ${info.notes}`); }
-    out.push('');
-    out.push(`Convocati: ${this.called().length}`);
-    return out.join('\n');
+    const toImage = (item: CallupPlayer): CallupImagePlayer => ({ tag: item.tag, number: item.player.shirtNumber != null ? String(item.player.shirtNumber) : '', name: this.fullName(item.player), badge: this.badge(item.player) });
+    return {
+      teamName: team.name, category: team.category, icon: team.icon || '⚽', eventTitle: calendar ? eventTitle(calendar) : '',
+      roundLabel: `Giornata ${round.number} · ${round.leg === 'A' ? 'Andata' : 'Ritorno'}`,
+      home: this.homeName(), away: this.awayName(), teamIsHome: round.home,
+      date: this.formatDate(round.date), time: round.time || '', meetingTime: info.meetingTime, meetingPlace: info.meetingPlace,
+      venue: [round.home ? 'In casa' : 'In trasferta', this.venue().name].filter(Boolean).join(' · '), kit: info.kit, notes: info.notes,
+      formation: this.formation(), starters: this.starters().map(toImage), bench: this.bench().map(toImage), calledCount: this.called().length
+    };
   }
 
   /* -------------------------------------------------- load and save */
