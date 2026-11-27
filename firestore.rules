@@ -180,6 +180,13 @@ service cloud.firestore {
         allow delete: if canEdit(workspaceId);
       }
 
+      // Squadre esportate dall'app: copie della rosa da importare in altri eventi.
+      match /squadExports/{exportId} {
+        allow read: if activeMember(workspaceId);
+        allow create, update, delete: if canEdit(workspaceId)
+          && (request.method == 'delete' || (request.resource.data.name is string && request.resource.data.players is list && request.resource.data.players.size() <= 80));
+      }
+
       match /formations/{formationId} {
         allow read: if activeMember(workspaceId);
         allow create, update, delete: if canEdit(workspaceId);

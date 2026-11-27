@@ -33,12 +33,13 @@ export class SquadsPageComponent implements OnChanges {
   protected readonly team = signal<TeamRecord | null>(null);
   protected readonly importOpen = signal(false);
   protected readonly importMode = signal<'event' | 'file'>('event');
-  protected readonly sources = signal<{ id: string; title: string; team: string; players: number }[]>([]);
+  protected readonly sources = signal<{ id: string; name: string; eventTitle: string; count: number }[]>([]);
   protected readonly sourceTitle = signal('');
   protected readonly busy = signal(false);
   protected readonly message = signal('');
   protected readonly refreshKey = signal(0);
-  protected readonly sourceLabels = computed(() => this.sources().map(source => `${source.title} · ${source.team} (${source.players})`));
+  protected readonly sourceLabels = computed(() => this.sources().map(source => this.label(source)));
+  private label(source: { name: string; eventTitle: string; count: number }): string { return `${source.name} · ${source.eventTitle} (${source.count} giocatori)`; }
 
   constructor() { effect(() => { if (this.auth.workspaceId() && this.events.activeId()) void this.loadTeam(); }); }
 
@@ -51,16 +52,16 @@ export class SquadsPageComponent implements OnChanges {
     this.importMode.set('event');
     this.importOpen.set(true);
     this.sourceTitle.set('');
-    try { this.sources.set(await this.transfer.sourceEvents()); } catch { this.sources.set([]); }
+    try { this.sources.set(await this.transfer.listExports()); } catch { this.sources.set([]); }
   }
 
   protected closeImport(): void { this.importOpen.set(false); }
 
   protected async runImportFromEvent(): Promise<void> {
     const label = this.sourceTitle();
-    const source = this.sources().find(item => `${item.title} · ${item.team} (${item.players})` === label);
-    if (!source) { this.message.set('Scegli da quale evento importare.'); return; }
-    await this.run(() => this.transfer.importFromEvent(source.id));
+    const source = this.sources().find(item => this.label(item) === label);
+    if (!source) { this.message.set('Scegli quale squadra importare.'); return; }
+    await this.run(() => this.transfer.importFromExport(source.id));
   }
 
   protected async runImportFromFile(event: Event): Promise<void> {
@@ -78,8 +79,10 @@ export class SquadsPageComponent implements OnChanges {
     const team = this.team();
     if (!workspaceId || !team) { this.notifications.notify({ title: 'Nessuna squadra', message: 'Crea prima la squadra di questo evento.', type: 'warning' }); return; }
     const players = await this.playerService.list(workspaceId, [team]);
-    this.transfer.exportCsv(team, players);
-    this.notifications.notify({ title: 'Rosa esportata', message: `${players.filter(player => !player.isArchived).length} giocatori nel file CSV (si apre con Excel).`, type: 'success' });
+    try {
+      const count = await this.transfer.exportToApp(team, players);
+      this.notifications.notify({ title: 'Squadra esportata', message: `${team.name} con ${count} giocatori: ora puoi importarla in un altro evento.`, type: 'success' });
+    } catch { this.notifications.notify({ title: 'Esportazione non riuscita', message: 'Riprova tra un momento.', type: 'warning' }); }
   }
 
   private async run(action: () => Promise<{ added: number; skipped: number; failed: string[]; teamCreated: boolean }>): Promise<void> {

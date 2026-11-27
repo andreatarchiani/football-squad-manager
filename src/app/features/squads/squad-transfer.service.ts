@@ -1,4 +1,6 @@
 import { Injectable, inject } from '@angular/core';
+import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
+import { FIRESTORE_DB } from '../../core/firebase.tokens';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { ActiveEventService } from '../../core/active-event.service';
 import { TeamService, type TeamInput, type TeamRecord } from '../teams/team.service';
@@ -12,6 +14,7 @@ const STATUS_LABEL: Record<PlayerStatus, string> = { active: 'Attivo', injured: 
 /** Copies a squad from another event or from a file, and exports it (CSV, opens in Excel). */
 @Injectable({ providedIn: 'root' })
 export class SquadTransferService {
+  private readonly db = inject(FIRESTORE_DB, { optional: true });
   private readonly auth = inject(FirebaseAuthService);
   private readonly events = inject(ActiveEventService);
   private readonly teamService = inject(TeamService);
@@ -50,6 +53,46 @@ export class SquadTransferService {
     const inputs = this.parseCsv(text, team.id);
     if (!inputs.length) throw new Error('Nel file non ho trovato giocatori: servono almeno le colonne Cognome, Nome e Numero.');
     return { ...(await this.addPlayers(workspaceId, team, inputs)), teamCreated: false };
+  }
+
+  /** Saves a copy of the squad inside the app, so it can be imported into any other event. */
+  async exportToApp(team: TeamRecord, players: PlayerRecord[]): Promise<number> {
+    const workspaceId = this.requireWorkspace();
+    if (!this.db) throw new Error('Database non disponibile.');
+    const list = players.filter(player => !player.isArchived && player.status !== 'left');
+    const { id, ...teamData } = JSON.parse(JSON.stringify(team)) as TeamRecord;
+    void id;
+    await setDoc(doc(this.db, 'workspaces', workspaceId, 'squadExports', team.id), {
+      name: team.name, eventTitle: this.events.activeTitle(), exportedAt: Date.now(), team: teamData,
+      players: list.map(player => JSON.parse(JSON.stringify(this.toInput(player, '')))) 
+    });
+    return list.length;
+  }
+
+  async listExports(): Promise<{ id: string; name: string; eventTitle: string; count: number }[]> {
+    const workspaceId = this.requireWorkspace();
+    if (!this.db) return [];
+    const snap = await getDocs(collection(this.db, 'workspaces', workspaceId, 'squadExports'));
+    return snap.docs.map(item => { const d = item.data(); return { id: item.id, name: String(d['name'] ?? ''), eventTitle: String(d['eventTitle'] ?? ''), count: Array.isArray(d['players']) ? d['players'].length : 0, at: Number(d['exportedAt'] ?? 0) }; })
+      .sort((a, b) => b.at - a.at).map(({ at, ...rest }) => { void at; return rest; });
+  }
+
+  async deleteExport(id: string): Promise<void> {
+    if (this.db) await deleteDoc(doc(this.db, 'workspaces', this.requireWorkspace(), 'squadExports', id));
+  }
+
+  /** Imports an exported squad into the current event (creating the team if the event has none). */
+  async importFromExport(exportId: string): Promise<ImportResult> {
+    const workspaceId = this.requireWorkspace();
+    if (!this.db) throw new Error('Database non disponibile.');
+    const snap = await getDocs(collection(this.db, 'workspaces', workspaceId, 'squadExports'));
+    const item = snap.docs.find(entry => entry.id === exportId);
+    if (!item) throw new Error('La squadra esportata non esiste più.');
+    const data = item.data();
+    const source = { ...(data['team'] as object), id: exportId } as TeamRecord;
+    const { team, created } = await this.ensureTarget(workspaceId, source);
+    const players = ((data['players'] as PlayerInput[]) ?? []).map(player => ({ ...player, teamId: team.id }));
+    return { ...(await this.addPlayers(workspaceId, team, players)), teamCreated: created };
   }
 
   /** Downloads the squad as a CSV file that Excel opens directly. */
