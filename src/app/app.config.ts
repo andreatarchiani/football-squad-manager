@@ -4,7 +4,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideServiceWorker } from '@angular/service-worker';
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import type { FirebaseApp } from 'firebase/app';
 import { environment, isFirebaseConfigured } from '../environments/environment';
 import { FIREBASE_APP, FIREBASE_AUTH, FIRESTORE_DB } from './core/firebase.tokens';
@@ -23,7 +23,11 @@ const firebaseProviders = isFirebaseConfigured
       },
       {
         provide: FIRESTORE_DB,
-        useFactory: (app: FirebaseApp) => getFirestore(app),
+        useFactory: (app: FirebaseApp) => {
+          // Data already seen is kept on the device: screens open at once and keep working on a weak connection.
+          try { return initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }); }
+          catch { return getFirestore(app); }
+        },
         deps: [FIREBASE_APP]
       }
     ]

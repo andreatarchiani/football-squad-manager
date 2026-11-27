@@ -689,7 +689,7 @@
     "settle": 800
   },
   {
-    "name": "31-squads-mine",
+    "name": "31-export",
     "actions": [
       {
         "click": ".nfm-logo"
@@ -704,7 +704,85 @@
         "wait": 1500
       },
       {
-        "click": ".nfm-scene-item:has-text('Anagrafe squadre'), .nfm-menu-item:has-text('Anagrafe squadre')"
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Juniores')"
+      },
+      {
+        "wait": 2500
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Anagrafe squadre'), .nfm-scene-item:has-text('Anagrafe squadre')"
+      },
+      {
+        "wait": 2500
+      },
+      {
+        "click": ".sq-btn:has-text('Esporta')"
+      },
+      {
+        "wait": 4000
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "32-import-list",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Stagione 2026')"
+      },
+      {
+        "wait": 2500
+      },
+      {
+        "wait": 1000
+      },
+      {
+        "click": ".sq-btn:has-text('Importa')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "32b-import-done",
+    "actions": [
+      {
+        "click": ".sq-sources button"
+      },
+      {
+        "click": ".sq-primary:has-text('Importa squadra')"
+      },
+      {
+        "wait": 12000
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "33-players-new-event",
+    "actions": [
+      {
+        "click": ".sq-primary:has-text('Chiudi')"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Anagrafe calciatore'), .nfm-scene-item:has-text('Anagrafe calciatore')"
       },
       {
         "wait": 2500
@@ -713,22 +791,88 @@
     "settle": 800
   },
   {
-    "name": "32-squads-import",
+    "name": "34-staff-new-event",
     "actions": [
       {
-        "click": ".sq-btn:has-text('Importa')"
+        "click": ".nfm-menu-item:has-text('Anagrafe dirigente'), .nfm-scene-item:has-text('Anagrafe dirigente')"
       },
       {
-        "wait": 1500
+        "wait": 2500
       }
     ],
     "settle": 800
   },
   {
-    "name": "33-squads-opponents",
+    "name": "34b-staff-archive",
     "actions": [
       {
-        "click": ".sq-dialog header button"
+        "click": ".archive-button"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "34c-staff-loaded",
+    "actions": [
+      {
+        "click": ".archive-list label"
+      },
+      {
+        "click": ".archive-dialog .primary-button"
+      },
+      {
+        "wait": 4000
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "35-staff-old-event",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Juniores')"
+      },
+      {
+        "wait": 2500
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Anagrafe dirigente'), .nfm-scene-item:has-text('Anagrafe dirigente')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "36-opponents",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Stagione 2026')"
+      },
+      {
+        "wait": 2500
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Anagrafe squadre'), .nfm-scene-item:has-text('Anagrafe squadre')"
+      },
+      {
+        "wait": 2500
       },
       {
         "click": ".sq-tabs button:has-text('Squadre avversarie')"
@@ -746,13 +890,16 @@
     "settle": 800
   },
   {
-    "name": "34-archive",
+    "name": "37-archive",
     "actions": [
       {
         "click": ".op-dialog header button"
       },
       {
-        "click": ".nfm-menu-item:has-text('Archivio anagrafe')"
+        "wait": 300
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Archivio anagrafe'), .nfm-scene-item:has-text('Archivio anagrafe')"
       },
       {
         "wait": 2500

@@ -1,7 +1,7 @@
 <section class="players-page staff-page">
   <div class="page-heading">
     <div><h2>Dirigenti</h2><p>Anagrafica dei dirigenti della società.</p></div>
-    <div class="heading-actions"><button class="primary-button" type="button" (click)="openCreate()">＋ Nuovo dirigente</button></div>
+    <div class="heading-actions"><button class="secondary-button archive-button" type="button" (click)="openArchive()">Carica da archivio</button><button class="primary-button" type="button" (click)="openCreate()">＋ Nuovo dirigente</button></div>
   </div>
   @if (error()) { <div class="feedback error" role="alert">{{ error() }}</div> }
 
@@ -70,3 +70,22 @@
     </div>
   }
 </section>
+
+@if (archiveOpen()) {
+  <div class="archive-backdrop" role="presentation" (click)="archiveOpen.set(false)">
+    <section class="archive-dialog" role="dialog" aria-modal="true" aria-labelledby="archive-title" (click)="$event.stopPropagation()">
+      <header><div><small>ANAGRAFE DIRIGENTE</small><h3 id="archive-title">Carica da archivio</h3></div><button type="button" (click)="archiveOpen.set(false)" aria-label="Chiudi">×</button></header>
+      <p>Scegli i dirigenti degli altri eventi da aggiungere a questo.</p>
+      @if (archiveLoading()) { <div class="archive-bar"><span></span></div><p class="archive-note">Caricamento…</p> }
+      @else if (!archive().length) { <p class="archive-note">Non ci sono altri dirigenti da caricare.</p> }
+      @else {
+        <ul class="archive-list">
+          @for (person of archive(); track person.id) {
+            <li><label><input type="checkbox" [checked]="picked().has(person.id)" (change)="togglePick(person.id)"><span><strong>{{ person.lastName }} {{ person.firstName }}</strong><small>{{ person.eventTitle || 'Altro evento' }}{{ person.affiliationCategory ? ' · ' + person.affiliationCategory : '' }}</small></span></label></li>
+          }
+        </ul>
+      }
+      <footer><button type="button" class="secondary-button" (click)="archiveOpen.set(false)">Annulla</button><button type="button" class="primary-button" [disabled]="!picked().size || copying()" (click)="copyPicked()">{{ copying() ? 'Caricamento…' : 'Carica ' + (picked().size || '') }}</button></footer>
+    </section>
+  </div>
+}

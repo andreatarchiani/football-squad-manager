@@ -1,5 +1,5 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 import { FIRESTORE_DB } from './firebase.tokens';
 import { FirebaseAuthService } from './firebase-auth.service';
 import { invalidateData } from './data-cache';
@@ -28,7 +28,9 @@ export class ActiveEventService {
   });
   readonly active = computed(() => this.events().find(event => event.id === this.activeId()) ?? null);
   activeTitleOf(event: CalendarData): string { return eventTitle(event); }
-  readonly firstId = computed(() => this.events()[0]?.id ?? '');
+  /** Event that keeps the data made before events existed (stable: it never changes when new events are added). */
+  readonly legacyId = signal('');
+  readonly firstId = computed(() => this.legacyId() || (this.events()[0]?.id ?? ''));
   readonly activeTitle = computed(() => { const event = this.active(); return event ? eventTitle(event) : ''; });
 
   private resolveReady!: () => void;
@@ -54,7 +56,6 @@ export class ActiveEventService {
     if (id === this.activeId()) return;
     this.selected.set(id);
     try { localStorage.setItem(this.storageKey(), id); } catch { /* storage unavailable */ }
-    invalidateData();
   }
 
   async refresh(): Promise<void> {
@@ -71,6 +72,11 @@ export class ActiveEventService {
         if (teamDocs) events = await this.migrateTeams(workspaceId, events, teamDocs.docs);
         try { this.selected.set(localStorage.getItem(this.storageKey()) ?? ''); } catch { /* storage unavailable */ }
         this.events.set(events);
+        if (teamDocs) {
+          const legacyTeams = new Set(teamDocs.docs.filter(item => !item.data()['eventId']).map(item => item.id));
+          this.legacyId.set(events.find(event => legacyTeams.has(event.id))?.id ?? events[0]?.id ?? '');
+          void this.assignLegacyStaff(workspaceId);
+        }
         break;
       } catch (error) {
         console.error('Unable to load the events.', error);
@@ -84,8 +90,19 @@ export class ActiveEventService {
   async reload(): Promise<void> {
     const workspaceId = this.auth.workspaceId();
     if (!workspaceId) return;
-    this.events.set(await this.calendars.loadAll(workspaceId));
+    try { this.events.set(await this.calendars.loadAll(workspaceId)); }
+    catch (error) { console.error('Unable to reload the events.', error); }
     invalidateData();
+  }
+
+  /** Officials saved before events existed are written once into the legacy event, so they never move. */
+  private async assignLegacyStaff(workspaceId: string): Promise<void> {
+    const target = this.legacyId();
+    if (!this.db || !target) return;
+    try {
+      const snapshot = await getDocs(collection(this.db, 'workspaces', workspaceId, 'staff'));
+      await Promise.all(snapshot.docs.filter(item => !item.data()['eventId']).map(item => updateDoc(item.ref, { eventId: target })));
+    } catch (error) { console.warn('Unable to assign old officials to an event.', error); }
   }
 
   /** Teams made before events existed get an event of their own (same id), once. */

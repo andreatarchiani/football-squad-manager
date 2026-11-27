@@ -280,7 +280,7 @@ export class AppComponent {
       this.setView(view && view in VIEW_DEPTH ? view : 'home', true);
     });
     window.addEventListener('fsm-match-context', () => { this.nextOpponent.set(this.readNextOpponent()); this.nextTeam.set(this.readNextTeam()); void this.refreshNextMatch(); });
-    effect(() => { if (this.auth.workspaceId()) untracked(() => void this.refreshNextMatch()); });
+    effect(() => { if (this.auth.workspaceId()) { this.activeEvents.activeId(); untracked(() => void this.refreshNextMatch()); } });
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe((event) => {
         if (event.type === 'VERSION_READY') {

@@ -7,7 +7,7 @@ import { TeamService, type TeamInput, type TeamRecord } from '../teams/team.serv
 import { PLAYER_ROLES, PlayerService, type PlayerInput, type PlayerRecord, type PlayerRole, type PlayerStatus } from '../players/player.service';
 
 export type Progress = (done: number, total: number) => void;
-export interface ImportResult { added: number; skipped: number; failed: string[]; teamCreated: boolean; }
+export interface ImportResult { added: number; skipped: number; failed: string[]; teamCreated: boolean; teamName: string; finalCount: number; }
 
 const COLUMNS = ['Cognome', 'Nome', 'Numero', 'Ruolo', 'Stato', 'Data di nascita', 'Luogo di nascita', 'Residenza', 'CAP', 'Documento identità', 'Categoria appartenenza', 'Matricola federale', 'Tessera federale', 'Telefono', 'Mail', 'Piede', 'Note'] as const;
 const STATUS_LABEL: Record<PlayerStatus, string> = { active: 'Attivo', injured: 'Infortunato', suspended: 'Squalificato', left: 'Ceduto' };
@@ -64,17 +64,17 @@ export class SquadTransferService {
     const { id, ...teamData } = JSON.parse(JSON.stringify(team)) as TeamRecord;
     void id;
     await setDoc(doc(this.db, 'workspaces', workspaceId, 'squadExports', team.id), {
-      name: team.name, eventTitle: this.events.activeTitle(), exportedAt: Date.now(), team: teamData,
+      name: team.name, eventId: this.events.activeId(), eventTitle: this.events.activeTitle(), exportedAt: Date.now(), team: teamData,
       players: list.map(player => JSON.parse(JSON.stringify(this.toInput(player, '')))) 
     });
     return list.length;
   }
 
-  async listExports(): Promise<{ id: string; name: string; eventTitle: string; count: number }[]> {
+  async listExports(): Promise<{ id: string; name: string; eventTitle: string; count: number; here: boolean }[]> {
     const workspaceId = this.requireWorkspace();
     if (!this.db) return [];
     const snap = await getDocs(collection(this.db, 'workspaces', workspaceId, 'squadExports'));
-    return snap.docs.map(item => { const d = item.data(); return { id: item.id, name: String(d['name'] ?? ''), eventTitle: String(d['eventTitle'] ?? ''), count: Array.isArray(d['players']) ? d['players'].length : 0, at: Number(d['exportedAt'] ?? 0) }; })
+    return snap.docs.map(item => { const d = item.data(); return { id: item.id, here: String(d['eventId'] ?? '') === this.events.activeId(), name: String(d['name'] ?? ''), eventTitle: String(d['eventTitle'] ?? ''), count: Array.isArray(d['players']) ? d['players'].length : 0, at: Number(d['exportedAt'] ?? 0) }; })
       .sort((a, b) => b.at - a.at).map(({ at, ...rest }) => { void at; return rest; });
   }
 
@@ -126,11 +126,12 @@ export class SquadTransferService {
   }
 
   private async addPlayers(workspaceId: string, team: TeamRecord, inputs: PlayerInput[], onProgress?: Progress): Promise<Omit<ImportResult, 'teamCreated'>> {
+    if (!team.seasonId) throw new Error(`La squadra “${team.name}” non ha una stagione attiva: aprila in Anagrafe squadre e salvala, poi riprova.`);
     const existing = await this.playerService.list(workspaceId, [team]);
     const key = (first: string, last: string, birth: string) => `${last}|${first}|${birth}`.toLowerCase().trim();
     const known = new Set(existing.map(player => key(player.firstName, player.lastName, player.dateOfBirth)));
     const taken = new Set(existing.map(player => player.shirtNumber).filter((n): n is number => n !== null));
-    const result = { added: 0, skipped: 0, failed: [] as string[] };
+    const result = { added: 0, skipped: 0, failed: [] as string[], teamName: team.name, finalCount: 0 };
     // Decide numbers first (a number already used in this team gets the first free one), then save a few players at a time.
     const jobs: { input: PlayerInput; label: string }[] = [];
     for (const input of inputs) {
@@ -153,6 +154,8 @@ export class SquadTransferService {
         onProgress?.(++done, jobs.length);
       }));
     }
+    // Count again from the database, so the message tells what is really saved.
+    result.finalCount = (await this.playerService.list(workspaceId, [team])).filter(player => !player.isArchived).length;
     return result;
   }
 

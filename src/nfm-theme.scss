@@ -670,3 +670,5 @@
 #nfm .nfm-menu-group.is-open { border-color: var(--c-hi); background: rgba(var(--c-rgb), .25); }
 #nfm .nfm-menu-sub { margin-left: 14px; width: calc(100% - 14px); min-height: 40px; font-size: 14px; }
 #nfm .nfm-soon-note { display: block; padding: 8px 12px; color: var(--soft); font-size: 13px; }
+#nfm .nfm-menu-item.nfm-menu-sub { display: flex; align-items: center; gap: 8px; grid-template-columns: none; text-align: left; line-height: 1.25; }
+#nfm .nfm-menu-item.nfm-menu-sub span { flex: 1 1 auto; white-space: normal; }

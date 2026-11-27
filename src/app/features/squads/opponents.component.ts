@@ -3,7 +3,7 @@ import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { ActiveEventService } from '../../core/active-event.service';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { prepareIconImage } from '../../core/icon-image';
-import { CalendarService, emptyGroupTeam, isMapsLink, type CalendarRound, type GroupTeam } from '../calendar/calendar.service';
+import { CalendarService, emptyGroupTeam, isMapsLink, type CalendarData, type CalendarRound, type GroupTeam } from '../calendar/calendar.service';
 
 const TERRAINS = ['Erba naturale', 'Erba sintetica', 'Mista sintetico-naturale'];
 const ICONS = ['⚽', '🛡️', '🏆', '⭐', '👑', '🦅', '🦁', '🐺', '🐉', '🔥', '⚡', '💎', '🏟️', '🎯', '🔱', '🌟'];
@@ -134,29 +134,32 @@ export class OpponentsComponent {
 
   protected async save(): Promise<void> {
     const d = this.draft();
-    const calendar = this.events.active();
-    const workspaceId = this.auth.workspaceId();
-    if (!d || !calendar || !workspaceId || !this.valid()) return;
+    if (!d || !this.valid()) return;
     const team: GroupTeam = { ...d, name: d.name.trim(), mapsUrl: isMapsLink(d.mapsUrl) ? d.mapsUrl.trim() : '' };
     const old = this.original();
     const rename = (round: CalendarRound) => old && round.opponent === old ? { ...round, opponent: team.name } : round;
-    const exists = calendar.groupTeams.some(item => item.id === team.id);
-    const groupTeams = exists ? calendar.groupTeams.map(item => item.id === team.id ? team : item) : [...calendar.groupTeams, team];
-    await this.persist(workspaceId, { ...calendar, groupTeams, andata: calendar.andata.map(rename), ritorno: calendar.ritorno.map(rename) });
+    await this.persist(calendar => {
+      const exists = calendar.groupTeams.some(item => item.id === team.id);
+      const groupTeams = exists ? calendar.groupTeams.map(item => item.id === team.id ? team : item) : [...calendar.groupTeams, team];
+      return { ...calendar, groupTeams, andata: calendar.andata.map(rename), ritorno: calendar.ritorno.map(rename) };
+    });
   }
 
   protected async remove(): Promise<void> {
     const d = this.draft();
-    const calendar = this.events.active();
-    const workspaceId = this.auth.workspaceId();
-    if (!d || !calendar || !workspaceId || this.used()) return;
-    await this.persist(workspaceId, { ...calendar, groupTeams: calendar.groupTeams.filter(team => team.id !== d.id) });
+    if (!d || this.used()) return;
+    await this.persist(calendar => ({ ...calendar, groupTeams: calendar.groupTeams.filter(team => team.id !== d.id) }));
   }
 
-  private async persist(workspaceId: string, calendar: NonNullable<ReturnType<ActiveEventService['active']>>): Promise<void> {
+  /** Always starts from the calendar as it is saved now, so changes made in the calendar are never lost. */
+  private async persist(change: (calendar: CalendarData) => CalendarData): Promise<void> {
+    const workspaceId = this.auth.workspaceId();
+    const eventId = this.events.activeId();
+    if (!workspaceId || !eventId) return;
     this.saving.set(true);
     try {
-      await this.service.save(workspaceId, calendar);
+      const fresh = await this.service.load(workspaceId, eventId);
+      await this.service.save(workspaceId, change({ ...fresh, id: eventId }));
       await this.events.reload();
       this.draft.set(null);
     } catch (error) {

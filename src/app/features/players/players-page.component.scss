@@ -70,3 +70,15 @@
 /* Fix: il pannello dell'anagrafica mantiene il fondale continuo per tutta l'altezza disponibile, anche con moduli lunghi e scroll interno. */
 .fsm-form-dialog{box-sizing:border-box;min-height:calc(100dvh - 32px);}
 @media(max-width:650px){.fsm-form-dialog{min-height:calc(100dvh - 20px);}}
+
+.heading-actions{display:flex;flex-wrap:wrap;gap:8px}
+.archive-backdrop{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:14px;background:rgba(0,0,0,.7)}
+.archive-dialog{display:grid;gap:12px;width:min(520px,100%);max-height:90vh;padding:16px;overflow:auto;border:1.5px solid var(--c-hi,#ff9a3c);border-radius:18px;color:#fff;background:var(--panel-solid,#1a1208)}
+.archive-dialog header{display:flex;justify-content:space-between;align-items:flex-start}.archive-dialog h3{margin:2px 0 0;font-size:20px}.archive-dialog small{color:var(--text-muted)}
+.archive-dialog header button{width:40px;height:40px;border:1.5px solid rgba(255,255,255,.3);border-radius:12px;color:#fff;background:none;font-size:22px}
+.archive-dialog p{margin:0}.archive-note{color:var(--text-muted)}
+.archive-list{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.archive-list label{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(255,255,255,.15);border-radius:10px;cursor:pointer}
+.archive-list input{width:20px;height:20px}.archive-list span{display:grid}.archive-list small{font-size:12px}
+.archive-dialog footer{display:flex;justify-content:flex-end;gap:8px}
+.archive-bar{height:10px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.1)}.archive-bar span{display:block;width:20%;height:100%;background:#ffb800;animation:arch 1s ease-in-out infinite alternate}@keyframes arch{to{margin-left:80%}}

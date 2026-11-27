@@ -20,7 +20,7 @@ export async function cached<T>(key: string, load: () => Promise<T>): Promise<T>
   const hit = entries.get(key);
   if (hit && hit.version === version && Date.now() - hit.at < MAX_AGE_MS) return hit.value as Promise<T>;
   const startedAt = version;
-  const value = load();
+  const value = withRetry(load);
   entries.set(key, { version: startedAt, at: Date.now(), value });
   value.catch(() => { if (entries.get(key)?.value === value) entries.delete(key); });
   return value;
@@ -41,4 +41,14 @@ export function invalidateOnWrite(service: object, methods: string[]): void {
       finally { invalidateData(); }
     };
   }
+}
+
+/** A failed download is tried again (up to 3 times) before the screen shows an error. */
+async function withRetry<T>(load: () => Promise<T>): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try { return await load(); }
+    catch (error) { lastError = error; await new Promise(resolve => setTimeout(resolve, 600 * (attempt + 1))); }
+  }
+  throw lastError;
 }
