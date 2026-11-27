@@ -403,26 +403,13 @@
   "settle": 600
  },
  {
-  "name": "24-event-form-back",
+  "name": "24a-event-created",
   "actions": [
    {
-    "click": ".ev-footer .ev-secondary:has-text('Annulla')"
+    "click": ".ev-footer .ev-primary"
    },
    {
-    "wait": 600
-   }
-  ],
-  "settle": 300,
-  "full": false
- },
- {
-  "name": "24a-event-open",
-  "actions": [
-   {
-    "click": ".ev-card"
-   },
-   {
-    "wait": 2000
+    "wait": 2500
    }
   ],
   "settle": 600
@@ -477,8 +464,7 @@
    }
   ],
   "settle": 600,
-  "full": false,
-  "only": "desktop"
+  "full": false
  },
  {
   "name": "24c-group-saved",
@@ -490,8 +476,7 @@
     "wait": 500
    }
   ],
-  "settle": 400,
-  "only": "desktop"
+  "settle": 400
  },
  {
   "name": "25-calendar-andata",
