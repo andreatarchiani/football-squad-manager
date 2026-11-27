@@ -1,0 +1,161 @@
+[desktop] ok 01-home
+[desktop] ok 01b-bug-report
+[desktop] ok 02-office
+[desktop] ok 03-players
+[desktop] FAIL 04-player-form: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button:has-text(\'Nuovo giocatore\')').locator('visible=true').first() | 
+[desktop] ok 04b-player-validation
+[desktop] ok 04c-player-guardian
+[desktop] FAIL 05-teams: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.text-button:has-text(\'Annulla\')').locator('visible=true').first() | 
+[desktop] FAIL 06-team-form: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button:has-text(\'Nuova squadra\')').locator('visible=true').first() | 
+[desktop] FAIL 06b-team-validation: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button[type=submit]:has-text(\'Crea squadra\')').locator('visible=true').first() | 
+[desktop] FAIL 06c-team-address: locator.fill: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('input[name=facilityAddress]').locator('visible=true').first() | 
+[desktop] FAIL 07-training: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.text-button:has-text(\'Annulla\')').locator('visible=true').first() | 
+[desktop] ok 08-match-hub
+[desktop] ok 09-formation
+[desktop] ok 10-lineup
+[desktop] ok 11-live
+[desktop] ok 12-live-event
+[desktop] ok 13-live-registered
+[desktop] ok 14-goal-dialog
+[desktop] ok 15-goal-registered
+[desktop] ok 16-finish-confirm
+[desktop] ok 17-report
+[desktop] ok 18-after-exit
+[desktop] FAIL 19-team-roster: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.roster-primary-button').locator('visible=true').first() | 
+[desktop] ok 20-staff
+[desktop] FAIL 21-staff-form: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button:has-text(\'Nuovo dirigente\')').locator('visible=true').first() | 
+[desktop] ok 22-staff-validation
+[desktop] ok 23-staff-saved
+[desktop] ok 24-calendar
+[desktop] ok 24-new-event-form
+[desktop] ok 24a-event-created
+[desktop] FAIL 24b-group-teams: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-teams button.cal-add').locator('visible=true').first() | 
+[desktop] FAIL 24c-group-saved: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.venue-save').locator('visible=true').first() | 
+[desktop] FAIL 25-calendar-andata: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.cal-add').locator('visible=true').first() | 
+[desktop] FAIL 25a-opponent-menu: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-team-trigger').locator('visible=true').first() | 
+[desktop] FAIL 25a2-close: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-menu-backdrop').locator('visible=true').first() | 
+[desktop] FAIL 25b-venue-dialog: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-venue-set-button').locator('visible=true').first() | 
+[desktop] FAIL 25c-venue-saved: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.venue-save').locator('visible=true').first() | 
+[desktop] FAIL 26-calendar-conflict: locator.fill: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-main > section:nth-child(2) .cal-row:nth-child(2) input[type=date]').locator('visible=true').first() | 
+[desktop] FAIL 27-calendar-fixed: locator.fill: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-main > section:nth-child(2) .cal-row:nth-child(2) input[type=date]').locator('visible=true').first() | 
+[desktop] FAIL 27b-calendar-next-changes: locator.fill: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=date]').locator('visible=true').first() | 
+[desktop] FAIL 27c-event-edit: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-edit-event').locator('visible=true').first() | 
+[desktop] FAIL 27d-event-back: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.ev-footer .ev-secondary:has-text(\'Annulla\')').locator('visible=true').first() | 
+[desktop] ok 28-match-header
+[desktop] ok 29-formation-next
+[desktop] ok 30-callup
+[desktop] ok 30z-office
+[desktop] ok sw-staff-a
+[desktop] ok sw-staff-b-new
+[desktop] ok sw-staff-c-back
+[desktop] ok sw-players-a
+[desktop] ok sw-players-b-new
+[desktop] ok sw-players-c-back
+[desktop] ok sw-squads-a
+[desktop] ok sw-squads-b-new
+[desktop] ok sw-squads-c-back
+[desktop] ok sw-archive-a
+[desktop] ok sw-archive-b-new
+[desktop] ok sw-archive-c-back
+[desktop] ok sw-events-a
+[desktop] ok sw-events-b-new
+[desktop] ok sw-events-c-back
+[desktop] ok sw-match
+[desktop] ok sw-match-b-new
+[desktop] ok sw-match-c-back
+[desktop] ok sw-callup
+[desktop] ok sw-callup-b-new
+[desktop] ok sw-callup-c-back
+[desktop] ok 30y-header-new-event
+[desktop] ok 30y2-cancel
+[desktop] ok 30c-callup-image
+[desktop] FAIL 31-export: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe squadre\'), .nfm-subnav-item:has-text(\'Anagrafe squadre\')').locator('visible=true').first() | 
+[desktop] FAIL 32-import-list: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.sq-btn:has-text(\'Importa\')').locator('visible=true').first() | 
+[desktop] FAIL 32b-import-done: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.sq-sources button').locator('visible=true').first() | 
+[desktop] FAIL 33-players-new-event: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.sq-primary:has-text(\'Chiudi\')').locator('visible=true').first() | 
+[desktop] FAIL 34-staff-new-event: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe dirigente\'), .nfm-subnav-item:has-text(\'Anagrafe dirigente\')').locator('visible=true').first() | 
+[desktop] FAIL 34b-staff-archive: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.archive-button').locator('visible=true').first() | 
+[desktop] FAIL 34c-staff-loaded: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.archive-list label').locator('visible=true').first() | 
+[desktop] FAIL 35-staff-old-event: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe dirigente\'), .nfm-subnav-item:has-text(\'Anagrafe dirigente\')').locator('visible=true').first() | 
+[desktop] FAIL 36-opponents: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe squadre\'), .nfm-subnav-item:has-text(\'Anagrafe squadre\')').locator('visible=true').first() | 
+[desktop] FAIL 37-archive: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.op-dialog header button').locator('visible=true').first() | 
+[mobile] ok 01-home
+[mobile] ok 01b-bug-report
+[mobile] ok 02-office
+[mobile] FAIL 03-players: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe Calciatore\'), .nfm-subnav-item:has-text(\'Anagrafe Calciatore\')').locator('visible=true').first() | 
+[mobile] FAIL 04-player-form: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button:has-text(\'Nuovo giocatore\')').locator('visible=true').first() | 
+[mobile] FAIL 04b-player-validation: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button[type=submit]:has-text(\'Inserisci giocatore\')').locator('visible=true').first() | 
+[mobile] FAIL 04c-player-guardian: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.guardian-toggles label:has-text(\'Madre\')').locator('visible=true').first() | 
+[mobile] FAIL 05-teams: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.text-button:has-text(\'Annulla\')').locator('visible=true').first() | 
+[mobile] FAIL 06-team-form: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button:has-text(\'Nuova squadra\')').locator('visible=true').first() | 
+[mobile] FAIL 06b-team-validation: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button[type=submit]:has-text(\'Crea squadra\')').locator('visible=true').first() | 
+[mobile] FAIL 06c-team-address: locator.fill: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('input[name=facilityAddress]').locator('visible=true').first() | 
+[mobile] FAIL 07-training: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.text-button:has-text(\'Annulla\')').locator('visible=true').first() | 
+[mobile] ok 08-match-hub
+[mobile] FAIL 09-formation: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Formazione\'), .nfm-subnav-item:has-text(\'Formazione\')').locator('visible=true').first() | 
+[mobile] ok 10-lineup
+[mobile] FAIL 11-live: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button:has-text(\'Inizia partita\')').locator('visible=true').first() | 
+[mobile] FAIL 12-live-event: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-event-button:has-text(\'Ammonizione\')').locator('visible=true').first() | 
+[mobile] FAIL 13-live-registered: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-number:has-text(\'Costa\')').locator('visible=true').first() | 
+[mobile] FAIL 14-goal-dialog: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-event-button:has-text(\'Gol fatto\')').locator('visible=true').first() | 
+[mobile] FAIL 15-goal-registered: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-event-submit').locator('visible=true').first() | 
+[mobile] FAIL 16-finish-confirm: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.finish-match:has-text(\'Fine partita\')').locator('visible=true').first() | 
+[mobile] FAIL 17-report: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.finish-confirm-yes').locator('visible=true').first() | 
+[mobile] FAIL 18-after-exit: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.exit-match-report').locator('visible=true').first() | 
+[mobile] FAIL 19-team-roster: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe squadre\'), .nfm-subnav-item:has-text(\'Anagrafe squadre\')').locator('visible=true').first() | 
+[mobile] FAIL 20-staff: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe Dirigente\'), .nfm-subnav-item:has-text(\'Anagrafe Dirigente\')').locator('visible=true').first() | 
+[mobile] FAIL 21-staff-form: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button:has-text(\'Nuovo dirigente\')').locator('visible=true').first() | 
+[mobile] FAIL 22-staff-validation: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button[type=submit]:has-text(\'Inserisci dirigente\')').locator('visible=true').first() | 
+[mobile] FAIL 23-staff-saved: locator.fill: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('input[name=lastName]').locator('visible=true').first() | 
+[mobile] FAIL 24-calendar: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Creazione Stagione\'), .nfm-subnav-item:has-text(\'Creazione Stagione\')').locator('visible=true').first() | 
+[mobile] FAIL 24-new-event-form: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.ev-list-head .ev-primary').locator('visible=true').first() | 
+[mobile] FAIL 24a-event-created: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.ev-footer .ev-primary').locator('visible=true').first() | 
+[mobile] FAIL 24b-group-teams: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-teams button.cal-add').locator('visible=true').first() | 
+[mobile] FAIL 24c-group-saved: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.venue-save').locator('visible=true').first() | 
+[mobile] FAIL 25-calendar-andata: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.cal-add').locator('visible=true').first() | 
+[mobile] FAIL 25a-opponent-menu: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-team-trigger').locator('visible=true').first() | 
+[mobile] FAIL 25a2-close: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-menu-backdrop').locator('visible=true').first() | 
+[mobile] FAIL 25b-venue-dialog: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-venue-set-button').locator('visible=true').first() | 
+[mobile] FAIL 25c-venue-saved: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('button.venue-save').locator('visible=true').first() | 
+[mobile] FAIL 26-calendar-conflict: locator.fill: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-main > section:nth-child(2) .cal-row:nth-child(2) input[type=date]').locator('visible=true').first() | 
+[mobile] FAIL 27-calendar-fixed: locator.fill: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-main > section:nth-child(2) .cal-row:nth-child(2) input[type=date]').locator('visible=true').first() | 
+[mobile] FAIL 27b-calendar-next-changes: locator.fill: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=date]').locator('visible=true').first() | 
+[mobile] FAIL 27c-event-edit: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.cal-edit-event').locator('visible=true').first() | 
+[mobile] FAIL 27d-event-back: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.ev-footer .ev-secondary:has-text(\'Annulla\')').locator('visible=true').first() | 
+[mobile] ok 28-match-header
+[mobile] FAIL 29-formation-next: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Formazione\'), .nfm-subnav-item:has-text(\'Formazione\')').locator('visible=true').first() | 
+[mobile] FAIL 30-callup: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Convocazione\'), .nfm-subnav-item:has-text(\'Convocazione\')').locator('visible=true').first() | 
+[mobile] ok 30z-office
+[mobile] FAIL sw-staff-a: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe dirigente\'), .nfm-subnav-item:has-text(\'Anagrafe dirigente\')').locator('visible=true').first() | 
+[mobile] ok sw-staff-b-new
+[mobile] ok sw-staff-c-back
+[mobile] FAIL sw-players-a: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe calciatore\'), .nfm-subnav-item:has-text(\'Anagrafe calciatore\')').locator('visible=true').first() | 
+[mobile] ok sw-players-b-new
+[mobile] ok sw-players-c-back
+[mobile] FAIL sw-squads-a: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe squadre\'), .nfm-subnav-item:has-text(\'Anagrafe squadre\')').locator('visible=true').first() | 
+[mobile] ok sw-squads-b-new
+[mobile] ok sw-squads-c-back
+[mobile] FAIL sw-archive-a: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Archivio anagrafe\'), .nfm-subnav-item:has-text(\'Archivio anagrafe\')').locator('visible=true').first() | 
+[mobile] ok sw-archive-b-new
+[mobile] ok sw-archive-c-back
+[mobile] FAIL sw-events-a: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Creazione stagione\'), .nfm-subnav-item:has-text(\'Creazione stagione\')').locator('visible=true').first() | 
+[mobile] ok sw-events-b-new
+[mobile] ok sw-events-c-back
+[mobile] FAIL sw-match: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Formazione\'), .nfm-subnav-item:has-text(\'Formazione\')').locator('visible=true').first() | 
+[mobile] ok sw-match-b-new
+[mobile] ok sw-match-c-back
+[mobile] FAIL sw-callup: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Convocazione\'), .nfm-subnav-item:has-text(\'Convocazione\')').locator('visible=true').first() | 
+[mobile] ok sw-callup-b-new
+[mobile] ok sw-callup-c-back
+[mobile] ok 30y-header-new-event
+[mobile] ok 30y2-cancel
+[mobile] FAIL 31-export: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe squadre\'), .nfm-subnav-item:has-text(\'Anagrafe squadre\')').locator('visible=true').first() | 
+[mobile] FAIL 32-import-list: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.sq-btn:has-text(\'Importa\')').locator('visible=true').first() | 
+[mobile] FAIL 32b-import-done: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.sq-sources button').locator('visible=true').first() | 
+[mobile] FAIL 33-players-new-event: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.sq-primary:has-text(\'Chiudi\')').locator('visible=true').first() | 
+[mobile] FAIL 34-staff-new-event: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe dirigente\'), .nfm-subnav-item:has-text(\'Anagrafe dirigente\')').locator('visible=true').first() | 
+[mobile] FAIL 34b-staff-archive: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.archive-button').locator('visible=true').first() | 
+[mobile] FAIL 34c-staff-loaded: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.archive-list label').locator('visible=true').first() | 
+[mobile] FAIL 35-staff-old-event: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe dirigente\'), .nfm-subnav-item:has-text(\'Anagrafe dirigente\')').locator('visible=true').first() | 
+[mobile] FAIL 36-opponents: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.nfm-menu-item:has-text(\'Anagrafe squadre\'), .nfm-subnav-item:has-text(\'Anagrafe squadre\')').locator('visible=true').first() | 
+[mobile] FAIL 37-archive: locator.click: Timeout 6000ms exceeded. | Call log: |   - waiting for locator('.op-dialog header button').locator('visible=true').first() | 

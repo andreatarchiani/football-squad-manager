@@ -1,0 +1,44 @@
+
+> football-squad-manager@0.1.0 build
+> ng build
+
+❯ Building...
+✔ Building...
+Initial chunk files   | Names                  |  Raw size | Estimated transfer size
+main-UKK67REC.js      | main                   |   1.12 MB |               278.88 kB
+styles-BSDEZKWK.css   | styles                 | 164.94 kB |                26.06 kB
+polyfills-LVNOU2XZ.js | polyfills              |  35.88 kB |                11.64 kB
+
+                      | Initial total          |   1.32 MB |               316.58 kB
+
+Lazy chunk files      | Names                  |  Raw size | Estimated transfer size
+chunk--KLGhutH.js     | -                      | 193.48 kB |                39.19 kB
+chunk-Dupf8-BC.js     | events-page-component  |  97.23 kB |                19.83 kB
+chunk-Bk7zveSh.js     | browser                |  69.26 kB |                17.86 kB
+chunk-BH4uk0vx.js     | players-page-component |  56.55 kB |                11.66 kB
+chunk-C5QBPGJE.js     | home-page-component    |  41.62 kB |                 9.30 kB
+chunk-EmppQcGG.js     | staff-page-component   |  38.88 kB |                 8.29 kB
+chunk-Bc7LoC43.js     | squads-page-component  |  29.93 kB |                 7.52 kB
+chunk-DbQaC9wz.js     | callup-page-component  |  28.67 kB |                 8.57 kB
+chunk-BxeLt-kt.js     | archive-page-component |  11.00 kB |                 3.36 kB
+chunk-DzGjyW5A.js     | -                      |   9.20 kB |                 2.63 kB
+chunk-BqbOno3T.js     | -                      |   9.00 kB |                 3.29 kB
+chunk-D8Mj_OtL.js     | -                      |   6.08 kB |                 1.20 kB
+chunk-CCC112Zz.js     | -                      |   2.46 kB |               927 bytes
+chunk-CdCSSfex.js     | -                      | 994 bytes |               994 bytes
+chunk-2QEOQvos.js     | -                      | 540 bytes |               540 bytes
+...and 1 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [7.032 seconds] - 2026-11-27T16:40:35.782Z
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mbundle initial exceeded maximum budget. Budget 1.10 MB was not met by 224.96 kB with a total of 1.32 MB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/features/teams/teams-page.component.scss exceeded maximum budget. Budget 22.00 kB was not met by 1.01 kB with a total of 23.01 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/features/teams/live-match.component.scss exceeded maximum budget. Budget 22.00 kB was not met by 52 bytes with a total of 22.05 kB.[0m
+
+
+Output location: /home/runner/work/football-squad-manager/football-squad-manager/dist/football-squad-manager
+
