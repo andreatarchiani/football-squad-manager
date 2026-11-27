@@ -689,6 +689,384 @@
     "settle": 800
   },
   {
+    "name": "30z-office",
+    "actions": [
+      {
+        "click": ".nfm-logo"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".nfm-home-tile:has-text('Ufficio')"
+      },
+      {
+        "wait": 1500
+      },
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Juniores')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-staff-a",
+    "actions": [
+      {
+        "click": ".nfm-menu-item:has-text('Anagrafe dirigente'), .nfm-subnav-item:has-text('Anagrafe dirigente')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-staff-b-new",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Stagione 2026')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-staff-c-back",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Juniores')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-players-a",
+    "actions": [
+      {
+        "click": ".nfm-menu-item:has-text('Anagrafe calciatore'), .nfm-subnav-item:has-text('Anagrafe calciatore')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-players-b-new",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Stagione 2026')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-players-c-back",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Juniores')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-squads-a",
+    "actions": [
+      {
+        "click": ".nfm-menu-item:has-text('Anagrafe squadre'), .nfm-subnav-item:has-text('Anagrafe squadre')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-squads-b-new",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Stagione 2026')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-squads-c-back",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Juniores')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-archive-a",
+    "actions": [
+      {
+        "click": ".nfm-menu-item:has-text('Archivio anagrafe'), .nfm-subnav-item:has-text('Archivio anagrafe')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-archive-b-new",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Stagione 2026')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-archive-c-back",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Juniores')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-events-a",
+    "actions": [
+      {
+        "click": ".nfm-menu-item:has-text('Creazione stagione'), .nfm-subnav-item:has-text('Creazione stagione')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-events-b-new",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Stagione 2026')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-events-c-back",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Juniores')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-match",
+    "actions": [
+      {
+        "click": ".nfm-logo"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".nfm-home-tile:has-text('Partita')"
+      },
+      {
+        "wait": 1500
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Formazione'), .nfm-subnav-item:has-text('Formazione')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-match-b-new",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Stagione 2026')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-match-c-back",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Juniores')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-callup",
+    "actions": [
+      {
+        "click": ".nfm-menu-item:has-text('Convocazione'), .nfm-subnav-item:has-text('Convocazione')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-callup-b-new",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Stagione 2026')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "sw-callup-c-back",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Juniores')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 500
+  },
+  {
     "name": "31-export",
     "actions": [
       {
