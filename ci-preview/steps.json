@@ -1113,10 +1113,16 @@
         "wait": 3000
       },
       {
+        "click": ".nfm-menu-group:has-text('Campo')"
+      },
+      {
+        "wait": 500
+      },
+      {
         "click": ".nfm-menu-item:has-text('Convocazione')"
       },
       {
-        "wait": 5000
+        "wait": 6000
       }
     ],
     "settle": 1500
