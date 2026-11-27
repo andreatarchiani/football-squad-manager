@@ -73,6 +73,10 @@ export class CalendarPageComponent implements OnDestroy {
     this.updateAndata(andata => andata.filter((_, i) => i !== index).map((round, i) => ({ ...round, number: i + 1 })));
   }
 
+  protected readonly opponentMenu = signal(-1);
+  protected toggleOpponentMenu(index: number): void { this.opponentMenu.update(open => open === index ? -1 : index); }
+  protected pickOpponent(index: number, name: string): void { this.opponentMenu.set(-1); this.setOpponent(index, name); }
+
   protected swap(index: number): void {
     this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, home: !round.home } : round));
   }

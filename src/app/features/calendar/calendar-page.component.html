@@ -117,7 +117,7 @@
       <span role="columnheader">G.</span><span role="columnheader">Data</span><span role="columnheader">Ora</span><span role="columnheader">Casa – Trasferta</span><span role="columnheader"></span>
     </div>
     @for (round of rows(leg); track round.number; let i = $index) {
-      <div class="cal-row" role="row" [class.is-next]="nextMatch()?.number === round.number">
+      <div class="cal-row" role="row" [class.menu-open]="leg === 'A' && opponentMenu() === i" [class.is-next]="nextMatch()?.number === round.number">
         <span class="cal-num" role="cell">{{ round.number }}ª</span>
         <span role="cell"><input type="date" [value]="round.date" (change)="setWhen(leg, i, 'date', $any($event.target).value)" (blur)="setWhen(leg, i, 'date', $any($event.target).value)" [class.is-missing]="!round.date" [class.is-conflict]="!!round.date && conflicts().has(round.date)" aria-label="Data"></span>
         <span role="cell"><input type="time" [value]="round.time" (change)="setWhen(leg, i, 'time', $any($event.target).value)" (blur)="setWhen(leg, i, 'time', $any($event.target).value)" aria-label="Ora"></span>
@@ -170,19 +170,40 @@
   </div>
 </ng-template>
 
-<ng-template #crest let-name="name" let-big="big" let-away="away">
+<ng-template #crest let-name="name" let-big="big" let-away="away" let-mini="mini">
   @if (isImage(iconOf(name))) {
-    <img class="cal-crest cal-crest-img" [class.big]="big" [src]="iconOf(name)" alt="">
+    <img class="cal-crest cal-crest-img" [class.big]="big" [class.mini]="mini" [src]="iconOf(name)" alt="">
   } @else {
-    <span class="cal-crest" [class.big]="big" [class.away]="away" aria-hidden="true">{{ iconOf(name) || name.charAt(0).toUpperCase() }}</span>
+    <span class="cal-crest" [class.big]="big" [class.mini]="mini" [class.away]="away" aria-hidden="true">{{ iconOf(name) || name.charAt(0).toUpperCase() }}</span>
   }
 </ng-template>
 
 <ng-template #opponentSelect let-round let-index="index">
-  <select class="cal-opponent" [value]="round.opponent" (change)="setOpponent(index, $any($event.target).value)" [class.is-missing]="!round.opponent" aria-label="Avversario">
-    <option value="" [selected]="!round.opponent">{{ calendar().groupTeams.length ? 'Scegli avversario' : 'Crea prima le squadre' }}</option>
-    @for (item of availableTeams(index); track item.id) { <option [value]="item.name" [selected]="item.name === round.opponent">{{ item.name }}</option> }
-  </select>
+  <div class="cal-team-picker cal-opp-picker" [class.is-open]="opponentMenu() === index">
+    <button type="button" class="cal-team-trigger" (click)="toggleOpponentMenu(index)" [attr.aria-expanded]="opponentMenu() === index" aria-haspopup="listbox" aria-label="Avversario" [class.is-missing]="!round.opponent">
+      @if (round.opponent) {
+        <ng-container [ngTemplateOutlet]="crest" [ngTemplateOutletContext]="{ name: round.opponent, mini: true }"></ng-container>
+        <strong>{{ round.opponent }}</strong>
+      } @else {
+        <strong class="cal-placeholder">{{ calendar().groupTeams.length ? 'Scegli avversario' : 'Crea prima le squadre' }}</strong>
+      }
+      <span class="cal-chevron" aria-hidden="true"></span>
+    </button>
+    @if (opponentMenu() === index) {
+      <div class="cal-menu-backdrop" (click)="opponentMenu.set(-1)"></div>
+      <div class="cal-team-menu" role="listbox" aria-label="Seleziona avversario">
+        @for (item of availableTeams(index); track item.id) {
+          <button type="button" role="option" [class.is-selected]="item.name === round.opponent" [attr.aria-selected]="item.name === round.opponent" (click)="pickOpponent(index, item.name)">
+            <ng-container [ngTemplateOutlet]="crest" [ngTemplateOutletContext]="{ name: item.name, mini: true }"></ng-container>
+            <span>{{ item.name }}@if (item.city) { <small>{{ item.city }}</small> }</span>
+          </button>
+        } @empty {
+          <span class="cal-menu-empty">{{ calendar().groupTeams.length ? 'Tutte le squadre sono già state scelte.' : 'Crea le squadre dal pannello “Squadre del girone”.' }}</span>
+        }
+        @if (round.opponent) { <button type="button" class="cal-menu-clear" (click)="pickOpponent(index, '')">Togli avversario</button> }
+      </div>
+    }
+  </div>
 </ng-template>
 
 <!-- Nuova squadra del girone -->

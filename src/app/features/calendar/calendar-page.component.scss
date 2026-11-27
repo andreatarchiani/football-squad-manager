@@ -184,3 +184,17 @@ select.cal-opponent.is-missing { border-color: #ffd21a !important; background: #
 .gt-logo-row button, .gt-upload { display: grid; place-items: center; width: 42px; height: 42px; padding: 0; overflow: hidden; border: 1.5px solid rgba(255, 255, 255, .25); border-radius: 11px; color: #fff; background: rgba(255, 255, 255, .08); font-size: 22px; cursor: pointer; }
 .gt-logo-row .is-selected { border-color: var(--c-hi); background: rgba(var(--c-rgb), .35); box-shadow: 0 0 0 2px var(--c-hi); }
 .gt-upload img { width: 100%; height: 100%; object-fit: cover; }
+
+.cal-opp-picker { min-width: 0; width: 100%; }
+.cal-opp-picker .cal-team-trigger { min-height: 36px; padding: 3px 10px; border-radius: 9px; gap: 8px; }
+.cal-opp-picker .cal-team-trigger strong { overflow: hidden; font-size: 14px; white-space: nowrap; text-overflow: ellipsis; }
+.cal-opp-picker .cal-team-trigger.is-missing { border-color: #ffd21a; }
+.cal-placeholder { color: var(--soft); font-weight: 500; }
+.cal-opp-picker .cal-team-menu { max-height: 260px; overflow-y: auto; min-width: 220px; }
+.cal-opp-picker .cal-team-menu button { display: flex; align-items: center; gap: 10px; }
+.cal-opp-picker .cal-team-menu button span { display: grid; gap: 1px; }
+.cal-menu-clear { color: #ff9aa5 !important; font-size: 13px; }
+.cal-menu-empty { padding: 8px 10px; color: var(--soft); font-size: 13px; }
+.cal-menu-backdrop { position: fixed; inset: 0; z-index: 40; background: transparent; }
+.cal-row.menu-open { position: relative; z-index: 60; }
+.cal-crest.mini { width: 22px; height: 24px; border-radius: 5px 5px 11px 11px; font-size: 11px; }

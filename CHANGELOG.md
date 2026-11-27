@@ -7,6 +7,7 @@
 - **Ripristinato:** la freccia ⇄ per scambiare casa e trasferta nell’andata.
 - **Nuovo:** il modulo delle squadre del girone ha gli stessi dati della tua squadra (logo, nome, impianto, indirizzo, sede, matricola) più referente, telefono ed email. Il logo compare nel calendario e nella prossima partita.
 - **Nuovo:** nella creazione/modifica della tua squadra c’è il “Link di Maps dell’impianto”: le partite in casa si aprono in Maps con quel link.
+- **Modifica:** il menu dell’avversario nel calendario ha lo stesso aspetto degli altri menu (con logo e città).
 - I calendari già inseriti vengono convertiti: gli avversari scritti prima diventano squadre del girone.
 
 ## 2026-11-26 — Campo della trasferta in 3 passi

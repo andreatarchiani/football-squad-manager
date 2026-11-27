@@ -463,8 +463,10 @@
     "click": "button.cal-add"
    },
    {
-    "value": "Fulgor Castelfranco",
-    "select": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) .cal-opponent"
+    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) .cal-team-trigger"
+   },
+   {
+    "click": ".cal-opp-picker .cal-team-menu button:has-text('Fulgor Castelfranco')"
    },
    {
     "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=date]",
@@ -475,8 +477,10 @@
     "value": "15:30"
    },
    {
-    "value": "Atletico Levane Leona",
-    "select": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-opponent"
+    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-team-trigger"
+   },
+   {
+    "click": ".cal-opp-picker .cal-team-menu button:has-text('Atletico Levane Leona')"
    },
    {
     "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) input[type=date]",
@@ -493,6 +497,26 @@
    }
   ],
   "settle": 800
+ },
+ {
+  "name": "25a-opponent-menu",
+  "actions": [
+   {
+    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-team-trigger"
+   }
+  ],
+  "settle": 500,
+  "full": false
+ },
+ {
+  "name": "25a2-close",
+  "actions": [
+   {
+    "click": ".cal-menu-backdrop"
+   }
+  ],
+  "settle": 300,
+  "full": false
  },
  {
   "name": "25b-venue-dialog",
