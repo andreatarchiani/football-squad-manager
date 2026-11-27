@@ -82,3 +82,4 @@
 .archive-list input{width:20px;height:20px}.archive-list span{display:grid}.archive-list small{font-size:12px}
 .archive-dialog footer{display:flex;justify-content:flex-end;gap:8px}
 .archive-bar{height:10px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.1)}.archive-bar span{display:block;width:20%;height:100%;background:#ffb800;animation:arch 1s ease-in-out infinite alternate}@keyframes arch{to{margin-left:80%}}
+.role-hint{display:grid;gap:2px;margin:2px 0 8px;color:#9db5a5;font-size:10.5px;line-height:1.35}.role-hint b{color:#dcebe0}

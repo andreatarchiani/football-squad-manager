@@ -1,5 +1,11 @@
 # Changelog
 
+## Formazioni, ruoli e menu
+- Moduli: oltre a 4-3-3, 4-4-2 e 3-5-2 ci sono 4-2-3-1, 4-1-4-1, 3-4-3, 5-3-2 e altri, anche per calcio a 9, a 7 e a 5, raggruppati per tipo di gara (Home, Formazione, Panchina live).
+- Ruoli in italiano: POR, TD, TS, DC, LIB, ED, ES, MED, CC, REG, TRQ, AD, AS, SP, PC, ATT (nel modulo calciatore è indicato quale ruolo copre ogni posizione).
+- Anagrafe calciatore, dirigente e squadre si aprono direttamente sul modulo «nuovo»; per modificarne uno esistente lo si sceglie dal menu in cima al modulo (l'elenco completo resta in Archivio anagrafe).
+- Menu: si può tenere aperta una sola voce tra Ufficio, Allenamenti, Campo e Dati.
+
 ## Tutto parte dall'evento
 - In alto scegli Stagione / Evento: squadra, giocatori, dirigenti, calendario e convocazioni mostrano solo quelli dell'evento scelto.
 - Anagrafe squadre: «La mia squadra» con Importa (da altro evento o file CSV) ed Esporta (CSV per Excel) e «Squadre avversarie» (tipo terreno, colori completi, Maps).

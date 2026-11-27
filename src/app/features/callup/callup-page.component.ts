@@ -1,3 +1,4 @@
+import { PITCH_SLOTS } from '../../core/formations';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { ActiveEventService } from '../../core/active-event.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
@@ -153,6 +154,8 @@ export class CallupPageComponent {
   protected groupOf(items: CallupPlayer[], key: string): CallupPlayer[] { return items.filter(item => item.tag === key); }
 
   private slotGroup(slotId: string): string {
+    const slot = PITCH_SLOTS[this.formation()]?.find(item => item.id === slotId);
+    if (slot) return ({ Portiere: 'POR', Difensore: 'DIF', Centrocampista: 'CEN', Attaccante: 'ATT' } as Record<string, string>)[slot.role];
     const id = slotId.toLowerCase();
     if (id.startsWith('por')) return 'POR';
     if (/^(ts|td|dc|dif|ter|lib|dd|ds)/.test(id)) return 'DIF';

@@ -5,7 +5,7 @@
     <span>Stiamo riaprendo il campo e gli eventi salvati.</span>
   </section>
 } @else {
-<section class="teams-page">
+<section class="teams-page" [class.direct]="direct">
   @if (!liveMatch()) {
   <div class="page-heading">
     <div>
@@ -30,6 +30,9 @@
         <button class="text-button" type="button" (click)="cancelEdit()">Annulla</button>
       </div>
       <div class="form-grid">
+        @if (direct && teams().length) {
+          <label class="wide direct-pick">Nuova squadra oppure modifica una esistente<select name="directPick" [ngModel]="editingId() || ''" (ngModelChange)="pickExisting($event)"><option value="">＋ Nuova squadra</option>@for (team of teams(); track team.id) { <option [value]="team.id">{{ team.name }}</option> }</select></label>
+        }
         <label data-field="category">Categoria *
           <div class="formation-picker team-category-picker" [class.dropdown-open]="categoryDropdownOpen()">
             <button type="button" class="formation-picker-trigger" [class.is-open]="categoryDropdownOpen()" (click)="categoryDropdownOpen.update(open => !open)" [attr.aria-expanded]="categoryDropdownOpen()" aria-haspopup="listbox">
@@ -192,10 +195,13 @@
                   </button>
                   @if (formationDropdownOpen()) {
                     <div class="formation-picker-menu" role="listbox" aria-label="Seleziona modulo">
-                      @for (module of formations; track module) {
-                        <button type="button" class="formation-picker-option" role="option" [class.is-selected]="formation() === module" [attr.aria-selected]="formation() === module" (click)="changeFormation(module); formationDropdownOpen.set(false)">
-                          <span>{{ module }}</span>@if (formation() === module) { <span class="formation-picker-check">✓</span> }
-                        </button>
+                      @for (group of formationGroups; track group.label) {
+                        <div class="formation-picker-group">{{ group.label }}</div>
+                        @for (module of group.names; track module) {
+                          <button type="button" class="formation-picker-option" role="option" [class.is-selected]="formation() === module" [attr.aria-selected]="formation() === module" (click)="changeFormation(module); formationDropdownOpen.set(false)">
+                            <span>{{ module }}</span>@if (formation() === module) { <span class="formation-picker-check">✓</span> }
+                          </button>
+                        }
                       }
                     </div>
                   }

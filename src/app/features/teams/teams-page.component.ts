@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
+import { FORMATION_GROUPS, FORMATION_NAMES, PITCH_SLOTS, type PitchSlot } from '../../core/formations';
 import { TeamService, type TeamInput, type TeamRecord } from './team.service';
 import { PlayerService, type PlayerRecord } from '../players/player.service';
 import { NotificationService } from '../../core/notifications/notification.service';
@@ -16,6 +17,16 @@ import { LiveMatchComponent } from './live-match.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TeamsPageComponent implements OnChanges {
+  @Input() direct = false;
+  /** Direct mode: the page always shows an empty new-team form instead of the list. */
+  private reopenDirect(): void {
+    if (!this.direct || this.formOpen()) return;
+    this.formError.set(''); this.editingId.set(null); this.form = this.emptyForm(); this.teamIconPreview.set(''); this.teamIconUploadStatus.set(''); this.formOpen.set(true);
+  }
+  protected pickExisting(id: string): void {
+    const team = this.teams().find(item => item.id === id);
+    if (team) this.openEdit(team); else { this.formOpen.set(false); this.reopenDirect(); }
+  }
   @Input() launchRequest: { team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; opponentName: string; token: number } | null = null;
   @Input() rosterRequest: { teamId: string; layoutSlot: 1 | 2; token: number; scroll?: boolean } | null = null;
   @Input() resumeMatch = false;
@@ -60,27 +71,9 @@ export class TeamsPageComponent implements OnChanges {
   protected readonly matchOpponentName = signal('');
   protected readonly shirtPositions = signal<Record<string, { x: number; y: number }>>({});
   private dragSlotId: string | null = null;
-  protected readonly formations = ['4-3-3', '4-4-2', '3-5-2'];
-  protected readonly pitchSlots: Record<string, { id: string; label: string; role: string; x: number; y: number }[]> = {
-    '4-3-3': [
-      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
-      { id: 'ts', label: 'TS', role: 'Difensore', x: 13, y: 72 }, { id: 'dc1', label: 'DC', role: 'Difensore', x: 38, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 62, y: 75 }, { id: 'td', label: 'TD', role: 'Difensore', x: 87, y: 72 },
-      { id: 'mezz1', label: 'CC', role: 'Centrocampista', x: 28, y: 49 }, { id: 'med', label: 'MED', role: 'Centrocampista', x: 50, y: 56 }, { id: 'mezz2', label: 'CC', role: 'Centrocampista', x: 72, y: 49 },
-      { id: 'ala1', label: 'AS', role: 'Attaccante', x: 17, y: 27 }, { id: 'punta', label: 'ATT', role: 'Attaccante', x: 50, y: 19 }, { id: 'ala2', label: 'AD', role: 'Attaccante', x: 83, y: 27 }
-    ],
-    '4-4-2': [
-      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
-      { id: 'ts', label: 'TS', role: 'Difensore', x: 13, y: 72 }, { id: 'dc1', label: 'DC', role: 'Difensore', x: 38, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 62, y: 75 }, { id: 'td', label: 'TD', role: 'Difensore', x: 87, y: 72 },
-      { id: 'est1', label: 'ES', role: 'Centrocampista', x: 13, y: 49 }, { id: 'cc1', label: 'CC', role: 'Centrocampista', x: 38, y: 53 }, { id: 'cc2', label: 'CC', role: 'Centrocampista', x: 62, y: 53 }, { id: 'est2', label: 'ED', role: 'Centrocampista', x: 87, y: 49 },
-      { id: 'att1', label: 'ATT', role: 'Attaccante', x: 37, y: 24 }, { id: 'att2', label: 'ATT', role: 'Attaccante', x: 63, y: 24 }
-    ],
-    '3-5-2': [
-      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
-      { id: 'dc1', label: 'DC', role: 'Difensore', x: 25, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 50, y: 78 }, { id: 'dc3', label: 'DC', role: 'Difensore', x: 75, y: 75 },
-      { id: 'est1', label: 'EST', role: 'Centrocampista', x: 10, y: 49 }, { id: 'cc1', label: 'CC', role: 'Centrocampista', x: 30, y: 53 }, { id: 'reg', label: 'REG', role: 'Centrocampista', x: 50, y: 47 }, { id: 'cc2', label: 'CC', role: 'Centrocampista', x: 70, y: 53 }, { id: 'est2', label: 'EST', role: 'Centrocampista', x: 90, y: 49 },
-      { id: 'att1', label: 'ATT', role: 'Attaccante', x: 36, y: 24 }, { id: 'att2', label: 'ATT', role: 'Attaccante', x: 64, y: 24 }
-    ]
-  };
+  protected readonly formations = FORMATION_NAMES;
+  protected readonly formationGroups = FORMATION_GROUPS;
+  protected readonly pitchSlots: Record<string, PitchSlot[]> = PITCH_SLOTS;
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly showArchived = signal(false);
@@ -158,6 +151,7 @@ export class TeamsPageComponent implements OnChanges {
 
   constructor() {
     this.teamsLoadPromise = this.loadTeams();
+    void this.teamsLoadPromise.then(() => this.reopenDirect());
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -631,6 +625,7 @@ export class TeamsPageComponent implements OnChanges {
     this.form = this.emptyForm();
     this.teamIconPreview.set('');
     this.teamIconUploadStatus.set('');
+    this.reopenDirect();
     this.error.set('');
   }
 
@@ -673,6 +668,7 @@ export class TeamsPageComponent implements OnChanges {
       this.teamIconPreview.set('');
       this.teamIconUploadStatus.set('');
       await this.loadTeams();
+      this.reopenDirect();
     } catch (error) {
       console.error('Unable to save team.', error);
       const message = 'Non è stato possibile salvare la squadra. Controlla la connessione a internet e riprova.';

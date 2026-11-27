@@ -18,7 +18,7 @@
   @if (!events.activeId()) {
     <div class="sq-empty"><strong>Prima crea una stagione o un evento</strong><span>Squadre, giocatori e dirigenti si creano dentro un evento: usa “Creazione Stagione / Evento”.</span></div>
   } @else if (tab() === 'mine') {
-    @for (key of [refreshKey()]; track key) { <fsm-teams-page [resumeMatch]="false" /> }
+    @for (key of [refreshKey()]; track key) { <fsm-teams-page [resumeMatch]="false" [direct]="true" /> }
   } @else {
     <fsm-opponents />
   }

@@ -4,6 +4,7 @@ import { VoiceRecognitionService } from '../../core/voice/voice-recognition.serv
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { PlayerService } from '../players/player.service';
 import { TeamService } from './team.service';
+import { FORMATION_GROUPS, PITCH_SLOTS, type PitchSlot } from '../../core/formations';
 
 type MatchEventType = 'goal' | 'opponent-goal' | 'key-pass' | 'yellow-card' | 'red-card' | 'substitution' | 'formation';
 interface MatchEvent { type: MatchEventType; minute: number; description: string; playerId?: string; assistPlayerId?: string; outgoingId?: string; incomingId?: string; }
@@ -109,20 +110,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
   private voicePointerId: number | null = null;
   private voiceStartFailed = false;
 
-  readonly formations: Record<string, { id: string; label: string; x: number; y: number }[]> = {
-    '4-3-3': [
-      {id:'por',label:'POR',x:50,y:91},{id:'ts',label:'TS',x:13,y:72},{id:'dc1',label:'DC',x:38,y:75},{id:'dc2',label:'DC',x:62,y:75},{id:'td',label:'TD',x:87,y:72},
-      {id:'mezz1',label:'CC',x:28,y:49},{id:'med',label:'MED',x:50,y:56},{id:'mezz2',label:'CC',x:72,y:49},{id:'ala1',label:'AS',x:17,y:27},{id:'punta',label:'ATT',x:50,y:19},{id:'ala2',label:'AD',x:83,y:27}
-    ],
-    '4-4-2': [
-      {id:'por',label:'POR',x:50,y:91},{id:'ts',label:'TS',x:13,y:72},{id:'dc1',label:'DC',x:38,y:75},{id:'dc2',label:'DC',x:62,y:75},{id:'td',label:'TD',x:87,y:72},
-      {id:'est1',label:'ES',x:13,y:49},{id:'cc1',label:'CC',x:38,y:53},{id:'cc2',label:'CC',x:62,y:53},{id:'est2',label:'ED',x:87,y:49},{id:'att1',label:'ATT',x:37,y:24},{id:'att2',label:'ATT',x:63,y:24}
-    ],
-    '3-5-2': [
-      {id:'por',label:'POR',x:50,y:91},{id:'dc1',label:'DC',x:25,y:75},{id:'dc2',label:'DC',x:50,y:78},{id:'dc3',label:'DC',x:75,y:75},
-      {id:'est1',label:'EST',x:10,y:49},{id:'cc1',label:'CC',x:30,y:53},{id:'reg',label:'REG',x:50,y:47},{id:'cc2',label:'CC',x:70,y:53},{id:'est2',label:'EST',x:90,y:49},{id:'att1',label:'ATT',x:36,y:24},{id:'att2',label:'ATT',x:64,y:24}
-    ]
-  };
+  readonly formations: Record<string, PitchSlot[]> = PITCH_SLOTS;
 
   async ngOnInit(): Promise<void> {
     // Do not rely on the Home preview or a previously mounted roster: refresh
@@ -215,6 +203,7 @@ export class LiveMatchComponent implements OnDestroy, OnInit {
       return valid ? { ...slot, x: Math.max(9, Math.min(91, saved.x)), y: Math.max(9, Math.min(91, saved.y)) } : slot;
     });
   }
+  protected readonly formationGroups = FORMATION_GROUPS;
   protected formationOptions(): string[] { return Object.keys(this.formations); }
   protected changeMatchFormation(next: string): void { if (!this.formations[next] || next === this.matchFormation()) return; const previous=this.matchFormation(); const ids=this.formationPlayerOrder.length ? this.formationPlayerOrder : this.formations[previous].map(slot=>this.lineup()[slot.id]).filter((id): id is string => !!id); this.formationPlayerOrder=[...ids]; const lineup: Record<string,string>={}; const positions: Record<string,{x:number;y:number}>={}; this.formations[next].forEach((slot,i)=>{const id=ids[i];if(id){lineup[slot.id]=id;positions[id]={x:slot.x,y:slot.y};}}); this.lineup.set(lineup);this.matchPositions.set(positions);this.matchFormation.set(next);this.selectedOutgoingId.set(null);this.events.update(items=>[{type:'formation',minute:this.minute,description:'Cambio modulo: '+previous+' → '+next},...items]);this.voiceMessage.set('');this.voiceDraft.set(''); void this.persistMatchState(); }
   protected startShirtDrag(event: PointerEvent, id: string): void {

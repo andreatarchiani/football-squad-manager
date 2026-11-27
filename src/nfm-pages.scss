@@ -1165,3 +1165,19 @@
 #nfm .home-roster-panel.home-roster-compact { display: block; padding-bottom: 14px; }
 #nfm .home-roster-compact .home-roster-heading { margin: 0; padding: 0; border: 0; }
 #nfm .nfm-formation-editor { display: block; margin-top: 14px; }
+
+/* ===== Anagrafe calciatore / dirigente / squadre: apre direttamente il modulo "nuovo", incorniciato nella pagina ===== */
+#nfm .direct > :not(.fsm-form-overlay):not(.feedback):not(.page-heading) { display: none; }
+#nfm .direct .page-heading .primary-button { display: none; }
+#nfm .direct .fsm-form-overlay {
+  position: static; inset: auto; z-index: 1; display: block; overflow: visible; padding: 0;
+  background: none; backdrop-filter: none; animation: none;
+}
+#nfm .direct .fsm-form-overlay > .fsm-form-dialog {
+  position: relative; width: 100%; max-width: none; min-height: 0; max-height: none; margin: 0 0 24px; overflow: visible;
+}
+#nfm .direct .fsm-form-dialog .form-heading { position: relative; top: auto; }
+#nfm .direct .fsm-form-dialog .form-heading .text-button { display: none; }
+#nfm .direct .fsm-form-dialog .form-actions { position: relative; bottom: auto; }
+#nfm .direct .direct-pick select { width: 100%; }
+.direct-pick { grid-column: 1 / -1; }

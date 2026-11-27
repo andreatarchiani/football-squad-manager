@@ -1,4 +1,4 @@
-<section class="players-page staff-page">
+<section class="players-page staff-page" [class.direct]="direct">
   <div class="page-heading">
     <div><h2>Dirigenti</h2><p>Anagrafica dei dirigenti della società.</p></div>
     <div class="heading-actions"><button class="secondary-button archive-button" type="button" (click)="openArchive()">Carica da archivio</button><button class="primary-button" type="button" (click)="openCreate()">＋ Nuovo dirigente</button></div>
@@ -13,6 +13,9 @@
           <button class="text-button" type="button" (click)="cancel()">Annulla</button>
         </div>
         <div class="form-grid">
+          @if (direct && staff().length) {
+            <label class="wide direct-pick">Nuovo dirigente oppure modifica uno esistente<select name="directPick" [ngModel]="editingId() || ''" (ngModelChange)="pickExisting($event)"><option value="">＋ Nuovo dirigente</option>@for (person of staff(); track person.id) { <option [value]="person.id">{{ person.lastName }} {{ person.firstName }}</option> }</select></label>
+          }
           <label>Nome *<input name="firstName" [(ngModel)]="form.firstName" maxlength="50" placeholder="Nome"></label>
           <label>Cognome *<input name="lastName" [(ngModel)]="form.lastName" maxlength="50" placeholder="Cognome"></label>
           <label>Data di nascita<input name="dateOfBirth" type="date" [(ngModel)]="form.dateOfBirth"></label>

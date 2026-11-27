@@ -233,10 +233,11 @@ export class AppComponent {
     { key: 'office', label: 'Ufficio', icon: 'desk' }, { key: 'training', label: 'Allenamenti', icon: 'cone' },
     { key: 'match', label: 'Campo', icon: 'match' }, { key: 'data', label: 'Dati', icon: 'data', soon: true }
   ];
-  private readonly groupOpen = signal<Record<string, boolean>>({});
+  /** Only one menu group (Ufficio/Allenamenti/Campo/Dati) can be open; undefined = follow the current section. */
+  private readonly openGroup = signal<string | null | undefined>(undefined);
   protected groupItems(key: string): NavItem[] { return SECTION_MENU[key as AppSection] ?? []; }
-  protected isGroupOpen(key: string): boolean { return this.groupOpen()[key] ?? this.section() === key; }
-  protected toggleGroup(key: string): void { this.groupOpen.update(state => ({ ...state, [key]: !this.isGroupOpen(key) })); }
+  protected isGroupOpen(key: string): boolean { const open = this.openGroup(); return open === undefined ? this.section() === key : open === key; }
+  protected toggleGroup(key: string): void { this.openGroup.set(this.isGroupOpen(key) ? null : key); }
   protected readonly createEventRequest = signal(0);
   protected readonly newEventLabel = '＋ Nuovo evento…';
   protected readonly eventOptions = computed(() => {

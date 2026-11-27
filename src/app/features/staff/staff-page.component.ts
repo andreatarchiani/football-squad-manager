@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { NotificationService } from '../../core/notifications/notification.service';
@@ -61,7 +61,18 @@ export class StaffPageComponent {
     } finally { this.copying.set(false); }
   }
 
-  constructor() { effect(() => { if (this.auth.workspaceId()) void this.load(); }); }
+  @Input() direct = false;
+  constructor() { effect(() => { if (this.auth.workspaceId()) void this.load().then(() => this.reopenDirect()); }); }
+
+  /** Direct mode: the page always shows an empty new-dirigente form instead of the list. */
+  private reopenDirect(): void {
+    if (!this.direct || this.formOpen()) return;
+    this.editingId.set(null); this.form = emptyStaff(); this.formError.set(''); this.categoryOpen.set(false); this.formOpen.set(true);
+  }
+  protected pickExisting(id: string): void {
+    const person = this.staff().find(item => item.id === id);
+    if (person) this.openEdit(person); else { this.formOpen.set(false); this.reopenDirect(); }
+  }
 
   protected initials(person: StaffRecord): string {
     return `${person.firstName.charAt(0)}${person.lastName.charAt(0)}`.toUpperCase() || '—';
@@ -76,7 +87,7 @@ export class StaffPageComponent {
     this.editingId.set(id); this.form = { ...data }; this.formError.set(''); this.categoryOpen.set(false); this.formOpen.set(true);
   }
 
-  protected cancel(): void { this.formOpen.set(false); this.editingId.set(null); this.formError.set(''); }
+  protected cancel(): void { this.formOpen.set(false); this.editingId.set(null); this.formError.set(''); this.reopenDirect(); }
 
   protected setCategory(value: string): void { this.form.affiliationCategory = value; this.categoryOpen.set(false); }
 
@@ -100,6 +111,7 @@ export class StaffPageComponent {
       this.notifications.notify({ title: editing ? 'Dirigente aggiornato' : 'Dirigente inserito', message: `${this.form.firstName} ${this.form.lastName}`, type: 'success' });
       this.formOpen.set(false); this.editingId.set(null);
       await this.load();
+      this.reopenDirect();
     } catch (error) {
       console.error('Unable to save staff member.', error);
       const message = 'Non è stato possibile salvare il dirigente. Controlla la connessione a internet e riprova.';

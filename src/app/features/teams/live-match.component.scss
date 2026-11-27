@@ -255,3 +255,5 @@
 .match-player-label.pitch-player-name { flex-wrap: nowrap; width: max-content; max-width: none; white-space: nowrap; }
 .match-leadership-mark { flex: 0 0 auto; }
 
+.formation-picker-menu { max-height: min(60vh, 420px); overflow-y: auto; }
+.formation-picker-group { padding: 9px 10px 4px; color: #8fb59c; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }

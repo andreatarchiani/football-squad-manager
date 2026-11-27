@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy,Component,inject,signal } from '@angular/core';
+import { POSITIONS } from '../../core/formations';
+import { ChangeDetectionStrategy,Component,Input,inject,signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { clearFieldProblems, showFieldProblems, type FieldProblem } from '../../core/form-feedback';
@@ -9,13 +10,18 @@ import { PLAYER_ROLES,PlayerService,emptyGuardian,type Guardian,type GuardianKin
 @Component({selector:'fsm-players-page',standalone:true,imports:[FormsModule],templateUrl:'./players-page.component.html',styleUrl:'./players-page.component.scss',changeDetection:ChangeDetectionStrategy.OnPush})
 export class PlayersPageComponent {
  private readonly auth=inject(FirebaseAuthService); private readonly service=inject(PlayerService); private readonly teamService=inject(TeamService); private readonly notifications=inject(NotificationService);
+ protected readonly positionFamilies=(['Portiere','Difensore','Centrocampista','Attaccante'] as const).map(role=>({role,text:POSITIONS.filter(item=>item.role===role).map(item=>item.code+' '+item.name.toLowerCase()).join(' · ')}));
  protected readonly players=signal<PlayerRecord[]>([]); protected readonly teams=signal<TeamRecord[]>([]); protected readonly loading=signal(true); protected readonly saving=signal(false); protected readonly showArchived=signal(false); protected readonly playerSort=signal<'surname-asc'|'surname-desc'|'shirt-asc'>('surname-asc'); protected readonly playerSortDropdownOpen=signal(false); protected readonly formDropdownOpen=signal<string|null>(null); protected readonly playerCategories=['Juniores Under 19','Under 18','Allievi Under 17','Allievi B Under 16','Giovanissimi Under 15','Giovanissimi B Under 14','Esordienti II anno Under 13','Esordienti I anno Under 12','Pulcini II anno Under 11','Pulcini I anno Under 10','Primi Calci II anno Under 9','Primi Calci I anno Under 8','Piccoli Amici II anno Under 7','Piccoli Amici I anno Under 6']; protected readonly error=signal(''); protected readonly formError=signal(''); protected readonly notice=signal(''); protected readonly formOpen=signal(false); protected readonly editingId=signal<string|null>(null); protected readonly roles=PLAYER_ROLES; protected form:PlayerInput=this.emptyForm(); protected readonly guardianKinds:{key:GuardianKind;label:string}[]=[{key:'mother',label:'Madre / Tutrice'},{key:'father',label:'Padre / Tutore'}];
- constructor(){void this.load();}
+ @Input() direct=false;
+ constructor(){void this.load().then(()=>this.reopenDirect());}
+ /** Direct mode: the page always shows an empty new-player form instead of the list. */
+ private reopenDirect(){if(!this.direct||this.formOpen()||!this.activeTeams.length)return;this.formError.set('');this.editingId.set(null);this.form=this.emptyForm();this.form.teamId=this.activeTeams[0]?.id??'';this.formOpen.set(true);}
+ protected pickExisting(id:string){const p=this.players().find(item=>item.id===id);if(p){this.openEdit(p);}else{this.formOpen.set(false);this.reopenDirect();}}
  protected get visiblePlayers(){const list=this.players().filter(p=>this.showArchived()||!p.isArchived);return [...list].sort((a,b)=>{if(this.playerSort()==='shirt-asc'){const an=a.shirtNumber??Number.MAX_SAFE_INTEGER,bn=b.shirtNumber??Number.MAX_SAFE_INTEGER;return an-bn||a.lastName.localeCompare(b.lastName,'it',{sensitivity:'base'});}const order=a.lastName.localeCompare(b.lastName,'it',{sensitivity:'base'})||a.firstName.localeCompare(b.firstName,'it',{sensitivity:'base'});return this.playerSort()==='surname-desc'?-order:order;});}
  protected get activeTeams(){return this.teams().filter(t=>!t.isArchived&&t.seasonId);}
  protected openCreate(){this.formError.set('');this.editingId.set(null);this.form=this.emptyForm();this.form.teamId=this.activeTeams[0]?.id??'';this.formOpen.set(true);this.error.set('');this.notice.set('');}
  protected openEdit(p:PlayerRecord){this.formError.set('');this.editingId.set(p.id);this.form={firstName:p.firstName,lastName:p.lastName,dateOfBirth:p.dateOfBirth,placeOfBirth:p.placeOfBirth,residence:p.residence,postalCode:p.postalCode,identityDocument:p.identityDocument,affiliationCategory:p.affiliationCategory,federationNumber:p.federationNumber,federationCard:p.federationCard,keyContactPhone:p.keyContactPhone,keyContactEmail:p.keyContactEmail,preferredFoot:p.preferredFoot,primaryRole:p.primaryRole,notes:p.notes,teamId:p.teamId||this.activeTeams[0]?.id||'',shirtNumber:p.shirtNumber===null?'':String(p.shirtNumber),roles:p.roles.length?[...p.roles]:[p.primaryRole],status:p.status,guardians:{mother:p.guardians?.mother?{...p.guardians.mother}:null,father:p.guardians?.father?{...p.guardians.father}:null}};this.formOpen.set(true);this.error.set('');this.notice.set('');}
- protected cancel(){this.formError.set('');this.formOpen.set(false);this.editingId.set(null);this.form=this.emptyForm();this.error.set('');}
+ protected cancel(){this.formError.set('');this.formOpen.set(false);this.editingId.set(null);this.form=this.emptyForm();this.error.set('');this.reopenDirect();}
  
  protected toggleFormDropdown(name:string){this.formDropdownOpen.update(open=>open===name?null:name);}
  protected setAffiliationCategory(value:string){this.form.affiliationCategory=value;this.formDropdownOpen.set(null);}
@@ -32,7 +38,7 @@ export class PlayersPageComponent {
   if(problems.length){this.reportProblems(formEl,problems);return;}
   const id=this.auth.workspaceId();if(!id){this.formError.set('Sessione scaduta: esci e accedi di nuovo.');return;}
   this.saving.set(true);this.error.set('');this.notice.set('');
-  try{const old=this.players().find(p=>p.id===this.editingId());await this.service.save(id,this.form,this.teams(),old);this.notice.set(old?'Giocatore aggiornato.':'Giocatore inserito nella rosa.');this.notifications.notify({title:old?'Giocatore aggiornato':'Giocatore inserito',message:`${this.form.firstName} ${this.form.lastName}`,type:'success'});this.formOpen.set(false);this.editingId.set(null);await this.load();}
+  try{const old=this.players().find(p=>p.id===this.editingId());await this.service.save(id,this.form,this.teams(),old);this.notice.set(old?'Giocatore aggiornato.':'Giocatore inserito nella rosa.');this.notifications.notify({title:old?'Giocatore aggiornato':'Giocatore inserito',message:`${this.form.firstName} ${this.form.lastName}`,type:'success'});this.formOpen.set(false);this.editingId.set(null);await this.load();this.reopenDirect();}
   catch(e){console.error('Unable to save player.',e);const message=e instanceof Error?e.message:'Non è stato possibile salvare il giocatore. Riprova.';
    if(/maglia/i.test(message))this.reportProblems(formEl,[{field:'shirtNumber',label:'Numero maglia',message}]);
    else if(/squadra/i.test(message))this.reportProblems(formEl,[{field:'teamId',label:'Squadra',message}]);

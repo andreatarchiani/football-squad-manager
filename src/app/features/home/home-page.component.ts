@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Output, effect, injec
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
+import { FORMATION_NAMES, PITCH_SLOTS, type PitchSlot } from '../../core/formations';
 import { TeamService, type TeamRecord } from '../teams/team.service';
 import { PlayerService, type PlayerRecord } from '../players/player.service';
 import { ActiveEventService } from '../../core/active-event.service';
@@ -47,26 +48,7 @@ export class HomePageComponent {
   private previewDrag: { slotId: string; pointerId: number; startX: number; startY: number; moved: boolean } | null = null;
   private previewDraggedClick = false;
   private previewSaveQueue: Promise<void> = Promise.resolve();
-  protected readonly pitchSlots: Record<string, { id: string; label: string; role: string; x: number; y: number }[]> = {
-    '4-3-3': [
-      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
-      { id: 'ts', label: 'TS', role: 'Difensore', x: 13, y: 72 }, { id: 'dc1', label: 'DC', role: 'Difensore', x: 38, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 62, y: 75 }, { id: 'td', label: 'TD', role: 'Difensore', x: 87, y: 72 },
-      { id: 'mezz1', label: 'CC', role: 'Centrocampista', x: 28, y: 49 }, { id: 'med', label: 'MED', role: 'Centrocampista', x: 50, y: 56 }, { id: 'mezz2', label: 'CC', role: 'Centrocampista', x: 72, y: 49 },
-      { id: 'ala1', label: 'AS', role: 'Attaccante', x: 17, y: 27 }, { id: 'punta', label: 'ATT', role: 'Attaccante', x: 50, y: 19 }, { id: 'ala2', label: 'AD', role: 'Attaccante', x: 83, y: 27 }
-    ],
-    '4-4-2': [
-      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
-      { id: 'ts', label: 'TS', role: 'Difensore', x: 13, y: 72 }, { id: 'dc1', label: 'DC', role: 'Difensore', x: 38, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 62, y: 75 }, { id: 'td', label: 'TD', role: 'Difensore', x: 87, y: 72 },
-      { id: 'est1', label: 'ES', role: 'Centrocampista', x: 13, y: 49 }, { id: 'cc1', label: 'CC', role: 'Centrocampista', x: 38, y: 53 }, { id: 'cc2', label: 'CC', role: 'Centrocampista', x: 62, y: 53 }, { id: 'est2', label: 'ED', role: 'Centrocampista', x: 87, y: 49 },
-      { id: 'att1', label: 'ATT', role: 'Attaccante', x: 37, y: 24 }, { id: 'att2', label: 'ATT', role: 'Attaccante', x: 63, y: 24 }
-    ],
-    '3-5-2': [
-      { id: 'por', label: 'POR', role: 'Portiere', x: 50, y: 91 },
-      { id: 'dc1', label: 'DC', role: 'Difensore', x: 25, y: 75 }, { id: 'dc2', label: 'DC', role: 'Difensore', x: 50, y: 78 }, { id: 'dc3', label: 'DC', role: 'Difensore', x: 75, y: 75 },
-      { id: 'est1', label: 'EST', role: 'Centrocampista', x: 10, y: 49 }, { id: 'cc1', label: 'CC', role: 'Centrocampista', x: 30, y: 53 }, { id: 'reg', label: 'REG', role: 'Centrocampista', x: 50, y: 47 }, { id: 'cc2', label: 'CC', role: 'Centrocampista', x: 70, y: 53 }, { id: 'est2', label: 'EST', role: 'Centrocampista', x: 90, y: 49 },
-      { id: 'att1', label: 'ATT', role: 'Attaccante', x: 36, y: 24 }, { id: 'att2', label: 'ATT', role: 'Attaccante', x: 64, y: 24 }
-    ]
-  };
+  protected readonly pitchSlots: Record<string, PitchSlot[]> = PITCH_SLOTS;
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly error = signal('');
@@ -364,7 +346,7 @@ export class HomePageComponent {
       const viceCaptain = this.previewPlayers().find(player => player.isViceCaptain && player.id !== captain?.id);
       this.captainId.set(captain?.id ?? '');
       this.viceCaptainId.set(viceCaptain?.id ?? '');
-      const formation = saved?.formation && ['4-3-3', '4-4-2', '3-5-2'].includes(saved.formation) ? saved.formation : '4-3-3';
+      const formation = saved?.formation && FORMATION_NAMES.includes(saved.formation) ? saved.formation : '4-3-3';
       this.previewFormation.set(formation);
       const validSlots = new Set(this.pitchSlots[formation].map(slot => slot.id));
       const validPlayers = new Set(this.previewPlayers().map(player => player.id));
