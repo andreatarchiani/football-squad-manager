@@ -52,14 +52,26 @@ export interface GroupTeam {
 
 export function emptyGroupTeam(): GroupTeam { return { id: '', name: '', icon: '', city: '', facilityName: '', address: '', mapsUrl: '', headquarters: '', federation: '', contact: '', phone: '', email: '' }; }
 
+/** Call-up ("convocazione") details of one match, saved with the calendar. */
+export interface CallupInfo {
+  meetingTime: string;     // HH:mm
+  meetingPlace: string;
+  kit: string;             // e.g. "Divisa blu, calzettoni bianchi"
+  notes: string;
+  excluded: string[];      // player ids not called up
+}
+export function emptyCallup(): CallupInfo { return { meetingTime: '', meetingPlace: '', kit: '', notes: '', excluded: [] }; }
+
 export interface CalendarData {
+  callups: Record<string, CallupInfo>; // by round number
+
   groupName: string;       // e.g. "Girone unico Arezzo"
   groupTeams: GroupTeam[]; // teams of the group, chosen from a list in each round
   andata: CalendarRound[];
   ritorno: CalendarRound[];
 }
 
-export function emptyCalendar(): CalendarData { return { groupName: '', groupTeams: [], andata: [], ritorno: [] }; }
+export function emptyCalendar(): CalendarData { return { callups: {}, groupName: '', groupTeams: [], andata: [], ritorno: [] }; }
 
 /**
  * Builds the return leg from the first leg: same opponents in the same order,
@@ -111,6 +123,7 @@ export class CalendarService {
     const data = snapshot.data();
     const rounds = Array.isArray(data['rounds']) ? (data['rounds'] as Record<string, unknown>[]).map(item => this.round(item)) : [];
     return {
+      callups: this.callups(data['callups']),
       groupName: String(data['groupName'] ?? ''),
       groupTeams: Array.isArray(data['groupTeams']) ? (data['groupTeams'] as Record<string, unknown>[]).map(item => this.groupTeam(item)).filter(team => team.name) : [],
       andata: rounds.filter(round => round.leg === 'A').sort((a, b) => a.number - b.number),
@@ -129,6 +142,7 @@ export class CalendarService {
       teamId,
       teamName,
       groupName: calendar.groupName.trim().slice(0, 80),
+      callups: Object.fromEntries(Object.entries(calendar.callups ?? {}).map(([number, info]) => [number, this.cleanCallup(info)])),
       groupTeams: calendar.groupTeams.slice(0, 40).map(team => ({
         id: team.id, name: team.name.trim().slice(0, 80), icon: (team.icon || '').slice(0, 60000), facilityName: (team.facilityName || '').trim().slice(0, 100), headquarters: (team.headquarters || '').trim().slice(0, 180), federation: (team.federation || '').trim().slice(0, 60), city: team.city.trim().slice(0, 80), address: team.address.trim().slice(0, 180),
         mapsUrl: isMapsLink(team.mapsUrl) ? team.mapsUrl.trim().slice(0, 400) : '', contact: team.contact.trim().slice(0, 80),
@@ -137,6 +151,29 @@ export class CalendarService {
       rounds: [...calendar.andata, ...calendar.ritorno].map(clean),
       updatedAt: serverTimestamp()
     });
+  }
+
+  /** Saves only the call-up of one match (other fields of the calendar stay untouched). */
+  async saveCallup(workspaceId: string, teamId: string, roundNumber: number, info: CallupInfo): Promise<void> {
+    await setDoc(doc(this.db(), 'workspaces', workspaceId, 'calendars', teamId), { callups: { [String(roundNumber)]: this.cleanCallup(info) } }, { merge: true });
+  }
+
+  private cleanCallup(info: CallupInfo): CallupInfo {
+    return {
+      meetingTime: String(info.meetingTime ?? '').slice(0, 5), meetingPlace: String(info.meetingPlace ?? '').trim().slice(0, 180),
+      kit: String(info.kit ?? '').trim().slice(0, 180), notes: String(info.notes ?? '').trim().slice(0, 600),
+      excluded: (info.excluded ?? []).slice(0, 80).map(id => String(id).slice(0, 80))
+    };
+  }
+
+  private callups(value: unknown): Record<string, CallupInfo> {
+    const result: Record<string, CallupInfo> = {};
+    if (value && typeof value === 'object') {
+      for (const [key, raw] of Object.entries(value as Record<string, Record<string, unknown>>)) {
+        result[key] = { meetingTime: String(raw?.['meetingTime'] ?? ''), meetingPlace: String(raw?.['meetingPlace'] ?? ''), kit: String(raw?.['kit'] ?? ''), notes: String(raw?.['notes'] ?? ''), excluded: Array.isArray(raw?.['excluded']) ? (raw['excluded'] as unknown[]).map(String) : [] };
+      }
+    }
+    return result;
   }
 
   /** Closest match from now on (today included), or null when nothing is scheduled. */

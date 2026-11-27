@@ -11,13 +11,14 @@ import { PlayersPageComponent } from './features/players/players-page.component'
 import { HomePageComponent } from './features/home/home-page.component';
 import { StaffPageComponent } from './features/staff/staff-page.component';
 import { CalendarPageComponent } from './features/calendar/calendar-page.component';
+import { CallupPageComponent } from './features/callup/callup-page.component';
 import { TeamService, type TeamRecord } from './features/teams/team.service';
 import { CalendarService, type CalendarRound } from './features/calendar/calendar.service';
 import type { PlayerRecord } from './features/players/player.service';
 import { FIRESTORE_DB } from './core/firebase.tokens';
 import { addDoc, collection, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore';
 
-type AppView = 'home' | 'office' | 'training' | 'match-hub' | 'players' | 'teams' | 'staff' | 'calendar' | 'formation' | 'lineup' | 'match';
+type AppView = 'home' | 'office' | 'training' | 'match-hub' | 'players' | 'teams' | 'staff' | 'calendar' | 'formation' | 'lineup' | 'match' | 'callup';
 type AppSection = 'home' | 'office' | 'training' | 'match';
 type IconName = keyof typeof NAV_ICONS;
 interface NavItem { label: string; icon: IconName; view?: AppView; soon?: boolean; }
@@ -51,7 +52,7 @@ const NAV_ICONS = {
 
 const VIEW_SECTION: Record<AppView, AppSection> = {
   home: 'home', office: 'office', players: 'office', teams: 'office', staff: 'office', training: 'training', calendar: 'office',
-  'match-hub': 'match', formation: 'match', lineup: 'match', match: 'match'
+  'match-hub': 'match', formation: 'match', lineup: 'match', match: 'match', callup: 'match'
 };
 const SECTION_LANDING: Record<AppSection, AppView | null> = { home: null, office: 'office', training: 'training', match: 'match-hub' };
 const VIEW_META: Record<AppView, { title: string; accent?: string; subtitle?: string; icon: IconName }> = {
@@ -65,12 +66,13 @@ const VIEW_META: Record<AppView, { title: string; accent?: string; subtitle?: st
   'match-hub': { title: 'Campo', icon: 'match' },
   formation: { title: 'Formazione', icon: 'formation', subtitle: 'Prepara la prossima partita e lo schieramento titolare' },
   lineup: { title: 'Formazione', icon: 'formation', subtitle: 'Modulo, titolari, panchina e capitani' },
-  match: { title: 'Panchina', accent: 'Live', icon: 'bench' }
+  match: { title: 'Panchina', accent: 'Live', icon: 'bench' },
+  callup: { title: 'Convocazione', icon: 'people', subtitle: 'Titolari, panchina, ritrovo e campo da condividere con la squadra' }
 };
 /** Depth of every screen: going to a smaller depth is "indietro" (slide from the left). */
 const VIEW_DEPTH: Record<AppView, number> = {
   home: 0, office: 1, training: 1, 'match-hub': 1,
-  players: 2, teams: 2, staff: 2, calendar: 2, formation: 2, match: 2, lineup: 3
+  players: 2, teams: 2, staff: 2, calendar: 2, formation: 2, match: 2, callup: 2, lineup: 3
 };
 const HOME_TILES: { label: string; icon: IconName; view?: AppView; tone: string; soon?: boolean }[] = [
   { label: 'Ufficio', icon: 'desk', view: 'office', tone: 'office' },
@@ -98,7 +100,7 @@ const SECTION_MENU: Partial<Record<AppSection, NavItem[]>> = {
     { label: 'Composizione Allenamento', icon: 'tactic', soon: true }
   ],
   match: [
-    { label: 'Convocazione', icon: 'people', soon: true },
+    { label: 'Convocazione', icon: 'people', view: 'callup' },
     { label: 'Distinta Gara', icon: 'sheet', soon: true },
     { label: 'Formazione', icon: 'formation', view: 'formation' },
     { label: 'Palle inattive', icon: 'flag', soon: true },
@@ -116,7 +118,7 @@ interface SupportTicket { id: string; authorEmail: string; authorName: string; d
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [DatePipe, NgTemplateOutlet, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, StaffPageComponent, CalendarPageComponent, NotificationHostComponent],
+  imports: [DatePipe, NgTemplateOutlet, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, StaffPageComponent, CalendarPageComponent, CallupPageComponent, NotificationHostComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

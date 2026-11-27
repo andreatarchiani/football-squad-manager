@@ -243,6 +243,9 @@
           @case ('match') {
             @defer { <fsm-teams-page class="nfm-live-mode" [launchRequest]="matchLaunch()" [resumeMatch]="true" (matchClosed)="returnHomeAfterMatch()" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
+          @case ('callup') {
+            @defer { <fsm-callup-page /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
+          }
           @case ('players') {
             @defer { <fsm-players-page /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }

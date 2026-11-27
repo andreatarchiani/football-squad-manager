@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-27 — Convocazione
+
+- **Nuovo:** in Partita › Convocazione si prepara la convocazione per la prossima partita del calendario: titolari (dalla formazione salvata, con ruolo, numero e capitano), panchina, ora e luogo di ritrovo, divisa, note e campo con link di Maps.
+- Puoi escludere un giocatore con un tocco; infortunati e squalificati sono indicati come non disponibili.
+- Il pulsante “Condividi convocazione” apre la condivisione del telefono (o WhatsApp / copia testo) con tutte le informazioni e il link di Maps.
+
 ## 2026-11-27 — Squadre del girone e freccia casa/trasferta
 
 - **Nuovo:** nella lista “Squadre del girone” il pulsante “Crea nuova squadra del girone” permette di inserire nome, città, campo (indirizzo e link Maps), referente, telefono ed email. Le squadre si possono modificare ed eliminare (se non usate).

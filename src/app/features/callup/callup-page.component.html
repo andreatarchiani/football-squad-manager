@@ -1,0 +1,90 @@
+<section class="callup-page">
+  @if (error()) { <div class="cu-alert" role="alert">{{ error() }}</div> }
+  @if (loading()) {
+    <div class="cu-empty">Caricamento della convocazione…</div>
+  } @else if (!team()) {
+    <div class="cu-empty"><strong>Prima crea una squadra</strong><span>La convocazione si basa sulla rosa di una squadra.</span></div>
+  } @else if (!round()) {
+    <div class="cu-empty"><strong>Nessuna partita in programma</strong><span>Inserisci le date delle giornate in Ufficio › Creazione Stagione / Campionato: la convocazione si prepara per la prossima partita.</span></div>
+  } @else {
+    <div class="cu-layout">
+      <div class="cu-main">
+        <!-- Partita -->
+        <section class="cu-panel cu-match">
+          <header class="cu-head"><strong>Partita</strong><small>Giornata {{ round()!.number }} · {{ round()!.leg === 'A' ? 'Andata' : 'Ritorno' }}</small></header>
+          <div class="cu-versus">
+            <div [class.is-mine]="round()!.home"><strong>{{ homeName() }}</strong><small>Casa</small></div>
+            <b>VS</b>
+            <div [class.is-mine]="!round()!.home"><strong>{{ awayName() }}</strong><small>Trasferta</small></div>
+          </div>
+          <dl class="cu-facts">
+            <div><dt>Giorno</dt><dd>{{ formatDate(round()!.date) }}</dd></div>
+            <div><dt>Ora gara</dt><dd [class.missing]="!round()!.time">{{ round()!.time || 'Da inserire nel calendario' }}</dd></div>
+            <div><dt>Campo</dt><dd>{{ venue().name || 'Da indicare' }}</dd></div>
+          </dl>
+          @if (venue().url) { <a class="cu-maps" [href]="venue().url" target="_blank" rel="noopener">📍 Apri il campo in Maps</a> }
+          @else { <p class="cu-hint">Manca il link di Maps del campo: aggiungilo in Anagrafe Squadra (casa) o nel calendario (trasferta).</p> }
+        </section>
+
+        <!-- Dettagli -->
+        <section class="cu-panel">
+          <header class="cu-head"><strong>Ritrovo e dettagli</strong></header>
+          <div class="cu-form">
+            <label>Ora di ritrovo<input type="time" [value]="info().meetingTime" (change)="setField('meetingTime', $any($event.target).value)"></label>
+            <label>Luogo di ritrovo<input type="text" maxlength="180" placeholder="Es. Parcheggio del campo" [value]="info().meetingPlace" (input)="setField('meetingPlace', $any($event.target).value)"></label>
+            <label class="wide">Divisa e materiale<input type="text" maxlength="180" placeholder="Es. Divisa blu, kway, documento" [value]="info().kit" (input)="setField('kit', $any($event.target).value)"></label>
+            <label class="wide">Note per i convocati<textarea rows="2" maxlength="600" placeholder="Es. Portare la borraccia" [value]="info().notes" (input)="setField('notes', $any($event.target).value)"></textarea></label>
+          </div>
+        </section>
+
+        <!-- Giocatori -->
+        <section class="cu-panel">
+          <header class="cu-head"><strong>Convocati ({{ called().length }})</strong><small>Tocca un giocatore per escluderlo</small></header>
+          <h4 class="cu-sub">Titolari {{ formation() ? '· ' + formation() : '' }} <small>({{ starters().length }})</small></h4>
+          @if (!starters().length) { <p class="cu-hint">Nessun titolare: scegli la formazione in Partita › Formazione.</p> }
+          <ul class="cu-list">
+            @for (item of starters(); track item.player.id) {
+              <li><button type="button" (click)="toggle(item.player)" title="Escludi dalla convocazione"><span class="cu-tag">{{ item.tag }}</span><span class="cu-num">{{ item.player.shirtNumber ?? '–' }}</span><span class="cu-name">{{ fullName(item.player) }}</span>@if (badge(item.player)) { <b class="cu-cap">{{ badge(item.player) }}</b> }<span class="cu-x" aria-hidden="true">×</span></button></li>
+            }
+          </ul>
+          <h4 class="cu-sub">Panchina <small>({{ bench().length }})</small></h4>
+          <ul class="cu-list">
+            @for (item of bench(); track item.player.id) {
+              <li><button type="button" (click)="toggle(item.player)" title="Escludi dalla convocazione"><span class="cu-tag">{{ item.tag }}</span><span class="cu-num">{{ item.player.shirtNumber ?? '–' }}</span><span class="cu-name">{{ fullName(item.player) }}</span>@if (badge(item.player)) { <b class="cu-cap">{{ badge(item.player) }}</b> }<span class="cu-x" aria-hidden="true">×</span></button></li>
+            } @empty { <li class="cu-hint">Nessun giocatore in panchina.</li> }
+          </ul>
+          @if (notCalled().length) {
+            <h4 class="cu-sub">Non convocati <small>({{ notCalled().length }})</small></h4>
+            <ul class="cu-list is-off">
+              @for (player of notCalled(); track player.id) {
+                <li><button type="button" (click)="toggle(player)" title="Convoca"><span class="cu-num">{{ player.shirtNumber ?? '–' }}</span><span class="cu-name">{{ fullName(player) }}</span><span class="cu-x" aria-hidden="true">＋</span></button></li>
+              }
+            </ul>
+          }
+          @if (unavailable().length) {
+            <h4 class="cu-sub">Non disponibili <small>({{ unavailable().length }})</small></h4>
+            <ul class="cu-list is-off">
+              @for (player of unavailable(); track player.id) {
+                <li><span class="cu-row-static"><span class="cu-num">{{ player.shirtNumber ?? '–' }}</span><span class="cu-name">{{ fullName(player) }}</span><small>{{ player.status === 'injured' ? 'Infortunato' : 'Squalificato' }}</small></span></li>
+              }
+            </ul>
+          }
+        </section>
+      </div>
+
+      <!-- Anteprima condivisione -->
+      <aside class="cu-side">
+        <section class="cu-panel cu-share">
+          <header class="cu-head"><strong>Messaggio da condividere</strong></header>
+          <pre class="cu-preview">{{ shareText() }}</pre>
+          <div class="cu-actions">
+            <button type="button" class="cu-primary" (click)="share()">📤 Condividi convocazione</button>
+            <a class="cu-secondary" [href]="whatsappUrl()" target="_blank" rel="noopener">WhatsApp</a>
+            <button type="button" class="cu-secondary" (click)="copy()">Copia testo</button>
+          </div>
+          <p class="cu-hint">Il messaggio contiene titolari, panchina, orari, ritrovo e il link di Maps del campo.</p>
+        </section>
+      </aside>
+    </div>
+  }
+</section>

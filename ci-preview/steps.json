@@ -622,5 +622,17 @@
   ],
   "settle": 800,
   "full": false
+ },
+ {
+  "name": "30-callup",
+  "actions": [
+   {
+    "click": ".nfm-menu-item:has-text('Convocazione'), .nfm-scene-item:has-text('Convocazione')"
+   },
+   {
+    "wait": 3000
+   }
+  ],
+  "settle": 800
  }
 ]
