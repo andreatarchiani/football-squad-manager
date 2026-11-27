@@ -12,6 +12,7 @@ import {
   type Firestore
 } from 'firebase/firestore';
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
+import { isMapsLink } from '../calendar/calendar.service';
 import { cached, invalidateOnWrite } from '../../core/data-cache';
 
 export interface TeamRecord {
@@ -20,6 +21,7 @@ export interface TeamRecord {
   category: string;
   facilityName: string;
   facilityAddress: string;
+  facilityMapsUrl: string;
   headquartersAddress: string;
   federationNumber: string;
   outfieldPlayersCount: number | null;
@@ -68,6 +70,7 @@ export interface TeamInput {
   category: string;
   facilityName: string;
   facilityAddress: string;
+  facilityMapsUrl: string;
   headquartersAddress: string;
   federationNumber: string;
   outfieldPlayersCount: number | null;
@@ -117,6 +120,7 @@ export class TeamService {
         category: String(data['category'] ?? ''),
         facilityName: String(data['facilityName'] ?? ''),
         facilityAddress: String(data['facilityAddress'] ?? ''),
+        facilityMapsUrl: String(data['facilityMapsUrl'] ?? ''),
         headquartersAddress: String(data['headquartersAddress'] ?? ''),
         federationNumber: String(data['federationNumber'] ?? ''),
         outfieldPlayersCount: data['outfieldPlayersCount'] == null ? null : Number(data['outfieldPlayersCount']),
@@ -219,6 +223,7 @@ export class TeamService {
       category: input.category.trim(),
       facilityName: input.facilityName.trim(),
       facilityAddress: input.facilityAddress.trim(),
+      facilityMapsUrl: isMapsLink(input.facilityMapsUrl ?? '') ? input.facilityMapsUrl.trim().slice(0, 400) : '',
       headquartersAddress: input.headquartersAddress.trim(),
       federationNumber: input.federationNumber.trim(),
       outfieldPlayersCount: input.outfieldPlayersCount,
@@ -257,6 +262,7 @@ export class TeamService {
       category: input.category.trim(),
       facilityName: input.facilityName.trim(),
       facilityAddress: input.facilityAddress.trim(),
+      facilityMapsUrl: isMapsLink(input.facilityMapsUrl ?? '') ? input.facilityMapsUrl.trim().slice(0, 400) : '',
       headquartersAddress: input.headquartersAddress.trim(),
       federationNumber: input.federationNumber.trim(),
       outfieldPlayersCount: input.outfieldPlayersCount,

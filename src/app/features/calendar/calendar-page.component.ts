@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
+import { prepareIconImage } from '../../core/icon-image';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { TeamService, type TeamRecord } from '../teams/team.service';
 import { CalendarService, coordinatesFromLink, isMapsLink, mapsLink, buildReturnLeg, duplicateDates, emptyCalendar, findNextMatch, emptyGroupTeam, type CalendarData, type CalendarRound, type GroupTeam } from './calendar.service';
@@ -101,6 +102,21 @@ export class CalendarPageComponent implements OnDestroy {
     if (!draft?.name.trim()) return '';
     return this.teamEditorValid() ? '' : 'Esiste già una squadra con questo nome nel girone.';
   });
+
+  protected readonly teamIcons = ['⚽', '🛡️', '🏆', '⭐', '👑', '🦅', '🦁', '🐺', '🐉', '🔥', '⚡', '💎', '🏟️', '🎯', '🔱', '🌟'];
+  protected isImage(value: string | null | undefined): boolean { return typeof value === 'string' && value.startsWith('data:image/'); }
+  protected async uploadTeamIcon(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file || !file.type.startsWith('image/') || file.size > 8 * 1024 * 1024) { if (file) this.notifications.notify({ title: 'Immagine non valida', message: 'Scegli un’immagine PNG, JPG o WebP sotto gli 8 MB.', type: 'warning' }); return; }
+    try { this.setTeamField('icon', await prepareIconImage(file)); }
+    catch { this.notifications.notify({ title: 'Logo non caricato', message: 'Prova con un file PNG, JPG o WebP.', type: 'warning' }); }
+  }
+  /** Logo of a team of the group (mine included): emoji, image or empty. */
+  protected iconOf(name: string): string {
+    return this.isMine(name) ? (this.team()?.icon ?? '') : (this.groupTeamByName(name)?.icon ?? '');
+  }
 
   protected newGroupTeam(): void { this.originalName.set(''); this.teamEditor.set({ ...emptyGroupTeam(), id: `t-${Date.now().toString(36)}` }); }
   protected editGroupTeam(id: string): void {
@@ -207,12 +223,12 @@ export class CalendarPageComponent implements OnDestroy {
   }
 
   protected mapsUrl(round: CalendarRound): string | null {
-    if (round.home) { const team = this.team(); const address = [team?.facilityName, team?.facilityAddress].filter(Boolean).join(', '); return team?.facilityAddress ? mapsLink(address) : null; }
+    if (round.home) { const team = this.team(); if (team?.facilityMapsUrl) return team.facilityMapsUrl; const address = [team?.facilityName, team?.facilityAddress].filter(Boolean).join(', '); return team?.facilityAddress ? mapsLink(address) : null; }
     if (round.venueUrl) return round.venueUrl;
     if (round.venue.trim()) return mapsLink(round.venue, round.venueLat, round.venueLon);
     const known = this.groupTeamByName(round.opponent);
     if (known?.mapsUrl) return known.mapsUrl;
-    return known?.address ? mapsLink([known.address, known.city].filter(Boolean).join(', ')) : null;
+    return known?.address || known?.facilityName ? mapsLink([known.facilityName, known.address, known.city].filter(Boolean).join(', ')) : null;
   }
 
   protected async shareVenue(round: CalendarRound): Promise<void> {
@@ -242,7 +258,7 @@ export class CalendarPageComponent implements OnDestroy {
   /** Pitch address saved with the opponent in the group list. */
   protected knownVenue(round: CalendarRound): string {
     const known = this.groupTeamByName(round.opponent);
-    return known ? [known.address, known.city].filter(Boolean).join(', ') : '';
+    return known ? [known.facilityName, known.address, known.city].filter(Boolean).join(' · ') : '';
   }
   protected venueOf(round: CalendarRound): string { return round.home ? this.homeVenue() : (round.venue || this.knownVenue(round) || (round.venueUrl ? 'Posizione salvata da Maps' : 'Campo da indicare')); }
   protected formatDate(value: string): string {

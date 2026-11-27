@@ -55,6 +55,9 @@
         <label>Indirizzo impianto
           <input name="facilityAddress" [(ngModel)]="form.facilityAddress" maxlength="180" placeholder="Via, numero civico, comune">
         </label>
+        <label>Link di Maps dell’impianto <small>(facoltativo)</small>
+          <input name="facilityMapsUrl" type="url" inputmode="url" [(ngModel)]="form.facilityMapsUrl" maxlength="400" placeholder="In Maps: Condividi › Copia link, poi incolla qui">
+        </label>
         <label>Indirizzo sede
           <input name="headquartersAddress" [(ngModel)]="form.headquartersAddress" maxlength="180" placeholder="Indirizzo della sede sociale">
         </label>

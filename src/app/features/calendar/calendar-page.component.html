@@ -67,9 +67,9 @@
           </header>
           @if (nextMatch(); as round) {
             <div class="cal-versus">
-              <div [class.is-mine]="round.home"><span class="cal-crest big" [class.away]="!round.home" aria-hidden="true">{{ homeName(round).charAt(0).toUpperCase() }}</span><strong>{{ homeName(round) }}</strong></div>
+              <div [class.is-mine]="round.home"><ng-container [ngTemplateOutlet]="crest" [ngTemplateOutletContext]="{ name: homeName(round), big: true, away: !round.home }"></ng-container><strong>{{ homeName(round) }}</strong></div>
               <b class="cal-vs big">VS</b>
-              <div [class.is-mine]="!round.home"><span class="cal-crest big" [class.away]="round.home" aria-hidden="true">{{ awayName(round).charAt(0).toUpperCase() }}</span><strong>{{ awayName(round) }}</strong></div>
+              <div [class.is-mine]="!round.home"><ng-container [ngTemplateOutlet]="crest" [ngTemplateOutletContext]="{ name: awayName(round), big: true, away: round.home }"></ng-container><strong>{{ awayName(round) }}</strong></div>
             </div>
             <dl class="cal-facts">
               <div><dt>Giorno</dt><dd>{{ formatDate(round.date) }}</dd></div>
@@ -96,9 +96,9 @@
           <ul>
             @for (name of groupTeams(); track name) {
               @if (isMine(name)) {
-                <li class="is-mine"><span class="cal-crest" aria-hidden="true">{{ name.charAt(0).toUpperCase() }}</span><span class="cal-team-name">{{ name }}</span></li>
+                <li class="is-mine"><ng-container [ngTemplateOutlet]="crest" [ngTemplateOutletContext]="{ name: name }"></ng-container><span class="cal-team-name">{{ name }}</span></li>
               } @else if (groupTeamByName(name); as known) {
-                <li><span class="cal-crest" aria-hidden="true">{{ name.charAt(0).toUpperCase() }}</span><span class="cal-team-name">{{ name }}@if (known.city) { <small>{{ known.city }}</small> }</span><button type="button" class="cal-team-edit" (click)="editGroupTeam(known.id)">Modifica</button></li>
+                <li><ng-container [ngTemplateOutlet]="crest" [ngTemplateOutletContext]="{ name: name }"></ng-container><span class="cal-team-name">{{ name }}@if (known.city) { <small>{{ known.city }}</small> }</span><button type="button" class="cal-team-edit" (click)="editGroupTeam(known.id)">Modifica</button></li>
               }
             }
           </ul>
@@ -170,6 +170,14 @@
   </div>
 </ng-template>
 
+<ng-template #crest let-name="name" let-big="big" let-away="away">
+  @if (isImage(iconOf(name))) {
+    <img class="cal-crest cal-crest-img" [class.big]="big" [src]="iconOf(name)" alt="">
+  } @else {
+    <span class="cal-crest" [class.big]="big" [class.away]="away" aria-hidden="true">{{ iconOf(name) || name.charAt(0).toUpperCase() }}</span>
+  }
+</ng-template>
+
 <ng-template #opponentSelect let-round let-index="index">
   <select class="cal-opponent" [value]="round.opponent" (change)="setOpponent(index, $any($event.target).value)" [class.is-missing]="!round.opponent" aria-label="Avversario">
     <option value="" [selected]="!round.opponent">{{ calendar().groupTeams.length ? 'Scegli avversario' : 'Crea prima le squadre' }}</option>
@@ -186,11 +194,24 @@
         <button type="button" class="venue-close" (click)="closeTeamEditor()" aria-label="Chiudi">×</button>
       </header>
       <div class="gt-form">
+        <fieldset class="gt-logo">
+          <legend>Logo</legend>
+          <div class="gt-logo-row">
+            @for (icon of teamIcons; track icon) { <button type="button" [class.is-selected]="draft.icon === icon" [attr.aria-pressed]="draft.icon === icon" (click)="setTeamField('icon', icon)">{{ icon }}</button> }
+            <label class="gt-upload" [class.is-selected]="isImage(draft.icon)" title="Carica un’immagine">
+              @if (isImage(draft.icon)) { <img [src]="draft.icon" alt=""> } @else { <span aria-hidden="true">＋</span> }
+              <input hidden type="file" accept="image/png,image/jpeg,image/webp,image/gif" (change)="uploadTeamIcon($event)">
+            </label>
+          </div>
+        </fieldset>
         <label>Nome squadra *<input type="text" maxlength="80" [value]="draft.name" (input)="setTeamField('name', $any($event.target).value)" placeholder="Es. A.S.D. Levane" [class.is-missing]="!draft.name.trim()"></label>
         @if (teamEditorError()) { <p class="venue-bad">{{ teamEditorError() }}</p> }
+        <label>Nome impianto<input type="text" maxlength="100" [value]="draft.facilityName" (input)="setTeamField('facilityName', $any($event.target).value)" placeholder="Nome del campo sportivo"></label>
+        <label>Indirizzo impianto<input type="text" maxlength="180" [value]="draft.address" (input)="setTeamField('address', $any($event.target).value)" placeholder="Via, numero civico, comune"></label>
+        <label>Link di Maps dell’impianto <small>(facoltativo)</small><input type="url" inputmode="url" maxlength="400" [value]="draft.mapsUrl" (input)="setTeamField('mapsUrl', $any($event.target).value.trim())" placeholder="In Maps: Condividi › Copia link, poi incolla qui"></label>
         <label>Città<input type="text" maxlength="80" [value]="draft.city" (input)="setTeamField('city', $any($event.target).value)"></label>
-        <label>Indirizzo del campo<input type="text" maxlength="180" [value]="draft.address" (input)="setTeamField('address', $any($event.target).value)" placeholder="Via, numero"></label>
-        <label>Link di Maps del campo <small>(facoltativo)</small><input type="url" inputmode="url" maxlength="400" [value]="draft.mapsUrl" (input)="setTeamField('mapsUrl', $any($event.target).value.trim())" placeholder="Condividi › Copia link in Maps"></label>
+        <label>Indirizzo sede<input type="text" maxlength="180" [value]="draft.headquarters" (input)="setTeamField('headquarters', $any($event.target).value)" placeholder="Indirizzo della sede sociale"></label>
+        <label>Matricola federale<input type="text" maxlength="60" [value]="draft.federation" (input)="setTeamField('federation', $any($event.target).value)" placeholder="Matricola FIGC"></label>
         <label>Referente<input type="text" maxlength="80" [value]="draft.contact" (input)="setTeamField('contact', $any($event.target).value)"></label>
         <div class="gt-two">
           <label>Telefono<input type="tel" maxlength="40" [value]="draft.phone" (input)="setTeamField('phone', $any($event.target).value)"></label>

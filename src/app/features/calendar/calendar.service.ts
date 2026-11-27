@@ -38,15 +38,19 @@ export function mapsLink(address: string, lat?: number | null, lon?: number | nu
 export interface GroupTeam {
   id: string;
   name: string;
+  icon: string;        // logo: emoji or small image (data URL)
   city: string;
+  facilityName: string;
   address: string;     // address of the pitch
   mapsUrl: string;     // optional link copied from Maps
+  headquarters: string; // club headquarters address
+  federation: string;   // federal number
   contact: string;     // contact person
   phone: string;
   email: string;
 }
 
-export function emptyGroupTeam(): GroupTeam { return { id: '', name: '', city: '', address: '', mapsUrl: '', contact: '', phone: '', email: '' }; }
+export function emptyGroupTeam(): GroupTeam { return { id: '', name: '', icon: '', city: '', facilityName: '', address: '', mapsUrl: '', headquarters: '', federation: '', contact: '', phone: '', email: '' }; }
 
 export interface CalendarData {
   groupName: string;       // e.g. "Girone unico Arezzo"
@@ -126,7 +130,7 @@ export class CalendarService {
       teamName,
       groupName: calendar.groupName.trim().slice(0, 80),
       groupTeams: calendar.groupTeams.slice(0, 40).map(team => ({
-        id: team.id, name: team.name.trim().slice(0, 80), city: team.city.trim().slice(0, 80), address: team.address.trim().slice(0, 180),
+        id: team.id, name: team.name.trim().slice(0, 80), icon: (team.icon || '').slice(0, 60000), facilityName: (team.facilityName || '').trim().slice(0, 100), headquarters: (team.headquarters || '').trim().slice(0, 180), federation: (team.federation || '').trim().slice(0, 60), city: team.city.trim().slice(0, 80), address: team.address.trim().slice(0, 180),
         mapsUrl: isMapsLink(team.mapsUrl) ? team.mapsUrl.trim().slice(0, 400) : '', contact: team.contact.trim().slice(0, 80),
         phone: team.phone.trim().slice(0, 40), email: team.email.trim().slice(0, 120)
       })),
@@ -142,7 +146,7 @@ export class CalendarService {
 
   private groupTeam(item: Record<string, unknown>): GroupTeam {
     const text = (key: string) => String(item[key] ?? '');
-    return { id: text('id') || `t-${Math.random().toString(36).slice(2, 9)}`, name: text('name'), city: text('city'), address: text('address'), mapsUrl: text('mapsUrl'), contact: text('contact'), phone: text('phone'), email: text('email') };
+    return { id: text('id') || `t-${Math.random().toString(36).slice(2, 9)}`, name: text('name'), icon: text('icon'), city: text('city'), facilityName: text('facilityName'), headquarters: text('headquarters'), federation: text('federation'), address: text('address'), mapsUrl: text('mapsUrl'), contact: text('contact'), phone: text('phone'), email: text('email') };
   }
 
   private round(item: Record<string, unknown>): CalendarRound {

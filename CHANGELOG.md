@@ -5,6 +5,8 @@
 - **Nuovo:** nella lista “Squadre del girone” il pulsante “Crea nuova squadra del girone” permette di inserire nome, città, campo (indirizzo e link Maps), referente, telefono ed email. Le squadre si possono modificare ed eliminare (se non usate).
 - **Modifica:** nelle giornate dell’andata l’avversario si sceglie da un menu con le squadre del girone; quelle già scelte in un’altra giornata spariscono dal menu.
 - **Ripristinato:** la freccia ⇄ per scambiare casa e trasferta nell’andata.
+- **Nuovo:** il modulo delle squadre del girone ha gli stessi dati della tua squadra (logo, nome, impianto, indirizzo, sede, matricola) più referente, telefono ed email. Il logo compare nel calendario e nella prossima partita.
+- **Nuovo:** nella creazione/modifica della tua squadra c’è il “Link di Maps dell’impianto”: le partite in casa si aprono in Maps con quel link.
 - I calendari già inseriti vengono convertiti: gli avversari scritti prima diventano squadre del girone.
 
 ## 2026-11-26 — Campo della trasferta in 3 passi

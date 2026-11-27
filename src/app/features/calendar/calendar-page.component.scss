@@ -176,3 +176,11 @@ select.cal-opponent.is-missing { border-color: #ffd21a !important; background: #
 .gt-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .venue-remove:disabled { opacity: .4; cursor: not-allowed; }
 @media (max-width: 560px) { .gt-two { grid-template-columns: 1fr; } }
+
+.cal-crest-img { object-fit: cover; background: #fff; }
+.gt-logo { margin: 0; padding: 0; border: 0; }
+.gt-logo legend { padding: 0; margin-bottom: 6px; font-size: 14px; font-weight: 700; }
+.gt-logo-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.gt-logo-row button, .gt-upload { display: grid; place-items: center; width: 42px; height: 42px; padding: 0; overflow: hidden; border: 1.5px solid rgba(255, 255, 255, .25); border-radius: 11px; color: #fff; background: rgba(255, 255, 255, .08); font-size: 22px; cursor: pointer; }
+.gt-logo-row .is-selected { border-color: var(--c-hi); background: rgba(var(--c-rgb), .35); box-shadow: 0 0 0 2px var(--c-hi); }
+.gt-upload img { width: 100%; height: 100%; object-fit: cover; }
