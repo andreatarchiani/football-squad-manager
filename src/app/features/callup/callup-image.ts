@@ -51,7 +51,7 @@ function paint(ctx: CanvasRenderingContext2D, data: CallupImageData, logo: HTMLI
   nameLines.forEach((line, i) => ctx.fillText(line, tx, y + 88 + i * 56));
   y += Math.max(logoSize, 70 + nameLines.length * 56) + 10;
   ctx.fillStyle = '#b8c7e6'; ctx.font = `500 26px ${FONT}`;
-  const sub = [data.category, data.eventTitle, data.roundLabel].filter(Boolean).join(' · ');
+  const sub = [data.category, data.eventTitle, data.roundLabel].filter((part, i, all) => !!part && all.findIndex(other => other === part) === i && !(i === 1 && data.category && part.includes(data.category))).join(' · ');
   for (const line of wrap(ctx, sub, W - PAD * 2)) { ctx.fillText(line, PAD, y + 26); y += 34; }
   y += 22;
 
