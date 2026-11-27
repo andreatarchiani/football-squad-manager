@@ -1181,3 +1181,9 @@
 #nfm .direct .fsm-form-dialog .form-actions { position: relative; bottom: auto; }
 #nfm .direct .direct-pick select { width: 100%; }
 .direct-pick { grid-column: 1 / -1; }
+
+/* Mobile: il modulo è nella pagina (non più a tutto schermo), quindi lascia spazio alla barra di navigazione fissa in basso. */
+@media (max-width: 650px) {
+  #nfm .direct { padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
+  #nfm .direct .fsm-form-overlay > .fsm-form-dialog { margin-bottom: 0; padding-bottom: 16px !important; }
+}
