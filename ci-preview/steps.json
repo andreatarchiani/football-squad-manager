@@ -434,7 +434,8 @@
    }
   ],
   "settle": 600,
-  "full": false
+  "full": false,
+  "only": "desktop"
  },
  {
   "name": "24c-group-saved",
@@ -446,7 +447,8 @@
     "wait": 500
    }
   ],
-  "settle": 400
+  "settle": 400,
+  "only": "desktop"
  },
  {
   "name": "25-calendar-andata",
