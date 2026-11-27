@@ -195,7 +195,8 @@ export class TeamsPageComponent implements OnChanges {
   private async openRequestedRoster(request: NonNullable<TeamsPageComponent['rosterRequest']>): Promise<void> {
     await this.teamsLoadPromise;
     const team = this.teams().find(item => item.id === request.teamId && !item.isArchived);
-    if (!team) { this.error.set('La squadra selezionata non è disponibile.'); return; }
+    // The request may refer to a team of another event: nothing to open here.
+    if (!team) return;
     this.liveMatch.set(false);
     this.autoStartMatch.set(false);
     if (this.expandedRosterId() !== team.id) await this.toggleRoster(team);

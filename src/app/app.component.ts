@@ -284,8 +284,10 @@ export class AppComponent {
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe((event) => {
         if (event.type === 'VERSION_READY') {
-          // Keep the update pending until the user explicitly taps “Aggiorna ora”.
+          // Right after opening the app the new version is installed at once (nothing typed can be lost);
+          // later it waits for “Aggiorna ora”, so a form or a live match is never interrupted.
           this.updateAvailable.set(true);
+          if (performance.now() < 20000 && !this.matchActive()) void this.applyUpdate();
         } else if (event.type === 'VERSION_INSTALLATION_FAILED') {
           console.error('Application update installation failed.', event.error);
           this.updateAvailable.set(true);
@@ -293,6 +295,7 @@ export class AppComponent {
       });
       void this.checkForUpdate();
       interval(5 * 60 * 1000).subscribe(() => void this.checkForUpdate());
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') void this.checkForUpdate(); });
     }
   }
 
