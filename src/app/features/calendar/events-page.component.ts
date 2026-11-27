@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { clearFieldProblems, showFieldProblems, type FieldProblem } from '../../core/form-feedback';
@@ -34,6 +34,8 @@ export class EventsPageComponent {
   private readonly formRef = viewChild<ElementRef<HTMLElement>>('eventForm');
 
   /** Asks the app to open "Anagrafe Squadra" (to create a team). */
+  /** Changes every time the header asks to create a new event: the form opens straight away. */
+  @Input() set createRequest(token: number) { if (token) this.newEvent(); }
   @Output() readonly openOpponents = new EventEmitter<void>();
   @Output() readonly openTeams = new EventEmitter<void>();
 

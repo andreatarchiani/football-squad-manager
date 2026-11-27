@@ -93,3 +93,36 @@
   .ev-cards { grid-template-columns: 1fr; }
   .ev-footer button { flex: 1 1 auto; }
 }
+
+/* Compact layout: panels fit together without empty holes */
+.ev-form { gap: 10px; }
+.ev-grid { gap: 10px; align-items: stretch;
+  grid-template-areas:
+    "g g g g g c c c c c c c"
+    "l l l l l c c c c c c c"
+    "v v v v r r r r r r r r"
+    "f f f p p p b b b x x x"; }
+.ev-panel { grid-column: auto; padding: 10px 12px; }
+.ev-general { grid-area: g; } .ev-category { grid-area: c; } .ev-logo-panel { grid-area: l; } .ev-level { grid-area: v; }
+.ev-rules { grid-area: r; } .ev-field { grid-area: f; } .ev-goals { grid-area: p; } .ev-ball { grid-area: b; } .ev-report { grid-area: x; }
+.ev-panel header { margin: 0 0 8px; padding-bottom: 6px; font-size: 16px; }
+.ev-rows { gap: 7px; }
+.ev-cats { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 6px; }
+.ev-cats h4 { grid-column: 1 / -1; }
+.ev-cat-body { grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); }
+.ev-radio { min-height: 28px; font-size: 13.5px; }
+.ev-chip-group { margin-bottom: 8px; gap: 4px; }
+.ev-chip { min-height: 32px; padding: 0 10px; }
+.ev-num-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 2px 0 10px; }
+.ev-logo-row { margin-bottom: 6px; }
+.ev-kits { margin-top: 6px; }
+.ev-kit, .ev-kit-add { width: 42px; height: 42px; }
+@media (max-width: 1180px) {
+  .ev-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "g c" "l c" "v v" "r r" "f p" "b x"; }
+  .ev-panel, .ev-general, .ev-category, .ev-rules { grid-column: auto; }
+}
+@media (max-width: 800px) {
+  .ev-grid { grid-template-columns: 1fr; grid-template-areas: "g" "c" "l" "v" "r" "f" "p" "b" "x"; }
+  .ev-panel, .ev-general, .ev-category, .ev-rules { grid-column: auto; }
+  .ev-cat-body { grid-template-columns: 1fr; }
+}

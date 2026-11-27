@@ -42,7 +42,7 @@
         </section>
 
         <!-- Logo e completi -->
-        <section class="ev-panel">
+        <section class="ev-panel ev-logo-panel">
           <header><strong>Logo e completi da gara</strong></header>
           <div class="ev-logo-row">
             <span>Logo società</span>
@@ -71,7 +71,7 @@
         </section>
 
         <!-- Livello e ambito -->
-        <section class="ev-panel">
+        <section class="ev-panel ev-level">
           <header><strong>Livello e ambito</strong></header>
           <div class="ev-chip-group"><span>Tipo di attività *</span><div>@for (item of activities; track item) { <button type="button" class="ev-chip" [class.is-on]="draft().activity === item" (click)="patch({ activity: item })">{{ item }}</button> }</div></div>
           <div class="ev-chip-group"><span>Natura *</span><div>@for (item of natures; track item) { <button type="button" class="ev-chip" [class.is-on]="draft().nature === item" (click)="patch({ nature: item })">{{ item }}</button> }</div></div>
@@ -98,22 +98,22 @@
         </section>
 
         <!-- Campo, porte, pallone, referto -->
-        <section class="ev-panel">
+        <section class="ev-panel ev-field">
           <header><strong>Dimensioni del campo</strong></header>
           <label class="ev-inline"><span>Lunghezza (m)</span><input type="text" maxlength="20" [value]="draft().fieldLength" (input)="setText('fieldLength', $any($event.target).value)" placeholder="100 - 110"></label>
           <label class="ev-inline"><span>Larghezza (m)</span><input type="text" maxlength="20" [value]="draft().fieldWidth" (input)="setText('fieldWidth', $any($event.target).value)" placeholder="64 - 75"></label>
         </section>
-        <section class="ev-panel">
+        <section class="ev-panel ev-goals">
           <header><strong>Porte</strong></header>
           <label class="ev-inline"><span>Larghezza (m)</span><input type="text" maxlength="12" [value]="draft().goalWidth" (input)="setText('goalWidth', $any($event.target).value)" placeholder="7,32"></label>
           <label class="ev-inline"><span>Altezza (m)</span><input type="text" maxlength="12" [value]="draft().goalHeight" (input)="setText('goalHeight', $any($event.target).value)" placeholder="2,44"></label>
         </section>
-        <section class="ev-panel">
+        <section class="ev-panel ev-ball">
           <header><strong>Pallone</strong></header>
           <div class="ev-inline"><span>Misura</span><fsm-select [options]="ballSizes" [value]="draft().ballSize" label="Misura del pallone" (changed)="patch({ ballSize: $event })" /></div>
           <label class="ev-inline"><span>Peso (g)</span><input type="text" maxlength="20" [value]="draft().ballWeight" (input)="setText('ballWeight', $any($event.target).value)" placeholder="410 - 450"></label>
         </section>
-        <section class="ev-panel">
+        <section class="ev-panel ev-report">
           <header><strong>Referto aggiuntivo</strong></header>
           <div class="ev-toggle"><span>Stampa sempre il referto aggiuntivo alla lista</span><div role="group" aria-label="Referto aggiuntivo"><button type="button" [class.is-on]="draft().extraReport" (click)="setFlag('extraReport', true)">Sì</button><button type="button" [class.is-on]="!draft().extraReport" (click)="setFlag('extraReport', false)">No</button></div></div>
         </section>

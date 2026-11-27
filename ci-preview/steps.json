@@ -1067,6 +1067,36 @@
     "settle": 500
   },
   {
+    "name": "30y-header-new-event",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Nuovo evento')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "30y2-cancel",
+    "actions": [
+      {
+        "click": ".ev-footer .ev-secondary:has-text('Annulla')"
+      },
+      {
+        "wait": 800
+      }
+    ],
+    "settle": 300
+  },
+  {
     "name": "31-export",
     "actions": [
       {

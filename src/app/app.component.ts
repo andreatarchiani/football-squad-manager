@@ -237,6 +237,7 @@ export class AppComponent {
   protected groupItems(key: string): NavItem[] { return SECTION_MENU[key as AppSection] ?? []; }
   protected isGroupOpen(key: string): boolean { return this.groupOpen()[key] ?? this.section() === key; }
   protected toggleGroup(key: string): void { this.groupOpen.update(state => ({ ...state, [key]: !this.isGroupOpen(key) })); }
+  protected readonly createEventRequest = signal(0);
   protected readonly newEventLabel = '＋ Nuovo evento…';
   protected readonly eventOptions = computed(() => {
     const titles = this.activeEvents.events().map(event => this.activeEvents.activeTitleOf(event));
@@ -244,7 +245,7 @@ export class AppComponent {
   });
   protected readonly activeEventLabel = computed(() => this.eventOptions()[this.activeEvents.events().findIndex(event => event.id === this.activeEvents.activeId())] ?? '');
   protected pickEvent(label: string): void {
-    if (label === this.newEventLabel) { this.setView('calendar'); return; }
+    if (label === this.newEventLabel) { this.createEventRequest.update(n => n + 1); this.setView('calendar'); return; }
     const index = this.eventOptions().indexOf(label);
     const event = this.activeEvents.events()[index];
     if (event) this.activeEvents.select(event.id);
