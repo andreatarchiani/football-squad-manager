@@ -1,0 +1,48 @@
+<section class="sq-page">
+  <header class="sq-head">
+    <div class="sq-tabs" role="tablist">
+      <button type="button" role="tab" [class.is-active]="tab() === 'mine'" [attr.aria-selected]="tab() === 'mine'" (click)="setTab('mine')">La mia squadra</button>
+      <button type="button" role="tab" [class.is-active]="tab() === 'opponents'" [attr.aria-selected]="tab() === 'opponents'" (click)="setTab('opponents')">Squadre avversarie</button>
+    </div>
+    @if (tab() === 'mine') {
+      <div class="sq-actions">
+        <button type="button" class="sq-btn" (click)="openImport()">⬇ Importa</button>
+        <button type="button" class="sq-btn" (click)="exportRoster()" [disabled]="!team()">⬆ Esporta</button>
+      </div>
+    }
+  </header>
+  <p class="sq-event">Evento: <strong>{{ events.activeTitle() || 'nessuno' }}</strong></p>
+
+  @if (!events.activeId()) {
+    <div class="sq-empty"><strong>Prima crea una stagione o un evento</strong><span>Squadre, giocatori e dirigenti si creano dentro un evento: usa “Creazione Stagione / Evento”.</span></div>
+  } @else if (tab() === 'mine') {
+    @for (key of [refreshKey()]; track key) { <fsm-teams-page [resumeMatch]="false" /> }
+  } @else {
+    <fsm-opponents />
+  }
+
+  @if (importOpen()) {
+    <div class="sq-backdrop" role="presentation" (click)="closeImport()">
+      <section class="sq-dialog" role="dialog" aria-modal="true" aria-labelledby="sq-import-title" (click)="$event.stopPropagation()">
+        <header><div><small>LA MIA SQUADRA</small><h3 id="sq-import-title">Importa giocatori</h3></div><button type="button" (click)="closeImport()" aria-label="Chiudi">×</button></header>
+        <div class="sq-modes">
+          <button type="button" [class.is-active]="importMode() === 'event'" (click)="importMode.set('event')">Da un altro evento</button>
+          <button type="button" [class.is-active]="importMode() === 'file'" (click)="importMode.set('file')">Da file Excel / CSV</button>
+        </div>
+        @if (importMode() === 'event') {
+          <p>Copia la squadra e <strong>tutti i suoi giocatori</strong> nell’evento “{{ events.activeTitle() }}”. {{ team() ? 'I giocatori già presenti non vengono duplicati.' : '' }}</p>
+          @if (sources().length) {
+            <fsm-select [options]="sourceLabels()" [value]="sourceTitle()" placeholder="Scegli l’evento da cui importare" label="Evento di origine" (changed)="sourceTitle.set($event)" />
+            <button type="button" class="sq-primary" [disabled]="busy()" (click)="runImportFromEvent()">{{ busy() ? 'Importazione…' : 'Importa giocatori' }}</button>
+          } @else {
+            <p class="sq-note">Non ci sono altri eventi con una squadra da cui importare.</p>
+          }
+        } @else {
+          <p>Scegli un file con le colonne <strong>Cognome, Nome, Numero</strong> (e facoltative: Ruolo, Data di nascita, ecc.). Il modo più semplice è esportare la rosa da qui e modificarla in Excel, salvando come CSV.</p>
+          <label class="sq-file"><span>{{ busy() ? 'Importazione…' : 'Scegli il file…' }}</span><input type="file" accept=".csv,text/csv,text/plain" (change)="runImportFromFile($event)"></label>
+        }
+        @if (message()) { <p class="sq-error" role="alert">{{ message() }}</p> }
+      </section>
+    </div>
+  }
+</section>

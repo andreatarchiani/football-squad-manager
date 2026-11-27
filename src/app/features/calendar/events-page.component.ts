@@ -4,6 +4,7 @@ import { NotificationService } from '../../core/notifications/notification.servi
 import { clearFieldProblems, showFieldProblems, type FieldProblem } from '../../core/form-feedback';
 import { prepareIconImage } from '../../core/icon-image';
 import { FsmSelectComponent } from '../../shared/fsm-select.component';
+import { ActiveEventService } from '../../core/active-event.service';
 import { TeamService, type TeamRecord } from '../teams/team.service';
 import {
   ACTIVITIES, BALL_SIZES, CalendarService, FORMATS, GROUP_OPTIONS, NATURES, ORGANIZATIONS, SCOPES, SEASON_CATEGORIES, SEASON_TABS,
@@ -27,11 +28,13 @@ type TextKey = 'name' | 'fieldLength' | 'fieldWidth' | 'goalWidth' | 'goalHeight
 export class EventsPageComponent {
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamService = inject(TeamService);
+  protected readonly activeEvents = inject(ActiveEventService);
   private readonly service = inject(CalendarService);
   private readonly notifications = inject(NotificationService);
   private readonly formRef = viewChild<ElementRef<HTMLElement>>('eventForm');
 
   /** Asks the app to open "Anagrafe Squadra" (to create a team). */
+  @Output() readonly openOpponents = new EventEmitter<void>();
   @Output() readonly openTeams = new EventEmitter<void>();
 
   protected readonly view = signal<View>('list');
@@ -39,11 +42,10 @@ export class EventsPageComponent {
   protected readonly saving = signal(false);
   protected readonly error = signal('');
   protected readonly teams = signal<TeamRecord[]>([]);
-  protected readonly events = signal<CalendarData[]>([]);
+  protected readonly events = this.activeEvents.events;
   protected readonly activeId = signal('');
   protected readonly editingId = signal<string | null>(null);
   protected readonly draft = signal<EventDetails>(emptyEvent());
-  protected readonly draftTeamId = signal('');
   protected readonly confirmDelete = signal(false);
 
   protected readonly tabs = SEASON_TABS;
@@ -58,19 +60,15 @@ export class EventsPageComponent {
   protected readonly ballSizes = BALL_SIZES;
   protected readonly seasons = this.seasonOptions();
 
-  protected readonly draftTeam = computed(() => this.teams().find(team => team.id === this.draftTeamId()));
-  protected readonly teamNames = computed(() => this.teams().map(team => team.name));
   protected readonly toggleRows: { key: Flag; label: string }[] = [
     { key: 'flyingSubstitutions', label: 'Sostituzioni volanti' }, { key: 'reentry', label: 'Reingresso consentito' },
     { key: 'extraTime', label: 'Tempi supplementari' }, { key: 'penalties', label: 'Calci di rigore' }
   ];
-  protected teamIdOf(name: string): string { return this.teams().find(team => team.name === name)?.id ?? ''; }
 
   constructor() { effect(() => { if (this.auth.workspaceId()) void this.load(); }); }
 
   /* ------------------------------------------------------------ list */
   protected title(event: CalendarData): string { return eventTitle(event); }
-  protected teamOf(event: CalendarData): TeamRecord | undefined { return this.teams().find(team => team.id === event.teamId); }
   protected isImage(value: string): boolean { return value.startsWith('data:image/'); }
   protected rounds(event: CalendarData): number { return event.andata.length + event.ritorno.length; }
   protected nextOf(event: CalendarData): string {
@@ -80,8 +78,8 @@ export class EventsPageComponent {
     return `${date.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}${round.time ? ' · ' + round.time : ''} vs ${round.opponent}`;
   }
 
-  protected open(id: string): void { this.activeId.set(id); this.view.set('girone'); }
-  protected async backToList(): Promise<void> { this.view.set('list'); await this.load(); }
+  protected open(id: string): void { this.activeEvents.select(id); this.activeId.set(id); this.view.set('girone'); }
+  protected async backToList(): Promise<void> { this.view.set('list'); await this.activeEvents.reload(); }
 
   /* ------------------------------------------------------------ form */
   protected newEvent(): void {
@@ -89,7 +87,6 @@ export class EventsPageComponent {
     this.editingId.set(null);
     this.confirmDelete.set(false);
     this.draft.set({ ...emptyEvent(), seasonLabel: season, name: season ? `Stagione ${season}` : '' });
-    this.draftTeamId.set(this.teams()[0]?.id ?? '');
     this.view.set('edit');
   }
 
@@ -99,7 +96,6 @@ export class EventsPageComponent {
     this.editingId.set(id);
     this.confirmDelete.set(false);
     this.draft.set({ ...event.event, kitsField: [...event.event.kitsField], kitsKeeper: [...event.event.kitsKeeper], tab: event.event.category ? tabOfCategory(event.event.category) : event.event.tab });
-    this.draftTeamId.set(event.teamId);
     this.view.set('edit');
   }
 
@@ -148,23 +144,22 @@ export class EventsPageComponent {
 
   protected async save(): Promise<void> {
     const draft = this.draft();
-    const team = this.draftTeam();
     const problems: FieldProblem[] = [];
     if (!draft.name.trim()) problems.push({ field: 'name', message: 'Compila questo campo: il nome della stagione.' });
     if (!draft.seasonLabel) problems.push({ field: 'season', message: 'Scegli la stagione sportiva.' });
     if (!draft.category) problems.push({ field: 'category', message: 'Scegli la categoria.' });
-    if (!team) problems.push({ field: 'team', message: 'Scegli la tua squadra (o creala in Anagrafe Squadra).' });
     if (draft.groupMode === 'manual' && !draft.group.trim()) problems.push({ field: 'group', message: 'Scrivi il nome del girone.' });
     const form = this.formRef()?.nativeElement;
     clearFieldProblems(form);
-    if (problems.length || !team) { showFieldProblems(form, problems); return; }
+    if (problems.length) { showFieldProblems(form, problems); return; }
     const workspaceId = this.auth.workspaceId();
     if (!workspaceId) return;
     this.saving.set(true);
     try {
-      const id = await this.service.saveEvent(workspaceId, this.editingId(), { id: team.id, name: team.name }, draft);
+      const id = await this.service.saveEvent(workspaceId, this.editingId(), draft);
       this.notifications.notify({ title: this.editingId() ? 'Evento aggiornato' : 'Stagione creata', message: 'Ora inserisci le giornate nel girone.', type: 'success' });
-      await this.load();
+      await this.activeEvents.reload();
+      this.activeEvents.select(id);
       this.activeId.set(id);
       this.view.set('girone');
     } catch (error) {
@@ -182,7 +177,7 @@ export class EventsPageComponent {
       await this.service.deleteEvent(workspaceId, id);
       this.notifications.notify({ title: 'Evento eliminato', message: 'Il calendario di questo evento è stato eliminato.', type: 'success' });
       this.view.set('list');
-      await this.load();
+      await this.activeEvents.reload();
     } catch (error) {
       console.error('Unable to delete the event.', error);
       this.notifications.notify({ title: 'Non eliminato', message: 'Riprova tra poco.', type: 'error' });
@@ -200,9 +195,8 @@ export class EventsPageComponent {
     const workspaceId = this.auth.workspaceId();
     if (!workspaceId) return;
     try {
-      const [teams, events] = await Promise.all([this.teamService.list(workspaceId), this.service.loadAll(workspaceId)]);
-      this.teams.set(teams.filter(team => !team.isArchived));
-      this.events.set(events);
+      await this.activeEvents.whenReady();
+      this.teams.set((await this.teamService.list(workspaceId)).filter(team => !team.isArchived));
       this.error.set('');
     } catch (error) {
       console.error('Unable to load the events.', error);

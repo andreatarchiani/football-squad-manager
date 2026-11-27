@@ -26,13 +26,15 @@ export class CalendarPageComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) eventId = '';
   @Output() readonly back = new EventEmitter<void>();
   @Output() readonly editEvent = new EventEmitter<void>();
+  @Output() readonly openTeams = new EventEmitter<void>();
+  @Output() readonly openOpponents = new EventEmitter<void>();
   protected readonly teams = signal<TeamRecord[]>([]);
   protected readonly calendar = signal<CalendarData>(emptyCalendar());
   protected readonly loading = signal(true);
   protected readonly saveState = signal<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
   protected readonly error = signal('');
 
-  protected readonly team = computed(() => this.teams().find(team => team.id === this.calendar().teamId));
+  protected readonly team = computed(() => this.teams()[0]);
   protected readonly title = computed(() => eventTitle({ event: this.calendar().event, teamName: this.team()?.name ?? '', groupName: this.calendar().groupName }));
   /** Teams of the group: my team plus the teams created in the group list. */
   protected readonly groupTeams = computed(() => {

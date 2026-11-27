@@ -14,9 +14,11 @@ import {
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
 import { isMapsLink } from '../calendar/calendar.service';
 import { cached, invalidateOnWrite } from '../../core/data-cache';
+import { ActiveEventService } from '../../core/active-event.service';
 
 export interface TeamRecord {
   id: string;
+  eventId: string;
   name: string;
   category: string;
   facilityName: string;
@@ -92,12 +94,22 @@ export interface TeamInput {
 export class TeamService {
   private readonly firestore = inject(FIRESTORE_DB, { optional: true });
 
+  private readonly events = inject(ActiveEventService);
+
   constructor() {
     invalidateOnWrite(this, ['saveTacticalLayout', 'saveCaptaincy', 'clearLiveMatch', 'create', 'update', 'deleteTeam', 'setArchived']);
   }
 
   /** Teams with their active season (cached for a short time, see data-cache). */
   async list(workspaceId: string): Promise<TeamRecord[]> {
+    await this.events.whenReady();
+    const eventId = this.events.activeId();
+    const teams = await cached(`teams:${workspaceId}`, () => this.fetchList(workspaceId));
+    return teams.filter(team => !eventId || this.events.eventOfTeam(team) === eventId).map(team => ({ ...team }));
+  }
+
+  /** Teams of every event (used to copy a squad from one event to another). */
+  async listAll(workspaceId: string): Promise<TeamRecord[]> {
     const teams = await cached(`teams:${workspaceId}`, () => this.fetchList(workspaceId));
     return teams.map(team => ({ ...team }));
   }
@@ -116,6 +128,7 @@ export class TeamService {
 
       return {
         id: teamSnapshot.id,
+        eventId: String(data['eventId'] ?? ''),
         name: String(data['name'] ?? ''),
         category: String(data['category'] ?? ''),
         facilityName: String(data['facilityName'] ?? ''),
@@ -211,7 +224,7 @@ export class TeamService {
     await setDoc(ref, { ...state, updatedAt: serverTimestamp() });
   }
 
-  async create(workspaceId: string, input: TeamInput): Promise<void> {
+  async create(workspaceId: string, input: TeamInput): Promise<string> {
     const db = this.requireFirestore();
     const teamRef = doc(collection(db, 'workspaces', workspaceId, 'teams'));
     const seasonRef = doc(collection(db, 'workspaces', workspaceId, 'teams', teamRef.id, 'seasons'));
@@ -219,6 +232,7 @@ export class TeamService {
     const batch = writeBatch(db);
 
     batch.set(teamRef, {
+      eventId: this.events.activeId(),
       name: input.name.trim(),
       category: input.category.trim(),
       facilityName: input.facilityName.trim(),
@@ -251,6 +265,7 @@ export class TeamService {
     });
 
     await batch.commit();
+    return teamRef.id;
   }
 
   async update(workspaceId: string, team: TeamRecord, input: TeamInput): Promise<void> {

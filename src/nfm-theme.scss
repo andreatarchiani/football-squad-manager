@@ -656,3 +656,17 @@
   #nfm[data-theme='match'] .nfm-title h1 { font-size: clamp(26px, 2.5vw, 40px); }
   #nfm[data-theme='match'] .nfm-title p { display: none; }
 }
+
+/* Selettore Stagione / Evento nell'header */
+#nfm .nfm-event-picker { flex: 0 1 260px; min-width: 150px; display: grid; gap: 2px; }
+#nfm .nfm-event-picker small { color: var(--soft); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+@media (max-width: 760px) {
+  #nfm .nfm-event-picker { flex: 1 1 100%; order: 5; min-width: 0; }
+}
+
+/* Menu a fisarmonica (Ufficio / Allenamenti / Campo / Dati) */
+#nfm .nfm-menu-group { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; column-gap: 10px; width: 100%; min-height: 46px; padding: 0 12px; border: 1.5px solid rgba(var(--c-rgb), .5); border-radius: 12px; color: #fff; background: rgba(0, 0, 0, .3); font: inherit; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; text-align: left; cursor: pointer; }
+#nfm .nfm-menu-group svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+#nfm .nfm-menu-group.is-open { border-color: var(--c-hi); background: rgba(var(--c-rgb), .25); }
+#nfm .nfm-menu-sub { margin-left: 14px; width: calc(100% - 14px); min-height: 40px; font-size: 14px; }
+#nfm .nfm-soon-note { display: block; padding: 8px 12px; color: var(--soft); font-size: 13px; }

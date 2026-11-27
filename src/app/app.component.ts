@@ -12,13 +12,17 @@ import { HomePageComponent } from './features/home/home-page.component';
 import { StaffPageComponent } from './features/staff/staff-page.component';
 import { EventsPageComponent } from './features/calendar/events-page.component';
 import { CallupPageComponent } from './features/callup/callup-page.component';
+import { SquadsPageComponent } from './features/squads/squads-page.component';
+import { ArchivePageComponent } from './features/archive/archive-page.component';
+import { FsmSelectComponent } from './shared/fsm-select.component';
 import { TeamService, type TeamRecord } from './features/teams/team.service';
+import { ActiveEventService } from './core/active-event.service';
 import { CalendarService, type CalendarRound } from './features/calendar/calendar.service';
 import type { PlayerRecord } from './features/players/player.service';
 import { FIRESTORE_DB } from './core/firebase.tokens';
 import { addDoc, collection, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore';
 
-type AppView = 'home' | 'office' | 'training' | 'match-hub' | 'players' | 'teams' | 'staff' | 'calendar' | 'formation' | 'lineup' | 'match' | 'callup';
+type AppView = 'home' | 'office' | 'training' | 'match-hub' | 'players' | 'teams' | 'staff' | 'calendar' | 'formation' | 'lineup' | 'match' | 'callup' | 'archive';
 type AppSection = 'home' | 'office' | 'training' | 'match';
 type IconName = keyof typeof NAV_ICONS;
 interface NavItem { label: string; icon: IconName; view?: AppView; soon?: boolean; }
@@ -51,7 +55,7 @@ const NAV_ICONS = {
 } as const;
 
 const VIEW_SECTION: Record<AppView, AppSection> = {
-  home: 'home', office: 'office', players: 'office', teams: 'office', staff: 'office', training: 'training', calendar: 'office',
+  home: 'home', office: 'office', players: 'office', teams: 'office', staff: 'office', training: 'training', calendar: 'office', archive: 'office',
   'match-hub': 'match', formation: 'match', lineup: 'match', match: 'match', callup: 'match'
 };
 const SECTION_LANDING: Record<AppSection, AppView | null> = { home: null, office: 'office', training: 'training', match: 'match-hub' };
@@ -59,7 +63,7 @@ const VIEW_META: Record<AppView, { title: string; accent?: string; subtitle?: st
   home: { title: 'Home Page', icon: 'home' },
   office: { title: 'Ufficio', icon: 'office' },
   players: { title: 'Anagrafe Calciatore', icon: 'player', subtitle: 'Anagrafica dei calciatori e assegnazione alla squadra' },
-  teams: { title: 'Anagrafe Squadra', icon: 'shield', subtitle: 'Dati della squadra, impianto e regolamento di gara' },
+  teams: { title: 'Anagrafe squadre', icon: 'shield', subtitle: 'La mia squadra (con importa/esporta) e le squadre avversarie' },
   staff: { title: 'Anagrafe Dirigenti', icon: 'manager', subtitle: 'Anagrafica dei dirigenti della società' },
   calendar: { title: 'Stagione / Evento', icon: 'trophy', subtitle: 'Crea campionati, tornei ed eventi: apri uno per vedere il girone' },
   training: { title: 'Allenamenti', icon: 'cone' },
@@ -67,12 +71,13 @@ const VIEW_META: Record<AppView, { title: string; accent?: string; subtitle?: st
   formation: { title: 'Formazione', icon: 'formation', subtitle: 'Prepara la prossima partita e lo schieramento titolare' },
   lineup: { title: 'Formazione', icon: 'formation', subtitle: 'Modulo, titolari, panchina e capitani' },
   match: { title: 'Panchina', accent: 'Live', icon: 'bench' },
+  archive: { title: 'Archivio anagrafe', icon: 'office', subtitle: 'Calciatori, dirigenti e squadre dell’evento selezionato' },
   callup: { title: 'Convocazione', icon: 'people', subtitle: 'Titolari, panchina, ritrovo e campo da condividere con la squadra' }
 };
 /** Depth of every screen: going to a smaller depth is "indietro" (slide from the left). */
 const VIEW_DEPTH: Record<AppView, number> = {
   home: 0, office: 1, training: 1, 'match-hub': 1,
-  players: 2, teams: 2, staff: 2, calendar: 2, formation: 2, match: 2, callup: 2, lineup: 3
+  players: 2, teams: 2, staff: 2, calendar: 2, formation: 2, match: 2, callup: 2, archive: 2, lineup: 3
 };
 const HOME_TILES: { label: string; icon: IconName; view?: AppView; tone: string; soon?: boolean }[] = [
   { label: 'Ufficio', icon: 'desk', view: 'office', tone: 'office' },
@@ -88,11 +93,12 @@ const MAIN_SECTIONS: { label: string; icon: IconName; view: AppView; section: Ap
 ];
 const SECTION_MENU: Partial<Record<AppSection, NavItem[]>> = {
   office: [
-    { label: 'Anagrafe Calciatore', icon: 'player', view: 'players' },
-    { label: 'Anagrafe Dirigente', icon: 'manager', view: 'staff' },
-    { label: 'Anagrafe Squadra', icon: 'shield', view: 'teams' },
-    { label: 'Creazione Stagione / Evento', icon: 'trophy', view: 'calendar' },
-    { label: 'Configurazione statistiche', icon: 'stats', soon: true }
+    { label: 'Creazione stagione / evento', icon: 'trophy', view: 'calendar' },
+    { label: 'Anagrafe calciatore', icon: 'player', view: 'players' },
+    { label: 'Anagrafe dirigente', icon: 'manager', view: 'staff' },
+    { label: 'Anagrafe squadre', icon: 'shield', view: 'teams' },
+    { label: 'Configurazione statistiche', icon: 'stats', soon: true },
+    { label: 'Archivio anagrafe', icon: 'office', view: 'archive' }
   ],
   training: [
     { label: 'Inserimento Presenze', icon: 'people', soon: true },
@@ -118,7 +124,7 @@ interface SupportTicket { id: string; authorEmail: string; authorName: string; d
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [DatePipe, NgTemplateOutlet, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, StaffPageComponent, EventsPageComponent, CallupPageComponent, NotificationHostComponent],
+  imports: [DatePipe, NgTemplateOutlet, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, StaffPageComponent, EventsPageComponent, CallupPageComponent, SquadsPageComponent, ArchivePageComponent, FsmSelectComponent, NotificationHostComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -205,6 +211,7 @@ export class AppComponent {
   protected readonly nextMatch = signal<{ round: CalendarRound; team: string; category: string } | null>(null);
   private readonly teamService = inject(TeamService);
   private readonly calendarService = inject(CalendarService);
+  protected readonly activeEvents = inject(ActiveEventService);
   private nextMatchRequest = 0;
   /** Direction of the page animation: 'forward' slides in from the right, 'back' from the left. */
   protected readonly navDirection = signal<'forward' | 'back'>('forward');
@@ -222,6 +229,23 @@ export class AppComponent {
   protected readonly viewMeta = computed(() => VIEW_META[this.activePage()]);
   protected readonly sectionMenu = computed<NavItem[]>(() => SECTION_MENU[this.section()] ?? []);
   protected readonly homeTiles = HOME_TILES;
+  protected readonly menuGroups: { key: AppSection | 'data'; label: string; icon: IconName; soon?: boolean }[] = [
+    { key: 'office', label: 'Ufficio', icon: 'desk' }, { key: 'training', label: 'Allenamenti', icon: 'cone' },
+    { key: 'match', label: 'Campo', icon: 'match' }, { key: 'data', label: 'Dati', icon: 'data', soon: true }
+  ];
+  private readonly groupOpen = signal<Record<string, boolean>>({});
+  protected groupItems(key: string): NavItem[] { return SECTION_MENU[key as AppSection] ?? []; }
+  protected isGroupOpen(key: string): boolean { return this.groupOpen()[key] ?? this.section() === key; }
+  protected toggleGroup(key: string): void { this.groupOpen.update(state => ({ ...state, [key]: !this.isGroupOpen(key) })); }
+  protected readonly newEventLabel = '＋ Nuovo evento…';
+  protected readonly eventOptions = computed(() => [...this.activeEvents.events().map(event => this.activeEvents.activeTitleOf(event)), this.newEventLabel]);
+  protected pickEvent(label: string): void {
+    if (label === this.newEventLabel) { this.setView('calendar'); return; }
+    const event = this.activeEvents.events().find(item => this.activeEvents.activeTitleOf(item) === label);
+    if (event) this.activeEvents.select(event.id);
+  }
+  protected readonly squadsTab = signal<'mine' | 'opponents'>('mine');
+  protected openSquads(tab: 'mine' | 'opponents'): void { this.squadsTab.set(tab); this.setView('teams'); }
   protected readonly mainSections = MAIN_SECTIONS;
   protected readonly matchLaunch = signal<{ team: TeamRecord; players: PlayerRecord[]; lineup: Record<string, string>; formation: string; positions: Record<string, { x: number; y: number }>; layoutSlot: 1 | 2; opponentName: string; token: number } | null>(null);
   protected readonly rosterRequest = signal<{ teamId: string; layoutSlot: 1 | 2; token: number } | null>(null);
@@ -422,7 +446,7 @@ export class AppComponent {
       const teams = (await this.teamService.list(workspaceId)).filter(team => !team.isArchived);
       const wanted = this.readNextTeam();
       const team = teams.find(item => item.id === wanted.id) ?? teams.find(item => item.name === wanted.name) ?? teams[0];
-      const round = team ? await this.calendarService.nextMatch(workspaceId, team.id) : null;
+      const round = team ? await this.calendarService.nextMatch(workspaceId, this.activeEvents.activeId()) : null;
       if (request !== this.nextMatchRequest) return;
       this.nextMatch.set(round && team ? { round, team: team.name, category: team.category } : null);
     } catch (error) {

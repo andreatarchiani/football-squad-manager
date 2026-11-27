@@ -1,691 +1,763 @@
 [
- {
-  "name": "01-home",
-  "settle": 2500
- },
- {
-  "name": "01b-bug-report",
-  "actions": [
-   {
-    "click": ".bug-report-button"
-   },
-   {
-    "fill": ".nfm-bug-field textarea",
-    "value": "Il pulsante Cambio non risponde durante la partita."
-   }
-  ],
-  "settle": 700,
-  "full": false
- },
- {
-  "name": "02-office",
-  "actions": [
-   {
-    "click": ".nfm-bug-close"
-   },
-   {
-    "click": ".nfm-home-tile:has-text('Ufficio')"
-   }
-  ],
-  "settle": 1200
- },
- {
-  "name": "03-players",
-  "actions": [
-   {
-    "click": ".nfm-menu-item:has-text('Anagrafe Calciatore'), .nfm-scene-item:has-text('Anagrafe Calciatore')"
-   }
-  ],
-  "settle": 2500
- },
- {
-  "name": "04-player-form",
-  "actions": [
-   {
-    "click": "button:has-text('Nuovo giocatore')"
-   }
-  ],
-  "settle": 800
- },
- {
-  "name": "04b-player-validation",
-  "actions": [
-   {
-    "click": "button[type=submit]:has-text('Inserisci giocatore')"
-   }
-  ],
-  "settle": 1200,
-  "full": false
- },
- {
-  "name": "04c-player-guardian",
-  "actions": [
-   {
-    "click": ".guardian-toggles label:has-text('Madre')"
-   },
-   {
-    "fill": "input[name=firstName]",
-    "value": "Luca"
-   },
-   {
-    "fill": "input[name=lastName]",
-    "value": "Neri"
-   },
-   {
-    "fill": "input[name=shirtNumber]",
-    "value": "23"
-   },
-   {
-    "click": "button[type=submit]:has-text('Inserisci giocatore')"
-   }
-  ],
-  "settle": 1400,
-  "full": false
- },
- {
-  "name": "05-teams",
-  "actions": [
-   {
-    "click": "button.text-button:has-text('Annulla')"
-   },
-   {
-    "click": ".nfm-menu-item:has-text('Anagrafe Squadra'), .nfm-subnav-item:has-text('Anagrafe Squadra')"
-   }
-  ],
-  "settle": 2500
- },
- {
-  "name": "06-team-form",
-  "actions": [
-   {
-    "click": "button:has-text('Nuova squadra')"
-   }
-  ],
-  "settle": 800
- },
- {
-  "name": "06b-team-validation",
-  "actions": [
-   {
-    "click": "button[type=submit]:has-text('Crea squadra')"
-   }
-  ],
-  "settle": 1200,
-  "full": false
- },
- {
-  "name": "06c-team-address",
-  "actions": [
-   {
-    "fill": "input[name=facilityAddress]",
-    "value": "Via Roma Arezzo"
-   },
-   {
-    "wait": 2600
-   }
-  ],
-  "settle": 400,
-  "full": false
- },
- {
-  "name": "07-training",
-  "actions": [
-   {
-    "click": "button.text-button:has-text('Annulla')"
-   },
-   {
-    "click": ".nfm-logo"
-   },
-   {
-    "wait": 500
-   },
-   {
-    "click": ".nfm-home-tile:has-text('Allenamento')"
-   }
-  ],
-  "settle": 1200
- },
- {
-  "name": "08-match-hub",
-  "actions": [
-   {
-    "click": ".nfm-logo"
-   },
-   {
-    "wait": 500
-   },
-   {
-    "click": ".nfm-home-tile:has-text('Partita')"
-   }
-  ],
-  "settle": 1200
- },
- {
-  "name": "09-formation",
-  "actions": [
-   {
-    "click": ".nfm-menu-item:has-text('Formazione'), .nfm-scene-item:has-text('Formazione')"
-   }
-  ],
-  "settle": 3000
- },
- {
-  "name": "10-lineup",
-  "actions": [
-   {
-    "wait": 1500
-   }
-  ],
-  "settle": 3000
- },
- {
-  "name": "11-live",
-  "actions": [
-   {
-    "click": "button:has-text('Inizia partita')"
-   }
-  ],
-  "settle": 3500
- },
- {
-  "name": "12-live-event",
-  "actions": [
-   {
-    "click": ".nfm-event-button:has-text('Ammonizione')"
-   }
-  ],
-  "settle": 800
- },
- {
-  "name": "13-live-registered",
-  "actions": [
-   {
-    "click": ".nfm-number:has-text('Costa')"
-   },
-   {
-    "click": ".nfm-event-submit"
-   },
-   {
-    "wait": 3800
-   }
-  ],
-  "settle": 800
- },
- {
-  "name": "14-goal-dialog",
-  "actions": [
-   {
-    "click": ".nfm-event-button:has-text('Gol fatto')"
-   },
-   {
-    "click": ".nfm-event-column:nth-child(1) .nfm-number:has-text('Conti')"
-   },
-   {
-    "click": ".nfm-event-column:nth-child(2) .nfm-number:has-text('Neri')"
-   }
-  ],
-  "settle": 600
- },
- {
-  "name": "15-goal-registered",
-  "actions": [
-   {
-    "click": ".nfm-event-submit"
-   },
-   {
-    "wait": 4200
-   }
-  ],
-  "settle": 600
- },
- {
-  "name": "16-finish-confirm",
-  "actions": [
-   {
-    "click": "button.finish-match:has-text('Fine partita')"
-   }
-  ],
-  "settle": 700
- },
- {
-  "name": "17-report",
-  "actions": [
-   {
-    "click": "button.finish-confirm-yes"
-   }
-  ],
-  "settle": 1500
- },
- {
-  "name": "18-after-exit",
-  "actions": [
-   {
-    "click": "button.exit-match-report"
-   },
-   {
-    "wait": 2500
-   }
-  ],
-  "settle": 800
- },
- {
-  "name": "19-team-roster",
-  "actions": [
-   {
-    "click": ".nfm-logo"
-   },
-   {
-    "wait": 500
-   },
-   {
-    "click": ".nfm-home-tile:has-text('Ufficio')"
-   },
-   {
-    "wait": 600
-   },
-   {
-    "click": ".nfm-menu-item:has-text('Anagrafe Squadra'), .nfm-scene-item:has-text('Anagrafe Squadra')"
-   },
-   {
-    "wait": 2500
-   },
-   {
-    "click": "button.roster-primary-button"
-   }
-  ],
-  "settle": 2500
- },
- {
-  "name": "20-staff",
-  "actions": [
-   {
-    "click": ".nfm-logo"
-   },
-   {
-    "wait": 500
-   },
-   {
-    "click": ".nfm-home-tile:has-text('Ufficio')"
-   },
-   {
-    "wait": 600
-   },
-   {
-    "click": ".nfm-menu-item:has-text('Anagrafe Dirigente'), .nfm-scene-item:has-text('Anagrafe Dirigente')"
-   }
-  ],
-  "settle": 2000
- },
- {
-  "name": "21-staff-form",
-  "actions": [
-   {
-    "click": "button:has-text('Nuovo dirigente')"
-   },
-   {
-    "fill": "input[name=firstName]",
-    "value": "Marco"
-   }
-  ],
-  "settle": 800
- },
- {
-  "name": "22-staff-validation",
-  "actions": [
-   {
-    "click": "button[type=submit]:has-text('Inserisci dirigente')"
-   }
-  ],
-  "settle": 1200,
-  "full": false
- },
- {
-  "name": "23-staff-saved",
-  "actions": [
-   {
-    "fill": "input[name=lastName]",
-    "value": "Bianchi"
-   },
-   {
-    "fill": "input[name=placeOfBirth]",
-    "value": "Arezzo"
-   },
-   {
-    "fill": "input[name=federationNumber]",
-    "value": "164205"
-   },
-   {
-    "click": "button[type=submit]:has-text('Inserisci dirigente')"
-   },
-   {
-    "wait": 2500
-   }
-  ],
-  "settle": 800
- },
- {
-  "name": "24-calendar",
-  "actions": [
-   {
-    "click": ".nfm-logo"
-   },
-   {
-    "wait": 500
-   },
-   {
-    "click": ".nfm-home-tile:has-text('Ufficio')"
-   },
-   {
-    "wait": 600
-   },
-   {
-    "click": ".nfm-menu-item:has-text('Creazione Stagione'), .nfm-scene-item:has-text('Creazione Stagione')"
-   }
-  ],
-  "settle": 2500
- },
- {
-  "name": "24-new-event-form",
-  "actions": [
-   {
-    "click": ".ev-list-head .ev-primary"
-   },
-   {
-    "wait": 800
-   },
-   {
-    "click": ".ev-cats .ev-radio:has-text('Allievi Regionali')"
-   },
-   {
-    "wait": 400
-   }
-  ],
-  "settle": 600
- },
- {
-  "name": "24a-event-created",
-  "actions": [
-   {
-    "click": ".ev-footer .ev-primary"
-   },
-   {
-    "wait": 2500
-   }
-  ],
-  "settle": 600
- },
- {
-  "name": "24b-group-teams",
-  "actions": [
-   {
-    "click": ".cal-teams button.cal-add"
-   },
-   {
-    "fill": ".gt-form label:nth-of-type(1) input",
-    "value": "Fulgor Castelfranco"
-   },
-   {
-    "fill": ".gt-form label:nth-of-type(2) input",
-    "value": "Castelfranco"
-   },
-   {
-    "click": "button.venue-save"
-   },
-   {
-    "wait": 500
-   },
-   {
-    "click": ".cal-teams button.cal-add"
-   },
-   {
-    "fill": ".gt-form label:nth-of-type(1) input",
-    "value": "Atletico Levane Leona"
-   },
-   {
-    "fill": ".gt-form label:nth-of-type(2) input",
-    "value": "Levane"
-   },
-   {
-    "click": "button.venue-save"
-   },
-   {
-    "wait": 500
-   },
-   {
-    "click": ".cal-teams button.cal-add"
-   },
-   {
-    "fill": ".gt-form label:nth-of-type(1) input",
-    "value": "Montevarchi Giovani"
-   },
-   {
-    "fill": ".gt-form label:nth-of-type(2) input",
-    "value": "Montevarchi"
-   }
-  ],
-  "settle": 600,
-  "full": false
- },
- {
-  "name": "24c-group-saved",
-  "actions": [
-   {
-    "click": "button.venue-save"
-   },
-   {
-    "wait": 500
-   }
-  ],
-  "settle": 400
- },
- {
-  "name": "25-calendar-andata",
-  "actions": [
-   {
-    "click": "button.cal-add"
-   },
-   {
-    "click": "button.cal-add"
-   },
-   {
-    "click": "button.cal-add"
-   },
-   {
-    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) .cal-team-trigger"
-   },
-   {
-    "click": ".cal-opp-picker .cal-team-menu button:has-text('Fulgor Castelfranco')"
-   },
-   {
-    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=date]",
-    "value": "2027-01-10"
-   },
-   {
-    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=time]",
-    "value": "15:30"
-   },
-   {
-    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-team-trigger"
-   },
-   {
-    "click": ".cal-opp-picker .cal-team-menu button:has-text('Atletico Levane Leona')"
-   },
-   {
-    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) input[type=date]",
-    "value": "2027-01-17"
-   },
-   {
-    "wait": 2500
-   },
-   {
-    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(4) .cal-delete"
-   },
-   {
-    "wait": 1500
-   }
-  ],
-  "settle": 800
- },
- {
-  "name": "25a-opponent-menu",
-  "actions": [
-   {
-    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-team-trigger"
-   }
-  ],
-  "settle": 500,
-  "full": false
- },
- {
-  "name": "25a2-close",
-  "actions": [
-   {
-    "click": ".cal-menu-backdrop"
-   }
-  ],
-  "settle": 300,
-  "full": false
- },
- {
-  "name": "25b-venue-dialog",
-  "actions": [
-   {
-    "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-venue-set-button"
-   },
-   {
-    "fill": ".venue-paste input",
-    "value": "https://maps.app.goo.gl/Xy12AbCdEf"
-   },
-   {
-    "fill": ".venue-name input",
-    "value": "Stadio Comunale di Levane"
-   }
-  ],
-  "settle": 600,
-  "full": false
- },
- {
-  "name": "25c-venue-saved",
-  "actions": [
-   {
-    "click": "button.venue-save"
-   },
-   {
-    "wait": 1500
-   }
-  ],
-  "settle": 500
- },
- {
-  "name": "26-calendar-conflict",
-  "actions": [
-   {
-    "fill": ".cal-main > section:nth-child(2) .cal-row:nth-child(2) input[type=date]",
-    "value": "2027-01-17"
-   },
-   {
-    "wait": 1800
-   }
-  ],
-  "settle": 600
- },
- {
-  "name": "27-calendar-fixed",
-  "actions": [
-   {
-    "fill": ".cal-main > section:nth-child(2) .cal-row:nth-child(2) input[type=date]",
-    "value": "2027-02-21"
-   },
-   {
-    "wait": 2000
-   }
-  ],
-  "settle": 600
- },
- {
-  "name": "27b-calendar-next-changes",
-  "actions": [
-   {
-    "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=date]",
-    "value": "2027-03-01"
-   },
-   {
-    "press": "Tab"
-   },
-   {
-    "wait": 2200
-   }
-  ],
-  "settle": 500,
-  "full": false
- },
- {
-  "name": "27c-event-edit",
-  "actions": [
-   {
-    "click": ".cal-edit-event"
-   },
-   {
-    "wait": 1200
-   }
-  ],
-  "settle": 600
- },
- {
-  "name": "27d-event-back",
-  "actions": [
-   {
-    "click": ".ev-footer .ev-secondary:has-text('Annulla')"
-   },
-   {
-    "wait": 1500
-   }
-  ],
-  "settle": 300,
-  "full": false
- },
- {
-  "name": "28-match-header",
-  "actions": [
-   {
-    "click": ".nfm-logo"
-   },
-   {
-    "wait": 500
-   },
-   {
-    "click": ".nfm-home-tile:has-text('Partita')"
-   },
-   {
-    "wait": 2500
-   }
-  ],
-  "settle": 800,
-  "full": false
- },
- {
-  "name": "29-formation-next",
-  "actions": [
-   {
-    "click": ".nfm-menu-item:has-text('Formazione'), .nfm-scene-item:has-text('Formazione')"
-   },
-   {
-    "wait": 2500
-   }
-  ],
-  "settle": 800,
-  "full": false
- },
- {
-  "name": "30-callup",
-  "actions": [
-   {
-    "click": ".nfm-menu-item:has-text('Convocazione'), .nfm-scene-item:has-text('Convocazione')"
-   },
-   {
-    "wait": 3000
-   }
-  ],
-  "settle": 800
- }
+  {
+    "name": "01-home",
+    "settle": 2500
+  },
+  {
+    "name": "01b-bug-report",
+    "actions": [
+      {
+        "click": ".bug-report-button"
+      },
+      {
+        "fill": ".nfm-bug-field textarea",
+        "value": "Il pulsante Cambio non risponde durante la partita."
+      }
+    ],
+    "settle": 700,
+    "full": false
+  },
+  {
+    "name": "02-office",
+    "actions": [
+      {
+        "click": ".nfm-bug-close"
+      },
+      {
+        "click": ".nfm-home-tile:has-text('Ufficio')"
+      }
+    ],
+    "settle": 1200
+  },
+  {
+    "name": "03-players",
+    "actions": [
+      {
+        "click": ".nfm-menu-item:has-text('Anagrafe Calciatore'), .nfm-scene-item:has-text('Anagrafe Calciatore')"
+      }
+    ],
+    "settle": 2500
+  },
+  {
+    "name": "04-player-form",
+    "actions": [
+      {
+        "click": "button:has-text('Nuovo giocatore')"
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "04b-player-validation",
+    "actions": [
+      {
+        "click": "button[type=submit]:has-text('Inserisci giocatore')"
+      }
+    ],
+    "settle": 1200,
+    "full": false
+  },
+  {
+    "name": "04c-player-guardian",
+    "actions": [
+      {
+        "click": ".guardian-toggles label:has-text('Madre')"
+      },
+      {
+        "fill": "input[name=firstName]",
+        "value": "Luca"
+      },
+      {
+        "fill": "input[name=lastName]",
+        "value": "Neri"
+      },
+      {
+        "fill": "input[name=shirtNumber]",
+        "value": "23"
+      },
+      {
+        "click": "button[type=submit]:has-text('Inserisci giocatore')"
+      }
+    ],
+    "settle": 1400,
+    "full": false
+  },
+  {
+    "name": "05-teams",
+    "actions": [
+      {
+        "click": "button.text-button:has-text('Annulla')"
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Anagrafe squadre'), .nfm-subnav-item:has-text('Anagrafe squadre')"
+      }
+    ],
+    "settle": 2500
+  },
+  {
+    "name": "06-team-form",
+    "actions": [
+      {
+        "click": "button:has-text('Nuova squadra')"
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "06b-team-validation",
+    "actions": [
+      {
+        "click": "button[type=submit]:has-text('Crea squadra')"
+      }
+    ],
+    "settle": 1200,
+    "full": false
+  },
+  {
+    "name": "06c-team-address",
+    "actions": [
+      {
+        "fill": "input[name=facilityAddress]",
+        "value": "Via Roma Arezzo"
+      },
+      {
+        "wait": 2600
+      }
+    ],
+    "settle": 400,
+    "full": false
+  },
+  {
+    "name": "07-training",
+    "actions": [
+      {
+        "click": "button.text-button:has-text('Annulla')"
+      },
+      {
+        "click": ".nfm-logo"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".nfm-home-tile:has-text('Allenamento')"
+      }
+    ],
+    "settle": 1200
+  },
+  {
+    "name": "08-match-hub",
+    "actions": [
+      {
+        "click": ".nfm-logo"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".nfm-home-tile:has-text('Partita')"
+      }
+    ],
+    "settle": 1200
+  },
+  {
+    "name": "09-formation",
+    "actions": [
+      {
+        "click": ".nfm-menu-item:has-text('Formazione'), .nfm-scene-item:has-text('Formazione')"
+      }
+    ],
+    "settle": 3000
+  },
+  {
+    "name": "10-lineup",
+    "actions": [
+      {
+        "wait": 1500
+      }
+    ],
+    "settle": 3000
+  },
+  {
+    "name": "11-live",
+    "actions": [
+      {
+        "click": "button:has-text('Inizia partita')"
+      }
+    ],
+    "settle": 3500
+  },
+  {
+    "name": "12-live-event",
+    "actions": [
+      {
+        "click": ".nfm-event-button:has-text('Ammonizione')"
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "13-live-registered",
+    "actions": [
+      {
+        "click": ".nfm-number:has-text('Costa')"
+      },
+      {
+        "click": ".nfm-event-submit"
+      },
+      {
+        "wait": 3800
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "14-goal-dialog",
+    "actions": [
+      {
+        "click": ".nfm-event-button:has-text('Gol fatto')"
+      },
+      {
+        "click": ".nfm-event-column:nth-child(1) .nfm-number:has-text('Conti')"
+      },
+      {
+        "click": ".nfm-event-column:nth-child(2) .nfm-number:has-text('Neri')"
+      }
+    ],
+    "settle": 600
+  },
+  {
+    "name": "15-goal-registered",
+    "actions": [
+      {
+        "click": ".nfm-event-submit"
+      },
+      {
+        "wait": 4200
+      }
+    ],
+    "settle": 600
+  },
+  {
+    "name": "16-finish-confirm",
+    "actions": [
+      {
+        "click": "button.finish-match:has-text('Fine partita')"
+      }
+    ],
+    "settle": 700
+  },
+  {
+    "name": "17-report",
+    "actions": [
+      {
+        "click": "button.finish-confirm-yes"
+      }
+    ],
+    "settle": 1500
+  },
+  {
+    "name": "18-after-exit",
+    "actions": [
+      {
+        "click": "button.exit-match-report"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "19-team-roster",
+    "actions": [
+      {
+        "click": ".nfm-logo"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".nfm-home-tile:has-text('Ufficio')"
+      },
+      {
+        "wait": 600
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Anagrafe squadre'), .nfm-scene-item:has-text('Anagrafe squadre')"
+      },
+      {
+        "wait": 2500
+      },
+      {
+        "click": "button.roster-primary-button"
+      }
+    ],
+    "settle": 2500
+  },
+  {
+    "name": "20-staff",
+    "actions": [
+      {
+        "click": ".nfm-logo"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".nfm-home-tile:has-text('Ufficio')"
+      },
+      {
+        "wait": 600
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Anagrafe Dirigente'), .nfm-scene-item:has-text('Anagrafe Dirigente')"
+      }
+    ],
+    "settle": 2000
+  },
+  {
+    "name": "21-staff-form",
+    "actions": [
+      {
+        "click": "button:has-text('Nuovo dirigente')"
+      },
+      {
+        "fill": "input[name=firstName]",
+        "value": "Marco"
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "22-staff-validation",
+    "actions": [
+      {
+        "click": "button[type=submit]:has-text('Inserisci dirigente')"
+      }
+    ],
+    "settle": 1200,
+    "full": false
+  },
+  {
+    "name": "23-staff-saved",
+    "actions": [
+      {
+        "fill": "input[name=lastName]",
+        "value": "Bianchi"
+      },
+      {
+        "fill": "input[name=placeOfBirth]",
+        "value": "Arezzo"
+      },
+      {
+        "fill": "input[name=federationNumber]",
+        "value": "164205"
+      },
+      {
+        "click": "button[type=submit]:has-text('Inserisci dirigente')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "24-calendar",
+    "actions": [
+      {
+        "click": ".nfm-logo"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".nfm-home-tile:has-text('Ufficio')"
+      },
+      {
+        "wait": 600
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Creazione Stagione'), .nfm-scene-item:has-text('Creazione Stagione')"
+      }
+    ],
+    "settle": 2500
+  },
+  {
+    "name": "24-new-event-form",
+    "actions": [
+      {
+        "click": ".ev-list-head .ev-primary"
+      },
+      {
+        "wait": 800
+      },
+      {
+        "click": ".ev-cats .ev-radio:has-text('Allievi Regionali')"
+      },
+      {
+        "wait": 400
+      }
+    ],
+    "settle": 600
+  },
+  {
+    "name": "24a-event-created",
+    "actions": [
+      {
+        "click": ".ev-footer .ev-primary"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 600
+  },
+  {
+    "name": "24b-group-teams",
+    "actions": [
+      {
+        "click": ".cal-teams button.cal-add"
+      },
+      {
+        "fill": ".gt-form label:nth-of-type(1) input",
+        "value": "Fulgor Castelfranco"
+      },
+      {
+        "fill": ".gt-form label:nth-of-type(2) input",
+        "value": "Castelfranco"
+      },
+      {
+        "click": "button.venue-save"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".cal-teams button.cal-add"
+      },
+      {
+        "fill": ".gt-form label:nth-of-type(1) input",
+        "value": "Atletico Levane Leona"
+      },
+      {
+        "fill": ".gt-form label:nth-of-type(2) input",
+        "value": "Levane"
+      },
+      {
+        "click": "button.venue-save"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".cal-teams button.cal-add"
+      },
+      {
+        "fill": ".gt-form label:nth-of-type(1) input",
+        "value": "Montevarchi Giovani"
+      },
+      {
+        "fill": ".gt-form label:nth-of-type(2) input",
+        "value": "Montevarchi"
+      }
+    ],
+    "settle": 600,
+    "full": false
+  },
+  {
+    "name": "24c-group-saved",
+    "actions": [
+      {
+        "click": "button.venue-save"
+      },
+      {
+        "wait": 500
+      }
+    ],
+    "settle": 400
+  },
+  {
+    "name": "25-calendar-andata",
+    "actions": [
+      {
+        "click": "button.cal-add"
+      },
+      {
+        "click": "button.cal-add"
+      },
+      {
+        "click": "button.cal-add"
+      },
+      {
+        "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) .cal-team-trigger"
+      },
+      {
+        "click": ".cal-opp-picker .cal-team-menu button:has-text('Fulgor Castelfranco')"
+      },
+      {
+        "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=date]",
+        "value": "2027-01-10"
+      },
+      {
+        "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=time]",
+        "value": "15:30"
+      },
+      {
+        "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-team-trigger"
+      },
+      {
+        "click": ".cal-opp-picker .cal-team-menu button:has-text('Atletico Levane Leona')"
+      },
+      {
+        "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) input[type=date]",
+        "value": "2027-01-17"
+      },
+      {
+        "wait": 2500
+      },
+      {
+        "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(4) .cal-delete"
+      },
+      {
+        "wait": 1500
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "25a-opponent-menu",
+    "actions": [
+      {
+        "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-team-trigger"
+      }
+    ],
+    "settle": 500,
+    "full": false
+  },
+  {
+    "name": "25a2-close",
+    "actions": [
+      {
+        "click": ".cal-menu-backdrop"
+      }
+    ],
+    "settle": 300,
+    "full": false
+  },
+  {
+    "name": "25b-venue-dialog",
+    "actions": [
+      {
+        "click": ".cal-main > section:nth-child(1) .cal-row:nth-child(3) .cal-venue-set-button"
+      },
+      {
+        "fill": ".venue-paste input",
+        "value": "https://maps.app.goo.gl/Xy12AbCdEf"
+      },
+      {
+        "fill": ".venue-name input",
+        "value": "Stadio Comunale di Levane"
+      }
+    ],
+    "settle": 600,
+    "full": false
+  },
+  {
+    "name": "25c-venue-saved",
+    "actions": [
+      {
+        "click": "button.venue-save"
+      },
+      {
+        "wait": 1500
+      }
+    ],
+    "settle": 500
+  },
+  {
+    "name": "26-calendar-conflict",
+    "actions": [
+      {
+        "fill": ".cal-main > section:nth-child(2) .cal-row:nth-child(2) input[type=date]",
+        "value": "2027-01-17"
+      },
+      {
+        "wait": 1800
+      }
+    ],
+    "settle": 600
+  },
+  {
+    "name": "27-calendar-fixed",
+    "actions": [
+      {
+        "fill": ".cal-main > section:nth-child(2) .cal-row:nth-child(2) input[type=date]",
+        "value": "2027-02-21"
+      },
+      {
+        "wait": 2000
+      }
+    ],
+    "settle": 600
+  },
+  {
+    "name": "27b-calendar-next-changes",
+    "actions": [
+      {
+        "fill": ".cal-main > section:nth-child(1) .cal-row:nth-child(2) input[type=date]",
+        "value": "2027-03-01"
+      },
+      {
+        "press": "Tab"
+      },
+      {
+        "wait": 2200
+      }
+    ],
+    "settle": 500,
+    "full": false
+  },
+  {
+    "name": "27c-event-edit",
+    "actions": [
+      {
+        "click": ".cal-edit-event"
+      },
+      {
+        "wait": 1200
+      }
+    ],
+    "settle": 600
+  },
+  {
+    "name": "27d-event-back",
+    "actions": [
+      {
+        "click": ".ev-footer .ev-secondary:has-text('Annulla')"
+      },
+      {
+        "wait": 1500
+      }
+    ],
+    "settle": 300,
+    "full": false
+  },
+  {
+    "name": "28-match-header",
+    "actions": [
+      {
+        "click": ".nfm-logo"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".nfm-home-tile:has-text('Partita')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 800,
+    "full": false
+  },
+  {
+    "name": "29-formation-next",
+    "actions": [
+      {
+        "click": ".nfm-menu-item:has-text('Formazione'), .nfm-scene-item:has-text('Formazione')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 800,
+    "full": false
+  },
+  {
+    "name": "30-callup",
+    "actions": [
+      {
+        "click": ".nfm-menu-item:has-text('Convocazione'), .nfm-scene-item:has-text('Convocazione')"
+      },
+      {
+        "wait": 3000
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "31-squads-mine",
+    "actions": [
+      {
+        "click": ".nfm-logo"
+      },
+      {
+        "wait": 500
+      },
+      {
+        "click": ".nfm-home-tile:has-text('Ufficio')"
+      },
+      {
+        "wait": 1500
+      },
+      {
+        "click": ".nfm-scene-item:has-text('Anagrafe squadre'), .nfm-menu-item:has-text('Anagrafe squadre')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "32-squads-import",
+    "actions": [
+      {
+        "click": ".sq-btn:has-text('Importa')"
+      },
+      {
+        "wait": 1500
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "33-squads-opponents",
+    "actions": [
+      {
+        "click": ".sq-dialog header button"
+      },
+      {
+        "click": ".sq-tabs button:has-text('Squadre avversarie')"
+      },
+      {
+        "wait": 1500
+      },
+      {
+        "click": ".op-add"
+      },
+      {
+        "wait": 800
+      }
+    ],
+    "settle": 800
+  },
+  {
+    "name": "34-archive",
+    "actions": [
+      {
+        "click": ".op-dialog header button"
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Archivio anagrafe')"
+      },
+      {
+        "wait": 2500
+      }
+    ],
+    "settle": 800
+  }
 ]

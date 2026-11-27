@@ -1,3 +1,4 @@
+import { ActiveEventService } from '../../core/active-event.service';
 import { Injectable, inject } from '@angular/core';
 import { addDoc, collection, deleteDoc, doc, getDocs, serverTimestamp, updateDoc, type Firestore } from 'firebase/firestore';
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
@@ -29,10 +30,16 @@ export function emptyStaff(): StaffInput {
 @Injectable({ providedIn: 'root' })
 export class StaffService {
   private readonly firestore = inject(FIRESTORE_DB, { optional: true });
+  private readonly events = inject(ActiveEventService);
 
   async list(workspaceId: string): Promise<StaffRecord[]> {
+    await this.events.whenReady();
+    const eventId = this.events.activeId();
+    const firstId = this.events.firstId();
     const snapshots = await getDocs(collection(this.db(), 'workspaces', workspaceId, 'staff'));
     return snapshots.docs
+      // Officials made before events existed belong to the first event.
+      .filter(snapshot => !eventId || String(snapshot.data()['eventId'] || firstId) === eventId)
       .map(snapshot => {
         const data = snapshot.data();
         const record = { id: snapshot.id, ...emptyStaff() } as StaffRecord;
@@ -50,6 +57,7 @@ export class StaffService {
       await updateDoc(doc(this.db(), 'workspaces', workspaceId, 'staff', id), data);
     } else {
       data['createdAt'] = serverTimestamp();
+      data['eventId'] = this.events.activeId();
       await addDoc(collection(this.db(), 'workspaces', workspaceId, 'staff'), data);
     }
   }

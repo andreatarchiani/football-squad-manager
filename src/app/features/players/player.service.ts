@@ -48,7 +48,9 @@ export class PlayerService {
   async list(workspaceId: string, teams: TeamRecord[]): Promise<PlayerRecord[]> {
     const key = `players:${workspaceId}:${teams.map(team => `${team.id}/${team.seasonId ?? ''}`).sort().join(',')}`;
     const players = await cached(key, () => this.fetchList(workspaceId, teams));
-    return players.map(player => ({ ...player, roles: [...player.roles], guardians: { mother: player.guardians.mother ? { ...player.guardians.mother } : null, father: player.guardians.father ? { ...player.guardians.father } : null } }));
+    // Only the players of the given teams (the teams of the selected event).
+    const teamIds = new Set(teams.map(team => team.id));
+    return players.filter(player => teamIds.has(player.teamId)).map(player => ({ ...player, roles: [...player.roles], guardians: { mother: player.guardians.mother ? { ...player.guardians.mother } : null, father: player.guardians.father ? { ...player.guardians.father } : null } }));
   }
 
   private async fetchList(workspaceId: string, teams: TeamRecord[]): Promise<PlayerRecord[]> {
@@ -72,7 +74,7 @@ export class PlayerService {
   }
 
   async listForTeam(workspaceId: string, teamId: string, seasonId: string, teamName: string): Promise<PlayerRecord[]> {
-    const team: TeamRecord = { id: teamId, name: teamName, category: '', facilityName: '', facilityAddress: '', facilityMapsUrl: '', headquartersAddress: '', federationNumber: '', outfieldPlayersCount: null, goalkeeperCount: null, periodCount: null, periodMinutes: null, playersOnField: null, playersOnRoster: null, maxSubstitutions: null, reentryAllowed: false, federationReportRequired: false, fixedPlayerCount: null, allPlayersMustPlay: false, icon: '⚽', isArchived: false, seasonId, seasonLabel: '', seasonStatus: 'active' };
+    const team: TeamRecord = { id: teamId, eventId: '', name: teamName, category: '', facilityName: '', facilityAddress: '', facilityMapsUrl: '', headquartersAddress: '', federationNumber: '', outfieldPlayersCount: null, goalkeeperCount: null, periodCount: null, periodMinutes: null, playersOnField: null, playersOnRoster: null, maxSubstitutions: null, reentryAllowed: false, federationReportRequired: false, fixedPlayerCount: null, allPlayersMustPlay: false, icon: '⚽', isArchived: false, seasonId, seasonLabel: '', seasonStatus: 'active' };
     return (await this.list(workspaceId, [team])).filter(player =>
       !player.isArchived && player.teamId === teamId && player.seasonId === seasonId
     );

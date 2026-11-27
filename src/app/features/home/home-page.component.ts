@@ -4,6 +4,7 @@ import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { FIRESTORE_DB } from '../../core/firebase.tokens';
 import { TeamService, type TeamRecord } from '../teams/team.service';
 import { PlayerService, type PlayerRecord } from '../players/player.service';
+import { ActiveEventService } from '../../core/active-event.service';
 import { CalendarService, type CalendarRound } from '../calendar/calendar.service';
 
 @Component({
@@ -18,6 +19,7 @@ export class HomePageComponent {
   private readonly teamsService = inject(TeamService);
   private readonly playerService = inject(PlayerService);
   private readonly calendarService = inject(CalendarService);
+  private readonly activeEvents = inject(ActiveEventService);
   /** Next match from the calendar: fills the opponent automatically. */
   protected readonly nextMatch = signal<CalendarRound | null>(null);
   private readonly db = inject(FIRESTORE_DB, { optional: true });
@@ -322,7 +324,7 @@ export class HomePageComponent {
     const workspaceId = this.auth.workspaceId();
     if (!team || !workspaceId) { this.nextMatch.set(null); return; }
     try {
-      const round = await this.calendarService.nextMatch(workspaceId, team.id);
+      const round = await this.calendarService.nextMatch(workspaceId, this.activeEvents.activeId());
       if (this.selectedTeam?.id !== team.id) return;
       this.nextMatch.set(round);
       if (round && round.opponent.trim() && round.opponent.trim() !== this.opponentName().trim()) this.setOpponentName(round.opponent.trim());

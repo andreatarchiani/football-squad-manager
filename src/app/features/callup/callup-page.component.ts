@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ActiveEventService } from '../../core/active-event.service';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { TeamService, type TeamRecord } from '../teams/team.service';
@@ -23,6 +24,7 @@ export class CallupPageComponent {
   private readonly teamService = inject(TeamService);
   private readonly playerService = inject(PlayerService);
   private readonly calendarService = inject(CalendarService);
+  private readonly activeEvents = inject(ActiveEventService);
   private readonly notifications = inject(NotificationService);
 
   protected readonly loading = signal(true);
@@ -198,7 +200,7 @@ export class CallupPageComponent {
       const uid = this.auth.user()?.uid;
       const slot = (uid && localStorage.getItem(`fsm-layout-slot-${uid}`)) === '2' ? 2 : 1;
       const [next, players, layout] = await Promise.all([
-        this.calendarService.nextMatchEvent(workspaceId, team.id),
+        this.calendarService.nextMatchEvent(workspaceId, this.activeEvents.activeId()),
         this.playerService.list(workspaceId, teams),
         team.seasonId ? this.teamService.loadTacticalLayout(workspaceId, team.id, team.seasonId, slot) : Promise.resolve(null)
       ]);

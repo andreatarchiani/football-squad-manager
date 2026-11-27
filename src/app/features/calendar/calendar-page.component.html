@@ -5,7 +5,7 @@
     <div class="cal-event-title">
       @if (isImage(calendar().event.logo)) { <img class="cal-crest cal-crest-img" [src]="calendar().event.logo" alt=""> }
       @else { <span class="cal-crest" aria-hidden="true">{{ calendar().event.logo || title().charAt(0).toUpperCase() }}</span> }
-      <div><strong>{{ title() }}</strong><small>{{ team()?.name || 'Squadra non trovata' }}@if (calendar().event.category || team()?.category) { · {{ calendar().event.category || team()?.category }} }@if (calendar().groupName) { · Girone {{ calendar().groupName }} }</small></div>
+      <div><strong>{{ title() }}</strong><small>{{ team()?.name || 'Nessuna squadra' }}@if (calendar().event.category || team()?.category) { · {{ calendar().event.category || team()?.category }} }@if (calendar().groupName) { · Girone {{ calendar().groupName }} }</small></div>
     </div>
     <button type="button" class="cal-edit-event" (click)="goEdit()">✎ Modifica evento</button>
   </div>
@@ -15,7 +15,7 @@
   @if (loading()) {
     <div class="cal-empty">Caricamento calendario…</div>
   } @else if (!team()) {
-    <div class="cal-empty"><strong>Squadra non trovata</strong><span>La squadra di questo evento non esiste più: scegline un'altra con “Modifica evento”.</span></div>
+    <div class="cal-empty"><strong>Prima crea o importa la tua squadra</strong><span>Il calendario usa la squadra di questo evento.</span><button type="button" class="cal-edit-event" (click)="openTeams.emit()">Vai ad Anagrafe Squadre</button></div>
   } @else {
     @if (conflicts().size) {
       <div class="cal-alert warning" role="alert"><strong>Due partite nello stesso giorno</strong> Giornate {{ conflictRounds().join(', ') }}: la squadra non può giocare due volte lo stesso giorno. Correggi le date evidenziate.</div>
@@ -90,7 +90,7 @@
               }
             }
           </ul>
-          <button type="button" class="cal-add" (click)="newGroupTeam()">＋ Crea nuova squadra del girone</button>
+          <button type="button" class="cal-add" (click)="openOpponents.emit()">＋ Crea nuova squadra del girone</button>
           <p class="cal-hint">Le squadre create qui compaiono nel menu “Avversario” di ogni giornata. Una squadra già scelta in un’altra giornata non è più selezionabile.</p>
         </section>
       </aside>

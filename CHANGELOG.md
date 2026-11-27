@@ -1,5 +1,11 @@
 # Changelog
 
+## Tutto parte dall'evento
+- In alto scegli Stagione / Evento: squadra, giocatori, dirigenti, calendario e convocazioni mostrano solo quelli dell'evento scelto.
+- Anagrafe squadre: «La mia squadra» con Importa (da altro evento o file CSV) ed Esporta (CSV per Excel) e «Squadre avversarie» (tipo terreno, colori completi, Maps).
+- Nuovo «Archivio anagrafe» (calciatori, dirigenti, squadre) con ricerca, filtri, pagine, Esporta e Stampa.
+- Menu a fisarmonica Ufficio / Allenamenti / Campo / Dati.
+
 ## 2026-11-27 — Squadra senza regolamento
 
 - **Modifica:** nella creazione/modifica della squadra tolta la sezione “Regolamento e gestione gara”: le regole si impostano nell’evento (Stagione / Evento). Le squadre già create mantengono i valori salvati.

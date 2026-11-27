@@ -1,6 +1,6 @@
 @switch (view()) {
   @case ('girone') {
-    <fsm-calendar-page [eventId]="activeId()" (back)="backToList()" (editEvent)="editEvent(activeId())" />
+    <fsm-calendar-page [eventId]="activeId()" (back)="backToList()" (editEvent)="editEvent(activeId())" (openTeams)="openTeams.emit()" (openOpponents)="openOpponents.emit()" />
   }
   @case ('edit') {
     <form #eventForm class="ev-form" (submit)="$event.preventDefault(); save()" novalidate>
@@ -12,11 +12,6 @@
             <label data-field="name"><span>Nome stagione *</span><input type="text" maxlength="80" [value]="draft().name" (input)="setText('name', $any($event.target).value)" placeholder="Es. Stagione 2026/2027"></label>
             <div class="ev-row" data-field="season"><span>Stagione sportiva *</span><fsm-select [options]="seasons" [value]="draft().seasonLabel" placeholder="Scegli la stagione" label="Stagione sportiva" (changed)="patch({ seasonLabel: $event })" /></div>
             <div class="ev-row" data-field="category"><span>Categoria *</span><fsm-select [options]="allCategories" [value]="draft().category" placeholder="Scegli la categoria" label="Categoria" (changed)="selectCategory($event)" /></div>
-            <div class="ev-row" data-field="team"><span>La mia squadra *</span><fsm-select [options]="teamNames()" [value]="draftTeam()?.name ?? ''" placeholder="Scegli la squadra" emptyText="Nessuna squadra: creala prima" label="La mia squadra" (changed)="draftTeamId.set(teamIdOf($event))" /></div>
-            @if (draftTeam(); as team) {
-              <div class="ev-team-card"><b>✓</b><div><strong>{{ team.name }}</strong><small>Matricola {{ team.federationNumber || '—' }} · {{ team.headquartersAddress || team.facilityAddress || 'Indirizzo non indicato' }}</small></div></div>
-            }
-            <button type="button" class="ev-link" (click)="openTeams.emit()">＋ Crea una nuova squadra in Anagrafe Squadra</button>
             <div class="ev-row"><span>Organizzazione *</span><fsm-select [options]="organizations" [value]="draft().organization" label="Organizzazione" (changed)="patch({ organization: $event })" /></div>
           </div>
         </section>
@@ -152,7 +147,7 @@
               @if (isImage(event.event.logo)) { <img class="ev-card-logo" [src]="event.event.logo" alt=""> } @else { <span class="ev-card-logo ev-card-letter" aria-hidden="true">{{ title(event).charAt(0).toUpperCase() }}</span> }
               <div class="ev-card-body">
                 <strong>{{ title(event) }}</strong>
-                <small>{{ teamOf(event)?.name || event.teamName || 'Squadra non trovata' }}@if (event.event.category || teamOf(event)?.category) { · {{ event.event.category || teamOf(event)?.category }} }</small>
+                <small>{{ event.event.category || 'Categoria da scegliere' }}</small>
                 <span class="ev-tags">
                   <b>{{ event.event.activity }}</b>@if (event.event.seasonLabel) { <b>{{ event.event.seasonLabel }}</b> }@if (event.groupName) { <b>Girone {{ event.groupName }}</b> }<b>{{ rounds(event) }} giornate</b>
                 </span>

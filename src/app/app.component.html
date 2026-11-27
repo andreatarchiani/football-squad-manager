@@ -90,6 +90,11 @@
         <span class="nfm-logo-text"><strong>Football</strong><small>Squad Manager</small></span>
       </button>
       <span class="nfm-header-slash" aria-hidden="true"></span>
+      <div class="nfm-event-picker" data-field="event">
+        <small>Stagione / evento</small>
+        <fsm-select [options]="eventOptions()" [value]="activeEvents.activeTitle()" placeholder="Crea o scegli un evento" label="Stagione o evento attivo" (changed)="pickEvent($event)" />
+      </div>
+      <span class="nfm-header-slash" aria-hidden="true"></span>
       @for (page of [activePage()]; track page) {
       <div class="nfm-title" [attr.data-nav]="navDirection()">
         <span class="nfm-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path [attr.d]="icons[viewMeta().icon]"/></svg></span>
@@ -154,14 +159,22 @@
           }
         </nav>
       } @else {
-        <nav class="nfm-menu" aria-label="Voci della sezione">
-          @for (item of sectionMenu(); track item.label) {
-            <button type="button" class="nfm-menu-item" [class.active]="isItemActive(item)" [class.is-soon]="item.soon" [attr.aria-disabled]="item.soon ? 'true' : null" [attr.aria-current]="isItemActive(item) ? 'page' : null" [title]="item.soon ? item.label + ' · in arrivo' : item.label" (click)="openItem(item)">
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons[item.icon]"/></svg>
-              <span>{{ item.label }}</span>
-              @if (item.soon) { <small class="nfm-soon">In arrivo</small> }
-              @if (item.view === 'match' && matchActive()) { <small class="nfm-live-dot" aria-label="Partita in corso"></small> }
+        <nav class="nfm-menu nfm-accordion" aria-label="Menu principale">
+          @for (group of menuGroups; track group.key) {
+            <button type="button" class="nfm-menu-group" [class.is-open]="isGroupOpen(group.key)" [attr.aria-expanded]="isGroupOpen(group.key)" (click)="toggleGroup(group.key)">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path [attr.d]="icons[group.icon]"/></svg>
+              <span>{{ group.label }}</span><i aria-hidden="true">{{ isGroupOpen(group.key) ? '⌃' : '›' }}</i>
             </button>
+            @if (isGroupOpen(group.key)) {
+              @for (item of groupItems(group.key); track item.label) {
+                <button type="button" class="nfm-menu-item nfm-menu-sub" [class.active]="isItemActive(item)" [class.is-soon]="item.soon" [attr.aria-disabled]="item.soon ? 'true' : null" [attr.aria-current]="isItemActive(item) ? 'page' : null" (click)="openItem(item)">
+                  <span>{{ item.label }}</span>
+                  @if (item.soon) { <small class="nfm-soon">In arrivo</small> }
+                  @if (item.view === 'match' && matchActive()) { <small class="nfm-live-dot" aria-label="Partita in corso"></small> }
+                </button>
+              }
+              @if (group.soon) { <span class="nfm-menu-sub nfm-soon-note">In arrivo</span> }
+            }
           }
           <span class="nfm-menu-divider" aria-hidden="true"></span>
           <button type="button" class="nfm-menu-item" (click)="goBack()">
@@ -207,7 +220,7 @@
       }
 
       <div class="nfm-frame" [class.nfm-frame-scene]="activePage() === 'home' || activePage() === 'office' || activePage() === 'training' || activePage() === 'match-hub'">
-        @for (page of [activePage()]; track page) {
+        @for (page of [activePage()]; track page + activeEvents.activeId()) {
         <div class="nfm-page" [attr.data-nav]="navDirection()">
         @switch (page) {
           @case ('home') {
@@ -235,13 +248,16 @@
             @defer { <fsm-home-page (openTeams)="openTeamRoster($event)" (launchMatch)="launchMatch($event)" (teamReady)="showLineupEditor($event)" /> @if (formationEditor(); as editor) { <fsm-teams-page class="nfm-lineup-mode nfm-formation-editor" [launchRequest]="null" [rosterRequest]="editor" [resumeMatch]="false" /> } } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('teams') {
-            @defer { <fsm-teams-page [launchRequest]="matchLaunch()" [rosterRequest]="rosterRequest()" [resumeMatch]="false" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
+            @defer { <fsm-squads-page [initialTab]="squadsTab()" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('lineup') {
             @defer { <fsm-teams-page class="nfm-lineup-mode" [launchRequest]="matchLaunch()" [rosterRequest]="rosterRequest()" [resumeMatch]="false" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('match') {
             @defer { <fsm-teams-page class="nfm-live-mode" [launchRequest]="matchLaunch()" [resumeMatch]="true" (matchClosed)="returnHomeAfterMatch()" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
+          }
+          @case ('archive') {
+            @defer { <fsm-archive /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('callup') {
             @defer { <fsm-callup-page /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
@@ -253,7 +269,7 @@
             @defer { <fsm-staff-page /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('calendar') {
-            @defer { <fsm-events-page (openTeams)="setView('teams')" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
+            @defer { <fsm-events-page (openTeams)="openSquads('mine')" (openOpponents)="openSquads('opponents')" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
         }
         </div>

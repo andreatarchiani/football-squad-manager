@@ -1,0 +1,34 @@
+<section class="ar-page">
+  <div class="ar-tabs" role="tablist">
+    <button type="button" role="tab" [class.on]="tab() === 'players'" (click)="setTab('players')">Calciatori</button>
+    <button type="button" role="tab" [class.on]="tab() === 'staff'" (click)="setTab('staff')">Dirigenti</button>
+    <button type="button" role="tab" [class.on]="tab() === 'teams'" (click)="setTab('teams')">Squadre</button>
+  </div>
+  <div class="ar-tools">
+    <input type="search" class="ar-search" placeholder="Cerca…" [value]="search()" (input)="setSearch($any($event.target).value)" aria-label="Cerca">
+    @if (tab() === 'players') { <fsm-select class="ar-status" [options]="statuses" [value]="status()" label="Stato" (changed)="status.set($event); page.set(0)" /> }
+    <div class="ar-buttons"><button type="button" (click)="exportList()">Esporta elenco</button><button type="button" (click)="print()">Stampa elenco</button></div>
+  </div>
+  <p class="ar-event">Evento: <strong>{{ eventTitle() || 'nessuno' }}</strong> · {{ total() }} risultati</p>
+
+  <div class="ar-table-wrap">
+    @if (loading()) { <p class="ar-empty">Caricamento…</p> }
+    @else if (!total()) { <p class="ar-empty">Nessun elemento in questo evento.</p> }
+    @else if (tab() === 'players') {
+      <table><thead><tr><th>N°</th><th>Cognome e Nome</th><th>Data di nascita</th><th>Categoria</th><th>Ruolo</th><th>Matricola</th><th>Tessera</th><th>Stato</th></tr></thead>
+        <tbody>@for (p of visible(); track p.id) { <tr><td>{{ p.shirtNumber ?? '—' }}</td><td><strong>{{ p.lastName }}</strong> {{ p.firstName }}</td><td>{{ p.dateOfBirth || '—' }}</td><td>{{ p.affiliationCategory || '—' }}</td><td>{{ p.primaryRole }}</td><td>{{ p.federationNumber || '—' }}</td><td>{{ p.federationCard || '—' }}</td><td><span class="ar-pill">{{ statusLabel(p.status) }}</span></td></tr> }</tbody></table>
+    } @else if (tab() === 'staff') {
+      <table><thead><tr><th>Cognome e Nome</th><th>Data di nascita</th><th>Categoria</th><th>Matricola</th><th>Tessera</th></tr></thead>
+        <tbody>@for (s of visible(); track s.id) { <tr><td><strong>{{ s.lastName }}</strong> {{ s.firstName }}</td><td>{{ s.dateOfBirth || '—' }}</td><td>{{ s.affiliationCategory || '—' }}</td><td>{{ s.federationNumber || '—' }}</td><td>{{ s.federationCard || '—' }}</td></tr> }</tbody></table>
+    } @else {
+      <table><thead><tr><th>Squadra</th><th>Città</th><th>Impianto</th><th>Terreno</th><th>Referente</th><th>Telefono</th></tr></thead>
+        <tbody>@for (t of visible(); track t.id) { <tr><td><strong>{{ t.name }}</strong></td><td>{{ t.city || '—' }}</td><td>{{ t.facilityName || '—' }}</td><td>{{ t.terrain }}</td><td>{{ t.contact || '—' }}</td><td>{{ t.phone || '—' }}</td></tr> }</tbody></table>
+    }
+  </div>
+
+  <footer class="ar-foot">
+    <span>Righe per pagina</span>
+    <fsm-select class="ar-size" [options]="sizes" [value]="pageSize()" label="Righe per pagina" (changed)="pageSize.set($event); page.set(0)" />
+    <span class="ar-pager"><button type="button" (click)="move(-1)" [disabled]="page() === 0" aria-label="Pagina precedente">‹</button> {{ page() + 1 }} / {{ pages() }} <button type="button" (click)="move(1)" [disabled]="page() >= pages() - 1" aria-label="Pagina successiva">›</button></span>
+  </footer>
+</section>

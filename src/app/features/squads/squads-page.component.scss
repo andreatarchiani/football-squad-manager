@@ -1,0 +1,28 @@
+:host { display: block; color: #fff; }
+.sq-page { display: grid; gap: 12px; }
+.sq-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.sq-tabs { display: flex; flex: 1 1 auto; gap: 8px; }
+.sq-tabs button, .sq-modes button { min-height: 44px; padding: 0 16px; border: 1.5px solid rgba(var(--c-rgb), .6); border-radius: 12px; color: #fff; background: rgba(0, 0, 0, .3); font: inherit; font-weight: 800; cursor: pointer; }
+.sq-tabs .is-active, .sq-modes .is-active { border-color: #fff3a6; color: #1a1300; background: linear-gradient(180deg, #ffe74d, #ffb800); }
+.sq-actions { display: flex; gap: 8px; }
+.sq-btn, .sq-primary { min-height: 44px; padding: 0 16px; border: 1.5px solid var(--c-hi); border-radius: 12px; color: #fff; background: rgba(var(--c-rgb), .25); font: inherit; font-weight: 800; cursor: pointer; }
+.sq-btn:disabled { opacity: .45; cursor: not-allowed; }
+.sq-primary { border-color: #fff3a6; color: #1a1300; background: linear-gradient(180deg, #ffe74d, #ffb800); }
+.sq-primary:disabled { opacity: .5; }
+.sq-event { margin: 0; color: var(--soft); font-size: 13px; }
+.sq-event strong { color: var(--nfm-yellow, #ffd21a); }
+.sq-empty { display: grid; gap: 6px; padding: 28px 18px; border: 1.5px dashed rgba(var(--c-rgb), .6); border-radius: 16px; text-align: center; color: var(--soft); }
+.sq-empty strong { color: #fff; font-size: 18px; }
+.sq-backdrop { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, .7); }
+.sq-dialog { display: grid; gap: 12px; width: min(520px, 100%); max-height: 92vh; padding: 16px; overflow: auto; border: 1.5px solid var(--c-hi); border-radius: 18px; background: var(--panel-solid, #0b1628); }
+.sq-dialog header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.sq-dialog small { color: var(--soft); letter-spacing: .08em; }
+.sq-dialog h3 { margin: 2px 0 0; font-size: 22px; }
+.sq-dialog header button { width: 40px; height: 40px; border: 1.5px solid rgba(255, 255, 255, .3); border-radius: 12px; color: #fff; background: none; font-size: 22px; cursor: pointer; }
+.sq-dialog p { margin: 0; line-height: 1.45; }
+.sq-modes { display: flex; gap: 8px; }
+.sq-modes button { flex: 1 1 0; font-size: 14px; }
+.sq-note { color: var(--soft); }
+.sq-error { padding: 10px 12px; border: 1.5px solid #ff4458; border-radius: 12px; background: rgba(255, 68, 88, .18); }
+.sq-file { display: grid; place-items: center; min-height: 56px; border: 2px dashed var(--c-hi); border-radius: 14px; font-weight: 800; cursor: pointer; }
+.sq-file input { display: none; }

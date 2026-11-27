@@ -44,13 +44,16 @@ export interface GroupTeam {
   address: string;     // address of the pitch
   mapsUrl: string;     // optional link copied from Maps
   headquarters: string; // club headquarters address
+  terrain: string;      // Erba naturale / Erba sintetica / Mista sintetico-naturale
+  kitsField: string[];
+  kitsKeeper: string[];
   federation: string;   // federal number
   contact: string;     // contact person
   phone: string;
   email: string;
 }
 
-export function emptyGroupTeam(): GroupTeam { return { id: '', name: '', icon: '', city: '', facilityName: '', address: '', mapsUrl: '', headquarters: '', federation: '', contact: '', phone: '', email: '' }; }
+export function emptyGroupTeam(): GroupTeam { return { id: '', name: '', icon: '', city: '', facilityName: '', address: '', mapsUrl: '', headquarters: '', terrain: 'Erba naturale', kitsField: [], kitsKeeper: [], federation: '', contact: '', phone: '', email: '' }; }
 
 /** Call-up ("convocazione") details of one match, saved with the calendar. */
 export interface CallupInfo {
@@ -225,10 +228,10 @@ export class CalendarService {
   }
 
   /** Creates (no id) or updates the details of an event; the calendar rounds are not touched. Returns the id. */
-  async saveEvent(workspaceId: string, id: string | null, team: { id: string; name: string }, details: EventDetails): Promise<string> {
+  async saveEvent(workspaceId: string, id: string | null, details: EventDetails): Promise<string> {
     const eventId = id ?? doc(collection(this.db(), 'workspaces', workspaceId, 'calendars')).id;
     const clean = this.cleanEvent(details);
-    const payload: Record<string, unknown> = { teamId: team.id, teamName: team.name, groupName: clean.group, event: clean, updatedAt: serverTimestamp() };
+    const payload: Record<string, unknown> = { groupName: clean.group, event: clean, updatedAt: serverTimestamp() };
     if (!id) payload['rounds'] = [];
     await setDoc(doc(this.db(), 'workspaces', workspaceId, 'calendars', eventId), payload, { merge: true });
     return eventId;
@@ -238,17 +241,12 @@ export class CalendarService {
     await deleteDoc(doc(this.db(), 'workspaces', workspaceId, 'calendars', eventId));
   }
 
-  /** Closest match from now on across all the events of the team, with the event it belongs to. */
-  async nextMatchEvent(workspaceId: string, teamId: string): Promise<{ round: CalendarRound; calendar: CalendarData } | null> {
-    const events = (await this.loadAll(workspaceId)).filter(item => item.teamId === teamId);
-    let best: { round: CalendarRound; calendar: CalendarData } | null = null;
-    for (const calendar of events) {
-      const round = findNextMatch(calendar);
-      if (!round) continue;
-      const key = (r: CalendarRound) => r.date + (r.time || '99:99');
-      if (!best || key(round) < key(best.round)) best = { round, calendar };
-    }
-    return best;
+  /** Closest match from now on in one event, with the event it belongs to. */
+  async nextMatchEvent(workspaceId: string, eventId: string): Promise<{ round: CalendarRound; calendar: CalendarData } | null> {
+    if (!eventId) return null;
+    const calendar = await this.load(workspaceId, eventId);
+    const round = findNextMatch(calendar);
+    return round ? { round, calendar } : null;
   }
 
   private parse(id: string, data: Record<string, unknown>): CalendarData {
@@ -315,7 +313,7 @@ export class CalendarService {
       groupName: calendar.groupName.trim().slice(0, 80),
       callups: Object.fromEntries(Object.entries(calendar.callups ?? {}).map(([number, info]) => [number, this.cleanCallup(info)])),
       groupTeams: calendar.groupTeams.slice(0, 40).map(team => ({
-        id: team.id, name: team.name.trim().slice(0, 80), icon: (team.icon || '').slice(0, 60000), facilityName: (team.facilityName || '').trim().slice(0, 100), headquarters: (team.headquarters || '').trim().slice(0, 180), federation: (team.federation || '').trim().slice(0, 60), city: team.city.trim().slice(0, 80), address: team.address.trim().slice(0, 180),
+        id: team.id, name: team.name.trim().slice(0, 80), icon: (team.icon || '').slice(0, 60000), facilityName: (team.facilityName || '').trim().slice(0, 100), headquarters: (team.headquarters || '').trim().slice(0, 180), terrain: (team.terrain || '').slice(0, 40), kitsField: (team.kitsField || []).filter(c => /^#[0-9a-f]{6}$/i.test(c)).slice(0, 6), kitsKeeper: (team.kitsKeeper || []).filter(c => /^#[0-9a-f]{6}$/i.test(c)).slice(0, 6), federation: (team.federation || '').trim().slice(0, 60), city: team.city.trim().slice(0, 80), address: team.address.trim().slice(0, 180),
         mapsUrl: isMapsLink(team.mapsUrl) ? team.mapsUrl.trim().slice(0, 400) : '', contact: team.contact.trim().slice(0, 80),
         phone: team.phone.trim().slice(0, 40), email: team.email.trim().slice(0, 120)
       })),
@@ -348,13 +346,13 @@ export class CalendarService {
   }
 
   /** Closest match from now on (today included) across the events of the team, or null. */
-  async nextMatch(workspaceId: string, teamId: string): Promise<CalendarRound | null> {
-    return (await this.nextMatchEvent(workspaceId, teamId))?.round ?? null;
+  async nextMatch(workspaceId: string, eventId: string): Promise<CalendarRound | null> {
+    return (await this.nextMatchEvent(workspaceId, eventId))?.round ?? null;
   }
 
   private groupTeam(item: Record<string, unknown>): GroupTeam {
     const text = (key: string) => String(item[key] ?? '');
-    return { id: text('id') || `t-${Math.random().toString(36).slice(2, 9)}`, name: text('name'), icon: text('icon'), city: text('city'), facilityName: text('facilityName'), headquarters: text('headquarters'), federation: text('federation'), address: text('address'), mapsUrl: text('mapsUrl'), contact: text('contact'), phone: text('phone'), email: text('email') };
+    return { id: text('id') || `t-${Math.random().toString(36).slice(2, 9)}`, name: text('name'), icon: text('icon'), city: text('city'), facilityName: text('facilityName'), headquarters: text('headquarters'), terrain: text('terrain') || 'Erba naturale', kitsField: Array.isArray(item['kitsField']) ? (item['kitsField'] as unknown[]).map(String) : [], kitsKeeper: Array.isArray(item['kitsKeeper']) ? (item['kitsKeeper'] as unknown[]).map(String) : [], federation: text('federation'), address: text('address'), mapsUrl: text('mapsUrl'), contact: text('contact'), phone: text('phone'), email: text('email') };
   }
 
   private round(item: Record<string, unknown>): CalendarRound {
