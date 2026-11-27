@@ -1097,6 +1097,31 @@
     "settle": 300
   },
   {
+    "name": "30c-callup-image",
+    "only": "desktop",
+    "actions": [
+      {
+        "click": ".nfm-event-picker .sel-trigger"
+      },
+      {
+        "wait": 400
+      },
+      {
+        "click": ".nfm-event-picker .sel-menu button:has-text('Juniores')"
+      },
+      {
+        "wait": 3000
+      },
+      {
+        "click": ".nfm-menu-item:has-text('Convocazione')"
+      },
+      {
+        "wait": 5000
+      }
+    ],
+    "settle": 1500
+  },
+  {
     "name": "31-export",
     "actions": [
       {

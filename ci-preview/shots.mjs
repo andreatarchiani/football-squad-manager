@@ -66,6 +66,16 @@ async function seed() {
   }
   const lineup = { por: ids[1], ts: ids[3], dc1: ids[5], dc2: ids[4], td: ids[2], mezz1: ids[10], med: ids[8], mezz2: ids[6], ala1: ids[11], punta: ids[9], ala2: ids[7] };
   await put(`workspaces/${ws}/teams/${team}/seasons/${season}/settings/tactical-layout`, { formation: '4-3-3', lineup, shirtPositions: {} });
+  await put(`workspaces/${ws}/calendars/${team}`, {
+    teamId: team, teamName: 'Olmoponte S. Firmina', groupName: 'Arezzo',
+    event: { name: 'Juniores Under 19 Provinciale', category: 'Juniores Under 19 Provinciale', seasonLabel: '2026/2027', activity: 'Campionato', organization: 'FIGC / LND', group: 'Arezzo', groupMode: 'manual' },
+    groupTeams: [{ id: 't1', name: 'Fortis Arezzo', icon: '🛡️', city: 'Arezzo', facilityName: 'Campo Comunale', address: 'Via Fratelli Lumiere, Arezzo', mapsUrl: '', headquarters: '', terrain: 'Erba naturale', kitsField: [], kitsKeeper: [], federation: '', contact: '', phone: '', email: '' }],
+    rounds: [
+      { number: 1, leg: 'A', opponent: 'Fortis Arezzo', home: true, date: '2027-02-14', time: '17:30', venue: '', venueLat: null, venueLon: null, venueUrl: '' },
+      { number: 1, leg: 'R', opponent: 'Fortis Arezzo', home: false, date: '2027-05-09', time: '15:00', venue: '', venueLat: null, venueLon: null, venueUrl: '' }
+    ],
+    callups: { '1': { meetingTime: '15:45', meetingPlace: 'Spogliatoi del campo', kit: 'Completo blu, pantaloncini bianchi', notes: 'Portare scarpini da erba e documento.', excluded: ['p20'] } }
+  });
   await put(`workspaces/${ws}/teams/${team}/seasons/${season}/settings/captaincy`, { captainId: ids[8], viceCaptainId: ids[10] });
 }
 
