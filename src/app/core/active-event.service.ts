@@ -43,7 +43,8 @@ export class ActiveEventService {
   }
 
   /** Resolves when the list of events has been loaded (and old data migrated). */
-  whenReady(): Promise<void> { return this.readyPromise; }
+  /** Never waits more than 10 seconds, so a screen can't stay blank because of a slow connection. */
+  whenReady(): Promise<void> { return Promise.race([this.readyPromise, new Promise<void>(resolve => setTimeout(resolve, 10000))]); }
 
   /** Event that owns a team: new teams carry the id, old ones use their own id. */
   eventOfTeam(team: { id: string; eventId?: string }): string { return team.eventId || team.id; }
@@ -59,14 +60,24 @@ export class ActiveEventService {
   async refresh(): Promise<void> {
     const workspaceId = this.auth.workspaceId();
     if (!workspaceId) return;
-    try {
-      let events = await this.calendars.loadAll(workspaceId);
-      events = await this.migrateTeams(workspaceId, events);
-      try { this.selected.set(localStorage.getItem(this.storageKey()) ?? ''); } catch { /* storage unavailable */ }
-      this.events.set(events);
-    } catch (error) {
-      console.error('Unable to load the events.', error);
-    } finally { this.resolveReady(); }
+    // Events and teams are downloaded together; a failed attempt is retried instead of leaving the app empty.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const [loaded, teamDocs] = await Promise.all([
+          this.calendars.loadAll(workspaceId),
+          this.db ? getDocs(collection(this.db, 'workspaces', workspaceId, 'teams')) : Promise.resolve(null)
+        ]);
+        let events = loaded;
+        if (teamDocs) events = await this.migrateTeams(workspaceId, events, teamDocs.docs);
+        try { this.selected.set(localStorage.getItem(this.storageKey()) ?? ''); } catch { /* storage unavailable */ }
+        this.events.set(events);
+        break;
+      } catch (error) {
+        console.error('Unable to load the events.', error);
+        await new Promise(resolve => setTimeout(resolve, 700 * (attempt + 1)));
+      }
+    }
+    this.resolveReady();
   }
 
   /** Reloads only the list of events (after creating, editing or deleting one). */
@@ -78,11 +89,10 @@ export class ActiveEventService {
   }
 
   /** Teams made before events existed get an event of their own (same id), once. */
-  private async migrateTeams(workspaceId: string, events: CalendarData[]): Promise<CalendarData[]> {
+  private async migrateTeams(workspaceId: string, events: CalendarData[], teamDocs: { id: string; data(): Record<string, unknown> }[]): Promise<CalendarData[]> {
     if (!this.db) return events;
     const known = new Set(events.map(event => event.id));
-    const snapshot = await getDocs(collection(this.db, 'workspaces', workspaceId, 'teams'));
-    const missing = snapshot.docs.filter(item => !item.data()['isArchived'] && !item.data()['eventId'] && !known.has(item.id));
+    const missing = teamDocs.filter(item => !item.data()['isArchived'] && !item.data()['eventId'] && !known.has(item.id));
     if (!missing.length) return events;
     await Promise.all(missing.map(item => {
       const data = item.data();
