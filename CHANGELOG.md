@@ -1,7 +1,8 @@
 # Changelog
 
-## 2026-11-27 — Convocazione
+## 2026-11-27 — Convocazione e segnalazione bug
 
+- **Modifica:** nella pagina “Segnala un bug” tolta la nota “Per ora si invia solo testo…”.
 - **Nuovo:** in Partita › Convocazione si prepara la convocazione per la prossima partita del calendario: titolari (dalla formazione salvata, con ruolo, numero e capitano), panchina, ora e luogo di ritrovo, divisa, note e campo con link di Maps.
 - Puoi escludere un giocatore con un tocco; infortunati e squalificati sono indicati come non disponibili.
 - Il pulsante “Condividi convocazione” apre la condivisione del telefono (o WhatsApp / copia testo) con tutte le informazioni e il link di Maps.
