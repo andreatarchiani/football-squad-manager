@@ -10,7 +10,7 @@ import { TeamsPageComponent } from './features/teams/teams-page.component';
 import { PlayersPageComponent } from './features/players/players-page.component';
 import { HomePageComponent } from './features/home/home-page.component';
 import { StaffPageComponent } from './features/staff/staff-page.component';
-import { CalendarPageComponent } from './features/calendar/calendar-page.component';
+import { EventsPageComponent } from './features/calendar/events-page.component';
 import { CallupPageComponent } from './features/callup/callup-page.component';
 import { TeamService, type TeamRecord } from './features/teams/team.service';
 import { CalendarService, type CalendarRound } from './features/calendar/calendar.service';
@@ -61,7 +61,7 @@ const VIEW_META: Record<AppView, { title: string; accent?: string; subtitle?: st
   players: { title: 'Anagrafe Calciatore', icon: 'player', subtitle: 'Anagrafica dei calciatori e assegnazione alla squadra' },
   teams: { title: 'Anagrafe Squadra', icon: 'shield', subtitle: 'Dati della squadra, impianto e regolamento di gara' },
   staff: { title: 'Anagrafe Dirigenti', icon: 'manager', subtitle: 'Anagrafica dei dirigenti della società' },
-  calendar: { title: 'Stagione / Campionato', icon: 'trophy', subtitle: 'Calendario: inserisci l’andata, il ritorno si crea da solo' },
+  calendar: { title: 'Stagione / Evento', icon: 'trophy', subtitle: 'Crea campionati, tornei ed eventi: apri uno per vedere il girone' },
   training: { title: 'Allenamenti', icon: 'cone' },
   'match-hub': { title: 'Campo', icon: 'match' },
   formation: { title: 'Formazione', icon: 'formation', subtitle: 'Prepara la prossima partita e lo schieramento titolare' },
@@ -91,7 +91,7 @@ const SECTION_MENU: Partial<Record<AppSection, NavItem[]>> = {
     { label: 'Anagrafe Calciatore', icon: 'player', view: 'players' },
     { label: 'Anagrafe Dirigente', icon: 'manager', view: 'staff' },
     { label: 'Anagrafe Squadra', icon: 'shield', view: 'teams' },
-    { label: 'Creazione Stagione / Campionato', icon: 'trophy', view: 'calendar' },
+    { label: 'Creazione Stagione / Evento', icon: 'trophy', view: 'calendar' },
     { label: 'Configurazione statistiche', icon: 'stats', soon: true }
   ],
   training: [
@@ -118,7 +118,7 @@ interface SupportTicket { id: string; authorEmail: string; authorName: string; d
 @Component({
   selector: 'fsm-root',
   standalone: true,
-  imports: [DatePipe, NgTemplateOutlet, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, StaffPageComponent, CalendarPageComponent, CallupPageComponent, NotificationHostComponent],
+  imports: [DatePipe, NgTemplateOutlet, AuthPageComponent, TeamsPageComponent, PlayersPageComponent, HomePageComponent, StaffPageComponent, EventsPageComponent, CallupPageComponent, NotificationHostComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

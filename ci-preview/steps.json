@@ -385,6 +385,49 @@
   "settle": 2500
  },
  {
+  "name": "24-new-event-form",
+  "actions": [
+   {
+    "click": ".ev-list-head .ev-primary"
+   },
+   {
+    "wait": 800
+   },
+   {
+    "click": ".ev-cats .ev-radio:has-text('Allievi Regionali')"
+   },
+   {
+    "wait": 400
+   }
+  ],
+  "settle": 600
+ },
+ {
+  "name": "24-event-form-back",
+  "actions": [
+   {
+    "click": ".ev-footer .ev-secondary:has-text('Annulla')"
+   },
+   {
+    "wait": 600
+   }
+  ],
+  "settle": 300,
+  "full": false
+ },
+ {
+  "name": "24a-event-open",
+  "actions": [
+   {
+    "click": ".ev-card"
+   },
+   {
+    "wait": 2000
+   }
+  ],
+  "settle": 600
+ },
+ {
   "name": "24b-group-teams",
   "actions": [
    {
@@ -589,6 +632,31 @@
    }
   ],
   "settle": 500,
+  "full": false
+ },
+ {
+  "name": "27c-event-edit",
+  "actions": [
+   {
+    "click": ".cal-edit-event"
+   },
+   {
+    "wait": 1200
+   }
+  ],
+  "settle": 600
+ },
+ {
+  "name": "27d-event-back",
+  "actions": [
+   {
+    "click": ".ev-footer .ev-secondary:has-text('Annulla')"
+   },
+   {
+    "wait": 1500
+   }
+  ],
+  "settle": 300,
   "full": false
  },
  {

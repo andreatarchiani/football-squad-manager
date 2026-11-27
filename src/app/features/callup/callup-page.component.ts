@@ -3,7 +3,7 @@ import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { TeamService, type TeamRecord } from '../teams/team.service';
 import { PlayerService, type PlayerRecord } from '../players/player.service';
-import { CalendarService, emptyCallup, findNextMatch, mapsLink, type CalendarData, type CalendarRound, type CallupInfo } from '../calendar/calendar.service';
+import { CalendarService, emptyCallup, eventTitle, mapsLink, type CalendarData, type CalendarRound, type CallupInfo } from '../calendar/calendar.service';
 
 interface CallupPlayer { player: PlayerRecord; tag: string; }
 
@@ -146,7 +146,8 @@ export class CallupPageComponent {
     const out: string[] = [];
     out.push('📋 CONVOCAZIONE');
     out.push(`${team.name}${team.category ? ' · ' + team.category : ''}`);
-    const group = this.calendar()?.groupName;
+    const calendar = this.calendar();
+    const group = calendar ? eventTitle(calendar) : '';
     out.push(`${group ? group + ' · ' : ''}Giornata ${round.number} · ${round.leg === 'A' ? 'Andata' : 'Ritorno'}`);
     out.push('');
     out.push(`🆚 ${this.homeName()} – ${this.awayName()}`);
@@ -174,9 +175,9 @@ export class CallupPageComponent {
   }
 
   private async saveNow(): Promise<void> {
-    const workspaceId = this.auth.workspaceId(); const team = this.team(); const round = this.round();
-    if (!workspaceId || !team || !round) return;
-    try { await this.calendarService.saveCallup(workspaceId, team.id, round.number, this.info()); }
+    const workspaceId = this.auth.workspaceId(); const calendar = this.calendar(); const round = this.round();
+    if (!workspaceId || !calendar || !round) return;
+    try { await this.calendarService.saveCallup(workspaceId, calendar.id, round.number, this.info()); }
     catch (error) {
       console.error('Unable to save the call-up.', error);
       this.notifications.notify({ title: 'Convocazione non salvata', message: 'Controlla la connessione e riprova a modificarla.', type: 'error', durationMs: 7000 });
@@ -196,15 +197,16 @@ export class CallupPageComponent {
       if (!team) { this.loading.set(false); return; }
       const uid = this.auth.user()?.uid;
       const slot = (uid && localStorage.getItem(`fsm-layout-slot-${uid}`)) === '2' ? 2 : 1;
-      const [calendar, players, layout] = await Promise.all([
-        this.calendarService.load(workspaceId, team.id),
+      const [next, players, layout] = await Promise.all([
+        this.calendarService.nextMatchEvent(workspaceId, team.id),
         this.playerService.list(workspaceId, teams),
         team.seasonId ? this.teamService.loadTacticalLayout(workspaceId, team.id, team.seasonId, slot) : Promise.resolve(null)
       ]);
+      const calendar = next?.calendar ?? null;
+      const round = next?.round ?? null;
       this.calendar.set(calendar);
-      const round = findNextMatch(calendar);
       this.round.set(round);
-      this.info.set(round ? { ...emptyCallup(), ...(calendar.callups[String(round.number)] ?? {}) } : emptyCallup());
+      this.info.set(round && calendar ? { ...emptyCallup(), ...(calendar.callups[String(round.number)] ?? {}) } : emptyCallup());
       this.players.set(players.filter(player => player.teamId === team.id && !player.isArchived));
       this.lineup.set(layout?.lineup ?? {});
       this.formation.set(layout?.formation ?? '');

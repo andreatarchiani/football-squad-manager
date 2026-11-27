@@ -253,7 +253,7 @@
             @defer { <fsm-staff-page /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
           @case ('calendar') {
-            @defer { <fsm-calendar-page /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
+            @defer { <fsm-events-page (openTeams)="setView('teams')" /> } @loading (after 150ms; minimum 250ms) { <div class="nfm-defer-loading">Caricamento…</div> }
           }
         }
         </div>

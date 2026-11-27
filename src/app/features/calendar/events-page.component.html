@@ -1,0 +1,168 @@
+@switch (view()) {
+  @case ('girone') {
+    <fsm-calendar-page [eventId]="activeId()" (back)="backToList()" (editEvent)="editEvent(activeId())" />
+  }
+  @case ('edit') {
+    <form #eventForm class="ev-form" (submit)="$event.preventDefault(); save()" novalidate>
+      <div class="ev-grid">
+        <!-- Dati generali -->
+        <section class="ev-panel ev-general">
+          <header><strong>Dati generali della stagione</strong></header>
+          <div class="ev-rows">
+            <label data-field="name"><span>Nome stagione *</span><input type="text" maxlength="80" [value]="draft().name" (input)="setText('name', $any($event.target).value)" placeholder="Es. Stagione 2026/2027"></label>
+            <div class="ev-row" data-field="season"><span>Stagione sportiva *</span><fsm-select [options]="seasons" [value]="draft().seasonLabel" placeholder="Scegli la stagione" label="Stagione sportiva" (changed)="patch({ seasonLabel: $event })" /></div>
+            <div class="ev-row" data-field="category"><span>Categoria *</span><fsm-select [options]="allCategories" [value]="draft().category" placeholder="Scegli la categoria" label="Categoria" (changed)="selectCategory($event)" /></div>
+            <div class="ev-row" data-field="team"><span>La mia squadra *</span><fsm-select [options]="teamNames()" [value]="draftTeam()?.name ?? ''" placeholder="Scegli la squadra" emptyText="Nessuna squadra: creala prima" label="La mia squadra" (changed)="draftTeamId.set(teamIdOf($event))" /></div>
+            @if (draftTeam(); as team) {
+              <div class="ev-team-card"><b>✓</b><div><strong>{{ team.name }}</strong><small>Matricola {{ team.federationNumber || '—' }} · {{ team.headquartersAddress || team.facilityAddress || 'Indirizzo non indicato' }}</small></div></div>
+            }
+            <button type="button" class="ev-link" (click)="openTeams.emit()">＋ Crea una nuova squadra in Anagrafe Squadra</button>
+            <div class="ev-row"><span>Organizzazione *</span><fsm-select [options]="organizations" [value]="draft().organization" label="Organizzazione" (changed)="patch({ organization: $event })" /></div>
+          </div>
+        </section>
+
+        <!-- Categoria -->
+        <section class="ev-panel ev-category">
+          <header><strong>Seleziona categoria</strong></header>
+          <div class="ev-tabs" role="tablist">
+            @for (tab of tabs; track tab.key) {
+              <button type="button" role="tab" [class.is-active]="draft().tab === tab.key" [attr.aria-selected]="draft().tab === tab.key" (click)="selectTab(tab.key)"><strong>{{ tab.label }}</strong><small>({{ tab.hint }})</small></button>
+            }
+          </div>
+          <div class="ev-cat-body">
+            <div class="ev-cats" data-field="category-list">
+              <h4>Categoria *</h4>
+              @for (category of categories[draft().tab]; track category) {
+                <button type="button" class="ev-radio" [class.is-on]="draft().category === category" role="radio" [attr.aria-checked]="draft().category === category" (click)="selectCategory(category)"><i></i>{{ category }}</button>
+              }
+            </div>
+            <div class="ev-group">
+              <h4>Girone</h4>
+              <button type="button" class="ev-radio" [class.is-on]="draft().groupMode === 'select'" role="radio" [attr.aria-checked]="draft().groupMode === 'select'" (click)="patch({ groupMode: 'select', group: draft().group || 'Unico' })"><i></i>Seleziona</button>
+              @if (draft().groupMode === 'select') { <fsm-select [options]="groupOptions" [value]="draft().group" label="Girone" (changed)="patch({ group: $event })" /> }
+              <button type="button" class="ev-radio" [class.is-on]="draft().groupMode === 'manual'" role="radio" [attr.aria-checked]="draft().groupMode === 'manual'" (click)="patch({ groupMode: 'manual', group: '' })"><i></i>Inserisci manualmente</button>
+              @if (draft().groupMode === 'manual') { <label data-field="group"><input type="text" maxlength="80" [value]="draft().group" (input)="setText('group', $any($event.target).value)" placeholder="Nome girone (es. A, B, Torneo, Amichevole…)"></label> }
+            </div>
+          </div>
+        </section>
+
+        <!-- Logo e completi -->
+        <section class="ev-panel">
+          <header><strong>Logo e completi da gara</strong></header>
+          <div class="ev-logo-row">
+            <span>Logo società</span>
+            <label class="ev-logo">
+              @if (isImage(draft().logo)) { <img [src]="draft().logo" alt="Logo"> } @else { <span>Carica logo</span> }
+              <input hidden type="file" accept="image/png,image/jpeg,image/webp,image/gif" (change)="uploadLogo($event)">
+            </label>
+            @if (draft().logo) { <button type="button" class="ev-mini" (click)="patch({ logo: '' })">Togli</button> }
+          </div>
+          <div class="ev-kits"><span>Completi calciatori di movimento</span>
+            <div class="ev-kit-row">
+              @for (color of draft().kitsField; track $index) {
+                <label class="ev-kit" [style.--kit]="color" title="Cambia colore"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 3 6l2 4 2-1v11h10V9l2 1 2-4-5-3c-.5 1.5-2 2.3-4 2.3S8.500 4.500 8 3z"/></svg><input type="color" [value]="color" (input)="setColor('kitsField', $index, $any($event.target).value)"><button type="button" class="ev-kit-x" (click)="removeColor('kitsField', $index); $event.preventDefault()" aria-label="Togli colore">×</button></label>
+              }
+              <button type="button" class="ev-kit-add" (click)="addColor('kitsField')" aria-label="Aggiungi completo">＋</button>
+            </div>
+          </div>
+          <div class="ev-kits"><span>Completi portieri</span>
+            <div class="ev-kit-row">
+              @for (color of draft().kitsKeeper; track $index) {
+                <label class="ev-kit" [style.--kit]="color" title="Cambia colore"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 3 6l2 4 2-1v11h10V9l2 1 2-4-5-3c-.5 1.5-2 2.3-4 2.3S8.500 4.500 8 3z"/></svg><input type="color" [value]="color" (input)="setColor('kitsKeeper', $index, $any($event.target).value)"><button type="button" class="ev-kit-x" (click)="removeColor('kitsKeeper', $index); $event.preventDefault()" aria-label="Togli colore">×</button></label>
+              }
+              <button type="button" class="ev-kit-add" (click)="addColor('kitsKeeper')" aria-label="Aggiungi completo">＋</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Livello e ambito -->
+        <section class="ev-panel">
+          <header><strong>Livello e ambito</strong></header>
+          <div class="ev-chip-group"><span>Tipo di attività *</span><div>@for (item of activities; track item) { <button type="button" class="ev-chip" [class.is-on]="draft().activity === item" (click)="patch({ activity: item })">{{ item }}</button> }</div></div>
+          <div class="ev-chip-group"><span>Natura *</span><div>@for (item of natures; track item) { <button type="button" class="ev-chip" [class.is-on]="draft().nature === item" (click)="patch({ nature: item })">{{ item }}</button> }</div></div>
+          <div class="ev-chip-group"><span>Ambito *</span><div>@for (item of scopes; track item) { <button type="button" class="ev-chip" [class.is-on]="draft().scope === item" (click)="patch({ scope: item })">{{ item }}</button> }</div></div>
+        </section>
+
+        <!-- Regole di gioco -->
+        <section class="ev-panel ev-rules">
+          <header><strong>Regole di gioco</strong></header>
+          <div class="ev-chip-group"><span>Formato di gioco *</span><div>@for (item of formats; track item) { <button type="button" class="ev-chip" [class.is-on]="draft().format === item" (click)="selectFormat(item)">{{ item }}</button> }</div></div>
+          <div class="ev-num-grid">
+            <label><span>Giocatori in campo *</span><input type="number" min="1" max="99" inputmode="numeric" [value]="draft().playersOnField ?? ''" (change)="setNumber('playersOnField', $any($event.target).value)"></label>
+            <label><span>Giocatori in lista (max) *</span><input type="number" min="1" max="99" inputmode="numeric" [value]="draft().playersOnList ?? ''" (change)="setNumber('playersOnList', $any($event.target).value)"></label>
+            <label><span>Numero di tempi *</span><input type="number" min="1" max="9" inputmode="numeric" [value]="draft().periods ?? ''" (change)="setNumber('periods', $any($event.target).value)"></label>
+            <label><span>Durata di ogni tempo (min) *</span><input type="number" min="1" max="120" inputmode="numeric" [value]="draft().periodMinutes ?? ''" (change)="setNumber('periodMinutes', $any($event.target).value)"></label>
+            <label><span>Intervallo (min) *</span><input type="number" min="0" max="60" inputmode="numeric" [value]="draft().interval ?? ''" (change)="setNumber('interval', $any($event.target).value)"></label>
+            <label><span>Numero massimo di cambi</span><input type="number" min="0" max="99" inputmode="numeric" placeholder="Illimitati" [value]="draft().maxSubstitutions ?? ''" (change)="setNumber('maxSubstitutions', $any($event.target).value)"></label>
+          </div>
+          <div class="ev-toggles">
+            @for (row of toggleRows; track row.key) {
+              <div class="ev-toggle"><span>{{ row.label }}</span><div role="group" [attr.aria-label]="row.label"><button type="button" [class.is-on]="draft()[row.key]" (click)="setFlag(row.key, true)">Sì</button><button type="button" [class.is-on]="!draft()[row.key]" (click)="setFlag(row.key, false)">No</button></div></div>
+            }
+          </div>
+        </section>
+
+        <!-- Campo, porte, pallone, referto -->
+        <section class="ev-panel">
+          <header><strong>Dimensioni del campo</strong></header>
+          <label class="ev-inline"><span>Lunghezza (m)</span><input type="text" maxlength="20" [value]="draft().fieldLength" (input)="setText('fieldLength', $any($event.target).value)" placeholder="100 - 110"></label>
+          <label class="ev-inline"><span>Larghezza (m)</span><input type="text" maxlength="20" [value]="draft().fieldWidth" (input)="setText('fieldWidth', $any($event.target).value)" placeholder="64 - 75"></label>
+        </section>
+        <section class="ev-panel">
+          <header><strong>Porte</strong></header>
+          <label class="ev-inline"><span>Larghezza (m)</span><input type="text" maxlength="12" [value]="draft().goalWidth" (input)="setText('goalWidth', $any($event.target).value)" placeholder="7,32"></label>
+          <label class="ev-inline"><span>Altezza (m)</span><input type="text" maxlength="12" [value]="draft().goalHeight" (input)="setText('goalHeight', $any($event.target).value)" placeholder="2,44"></label>
+        </section>
+        <section class="ev-panel">
+          <header><strong>Pallone</strong></header>
+          <div class="ev-inline"><span>Misura</span><fsm-select [options]="ballSizes" [value]="draft().ballSize" label="Misura del pallone" (changed)="patch({ ballSize: $event })" /></div>
+          <label class="ev-inline"><span>Peso (g)</span><input type="text" maxlength="20" [value]="draft().ballWeight" (input)="setText('ballWeight', $any($event.target).value)" placeholder="410 - 450"></label>
+        </section>
+        <section class="ev-panel">
+          <header><strong>Referto aggiuntivo</strong></header>
+          <div class="ev-toggle"><span>Stampa sempre il referto aggiuntivo alla lista</span><div role="group" aria-label="Referto aggiuntivo"><button type="button" [class.is-on]="draft().extraReport" (click)="setFlag('extraReport', true)">Sì</button><button type="button" [class.is-on]="!draft().extraReport" (click)="setFlag('extraReport', false)">No</button></div></div>
+        </section>
+      </div>
+
+      <footer class="ev-footer">
+        <button type="button" class="ev-secondary" (click)="applyRules()">Carica regolamento standard</button>
+        <button type="button" class="ev-secondary" (click)="applyRules()">Ripristina valori di categoria</button>
+        <span class="ev-spacer"></span>
+        @if (editingId()) { <button type="button" class="ev-danger" (click)="remove()">{{ confirmDelete() ? 'Conferma eliminazione' : 'Elimina' }}</button> }
+        <button type="button" class="ev-secondary" (click)="cancelEdit()">Annulla</button>
+        <button type="submit" class="ev-primary" [disabled]="saving()">{{ saving() ? 'Salvataggio…' : (editingId() ? '✓ Salva modifiche' : '✓ Crea stagione') }}</button>
+      </footer>
+    </form>
+  }
+  @default {
+    <section class="ev-list">
+      @if (error()) { <div class="ev-alert" role="alert">{{ error() }}</div> }
+      <header class="ev-list-head">
+        <div><strong>Stagioni e eventi</strong><small>Campionati, tornei e amichevoli: apri un evento per vedere il girone (calendario).</small></div>
+        <button type="button" class="ev-primary" (click)="newEvent()">＋ Crea stagione / evento</button>
+      </header>
+      @if (loading()) {
+        <div class="ev-empty">Caricamento…</div>
+      } @else if (!events().length) {
+        <div class="ev-empty"><strong>Nessuna stagione o evento</strong><span>Crea il primo campionato o torneo: poi inserirai le giornate nel girone.</span></div>
+      } @else {
+        <div class="ev-cards">
+          @for (event of events(); track event.id) {
+            <article class="ev-card" (click)="open(event.id)" tabindex="0" (keydown.enter)="open(event.id)">
+              @if (isImage(event.event.logo)) { <img class="ev-card-logo" [src]="event.event.logo" alt=""> } @else { <span class="ev-card-logo ev-card-letter" aria-hidden="true">{{ title(event).charAt(0).toUpperCase() }}</span> }
+              <div class="ev-card-body">
+                <strong>{{ title(event) }}</strong>
+                <small>{{ teamOf(event)?.name || event.teamName || 'Squadra non trovata' }}@if (event.event.category || teamOf(event)?.category) { · {{ event.event.category || teamOf(event)?.category }} }</small>
+                <span class="ev-tags">
+                  <b>{{ event.event.activity }}</b>@if (event.event.seasonLabel) { <b>{{ event.event.seasonLabel }}</b> }@if (event.groupName) { <b>Girone {{ event.groupName }}</b> }<b>{{ rounds(event) }} giornate</b>
+                </span>
+                @if (nextOf(event); as next) { <small class="ev-next">Prossima: {{ next }}</small> }
+              </div>
+              <button type="button" class="ev-secondary" (click)="$event.stopPropagation(); editEvent(event.id)">✎ Modifica</button>
+            </article>
+          }
+        </div>
+      }
+    </section>
+  }
+}

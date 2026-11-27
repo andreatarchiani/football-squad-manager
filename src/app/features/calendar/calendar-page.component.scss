@@ -198,3 +198,10 @@ select.cal-opponent.is-missing { border-color: #ffd21a !important; background: #
 .cal-menu-backdrop { position: fixed; inset: 0; z-index: 40; background: transparent; }
 .cal-row.menu-open { position: relative; z-index: 60; }
 .cal-crest.mini { width: 22px; height: 24px; border-radius: 5px 5px 11px 11px; font-size: 11px; }
+
+.cal-event-head { align-items: center; }
+.cal-back, .cal-edit-event { min-height: 42px; padding: 0 14px; border: 1.5px solid var(--c-hi); border-radius: 12px; color: #fff; background: rgba(var(--c-rgb), .2); font: inherit; font-weight: 700; cursor: pointer; }
+.cal-event-title { display: flex; flex: 1 1 auto; align-items: center; gap: 12px; min-width: 0; }
+.cal-event-title > div { display: grid; min-width: 0; }
+.cal-event-title strong { overflow: hidden; font-size: 18px; text-overflow: ellipsis; white-space: nowrap; }
+.cal-event-title small { color: var(--soft); font-size: 13px; }

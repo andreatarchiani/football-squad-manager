@@ -1,25 +1,13 @@
 <section class="calendar-page">
-  <!-- Toolbar: squadra, girone, stato del salvataggio automatico -->
-  <div class="cal-toolbar">
-    <div class="cal-team-picker" [class.is-open]="teamMenuOpen()">
-      <span class="cal-label">Squadra</span>
-      <button type="button" class="cal-team-trigger" (click)="teamMenuOpen.update(open => !open)" [attr.aria-expanded]="teamMenuOpen()" aria-haspopup="listbox" [disabled]="!teams().length">
-        <strong>{{ team()?.name || 'Nessuna squadra' }}</strong>
-        @if (team()?.category) { <small>{{ team()?.category }}</small> }
-        <span class="cal-chevron" aria-hidden="true"></span>
-      </button>
-      @if (teamMenuOpen()) {
-        <div class="cal-team-menu" role="listbox" aria-label="Seleziona squadra">
-          @for (item of teams(); track item.id) {
-            <button type="button" role="option" [class.is-selected]="item.id === teamId()" [attr.aria-selected]="item.id === teamId()" (click)="selectTeam(item.id)"><span>{{ item.name }}</span><small>{{ item.category }}</small></button>
-          }
-        </div>
-      }
+  <!-- Intestazione dell'evento -->
+  <div class="cal-toolbar cal-event-head">
+    <button type="button" class="cal-back" (click)="goBack()" aria-label="Torna alle stagioni">‹ Stagioni</button>
+    <div class="cal-event-title">
+      @if (isImage(calendar().event.logo)) { <img class="cal-crest cal-crest-img" [src]="calendar().event.logo" alt=""> }
+      @else { <span class="cal-crest" aria-hidden="true">{{ calendar().event.logo || title().charAt(0).toUpperCase() }}</span> }
+      <div><strong>{{ title() }}</strong><small>{{ team()?.name || 'Squadra non trovata' }}@if (calendar().event.category || team()?.category) { · {{ calendar().event.category || team()?.category }} }@if (calendar().groupName) { · Girone {{ calendar().groupName }} }</small></div>
     </div>
-    <label class="cal-group">
-      <span class="cal-label">Girone / Campionato</span>
-      <input type="text" maxlength="80" placeholder="Es. Campionato Juniores – Girone unico Arezzo" [value]="calendar().groupName" (input)="setGroupName($any($event.target).value)" [disabled]="!team()">
-    </label>
+    <button type="button" class="cal-edit-event" (click)="goEdit()">✎ Modifica evento</button>
   </div>
 
   @if (error()) { <div class="cal-alert" role="alert">{{ error() }}</div> }
@@ -27,7 +15,7 @@
   @if (loading()) {
     <div class="cal-empty">Caricamento calendario…</div>
   } @else if (!team()) {
-    <div class="cal-empty"><strong>Prima crea una squadra</strong><span>Il calendario si collega a una squadra: creala in Ufficio › Anagrafe Squadra.</span></div>
+    <div class="cal-empty"><strong>Squadra non trovata</strong><span>La squadra di questo evento non esiste più: scegline un'altra con “Modifica evento”.</span></div>
   } @else {
     @if (conflicts().size) {
       <div class="cal-alert warning" role="alert"><strong>Due partite nello stesso giorno</strong> Giornate {{ conflictRounds().join(', ') }}: la squadra non può giocare due volte lo stesso giorno. Correggi le date evidenziate.</div>

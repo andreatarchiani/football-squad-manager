@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnDestroy, Output, computed, effect, inject, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FirebaseAuthService } from '../../core/firebase-auth.service';
 import { prepareIconImage } from '../../core/icon-image';
 import { NotificationService } from '../../core/notifications/notification.service';
 import { TeamService, type TeamRecord } from '../teams/team.service';
-import { CalendarService, coordinatesFromLink, isMapsLink, mapsLink, buildReturnLeg, duplicateDates, emptyCalendar, findNextMatch, emptyGroupTeam, type CalendarData, type CalendarRound, type GroupTeam } from './calendar.service';
+import { CalendarService, coordinatesFromLink, isMapsLink, mapsLink, buildReturnLeg, duplicateDates, emptyCalendar, findNextMatch, emptyGroupTeam, eventTitle, type CalendarData, type CalendarRound, type GroupTeam } from './calendar.service';
 
 type Leg = 'A' | 'R';
 
@@ -16,21 +16,24 @@ type Leg = 'A' | 'R';
   styleUrl: './calendar-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CalendarPageComponent implements OnDestroy {
+export class CalendarPageComponent implements OnChanges, OnDestroy {
   private readonly auth = inject(FirebaseAuthService);
   private readonly teamService = inject(TeamService);
   private readonly service = inject(CalendarService);
   private readonly notifications = inject(NotificationService);
 
+  /** Event (season / championship) whose calendar ("girone") is shown. */
+  @Input({ required: true }) eventId = '';
+  @Output() readonly back = new EventEmitter<void>();
+  @Output() readonly editEvent = new EventEmitter<void>();
   protected readonly teams = signal<TeamRecord[]>([]);
-  protected readonly teamId = signal('');
-  protected readonly teamMenuOpen = signal(false);
   protected readonly calendar = signal<CalendarData>(emptyCalendar());
   protected readonly loading = signal(true);
   protected readonly saveState = signal<'idle' | 'pending' | 'saving' | 'saved' | 'error'>('idle');
   protected readonly error = signal('');
 
-  protected readonly team = computed(() => this.teams().find(team => team.id === this.teamId()));
+  protected readonly team = computed(() => this.teams().find(team => team.id === this.calendar().teamId));
+  protected readonly title = computed(() => eventTitle({ event: this.calendar().event, teamName: this.team()?.name ?? '', groupName: this.calendar().groupName }));
   /** Teams of the group: my team plus the teams created in the group list. */
   protected readonly groupTeams = computed(() => {
     const names = [...this.calendar().groupTeams.map(team => team.name)];
@@ -53,16 +56,12 @@ export class CalendarPageComponent implements OnDestroy {
 
   constructor() { effect(() => { if (this.auth.workspaceId()) void this.loadTeams(); }); }
 
-  ngOnDestroy(): void { if (this.saveTimer) { clearTimeout(this.saveTimer); this.saveTimer = null; void this.saveNow(); } }
+  ngOnChanges(): void { if (this.teams().length || !this.loading()) void this.loadCalendar(); }
 
-  /* ------------------------------------------------------------ team */
-  protected async selectTeam(id: string): Promise<void> {
-    this.teamMenuOpen.set(false);
-    if (id === this.teamId()) return;
-    await this.flush();
-    this.teamId.set(id);
-    await this.loadCalendar();
-  }
+  protected async goBack(): Promise<void> { await this.flush(); this.back.emit(); }
+  protected async goEdit(): Promise<void> { await this.flush(); this.editEvent.emit(); }
+
+  ngOnDestroy(): void { if (this.saveTimer) { clearTimeout(this.saveTimer); this.saveTimer = null; void this.saveNow(); } }
 
   /* ------------------------------------------------------- andata edits */
   protected addRound(): void {
@@ -162,8 +161,6 @@ export class CalendarPageComponent implements OnDestroy {
   protected setOpponent(index: number, value: string): void {
     this.updateAndata(andata => andata.map((round, i) => i === index ? { ...round, opponent: value } : round));
   }
-
-  protected setGroupName(value: string): void { this.calendar.update(data => ({ ...data, groupName: value })); this.scheduleSave(); }
 
   protected setWhen(leg: Leg, index: number, key: 'date' | 'time', value: string): void {
     // Called on change and on blur: ignore repeats so nothing is saved or announced twice.
@@ -303,14 +300,13 @@ export class CalendarPageComponent implements OnDestroy {
   }
 
   private saveNow(): Promise<void> {
-    const team = this.team();
     const workspaceId = this.auth.workspaceId();
-    if (!team || !workspaceId) return Promise.resolve();
     const data = this.calendar();
+    if (!workspaceId || !data.id) return Promise.resolve();
     this.saveChain = this.saveChain.then(async () => {
       this.saveState.set('saving');
       try {
-        await this.service.save(workspaceId, team.id, team.name, data);
+        await this.service.save(workspaceId, data);
         if (!this.saveTimer) this.saveState.set('saved');
         window.dispatchEvent(new CustomEvent('fsm-match-context'));
       } catch (error) {
@@ -327,11 +323,7 @@ export class CalendarPageComponent implements OnDestroy {
     if (!workspaceId) return;
     this.loading.set(true);
     try {
-      const teams = (await this.teamService.list(workspaceId)).filter(team => !team.isArchived);
-      this.teams.set(teams);
-      let preferred: { id?: string; name?: string } = {};
-      try { preferred = JSON.parse(localStorage.getItem('fsm-next-team') ?? '{}') ?? {}; } catch { preferred = {}; }
-      this.teamId.set(teams.find(team => team.id === preferred.id || team.name === preferred.name)?.id ?? teams[0]?.id ?? '');
+      this.teams.set((await this.teamService.list(workspaceId)).filter(team => !team.isArchived));
       await this.loadCalendar();
     } catch (error) {
       console.error('Unable to load teams for the calendar.', error);
@@ -342,12 +334,11 @@ export class CalendarPageComponent implements OnDestroy {
 
   private async loadCalendar(): Promise<void> {
     const workspaceId = this.auth.workspaceId();
-    const teamId = this.teamId();
     this.saveState.set('idle');
-    if (!workspaceId || !teamId) { this.calendar.set(emptyCalendar()); this.loading.set(false); return; }
+    if (!workspaceId || !this.eventId) { this.calendar.set(emptyCalendar()); this.loading.set(false); return; }
     this.loading.set(true);
     try {
-      const data = await this.service.load(workspaceId, teamId);
+      const data = await this.service.load(workspaceId, this.eventId);
       // Calendars made before the group list: turn the typed opponents into teams of the group.
       const known = new Set(data.groupTeams.map(team => team.name.toLowerCase()));
       const groupTeams = [...data.groupTeams];

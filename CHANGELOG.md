@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-27 — Stagioni ed eventi
+
+- **Nuovo:** “Creazione Stagione / Evento” ora è l’elenco dei campionati, tornei ed eventi: se ne possono creare quanti si vuole. Ogni evento ha i dati generali (nome, stagione, categoria, squadra, organizzazione), categoria e girone, logo e completi da gara, livello e ambito, regole di gioco, dimensioni del campo, porte, pallone e referto aggiuntivo.
+- **Nuovo:** aprendo un evento si vede il suo girone (il calendario di prima, con andata, ritorno e squadre del girone); “Modifica evento” riapre i dati.
+- I calendari già inseriti sono diventati eventi senza perdere nulla. Convocazione, prossima partita e Home usano la partita più vicina tra tutti gli eventi della squadra.
+
 ## 2026-11-27 — Convocazione e segnalazione bug
 
 - **Modifica:** nella pagina “Segnala un bug” tolta la nota “Per ora si invia solo testo…”.
