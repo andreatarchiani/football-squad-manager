@@ -6,6 +6,7 @@ import { ActiveEventService } from '../../core/active-event.service';
 import { TeamService, type TeamInput, type TeamRecord } from '../teams/team.service';
 import { PLAYER_ROLES, PlayerService, type PlayerInput, type PlayerRecord, type PlayerRole, type PlayerStatus } from '../players/player.service';
 
+export type Progress = (done: number, total: number) => void;
 export interface ImportResult { added: number; skipped: number; failed: string[]; teamCreated: boolean; }
 
 const COLUMNS = ['Cognome', 'Nome', 'Numero', 'Ruolo', 'Stato', 'Data di nascita', 'Luogo di nascita', 'Residenza', 'CAP', 'Documento identità', 'Categoria appartenenza', 'Matricola federale', 'Tessera federale', 'Telefono', 'Mail', 'Piede', 'Note'] as const;
@@ -34,7 +35,7 @@ export class SquadTransferService {
   }
 
   /** Copies the team (if the current event has none) and all its players from another event. */
-  async importFromEvent(sourceEventId: string): Promise<ImportResult> {
+  async importFromEvent(sourceEventId: string, onProgress?: Progress): Promise<ImportResult> {
     const workspaceId = this.requireWorkspace();
     const all = (await this.teamService.listAll(workspaceId)).filter(team => !team.isArchived);
     const sources = all.filter(team => this.events.eventOfTeam(team) === sourceEventId);
@@ -42,17 +43,17 @@ export class SquadTransferService {
     const sourcePlayers = (await this.playerService.list(workspaceId, sources)).filter(player => !player.isArchived && player.status !== 'left');
     const { team, created } = await this.ensureTarget(workspaceId, sources[0]);
     const inputs = sourcePlayers.map(player => this.toInput(player, team.id));
-    return { ...(await this.addPlayers(workspaceId, team, inputs)), teamCreated: created };
+    return { ...(await this.addPlayers(workspaceId, team, inputs, onProgress)), teamCreated: created };
   }
 
   /** Adds the players read from a CSV/Excel file to the team of the current event. */
-  async importFromText(text: string): Promise<ImportResult> {
+  async importFromText(text: string, onProgress?: Progress): Promise<ImportResult> {
     const workspaceId = this.requireWorkspace();
     const [team] = await this.teamService.list(workspaceId);
     if (!team) throw new Error('Prima crea la squadra di questo evento, poi importa i giocatori.');
     const inputs = this.parseCsv(text, team.id);
     if (!inputs.length) throw new Error('Nel file non ho trovato giocatori: servono almeno le colonne Cognome, Nome e Numero.');
-    return { ...(await this.addPlayers(workspaceId, team, inputs)), teamCreated: false };
+    return { ...(await this.addPlayers(workspaceId, team, inputs, onProgress)), teamCreated: false };
   }
 
   /** Saves a copy of the squad inside the app, so it can be imported into any other event. */
@@ -82,7 +83,7 @@ export class SquadTransferService {
   }
 
   /** Imports an exported squad into the current event (creating the team if the event has none). */
-  async importFromExport(exportId: string): Promise<ImportResult> {
+  async importFromExport(exportId: string, onProgress?: Progress): Promise<ImportResult> {
     const workspaceId = this.requireWorkspace();
     if (!this.db) throw new Error('Database non disponibile.');
     const snap = await getDocs(collection(this.db, 'workspaces', workspaceId, 'squadExports'));
@@ -92,7 +93,7 @@ export class SquadTransferService {
     const source = { ...(data['team'] as object), id: exportId } as TeamRecord;
     const { team, created } = await this.ensureTarget(workspaceId, source);
     const players = ((data['players'] as PlayerInput[]) ?? []).map(player => ({ ...player, teamId: team.id }));
-    return { ...(await this.addPlayers(workspaceId, team, players)), teamCreated: created };
+    return { ...(await this.addPlayers(workspaceId, team, players, onProgress)), teamCreated: created };
   }
 
   /** Downloads the squad as a CSV file that Excel opens directly. */
@@ -124,25 +125,33 @@ export class SquadTransferService {
     return { team, created: true };
   }
 
-  private async addPlayers(workspaceId: string, team: TeamRecord, inputs: PlayerInput[]): Promise<Omit<ImportResult, 'teamCreated'>> {
+  private async addPlayers(workspaceId: string, team: TeamRecord, inputs: PlayerInput[], onProgress?: Progress): Promise<Omit<ImportResult, 'teamCreated'>> {
     const existing = await this.playerService.list(workspaceId, [team]);
     const key = (first: string, last: string, birth: string) => `${last}|${first}|${birth}`.toLowerCase().trim();
     const known = new Set(existing.map(player => key(player.firstName, player.lastName, player.dateOfBirth)));
     const taken = new Set(existing.map(player => player.shirtNumber).filter((n): n is number => n !== null));
     const result = { added: 0, skipped: 0, failed: [] as string[] };
+    // Decide numbers first (a number already used in this team gets the first free one), then save a few players at a time.
+    const jobs: { input: PlayerInput; label: string }[] = [];
     for (const input of inputs) {
       const id = key(input.firstName, input.lastName, input.dateOfBirth);
       if (known.has(id)) { result.skipped++; continue; }
-      const label = `${input.lastName} ${input.firstName}`.trim();
+      known.add(id);
       let number = Number(input.shirtNumber);
-      // A shirt number already used in this team is replaced by the first free one.
-      if (!Number.isInteger(number) || number < 1 || number > 99 || taken.has(number)) {
-        number = Array.from({ length: 99 }, (_, i) => i + 1).find(n => !taken.has(n)) ?? 0;
-      }
-      try {
-        await this.playerService.save(workspaceId, { ...input, shirtNumber: String(number) }, [team]);
-        known.add(id); taken.add(number); result.added++;
-      } catch (error) { result.failed.push(`${label}: ${(error as Error).message}`); }
+      if (!Number.isInteger(number) || number < 1 || number > 99 || taken.has(number)) number = Array.from({ length: 99 }, (_, i) => i + 1).find(n => !taken.has(n)) ?? 0;
+      taken.add(number);
+      jobs.push({ input: { ...input, shirtNumber: String(number) }, label: `${input.lastName} ${input.firstName}`.trim() });
+    }
+    let done = 0;
+    onProgress?.(0, jobs.length);
+    for (let i = 0; i < jobs.length; i += 4) {
+      await Promise.all(jobs.slice(i, i + 4).map(async job => {
+        try {
+          await Promise.race([this.playerService.save(workspaceId, job.input, [team]), new Promise((_, reject) => setTimeout(() => reject(new Error('tempo scaduto')), 25000))]);
+          result.added++;
+        } catch (error) { result.failed.push(`${job.label}: ${(error as Error).message}`); }
+        onProgress?.(++done, jobs.length);
+      }));
     }
     return result;
   }

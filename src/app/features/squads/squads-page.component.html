@@ -41,6 +41,12 @@
           <p>Scegli un file con le colonne <strong>Cognome, Nome, Numero</strong> (e facoltative: Ruolo, Data di nascita, ecc.). Il modo più semplice è esportare la rosa da qui e modificarla in Excel, salvando come CSV.</p>
           <label class="sq-file"><span>{{ busy() ? 'Importazione…' : 'Scegli il file…' }}</span><input type="file" accept=".csv,text/csv,text/plain" (change)="runImportFromFile($event)"></label>
         }
+        @if (busy()) {
+          <div class="sq-progress" role="progressbar" aria-label="Importazione in corso" [attr.aria-valuenow]="percent()" aria-valuemin="0" aria-valuemax="100">
+            <span [style.width.%]="progress()?.total ? percent() : 8" [class.sq-indeterminate]="!progress()?.total"></span>
+          </div>
+          <p class="sq-note">{{ progress()?.total ? 'Importati ' + progress()!.done + ' di ' + progress()!.total + ' giocatori…' : 'Preparazione della squadra…' }}</p>
+        }
         @if (message()) { <p class="sq-error" role="alert">{{ message() }}</p> }
       </section>
     </div>

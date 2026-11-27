@@ -36,6 +36,8 @@ export class SquadsPageComponent implements OnChanges {
   protected readonly sources = signal<{ id: string; name: string; eventTitle: string; count: number }[]>([]);
   protected readonly sourceTitle = signal('');
   protected readonly busy = signal(false);
+  protected readonly progress = signal<{ done: number; total: number } | null>(null);
+  protected readonly percent = computed(() => { const p = this.progress(); return p && p.total ? Math.round(p.done / p.total * 100) : 0; });
   protected readonly message = signal('');
   protected readonly refreshKey = signal(0);
   protected readonly sourceLabels = computed(() => this.sources().map(source => this.label(source)));
@@ -61,7 +63,7 @@ export class SquadsPageComponent implements OnChanges {
     const label = this.sourceTitle();
     const source = this.sources().find(item => this.label(item) === label);
     if (!source) { this.message.set('Scegli quale squadra importare.'); return; }
-    await this.run(() => this.transfer.importFromExport(source.id));
+    await this.run(() => this.transfer.importFromExport(source.id, this.onProgress));
   }
 
   protected async runImportFromFile(event: Event): Promise<void> {
@@ -71,7 +73,7 @@ export class SquadsPageComponent implements OnChanges {
     if (!file) return;
     if (/\.xlsx?$/i.test(file.name)) { this.message.set('Salva il file Excel come “CSV (delimitato dal separatore di elenco)” e riprova: oppure usa un file esportato da qui.'); return; }
     const text = await file.text();
-    await this.run(() => this.transfer.importFromText(text));
+    await this.run(() => this.transfer.importFromText(text, this.onProgress));
   }
 
   protected async exportRoster(): Promise<void> {
@@ -85,8 +87,11 @@ export class SquadsPageComponent implements OnChanges {
     } catch { this.notifications.notify({ title: 'Esportazione non riuscita', message: 'Riprova tra un momento.', type: 'warning' }); }
   }
 
+  private readonly onProgress = (done: number, total: number): void => this.progress.set({ done, total });
+
   private async run(action: () => Promise<{ added: number; skipped: number; failed: string[]; teamCreated: boolean }>): Promise<void> {
     this.busy.set(true);
+    this.progress.set({ done: 0, total: 0 });
     this.message.set('');
     try {
       const result = await action();
@@ -101,7 +106,7 @@ export class SquadsPageComponent implements OnChanges {
       this.changed.emit();
     } catch (error) {
       this.message.set((error as Error).message || 'Importazione non riuscita.');
-    } finally { this.busy.set(false); }
+    } finally { this.busy.set(false); this.progress.set(null); }
   }
 
   private async loadTeam(): Promise<void> {
