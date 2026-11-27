@@ -271,7 +271,7 @@
           <span class="venue-step-num">3</span>
           <div><strong>Torna qui e incolla il link</strong>
             <div class="venue-paste">
-              <input type="url" inputmode="url" placeholder="Il link compare qui" [value]="draftLink()" (input)="draftLink.set($any($event.target).value.trim())">
+              <input type="url" inputmode="url" placeholder="Incolla qui il link" [value]="draftLink()" (input)="draftLink.set($any($event.target).value.trim())">
               <button type="button" class="venue-secondary" (click)="pasteDraftLink()">Incolla</button>
             </div>
             @if (draftLink()) {
