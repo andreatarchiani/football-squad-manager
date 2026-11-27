@@ -238,10 +238,15 @@ export class AppComponent {
   protected isGroupOpen(key: string): boolean { return this.groupOpen()[key] ?? this.section() === key; }
   protected toggleGroup(key: string): void { this.groupOpen.update(state => ({ ...state, [key]: !this.isGroupOpen(key) })); }
   protected readonly newEventLabel = '＋ Nuovo evento…';
-  protected readonly eventOptions = computed(() => [...this.activeEvents.events().map(event => this.activeEvents.activeTitleOf(event)), this.newEventLabel]);
+  protected readonly eventOptions = computed(() => {
+    const titles = this.activeEvents.events().map(event => this.activeEvents.activeTitleOf(event));
+    return [...titles.map((title, i) => titles.indexOf(title) === i && titles.lastIndexOf(title) === i ? title : `${title} (${i + 1})`), this.newEventLabel];
+  });
+  protected readonly activeEventLabel = computed(() => this.eventOptions()[this.activeEvents.events().findIndex(event => event.id === this.activeEvents.activeId())] ?? '');
   protected pickEvent(label: string): void {
     if (label === this.newEventLabel) { this.setView('calendar'); return; }
-    const event = this.activeEvents.events().find(item => this.activeEvents.activeTitleOf(item) === label);
+    const index = this.eventOptions().indexOf(label);
+    const event = this.activeEvents.events()[index];
     if (event) this.activeEvents.select(event.id);
   }
   protected readonly squadsTab = signal<'mine' | 'opponents'>('mine');

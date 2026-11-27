@@ -92,7 +92,7 @@
       <span class="nfm-header-slash" aria-hidden="true"></span>
       <div class="nfm-event-picker" data-field="event">
         <small>Stagione / evento</small>
-        <fsm-select [options]="eventOptions()" [value]="activeEvents.activeTitle()" placeholder="Crea o scegli un evento" label="Stagione o evento attivo" (changed)="pickEvent($event)" />
+        <fsm-select [options]="eventOptions()" [value]="activeEventLabel()" placeholder="Crea o scegli un evento" label="Stagione o evento attivo" (changed)="pickEvent($event)" />
       </div>
       <span class="nfm-header-slash" aria-hidden="true"></span>
       @for (page of [activePage()]; track page) {
@@ -220,7 +220,8 @@
       }
 
       <div class="nfm-frame" [class.nfm-frame-scene]="activePage() === 'home' || activePage() === 'office' || activePage() === 'training' || activePage() === 'match-hub'">
-        @for (page of [activePage()]; track page + activeEvents.activeId()) {
+        @for (page of [activePage()]; track page) {
+        @for (eventKey of [activeEvents.activeId()]; track eventKey) {
         <div class="nfm-page" [attr.data-nav]="navDirection()">
         @switch (page) {
           @case ('home') {
@@ -273,6 +274,7 @@
           }
         }
         </div>
+        }
         }
       </div>
     </main>
