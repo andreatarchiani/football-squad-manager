@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-27 — Squadra senza regolamento
+
+- **Modifica:** nella creazione/modifica della squadra tolta la sezione “Regolamento e gestione gara”: le regole si impostano nell’evento (Stagione / Evento). Le squadre già create mantengono i valori salvati.
+
 ## 2026-11-27 — Stagioni ed eventi
 
 - **Nuovo:** “Creazione Stagione / Evento” ora è l’elenco dei campionati, tornei ed eventi: se ne possono creare quanti si vuole. Ogni evento ha i dati generali (nome, stagione, categoria, squadra, organizzazione), categoria e girone, logo e completi da gara, livello e ambito, regole di gioco, dimensioni del campo, porte, pallone e referto aggiuntivo.
